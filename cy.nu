@@ -6,7 +6,12 @@
 
 
 # Create text file and pin it to local node
-export def add_text_particle_to_local_node [text] {
+export def add_text_particle_to_local_node [
+    text?: string
+] {
+
+    let text = if ($text | is-empty) {$in} else {$text}
+
     echo $text | 
         ipfs add -Q | 
         str replace '\n' ''
@@ -15,9 +20,13 @@ export def add_text_particle_to_local_node [text] {
 
 def parse_ipfs_table [] {parse -r '(?<status>\w+) (?<to>Qm\w{44}) (?<filename>.+)'}
 
+def is-cid [particle: string] {
+    (($particle | str length) == 46) && ($particle =~ '^Qm') 
+}
+
 # Adding files from folder to ipfs, creating table. Without parameters all files will be added
 export def add_files_from_folder_to_ipfs [
-    ...files: string # filenames to add
+    ...files: string                # filenames to add into local ipfs node
     --cyberlink_filenames_to_their_files
 ] {
 
@@ -69,9 +78,9 @@ export def add_to_particle [
 }
 
 #Create custom unsigned cyberlinks transaction
-export def cyberlinks_trans_json [
+export def cyberlinks_create_trans_json [
     cyberlinks?           # the table of cyberlinks
-    neuron?: string              # address of neuron who will create cyberlinks
+    --neuron: string              # address of neuron who will create cyberlinks
 ] {
     let cyberlinks = if ($cyberlinks | is-empty) {$in} else {$cyberlinks}
 
@@ -82,5 +91,23 @@ export def cyberlinks_trans_json [
     $trans | 
         upsert body.messages.neuron $neuron | 
         upsert body.messages.links $cyberlinks | 
-        save temp_cyberlinks.json 
+        save cyberlinks_unsigned.json 
+}
+
+# pussy tx sign --from hot_account temp_cyberlinks.json --chain-id space-pussy --keyring-backend test --output-document signed-trans.json
+
+# Upload values from column 'text' to the local IPFS node and add the column with the new CIDs.
+export def upload_text_column_to_ipfs [
+    cyberlinks?: table
+    --column_with_text: string = 'text' # column name to take values from to upload to IPFS. If is ommited default value is 'text'
+    --column_to_write_cid: string = 'from' # column name to write CIDs to. If is ommited default value is 'from'
+] {
+    let cyberlinks = if ($cyberlinks | is-empty) {$in} else {$cyberlinks}
+
+    $cyberlinks | 
+        upsert $column_to_write_cid {
+            |it| $it |
+                get $column_with_text |
+                cy add_text_particle_to_local_node 
+        }
 }
