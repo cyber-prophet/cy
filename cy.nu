@@ -5,6 +5,33 @@
 # > overlay use ~/apps-files/github/cy/cy.nu as cy -p
 
 
+export def init [
+    --remove-all
+] {
+    mkdir ~/cy
+    mkdir ~/cy/particles
+    mkdir ~/cy/cyberlinks
+    mkdir ~/cy/temp
+}
+
+export-env { 
+    let-env pussy = if ('~/.cy/cy_config.json' | path exists ) {
+        open ~/.cy/cy_config.json
+    } else {
+        ""
+    }
+}
+
+export def create_config_json [] {
+    print 'Enter pussy address: ' -n
+    let pussy_address = (input)
+    echo ''
+    print 'Enter keyring backend: ' -n 
+    let backend = (input)
+    {'back': $pussy_address}
+}
+
+
 # Create text file and pin it to local node
 export def add_text_particle_to_local_node [
     text?: string
@@ -19,6 +46,7 @@ export def add_text_particle_to_local_node [
 
 
 def parse_ipfs_table [] {parse -r '(?<status>\w+) (?<to>Qm\w{44}) (?<filename>.+)'}
+
 
 def is-cid [particle: string] {
     (($particle | str length) == 46) && ($particle =~ '^Qm') 
@@ -59,8 +87,8 @@ export def add_files_from_folder_to_ipfs [
 }
 
 # Add text particle into 'from' column of local_cyberlinks table
-export def add_from_particle [
-    text: string # Text to upload to ipfs
+export def cyberlinks_add_from_particle [
+    text: string                    # Text to upload to ipfs
 ] {
     $in | 
         upsert from (add_text_particle_to_local_node $text) |
@@ -68,8 +96,8 @@ export def add_from_particle [
 }
 
 # Add text particle into 'to' column of local_cyberlinks table
-export def add_to_particle [
-    text: string # Text to upload to ipfs
+export def cyberlinks_add_to_particle [
+    text: string                    # Text to upload to ipfs
 ] { 
     $in | 
         rename -c ['to' 'from'] | 
@@ -79,22 +107,24 @@ export def add_to_particle [
 
 #Create custom unsigned cyberlinks transaction
 export def cyberlinks_create_trans_json [
-    cyberlinks?           # the table of cyberlinks
-    --neuron: string              # address of neuron who will create cyberlinks
+    cyberlinks?                     # the table of cyberlinks
+    --neuron: string                # address of neuron who will create cyberlinks
 ] {
     let cyberlinks = if ($cyberlinks | is-empty) {$in} else {$cyberlinks}
 
     let cyberlinks = ($cyberlinks | select from to)
+
+    let neuron = if ($neuron | is-empty) { $env.pussy.from } else {$neuron}
 
     let trans = ('{"body":{"messages":[{"@type":"/cyber.graph.v1beta1.MsgCyberlink","neuron":"","links":[{"from":"","to":""}]}],"memo":"","timeout_height":"0","extension_options":[],"non_critical_extension_options":[]},"auth_info":{"signer_infos":[],"fee":{"amount":[],"gas_limit":"2000000","payer":"","granter":""}},"signatures":[]}' | from json)
 
     $trans | 
         upsert body.messages.neuron $neuron | 
         upsert body.messages.links $cyberlinks | 
-        save cyberlinks_unsigned.json 
+        save ~/.cy/unsigned_tx.json 
 }
 
-# pussy tx sign --from hot_account temp_cyberlinks.json --chain-id space-pussy --keyring-backend test --output-document signed-trans.json
+
 
 # Upload values from column 'text' to the local IPFS node and add the column with the new CIDs.
 export def upload_text_column_to_ipfs [
@@ -111,3 +141,24 @@ export def upload_text_column_to_ipfs [
                 cy add_text_particle_to_local_node 
         }
 }
+
+# pussy tx sign --from hot_account temp_cyberlinks.json --chain-id space-pussy --keyring-backend test --output-document signed_tx.json
+
+# sign and broadcast transaction
+export def tx_sign_broadcast [] {
+    pussy tx sign ~/.cy/unsigned_tx.json --from $env.pussy.from  --chain-id space-pussy --keyring-backend $env.pussy.keyring-backend --output-document ~/.cy/signed_tx.json
+    pussy tx broadcast ~/.cy/signed_tx.json
+}
+
+export def create_chuck_norris_cyberlink [] {
+    let chuck_cid = (add_text_particle_to_local_node 'Chuck Norris')
+    
+    let quote = (fetch https://api.chucknorris.io/jokes/random).value 
+    echo $quote
+
+    let quote_cid = (add_text_particle_to_local_node $quote)
+    
+    [[from to];[$chuck_cid $quote_cid]] | cyberlinks_create_trans_json
+} 
+
+def parse_copied_table [] {pbpaste | lines | parse -r '(?P<col>.*)\t(?P<col2>.*)'}
