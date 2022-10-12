@@ -5,35 +5,43 @@
 # > overlay use ~/apps-files/github/cy/cy.nu as cy -p
 
 
+def path_cy = $env.HOME + "/cy"
+
+def parse-ipfs-table [] {parse -r '(?<status>\w+) (?<to>Qm\w{44}) (?<filename>.+)'}
+
+def is-cid [particle: string] {
+    ($particle =~ '^Qm\w{44}$') 
+}
+
 export def init [
     --remove-all
 ] {
 
     let dt1 = (date now | date format "%Y-%m-%d_%H_%M_%S")
 
-    let path1 = $env.HOME + "/cy"
-    mkdir $path1
-    mkdir ($path1 + "/backup")
-    let path_back = $path1 + "/backup/" + $dt1 
+    let path_cy = $env.HOME + "/cy"
+    mkdir $path_cy
+    mkdir ($path_cy + "/backup")
+    let path_back = $path_cy + "/backup/" + $dt1 
 
-    if ($path1 | path exists) {
+    if ($path_cy | path exists) {
         mkdir $path_back
-        ls $path1 | 
+        ls $path_cy | 
             where name !~ "backup" | 
             get name | 
             each {|it| mv $it $path_back} | 
             echo ""
     }
 
-    # mkdir ($path1 + "/particles")
-    mkdir ($path1 + "/cyberlinks")
-    mkdir ($path1 + "/temp")
+    # mkdir ($path_cy + "/particles")
+    # mkdir ($path_cy + "/cyberlinks")
+    mkdir ($path_cy + "/temp")
 
-    cyberlinks-empty-table
+    cyberlinks-clear-temp-table
 
 }
 
-export def cyberlinks-empty-table [] {
+export def cyberlinks-clear-temp-table [] {
 
     let dt1 = (date now | date format "%Y-%m-%d_%H_%M_%S")
     let path1 = $env.HOME + "/cy/temp/cyberlinks.csv"           # ~ make errors with mv on mac
@@ -45,7 +53,7 @@ export def cyberlinks-empty-table [] {
     'from,to' | save $path1
 }
 
-export def cyberlinks_append [
+export def cyberlinks-append-to-temp-table [
     cyberlinks?    #cyberlinks table
     --display_result_cyberlinks
 ] {
@@ -53,13 +61,13 @@ export def cyberlinks_append [
     let path1 = $env.HOME + '/cy/temp/cyberlinks.csv'
 
     open $path1 | append $cyberlinks | save $path1
-    if (not ($display_result_cyberlinks | is-empty ) )  { open $path1 }
+    if (not $display_result_cyberlinks)  { open $path1 }
     
 }
 
 
 # Create text file and pin it to local node
-export def particle_add_text_to_local_node [
+export def particle-add-text [
     text?: string
 ] {
 
@@ -70,13 +78,6 @@ export def particle_add_text_to_local_node [
         str replace '\n' ''
 }
 
-
-def parse_ipfs_table [] {parse -r '(?<status>\w+) (?<to>Qm\w{44}) (?<filename>.+)'}
-
-
-def is-cid [particle: string] {
-    (($particle | str length) == 46) && ($particle =~ '^Qm') 
-}
 
 # Adding files from folder to ipfs, creating table. Without parameters all files will be added
 export def add_files_from_folder_to_ipfs [
@@ -93,14 +94,14 @@ export def add_files_from_folder_to_ipfs [
     let cid_table = (
         $files |
             each {|f| ipfs add $f} |
-            parse_ipfs_table 
+            parse-ipfs-table 
     )
 
     let out_table = (
         if $cyberlink_filenames_to_their_files {
             $cid_table.filename | 
                 each {
-                    |it| particle_add_text_to_local_node $it 
+                    |it| particle-add-text $it 
                 } | 
                 wrap from | 
                 merge {$cid_table}
@@ -113,26 +114,26 @@ export def add_files_from_folder_to_ipfs [
 }
 
 # Add text particle into 'from' column of local_cyberlinks table
-export def cyberlinks_add_from_particle [
+export def cyberlinks-add-from-particle [
     text: string                    # Text to upload to ipfs
 ] {
     $in | 
-        upsert from (particle_add_text_to_local_node $text) |
+        upsert from (particle-add-text $text) |
         select from to
 }
 
 # Add text particle into 'to' column of local_cyberlinks table
-export def cyberlinks_add_to_particle [
+export def cyberlinks-add-to-particle [
     text: string                    # Text to upload to ipfs
 ] { 
     $in | 
         rename -c ['to' 'from'] | 
-        upsert to (particle_add_text_to_local_node $text) |
+        upsert to (particle-add-text $text) |
         select from to
 }
 
 #Create custom unsigned cyberlinks transaction
-export def cyberlinks_create_trans_json [
+export def cyberlinks-create-trans-json [
     cyberlinks?                     # the table of cyberlinks
     --neuron: string                # address of neuron who will create cyberlinks
 ] {
@@ -153,7 +154,7 @@ export def cyberlinks_create_trans_json [
 
 
 # Upload values from column 'text' to the local IPFS node and add the column with the new CIDs.
-export def upload_text_column_to_ipfs [
+export def upload-text-column-to-ipfs [
     cyberlinks?: table
     --column_with_text: string = 'text' # column name to take values from to upload to IPFS. If is ommited default value is 'text'
     --column_to_write_cid: string = 'from' # column name to write CIDs to. If is ommited default value is 'from'
@@ -164,50 +165,56 @@ export def upload_text_column_to_ipfs [
         upsert $column_to_write_cid {
             |it| $it |
                 get $column_with_text |
-                cy particle_add_text_to_local_node 
+                cy particle-add-text 
         }
 }
 
 # pussy tx sign --from hot_account temp_cyberlinks.json --chain-id space-pussy --keyring-backend test --output-document signed_tx.json
 
 # sign and broadcast transaction
-export def tx_sign_broadcast [] {
+export def tx-sign-broadcast [] {
     pussy tx sign ~/cy/unsigned_tx.json --from $env.pussy.from  --chain-id space-pussy --keyring-backend $env.pussy.keyring-backend --output-document ~/cy/signed_tx.json
     pussy tx broadcast ~/cy/signed_tx.json
 }
 
-export def create_chuck_norris_cyberlink [] {
-    let chuck_cid = (particle_add_text_to_local_node 'Chuck Norris')
+export def create-chuck-norris-cyberlink [] {
+    let chuck_cid = (particle-add-text 'Chuck Norris')
     
     let quote = (fetch https://api.chucknorris.io/jokes/random).value 
     echo $quote
 
-    let quote_cid = (particle_add_text_to_local_node $quote)
+    let quote_cid = (particle-add-text $quote)
     
-    # [[from to ];[$chuck_cid $quote_cid "Chuck Norris" $quote]] | cyberlinks_create_trans_json
-    [[from to 'from text' 'to text'];[$chuck_cid $quote_cid "Chuck Norris" $quote]] 
+    # [[from to ];[$chuck_cid $quote_cid "Chuck Norris" $quote]] | cyberlinks-create-trans-json
+    [[from to 'from_text' 'to_text'];[$chuck_cid $quote_cid "Chuck Norris" $quote]] 
 } 
 
-export def parse_copied_table [] {
+export def parse-copied-table [] {
     # pbpaste | lines | parse -r '(?P<col>.*)\t(?P<col2>.*)'
     # pbpaste | lines | split column '\t'
     let _table = ( pbpaste | from tsv )
     # let _col = $_table | columns 
-    }
+}
 
-    export-env { 
-        let-env pussy = if ('~/cy/cy_config.json' | path exists ) {
-            open ~/cy/cy_config.json
-        } else {
-            ""
-        }
+export def copy-table [] {
+    let _table =  $in
+    $_table | to tsv | pbcopy
+    echo $_table
+}
+
+export-env { 
+    let-env pussy = if ('~/cy/cy_config.json' | path exists ) {
+        open ~/cy/cy_config.json
+    } else {
+        ""
     }
-    
-    export def create_config_json [] {
-        print 'Enter pussy address: ' -n
-        let pussy_address = (input)
-        echo ''
-        print 'Enter keyring backend: ' -n 
-        let backend = (input)
-        {'back': $pussy_address}
-    }
+}
+
+export def create_config_json [] {
+    print 'Enter pussy address: ' -n
+    let pussy_address = (input)
+    echo ''
+    print 'Enter keyring backend: ' -n 
+    let backend = (input)
+    {'back': $pussy_address}
+}
