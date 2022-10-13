@@ -5,63 +5,130 @@
 # > overlay use ~/apps-files/github/cy/cy.nu as cy -p
 
 
-def path_cy = $env.HOME + "/cy"
-
 def parse-ipfs-table [] {parse -r '(?<status>\w+) (?<to>Qm\w{44}) (?<filename>.+)'}
 
 def is-cid [particle: string] {
     ($particle =~ '^Qm\w{44}$') 
 }
 
-export def init [
-    --remove-all
-] {
+def is-connected []  {
+    (do -i {fetch https://google.com} | describe) == 'raw input'
+}
 
-    let dt1 = (date now | date format "%Y-%m-%d_%H_%M_%S")
+export-env { 
+    let path1 = $env.HOME + '/cy/cy_config.json'
+    let-env cy = if ($path1 | path exists ) {
+        open ($path1)
+    } else {
+        echo 'cy_config.json is not found. Run "cy create_config_json"'
+        ''
+    }
+}
 
-    let path_cy = $env.HOME + "/cy"
-    mkdir $path_cy
-    mkdir ($path_cy + "/backup")
-    let path_back = $path_cy + "/backup/" + $dt1 
+export def-env create_config_json [] {
 
-    if ($path_cy | path exists) {
-        mkdir $path_back
-        ls $path_cy | 
-            where name !~ "backup" | 
-            get name | 
-            each {|it| mv $it $path_back} | 
-            echo ""
+    let home = ($env.HOME + '/cy/')
+    # let old = (open ($home + 'config.json'))
+
+    let _exec = (input 'Choose cyber executable name (cyber or pussy): ')
+    let _exec = (if ($_exec | is-empty) {'cyber'} else {$_exec})
+
+    let address = (input 'Enter main address: ')
+    let address = (if ($address | is-empty) {'bostrom1aypv5wxute0nnhfv44jkhyfkzt7zyrden85tel'} else {$address})
+
+    let backend = (input 'Enter keyring backend: ')
+    let backend = (if ($backend | is-empty) {'test'} else {$backend})
+
+    # let chain_id = (input 'Enter chain-id: ')
+    # let chain_id = (if ($chain_id | is-empty) {'bostrom'} else {$chain_id})
+    let chain_id = (if ($_exec == 'cyber') {'bostrom'} else {'pussy'})
+
+    let temp_env = {
+        'exec': $_exec
+        'address': $address
+        'keyring-backend': $backend
+        'chain-id': $chain_id
+        'path': {
+            'home': $home
+            'cyberlinks-csv-temp': ($home + 'cyberlinks_temp.csv')
+            'cyberlinks-csv-archive': ($home + 'cyberlinks_archive.csv')
+            'tx-signed' : ($home + 'temp/tx-signed.json')
+            'tx-unsigned' : ($home + 'temp/tx-unsigned.json')
+        }
+    } 
+    
+    mkdir $temp_env.path.home
+
+    $temp_env | save ($temp_env.path.home + 'cy_config.json')
+    
+    let-env cy = $temp_env
+
+    if (not ($env.cy.path.cyberlinks-csv-archive | path exists)) {
+        "from,to,address,timestamp,txhash" | save $env.cy.path.cyberlinks-csv-archive
     }
 
-    # mkdir ($path_cy + "/particles")
-    # mkdir ($path_cy + "/cyberlinks")
-    mkdir ($path_cy + "/temp")
+    if (not ($env.cy.path.cyberlinks-csv-temp | path exists)) {
+        "from,to" | save $env.cy.path.cyberlinks-csv-temp
+    }
 
-    cyberlinks-clear-temp-table
-
+    echo ''
+    echo 'JSON is updated'
+    echo ''
+    echo $env.cy
 }
+
+# export def init [
+#     --remove-all
+# ] {
+
+#     let dt1 = (date now | date format '%Y%m%d-%H%M%S')
+
+#     mkdir ($env.cy.path.home)
+#     mkdir (($env.cy.path.home) + '/backup')
+#     let path_back = ($env.cy.path.home + '/backup/' + $dt1 )
+
+#     if (($env.cy.path.home) | path exists) {
+#         mkdir $path_back
+#         ls ($env.cy.path.home) | 
+#             where name !~ 'backup' | 
+#             get name | 
+#             each {|it| mv $it $path_back} | 
+#             echo ''
+#     }
+
+#     # mkdir (($env.cy.path.home) + '/particles')
+#     # mkdir (($env.cy.path.home) + '/cyberlinks')
+#     mkdir (($env.cy.path.home) + '/temp')
+
+#     cyberlinks-clear-temp-table
+
+# }
 
 export def cyberlinks-clear-temp-table [] {
 
-    let dt1 = (date now | date format "%Y-%m-%d_%H_%M_%S")
-    let path1 = $env.HOME + "/cy/temp/cyberlinks.csv"           # ~ make errors with mv on mac
-    let path2 = $env.HOME + "/cy/backup/" + "cyberlinks_" + $dt1 + ".csv"
+    let dt1 = (date now | date format '%Y%m%d-%H%M%S')
+    let path2 = $env.cy.path.home + 'backup/' + 'cyberlinks_' + $dt1 + '.csv'
 
-    if ($path1 | path exists ) {
-        ^mv $path1 $path2
+    if ($env.cy.path.cyberlinks-csv-temp | path exists ) {
+        ^mv $env.cy.path.cyberlinks-csv-temp $path2
     }
-    'from,to' | save $path1
+    'from,to' | save $env.cy.path.cyberlinks-csv-temp
 }
+
 
 export def cyberlinks-append-to-temp-table [
     cyberlinks?    #cyberlinks table
-    --display_result_cyberlinks
+    --dont_show_out_table
 ] {
     let cyberlinks = if ($cyberlinks | is-empty) {$in} else {$cyberlinks}
-    let path1 = $env.HOME + '/cy/temp/cyberlinks.csv'
 
-    open $path1 | append $cyberlinks | save $path1
-    if (not $display_result_cyberlinks)  { open $path1 }
+    open $env.cy.path.cyberlinks-csv-temp | 
+        append $cyberlinks | 
+        save $env.cy.path.cyberlinks-csv-temp
+
+    if (not $dont_show_out_table)  { 
+        open $env.cy.path.cyberlinks-csv-temp 
+    }
     
 }
 
@@ -132,25 +199,6 @@ export def cyberlinks-add-to-particle [
         select from to
 }
 
-#Create custom unsigned cyberlinks transaction
-export def cyberlinks-create-trans-json [
-    cyberlinks?                     # the table of cyberlinks
-    --neuron: string                # address of neuron who will create cyberlinks
-] {
-    let cyberlinks = if ($cyberlinks | is-empty) {$in} else {$cyberlinks}
-
-    let cyberlinks = ($cyberlinks | select from to)
-
-    let neuron = if ($neuron | is-empty) { $env.pussy.from } else {$neuron}
-
-    let trans = ('{"body":{"messages":[{"@type":"/cyber.graph.v1beta1.MsgCyberlink","neuron":"","links":[{"from":"","to":""}]}],"memo":"","timeout_height":"0","extension_options":[],"non_critical_extension_options":[]},"auth_info":{"signer_infos":[],"fee":{"amount":[],"gas_limit":"2000000","payer":"","granter":""}},"signatures":[]}' | from json)
-
-    $trans | 
-        upsert body.messages.neuron $neuron | 
-        upsert body.messages.links $cyberlinks | 
-        save ~/cy/unsigned_tx.json 
-}
-
 
 
 # Upload values from column 'text' to the local IPFS node and add the column with the new CIDs.
@@ -169,24 +217,74 @@ export def upload-text-column-to-ipfs [
         }
 }
 
-# pussy tx sign --from hot_account temp_cyberlinks.json --chain-id space-pussy --keyring-backend test --output-document signed_tx.json
+# $env.cy.exec tx sign --from hot_account temp_cyberlinks.json --chain-id space-pussy --keyring-backend test --output-document tx-signed_tx.json
 
-# sign and broadcast transaction
-export def tx-sign-broadcast [] {
-    pussy tx sign ~/cy/unsigned_tx.json --from $env.pussy.from  --chain-id space-pussy --keyring-backend $env.pussy.keyring-backend --output-document ~/cy/signed_tx.json
-    pussy tx broadcast ~/cy/signed_tx.json
+#Create custom tx-unsigned cyberlinks transaction
+def cyberlinks-create-trans-json [
+    # cyberlinks?                     # the table of cyberlinks
+    --neuron: string                # address of neuron who will create cyberlinks
+] {
+    let cyberlinks = (open $env.cy.path.cyberlinks-csv-temp | select from to)
+
+    # let cyberlinks = if ($cyberlinks | is-empty) {$in} else {$cyberlinks}
+    let neuron = if ($neuron | is-empty) { $env.cy.address } else {$neuron}
+    let trans = ('{"body":{"messages":[{"@type":"/cyber.graph.v1beta1.MsgCyberlink","neuron":"","links":[{"from":"","to":""}]}],"memo":"","timeout_height":"0","extension_options":[],"non_critical_extension_options":[]},"auth_info":{"signer_infos":[],"fee":{"amount":[],"gas_limit":"2000000","payer":"","granter":""}},"signatures":[]}' | from json)
+
+    $trans | 
+        upsert body.messages.neuron $neuron | 
+        upsert body.messages.links $cyberlinks | 
+        save $env.cy.path.tx-unsigned
 }
 
-export def create-chuck-norris-cyberlink [] {
+
+
+# sign and broadcast transaction
+export def tx-create-sign-broadcast [] {
+    if not (is-connected) {
+        error make {msg: "there is no internet!"}
+    }
+
+    cyberlinks-create-trans-json
+
+    let var1 = (if $env.cy.exec == 'cyber' {
+        cyber tx sign $env.cy.path.tx-unsigned --from $env.cy.address  --chain-id $env.cy.chain-id --keyring-backend $env.cy.keyring-backend --output-document $env.cy.path.tx-signed
+        cyber tx broadcast $env.cy.path.tx-signed --broadcast-mode block
+    } else {
+        pyssy tx sign $env.cy.path.tx-unsigned --from $env.cy.address  --chain-id $env.cy.chain-id --keyring-backend $env.cy.keyring-backend --output-document $env.cy.path.tx-signed
+        pyssy tx broadcast $env.cy.path.tx-signed --broadcast-mode block
+    })
+
+    let var2 = ($var1 | from json | select raw_log code txhash)
+    if $var2.code == 0 {
+        echo "cyberlinks should be successfully sent"
+        $var2 
+    } else {
+        # echo "error!"
+        $var2 
+    }
+}
+
+#export def check cyberlinks
+
+export def add-chuck-norris-cyberlink [
+    --dont_append_to_cyberlinks_temp_csv
+] {
     let chuck_cid = (particle-add-text 'Chuck Norris')
     
     let quote = (fetch https://api.chucknorris.io/jokes/random).value 
-    echo $quote
+    # echo $quote
 
     let quote_cid = (particle-add-text $quote)
     
-    # [[from to ];[$chuck_cid $quote_cid "Chuck Norris" $quote]] | cyberlinks-create-trans-json
-    [[from to 'from_text' 'to_text'];[$chuck_cid $quote_cid "Chuck Norris" $quote]] 
+    # [[from to ];[$chuck_cid $quote_cid 'Chuck Norris' $quote]] | cyberlinks-create-trans-json
+    let $_table = (
+        [[from to 'from_text' 'to_text'];
+        [$chuck_cid $quote_cid 'Chuck Norris' $quote]]
+    )
+
+    if $dont_append_to_cyberlinks_temp_csv {$_table} else {
+        $_table | cyberlinks-append-to-temp-table
+    }
 } 
 
 export def parse-copied-table [] {
@@ -202,19 +300,6 @@ export def copy-table [] {
     echo $_table
 }
 
-export-env { 
-    let-env pussy = if ('~/cy/cy_config.json' | path exists ) {
-        open ~/cy/cy_config.json
-    } else {
-        ""
-    }
-}
-
-export def create_config_json [] {
-    print 'Enter pussy address: ' -n
-    let pussy_address = (input)
-    echo ''
-    print 'Enter keyring backend: ' -n 
-    let backend = (input)
-    {'back': $pussy_address}
+export def view-table [] {
+    open $env.cy.path.cyberlinks-csv-temp | select from_text to_text from to
 }
