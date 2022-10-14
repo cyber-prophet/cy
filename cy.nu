@@ -122,6 +122,9 @@ export def 'append cyberlinks to temp table' [
 ] {
     let cyberlinks = if ($cyberlinks | is-empty) {$in} else {$cyberlinks}
 
+    let cyberlinks = ($cyberlinks | 
+        upsert date_time (date now | date format '%y%m%d-%H%M'))
+
     open $env.cy.path.cyberlinks-csv-temp | 
         append $cyberlinks | 
         save $env.cy.path.cyberlinks-csv-temp
@@ -301,6 +304,6 @@ export def 'copy table to clipboard' [] {
     echo $_table
 }
 
-export def 'view table from clipboard' [] {
-    open $env.cy.path.cyberlinks-csv-temp | select from_text to_text from to
+export def 'view temp cyberlinks table' [] {
+    open $env.cy.path.cyberlinks-csv-temp 
 }
