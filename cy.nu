@@ -15,7 +15,17 @@ def is-connected []  {
     (do -i {fetch https://www.iana.org} | describe) == 'raw input'
 }
 
+def 'banner' [] {
+    echo "
+     ____ _   _    
+    / ___) | | |   
+   ( (___| |_| |   
+    \\____)\\__  |   cy nushell module is loaded
+         (____/    have fun"
+}
+
 export-env { 
+    banner
     let path1 = $env.HOME + '/cy/cy_config.json'
     let-env cy = if ($path1 | path exists ) {
         open ($path1)
@@ -78,18 +88,42 @@ export def-env "create config json" [] {
     echo $env.cy
 }
 
+#################################################
 
-# Empty temp cyberlinks table
-export def 'clear temp cyberlinks table' [] {
+# Create text particle and pin it to local node
+export def 'create text particle' [
+    text?: string
+] {
 
-    let dt1 = (date now | date format '%Y%m%d-%H%M%S')
-    let path2 = $env.cy.path.home + 'backup/' + 'cyberlinks_temp_' + $dt1 + '.csv'
+    let text = if ($text | is-empty) {$in} else {$text}
 
-    if ($env.cy.path.cyberlinks-csv-temp | path exists ) {
-        ^mv $env.cy.path.cyberlinks-csv-temp $path2
-    }
-    'from,to' | save $env.cy.path.cyberlinks-csv-temp
+    echo $text | 
+        ipfs add -Q | 
+        str replace '\n' ''
 }
+
+
+# Add 2 texts cyberlink
+export def 'add two texts cyberlink' [
+    text_from
+    text_to
+    --dont_append_to_cyberlinks_temp_csv (-d)
+] {
+    let cid_from = (create text particle $text_from)
+    let cid_to = (create text particle $text_to)
+    
+    let $out_table = (
+        [[from to 'from_text' 'to_text'];
+        [$cid_from $cid_to $text_from $text_to]]
+    )
+
+    if $dont_append_to_cyberlinks_temp_csv {
+        $out_table
+    } else {
+        $out_table | append cyberlinks to temp table
+    }
+}
+
 
 # Append cyberlinks from pipe or parameters to temp table
 export def 'append cyberlinks to temp table' [
@@ -112,23 +146,11 @@ export def 'append cyberlinks to temp table' [
 }
 
 
-# Create text particle and pin it to local node
-export def 'create text particle' [
-    text?: string
-] {
-
-    let text = if ($text | is-empty) {$in} else {$text}
-
-    echo $text | 
-        ipfs add -Q | 
-        str replace '\n' ''
-}
-
-
-# Adding files from folder to ipfs, creating table. Without parameters all files will be added
+# Add files from folder to ipfs, create table. Without parameters all files will be added
 export def 'add files from folder to ipfs' [
     ...files: string                # filenames to add into local ipfs node
     --cyberlink_filenames_to_their_files
+    --dont_append_to_cyberlinks_temp_csv (-d)
 ] {
 
     let files = (
@@ -156,8 +178,53 @@ export def 'add files from folder to ipfs' [
         }
     )
 
-    $out_table 
+    if $dont_append_to_cyberlinks_temp_csv {
+        $out_table
+    } else {
+        $out_table | append cyberlinks to temp table
+    }
+
 }
+
+# Add random quote cyberlink to temp table
+export def 'add quote forismatic cyberlink' [] {
+    let q1 = (
+        fetch -r https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=json |
+        str replace "\\\\" "" | 
+        from json
+    )
+
+    let quoteAuthor = (
+        if $q1.quoteAuthor == '' {
+            'quote'
+        } else {
+            $q1.quoteAuthor
+        }
+    )
+
+    add two texts cyberlink $q1.quoteText $quoteAuthor
+}
+
+# Add chuck norris cyberlink to temp table
+export def 'add chuck norris cyberlink' [
+    --dont_append_to_cyberlinks_temp_csv (-d)
+] {
+    let cid_from = (create text particle 'chuck norris')
+    
+    let quote = (fetch https://api.chucknorris.io/jokes/random).value 
+    # echo $quote
+
+    let cid_to = (create text particle $quote)
+    
+    let $_table = (
+        [[from to 'from_text' 'to_text'];
+        [$cid_from $cid_to 'chuck norris' $quote]]
+    )
+
+    if $dont_append_to_cyberlinks_temp_csv {$_table} else {
+        $_table | append cyberlinks to temp table
+    }
+} 
 
 
 # Add text particle into 'from' column of local_cyberlinks table
@@ -180,7 +247,6 @@ export def 'add text particle into to column' [
 }
 
 
-
 # Upload values from the given column ('text' by default) to the local IPFS node and add the column with the new CIDs.
 export def 'upload text values from column to ipfs' [
     cyberlinks?: table
@@ -197,6 +263,39 @@ export def 'upload text values from column to ipfs' [
         }
 }
 
+
+# Empty temp cyberlinks table
+export def 'clear temp cyberlinks table' [] {
+
+    let dt1 = (date now | date format '%Y%m%d-%H%M%S')
+    let path2 = $env.cy.path.home + 'backup/' + 'cyberlinks_temp_' + $dt1 + '.csv'
+
+    if ($env.cy.path.cyberlinks-csv-temp | path exists ) {
+        ^mv $env.cy.path.cyberlinks-csv-temp $path2
+    }
+    'from,to' | save $env.cy.path.cyberlinks-csv-temp
+}
+
+#################################################
+
+# Paste table from clipboard
+export def 'paste table from clipboard' [] {
+    let _table = ( pbpaste | from tsv )
+}
+
+# Copy table from the pipe into clipboard (in tsv format)
+export def 'copy table to clipboard' [] {
+    let _table =  $in
+    echo $_table
+    $_table | to tsv | pbcopy
+}
+
+# View current temp cyberlinks table
+export def 'view temp cyberlinks table' [] {
+    open $env.cy.path.cyberlinks-csv-temp 
+}
+
+#################################################
 
 # Create custom tx-unsigned cyberlinks transaction
 def 'create tx json from temp cyberlinks' [
@@ -232,14 +331,14 @@ def 'tx sign and broadcast' [] {
             --keyring-backend $env.cy.keyring-backend 
             --output-document $env.cy.path.tx-signed)
 
-        cyber tx broadcast $env.cy.path.tx-signed # --broadcast-mode block
+        cyber tx broadcast $env.cy.path.tx-signed --broadcast-mode block
     } else {
         (pyssy tx sign $env.cy.path.tx-unsigned --from $env.cy.address  
             --chain-id $env.cy.chain-id 
             --keyring-backend $env.cy.keyring-backend 
             --output-document $env.cy.path.tx-signed)
 
-        pyssy tx broadcast $env.cy.path.tx-signed # --broadcast-mode block
+        pyssy tx broadcast $env.cy.path.tx-signed --broadcast-mode block
     }
 }
 
@@ -251,7 +350,7 @@ export def 'create sign broadcast cyberlinks tx' [] {
 
     create tx json from temp cyberlinks
 
-    let var0 = tx sign and broadcast
+    let var0 = (tx sign and broadcast)
 
     $var0 | save  ($env.cy.path.cyberlinks-csv-archive + '.json')
 
@@ -283,82 +382,4 @@ export def 'create sign broadcast cyberlinks tx' [] {
                 $_var 
             }
     }
-}
-
-#export def check cyberlinks
-
-# Add chuck norris cyberlink to temp table
-export def 'add chuck norris cyberlink' [
-    --dont_append_to_cyberlinks_temp_csv
-] {
-    let cid_from = (create text particle 'chuck norris')
-    
-    let quote = (fetch https://api.chucknorris.io/jokes/random).value 
-    # echo $quote
-
-    let cid_to = (create text particle $quote)
-    
-    let $_table = (
-        [[from to 'from_text' 'to_text'];
-        [$cid_from $cid_to 'chuck norris' $quote]]
-    )
-
-    if $dont_append_to_cyberlinks_temp_csv {$_table} else {
-        $_table | append cyberlinks to temp table
-    }
-} 
-
-# Paste table from clipboard
-export def 'paste table from clipboard' [] {
-    let _table = ( pbpaste | from tsv )
-}
-
-# Copy table from the pipe into clipboard (in tsv format)
-export def 'copy table to clipboard' [] {
-    let _table =  $in
-    echo $_table
-    $_table | to tsv | pbcopy
-}
-
-# View current temp cyberlinks table
-export def 'view temp cyberlinks table' [] {
-    open $env.cy.path.cyberlinks-csv-temp 
-}
-
-# Add 2 texts cyberlink
-export def 'add two texts cyberlink' [
-    text_from
-    text_to
-    --dont_append_to_cyberlinks_temp_csv
-] {
-    let cid_from = (create text particle $text_from)
-    let cid_to = (create text particle $text_to)
-    
-    let $_table = (
-        [[from to 'from_text' 'to_text'];
-        [$cid_from $cid_to $text_from $text_to]]
-    )
-
-    if $dont_append_to_cyberlinks_temp_csv {$_table} else {
-        $_table | append cyberlinks to temp table
-    }
-
-}
-
-export def 'add quote forismatic cyberlink' [] {
-    let q1 = (
-        fetch -r https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=json |
-        str replace "\\\\" "" | 
-        from json
-    )
-
-    let quoteAuthor = (
-        if $q1.quoteAuthor == '' {
-            'quote'
-        } else {
-            $q1.quoteAuthor
-        }
-    )
-
-    add two texts cyberlink $q1.quoteText $quoteAuthor
 }
