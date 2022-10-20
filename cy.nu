@@ -48,7 +48,7 @@ export def-env "create config json" [] {
     let address = (if ($address | is-empty) {'bostrom1aypv5wxute0nnhfv44jkhyfkzt7zyrden85tel'} else {$address})
 
     let backend = (input 'Enter keyring backend: ')
-    let backend = (if ($backend | is-empty) {'test'} else {$backend})
+    let backend = (if ($backend | is-empty) {'os'} else {$backend})
 
     # let chain_id = (input 'Enter chain-id: ')
     # let chain_id = (if ($chain_id | is-empty) {'bostrom'} else {$chain_id})
@@ -61,6 +61,7 @@ export def-env "create config json" [] {
         'chain-id': $chain_id
         'path': {
             'home': $home
+            'backup_folder': ($home + 'backup/')
             'cyberlinks-csv-temp': ($home + 'cyberlinks_temp.csv')
             'cyberlinks-csv-archive': ($home + 'cyberlinks_archive.csv')
             'tx-signed' : ($home + 'temp/tx-signed.json')
@@ -69,6 +70,7 @@ export def-env "create config json" [] {
     } 
     
     mkdir $temp_env.path.home
+    mkdir $env.cy.path.backup_folder
 
     $temp_env | save ($temp_env.path.home + 'cy_config.json')
     
@@ -81,6 +83,7 @@ export def-env "create config json" [] {
     if (not ($env.cy.path.cyberlinks-csv-temp | path exists)) {
         "from,to" | save $env.cy.path.cyberlinks-csv-temp
     }
+
 
     echo ''
     echo 'JSON is updated'
@@ -97,7 +100,7 @@ export def 'create text particle' [
 
     let text = if ($text | is-empty) {$in} else {$text}
 
-    echo $text | 
+    echo ( $text | into string ) | 
         ipfs add -Q | 
         str replace '\n' ''
 }
@@ -259,7 +262,7 @@ export def 'upload text values from column to ipfs' [
         upsert $column_to_write_cid {
             |it| $it |
                 get $column_with_text |
-                cy create text particle 
+                create text particle 
         }
 }
 
