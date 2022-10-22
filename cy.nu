@@ -284,6 +284,7 @@ export def 'clear temp cyberlinks table' [] {
 # Paste table from clipboard
 export def 'paste table from clipboard' [] {
     let _table = ( pbpaste | from tsv )
+    $_table
 }
 
 # Copy table from the pipe into clipboard (in tsv format)
@@ -354,8 +355,6 @@ export def 'create sign broadcast cyberlinks tx' [] {
     create tx json from temp cyberlinks
 
     let var0 = (tx sign and broadcast)
-
-    $var0 | save  ($env.cy.path.cyberlinks-csv-archive + '.json')
 
     let _var = ( 
         $var0 | 
