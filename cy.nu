@@ -44,7 +44,7 @@ export def-env "create config json" [] {
     let _exec = (input 'Choose cyber executable name (cyber or pussy): ')
     let _exec = (if ($_exec | is-empty) {'cyber'} else {$_exec})
 
-    let address = (input 'Enter main address: ')
+    let address = (input 'Enter address to send transactions from: ')
     let address = (if ($address | is-empty) {'bostrom1aypv5wxute0nnhfv44jkhyfkzt7zyrden85tel'} else {$address})
 
     let backend = (input 'Enter keyring backend: ')
@@ -52,7 +52,7 @@ export def-env "create config json" [] {
 
     # let chain_id = (input 'Enter chain-id: ')
     # let chain_id = (if ($chain_id | is-empty) {'bostrom'} else {$chain_id})
-    let chain_id = (if ($_exec == 'cyber') {'bostrom'} else {'pussy'})
+    let chain_id = (if ($_exec == 'cyber') {'bostrom'} else {'space-pussy'})
 
     let temp_env = {
         'exec': $_exec
@@ -94,7 +94,7 @@ export def-env "create config json" [] {
 #################################################
 
 # Create text particle and pin it to local node
-export def 'create text particle' [
+export def 'create and pin text particle' [
     text?: string
 ] {
 
@@ -205,7 +205,7 @@ export def 'add quote forismatic cyberlink' [] {
         }
     )
 
-    add two texts cyberlink $q1.quoteText $quoteAuthor
+    add two texts cyberlink $quoteAuthor $q1.quoteText
 }
 
 # Add chuck norris cyberlink to temp table
