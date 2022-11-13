@@ -4,6 +4,15 @@
 # Use:
 # > overlay use ~/apps-files/github/cy/cy.nu as cy -p
 
+def 'banner' [] {
+    echo "
+     ____ _   _    
+    / ___) | | |   
+   ( (___| |_| |   
+    \\____)\\__  |   cy nushell module is loaded
+         (____/    have fun"
+}
+
 
 def parse-ipfs-table [] {parse -r '(?<status>\w+) (?<to>Qm\w{44}) (?<filename>.+)'}
 
@@ -13,15 +22,6 @@ def is-cid [particle: string] {
 
 def is-connected []  {
     (do -i {fetch https://www.iana.org} | describe) == 'raw input'
-}
-
-def 'banner' [] {
-    echo "
-     ____ _   _    
-    / ___) | | |   
-   ( (___| |_| |   
-    \\____)\\__  |   cy nushell module is loaded
-         (____/    have fun"
 }
 
 export-env { 
@@ -41,7 +41,7 @@ export def-env "create config json" [] {
     let home = ($env.HOME + '/cy/')
     # let old = (open ($home + 'config.json'))
 
-    let _exec = (input 'Choose cyber executable name (cyber or pussy): ')
+    let _exec = (input 'Choose cyber executable name (*cyber* or pussy): ')
     let _exec = (if ($_exec | is-empty) {'cyber'} else {$_exec})
 
     let address = (input 'Enter address to send transactions from: ')
@@ -93,7 +93,7 @@ export def-env "create config json" [] {
 
 #################################################
 
-# Create and pin text particle and pin it to local node
+# Create text particle and pin it to local node
 export def 'create and pin text particle' [
     text?: string
 ] {
@@ -106,7 +106,7 @@ export def 'create and pin text particle' [
 }
 
 
-# Add 2 texts cyberlink
+# Add 2 texts cyberlink to temp table
 export def 'add two texts cyberlink' [
     text_from
     text_to
@@ -288,7 +288,7 @@ export def 'paste table from clipboard' [] {
 }
 
 # Copy table from the pipe into clipboard (in tsv format)
-export def 'copy table to clipboard' [] {
+export def 'copy in table to clipboard' [] {
     let _table =  $in
     echo $_table
     $_table | to tsv | pbcopy
