@@ -93,7 +93,7 @@ export def-env "create config json" [] {
 
 #################################################
 
-# Create text particle and pin it to local node
+# Create and pin text particle and pin it to local node
 export def 'create and pin text particle' [
     text?: string
 ] {
@@ -112,8 +112,8 @@ export def 'add two texts cyberlink' [
     text_to
     --dont_append_to_cyberlinks_temp_csv (-d)
 ] {
-    let cid_from = (create text particle $text_from)
-    let cid_to = (create text particle $text_to)
+    let cid_from = (create and pin text particle $text_from)
+    let cid_to = (create and pin text particle $text_to)
     
     let $out_table = (
         [[from to 'from_text' 'to_text'];
@@ -123,13 +123,13 @@ export def 'add two texts cyberlink' [
     if $dont_append_to_cyberlinks_temp_csv {
         $out_table
     } else {
-        $out_table | append cyberlinks to temp table
+        $out_table | append in cyberlinks to temp table
     }
 }
 
 
 # Append cyberlinks from pipe or parameters to temp table
-export def 'append cyberlinks to temp table' [
+export def 'append in cyberlinks to temp table' [
     cyberlinks?    #cyberlinks table
     --dont_show_out_table
 ] {
@@ -172,7 +172,7 @@ export def 'add files from folder to ipfs' [
         if $cyberlink_filenames_to_their_files {
             $cid_table.filename | 
                 each {
-                    |it| create text particle $it 
+                    |it| create and pin text particle $it 
                 } | 
                 wrap from | 
                 merge {$cid_table}
@@ -184,7 +184,7 @@ export def 'add files from folder to ipfs' [
     if $dont_append_to_cyberlinks_temp_csv {
         $out_table
     } else {
-        $out_table | append cyberlinks to temp table
+        $out_table | append in cyberlinks to temp table
     }
 
 }
@@ -212,12 +212,12 @@ export def 'add quote forismatic cyberlink' [] {
 export def 'add chuck norris cyberlink' [
     --dont_append_to_cyberlinks_temp_csv (-d)
 ] {
-    let cid_from = (create text particle 'chuck norris')
+    let cid_from = (create and pin text particle 'chuck norris')
     
     let quote = (fetch https://api.chucknorris.io/jokes/random).value 
     # echo $quote
 
-    let cid_to = (create text particle $quote)
+    let cid_to = (create and pin text particle $quote)
     
     let $_table = (
         [[from to 'from_text' 'to_text'];
@@ -225,7 +225,7 @@ export def 'add chuck norris cyberlink' [
     )
 
     if $dont_append_to_cyberlinks_temp_csv {$_table} else {
-        $_table | append cyberlinks to temp table
+        $_table | append in cyberlinks to temp table
     }
 } 
 
@@ -235,7 +235,7 @@ export def 'add text particle into from column' [
     text: string                    # Text to upload to ipfs
 ] {
     $in | 
-        upsert from (create text particle $text) |
+        upsert from (create and pin text particle $text) |
         select from to
 }
 
@@ -245,7 +245,7 @@ export def 'add text particle into to column' [
 ] { 
     $in | 
         rename -c ['to' 'from'] | 
-        upsert to (create text particle $text) |
+        upsert to (create and pin text particle $text) |
         select from to
 }
 
@@ -262,7 +262,7 @@ export def 'upload text values from column to ipfs' [
         upsert $column_to_write_cid {
             |it| $it |
                 get $column_with_text |
-                create text particle 
+                create and pin text particle 
         }
 }
 
@@ -337,12 +337,12 @@ def 'tx sign and broadcast' [] {
 
         cyber tx broadcast $env.cy.path.tx-signed --broadcast-mode block
     } else {
-        (pyssy tx sign $env.cy.path.tx-unsigned --from $env.cy.address  
+        (pussy tx sign $env.cy.path.tx-unsigned --from $env.cy.address  
             --chain-id $env.cy.chain-id 
             --keyring-backend $env.cy.keyring-backend 
             --output-document $env.cy.path.tx-signed)
 
-        pyssy tx broadcast $env.cy.path.tx-signed --broadcast-mode block
+        pussy tx broadcast $env.cy.path.tx-signed --broadcast-mode block
     }
 }
 
