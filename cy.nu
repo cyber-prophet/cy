@@ -70,20 +70,20 @@ export def-env "create config json" [] {
     } 
     
     mkdir $temp_env.path.home
-    mkdir $env.cy.path.backup_folder
+    mkdir $temp_env.path.backup_folder
 
     $temp_env | save ($temp_env.path.home + 'cy_config.json')
     
     let-env cy = $temp_env
 
-    if (not ($env.cy.path.cyberlinks-csv-archive | path exists)) {
-        "from,to,address,timestamp,txhash" | save $env.cy.path.cyberlinks-csv-archive
-    }
 
     if (not ($env.cy.path.cyberlinks-csv-temp | path exists)) {
         "from,to" | save $env.cy.path.cyberlinks-csv-temp
     }
 
+    if (not ($env.cy.path.cyberlinks-csv-archive | path exists)) {
+        "from,to,address,timestamp,txhash" | save $env.cy.path.cyberlinks-csv-archive
+    }
 
     echo ''
     echo 'JSON is updated'
