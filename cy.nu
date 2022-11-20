@@ -42,10 +42,22 @@ export def-env "create config json" [] {
     # let old = (open ($home + 'config.json'))
 
     let _exec = (input 'Choose cyber executable name (*cyber* or pussy): ')
-    let _exec = (if ($_exec | is-empty) {'cyber'} else {$_exec})
+    let _exec = (
+        if ($_exec | is-empty) {
+            'cyber'
+        } else {
+            $_exec
+        }
+    )
 
     let address = (input 'Enter address to send transactions from: ')
-    let address = (if ($address | is-empty) {'bostrom1aypv5wxute0nnhfv44jkhyfkzt7zyrden85tel'} else {$address})
+    let address = (
+        if ($address | is-empty) {
+            'bostrom1aypv5wxute0nnhfv44jkhyfkzt7zyrden85tel'
+        } else {
+            $address
+        }
+    )
 
     let backend = (input 'Enter keyring backend: ')
     let backend = (if ($backend | is-empty) {'os'} else {$backend})
@@ -77,11 +89,15 @@ export def-env "create config json" [] {
     let-env cy = $temp_env
 
 
-    if (not ($env.cy.path.cyberlinks-csv-temp | path exists)) {
+    if (
+        not ($env.cy.path.cyberlinks-csv-temp | path exists)
+    ) {
         "from,to" | save $env.cy.path.cyberlinks-csv-temp
     }
 
-    if (not ($env.cy.path.cyberlinks-csv-archive | path exists)) {
+    if (
+        not ($env.cy.path.cyberlinks-csv-archive | path exists)
+    ) {
         "from,to,address,timestamp,txhash" | save $env.cy.path.cyberlinks-csv-archive
     }
 
