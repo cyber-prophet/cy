@@ -110,7 +110,7 @@ export def-env "config" [] {
 #################################################
 
 # Create text particle and pin it to local node
-export def 'pin' [
+export def 'pin-text' [
     text?: string
 ] {
 
@@ -128,8 +128,8 @@ export def 'append-cl-texts' [
     text_to
     --dont_append_to_cyberlinks_temp_csv (-d)
 ] {
-    let cid_from = (pin $text_from)
-    let cid_to = (pin $text_to)
+    let cid_from = (pin-text $text_from)
+    let cid_to = (pin-text $text_to)
     
     let $out_table = (
         [[from to 'from_text' 'to_text'];
@@ -188,7 +188,7 @@ export def 'pin-files' [
         if $cyberlink_filenames_to_their_files {
             $cid_table.filename | 
                 each {
-                    |it| pin $it 
+                    |it| pin-text $it 
                 } | 
                 wrap from | 
                 merge {$cid_table}
@@ -228,12 +228,12 @@ export def 'append-cl-forismatic' [] {
 export def 'append-cl-chuck' [
     --dont_append_to_cyberlinks_temp_csv (-d)
 ] {
-    let cid_from = (pin 'chuck norris')
+    let cid_from = (pin-text 'chuck norris')
     
     let quote = (fetch https://api.chucknorris.io/jokes/random).value 
     # echo $quote
 
-    let cid_to = (pin $quote)
+    let cid_to = (pin-text $quote)
     
     let $_table = (
         [[from to 'from_text' 'to_text'];
@@ -251,7 +251,7 @@ export def 'link-from' [
     text: string                    # Text to upload to ipfs
 ] {
     $in | 
-        upsert from (pin $text) |
+        upsert from (pin-text $text) |
         select from to
 }
 
@@ -261,7 +261,7 @@ export def 'link-to' [
 ] { 
     $in | 
         rename -c ['to' 'from'] | 
-        upsert to (pin $text) |
+        upsert to (pin-text $text) |
         select from to
 }
 
@@ -278,7 +278,7 @@ export def 'pin-column' [
         upsert $column_to_write_cid {
             |it| $it |
                 get $column_with_text |
-                pin 
+                pin-text 
         }
 }
 
@@ -406,17 +406,15 @@ export def 'help' [] {
     echo "
 cy config                Create config JSON to set env varables, to use as parameters
 
-cy pin                   Create text particle and pin it to local node
-
+cy pin-text              Create text particle and pin it to local node
 cy pin-files             Add files from folder to ipfs, create table. Without parameters all files will be added
-
-cy link-to               Add text particle into 'to' column of local_cyberlinks table
-cy link-from             Add text particle into 'from' column of local_cyberlinks table
 
 cy tx-send               Create sign and broadcast transaction
 
 cy copy-tsv              Copy table from the pipe into clipboard (in tsv format)
 cy paste-tsv             Paste table from clipboard
+cy link-to               Add text particle into 'to' column of local_cyberlinks table
+cy link-from             Add text particle into 'from' column of local_cyberlinks table
 
 cy pin-column            Upload values from the given column ('text' by default) to the local IPFS node and add the column w
 cy view-temp             View current temp cyberlinks table
