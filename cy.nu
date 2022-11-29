@@ -116,9 +116,9 @@ export def 'pin-text' [
 
     let text = if ($text | is-empty) {$in} else {$text}
 
-    echo ( $text | into string ) | 
-        ipfs add -Q | 
-        str replace '\n' ''
+    (echo ( $text | into string ) 
+    | ipfs add -Q 
+    | str replace '\n' '')
 }
 
 
@@ -151,12 +151,18 @@ export def 'append-cl-pipe' [
 ] {
     let cyberlinks = if ($cyberlinks | is-empty) {$in} else {$cyberlinks}
 
-    let cyberlinks = ($cyberlinks | 
-        upsert date_time (date now | date format '%y%m%d-%H%M'))
+    let cyberlinks = (
+        $cyberlinks 
+        | upsert date_time (
+            date now 
+            | date format '%y%m%d-%H%M'
+        )
+    )
 
-    open $env.cy.path.cyberlinks-csv-temp | 
-        append $cyberlinks | 
-        save $env.cy.path.cyberlinks-csv-temp
+    (open $env.cy.path.cyberlinks-csv-temp 
+    | append $cyberlinks 
+    | save $env.cy.path.cyberlinks-csv-temp
+    )
 
     if (not $dont_show_out_table)  { 
         open $env.cy.path.cyberlinks-csv-temp 
@@ -179,38 +185,39 @@ export def 'pin-files' [
     )
 
     let cid_table = (
-        $files |
-            each {|f| ipfs add $f} |
-            parse-ipfs-table 
+        $files 
+        | each {|f| ipfs add $f} 
+        | parse-ipfs-table 
     )
 
     let out_table = (
-        if $cyberlink_filenames_to_their_files {
-            $cid_table.filename | 
-                each {
-                    |it| pin-text $it 
-                } | 
-                wrap from | 
-                merge {$cid_table}
-        } else {
+        if $cyberlink_filenames_to_their_files {(
+            $cid_table.filename 
+            | each {
+                |it| pin-text $it 
+                } 
+            | wrap from 
+            | merge {$cid_table}
+        )} else {
             $cid_table
         }
     )
 
     if $dont_append_to_cyberlinks_temp_csv {
         $out_table
-    } else {
-        $out_table | append-cl-pipe
-    }
+    } else {(
+        $out_table 
+        | append-cl-pipe
+    )}
 
 }
 
 # Add random quote cyberlink to temp table
 export def 'append-cl-forismatic' [] {
     let q1 = (
-        fetch -r https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=json |
-        str replace "\\\\" "" | 
-        from json
+        fetch -r https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=json 
+        | str replace "\\\\" "" 
+        | from json
     )
 
     let quoteAuthor = (
@@ -240,30 +247,31 @@ export def 'append-cl-chuck' [
         [$cid_from $cid_to 'chuck norris' $quote]]
     )
 
-    if $dont_append_to_cyberlinks_temp_csv {$_table} else {
-        $_table | append-cl-pipe
-    }
+    if $dont_append_to_cyberlinks_temp_csv {$_table} else {(
+        $_table
+        | append-cl-pipe
+    )}
 } 
 
 
 # Add text particle into 'from' column of local_cyberlinks table
 export def 'link-from' [
     text: string                    # Text to upload to ipfs
-] {
-    $in | 
-        upsert from (pin-text $text) |
-        select from to
-}
+] {(
+    $in 
+    | upsert from (pin-text $text) 
+    | select from to
+)}
 
 # Add text particle into 'to' column of local_cyberlinks table
 export def 'link-to' [
     text: string                    # Text to upload to ipfs
-] { 
-    $in | 
-        rename -c ['to' 'from'] | 
-        upsert to (pin-text $text) |
-        select from to
-}
+] {( 
+    $in 
+    | rename -c ['to' 'from'] 
+    | upsert to (pin-text $text) 
+    | select from to
+)}
 
 
 # Upload values from the given column ('text' by default) to the local IPFS node and add the column with the new CIDs.
@@ -274,12 +282,12 @@ export def 'pin-column' [
 ] {
     let cyberlinks = if ($cyberlinks | is-empty) {$in} else {$cyberlinks}
 
-    $cyberlinks | 
-        upsert $column_to_write_cid {
-            |it| $it |
-                get $column_with_text |
-                pin-text 
-        }
+    $cyberlinks 
+    | upsert $column_to_write_cid {
+        |it| $it 
+        | get $column_with_text 
+        | pin-text 
+    }
 }
 
 
@@ -289,7 +297,10 @@ export def 'clear-temp' [] {
     let dt1 = (date now | date format '%Y%m%d-%H%M%S')
     let path2 = $env.cy.path.home + 'backup/' + 'cyberlinks_temp_' + $dt1 + '.csv'
 
-    if ($env.cy.path.cyberlinks-csv-temp | path exists ) {
+    if (
+        $env.cy.path.cyberlinks-csv-temp
+        | path exists 
+    ) {
         ^mv $env.cy.path.cyberlinks-csv-temp $path2
     }
     'from,to' | save $env.cy.path.cyberlinks-csv-temp
@@ -338,10 +349,10 @@ def 'create tx json from temp cyberlinks' [
         "signatures":[]}' | from json
     )
 
-    $trans | 
-        upsert body.messages.neuron $neuron | 
-        upsert body.messages.links $cyberlinks | 
-        save $env.cy.path.tx-unsigned
+    $trans 
+    | upsert body.messages.neuron $neuron 
+    | upsert body.messages.links $cyberlinks 
+    | save $env.cy.path.tx-unsigned
 }
 
 def 'tx sign and broadcast' [] {
@@ -373,25 +384,25 @@ export def 'tx-send' [] {
     let var0 = (tx sign and broadcast)
 
     let _var = ( 
-        $var0 | 
-        from json | 
-        select raw_log code txhash
+        $var0 
+        | from json 
+        | select raw_log code txhash
     )
     
     if $_var.code == 0 {
-        {'cy': 'cyberlinks should be successfully sent'} | 
-            merge {
-                $_var | select code txhash 
-            }
+        {'cy': 'cyberlinks should be successfully sent'} 
+        | merge {
+            $_var | select code txhash 
+        }
         
 
-        open $env.cy.path.cyberlinks-csv-archive |
-            append (
-                open $env.cy.path.cyberlinks-csv-temp | 
-                upsert neuron $env.cy.address
-            ) |
-            save $env.cy.path.cyberlinks-csv-archive
-
+        (open $env.cy.path.cyberlinks-csv-archive 
+            | append (
+                open $env.cy.path.cyberlinks-csv-temp 
+                | upsert neuron $env.cy.address
+            ) 
+            | save $env.cy.path.cyberlinks-csv-archive
+        )
         clear-temp
 
     } else {
