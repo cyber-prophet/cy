@@ -401,3 +401,30 @@ export def 'tx-send' [] {
             }
     }
 }
+
+export def 'help' [] {
+    echo "
+cy config                Create config JSON to set env varables, to use as parameters
+
+cy pin                   Create text particle and pin it to local node
+
+cy pin-files             Add files from folder to ipfs, create table. Without parameters all files will be added
+
+cy link-to               Add text particle into 'to' column of local_cyberlinks table
+cy link-from             Add text particle into 'from' column of local_cyberlinks table
+
+cy tx-send               Create sign and broadcast transaction
+
+cy copy-tsv              Copy table from the pipe into clipboard (in tsv format)
+cy paste-tsv             Paste table from clipboard
+
+cy pin-column            Upload values from the given column ('text' by default) to the local IPFS node and add the column w
+cy view-temp             View current temp cyberlinks table
+cy clear-temp            Empty temp cyberlinks table
+
+cy append-cl-pipe        Append cyberlinks from pipe or parameters to temp table
+cy append-cl-chuck       Add chuck norris cyberlink to temp table
+cy append-cl-texts       Add 2 texts cyberlink to temp table
+cy append-cl-forismatic  Add random quote cyberlink to temp table
+"
+}
