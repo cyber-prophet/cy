@@ -123,7 +123,7 @@ export def 'pin-text' [
 
 
 # Add 2 texts cyberlink to temp table
-export def 'append-cl-texts' [
+export def 'link-texts' [
     text_from
     text_to
     --dont_append_to_cyberlinks_temp_csv (-d)
@@ -139,13 +139,13 @@ export def 'append-cl-texts' [
     if $dont_append_to_cyberlinks_temp_csv {
         $out_table
     } else {
-        $out_table | append-cl-pipe
+        $out_table | pipe-append
     }
 }
 
 
 # Append cyberlinks from pipe or parameters to temp table
-export def 'append-cl-pipe' [
+export def 'pipe-append' [
     cyberlinks?    #cyberlinks table
     --dont_show_out_table
 ] {
@@ -207,13 +207,13 @@ export def 'pin-files' [
         $out_table
     } else {(
         $out_table 
-        | append-cl-pipe
+        | pipe-append
     )}
 
 }
 
 # Add random quote cyberlink to temp table
-export def 'append-cl-forismatic' [] {
+export def 'link-quote' [] {
     let q1 = (
         fetch -r https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=json 
         | str replace "\\\\" "" 
@@ -228,11 +228,11 @@ export def 'append-cl-forismatic' [] {
         }
     )
 
-    append-cl-texts $quoteAuthor $q1.quoteText
+    link-texts $quoteAuthor $q1.quoteText
 }
 
 # Add chuck norris cyberlink to temp table
-export def 'append-cl-chuck' [
+export def 'link-chuck' [
     --dont_append_to_cyberlinks_temp_csv (-d)
 ] {
     let cid_from = (pin-text 'chuck norris')
@@ -249,7 +249,7 @@ export def 'append-cl-chuck' [
 
     if $dont_append_to_cyberlinks_temp_csv {$_table} else {(
         $_table
-        | append-cl-pipe
+        | pipe-append
     )}
 } 
 
@@ -420,6 +420,11 @@ cy config                Create config JSON to set env varables, to use as param
 cy pin-text              Create text particle and pin it to local node
 cy pin-files             Add files from folder to ipfs, create table. Without parameters all files will be added
 
+cy link-texts            Add 2 texts cyberlink to temp table
+cy link-chuck            Add chuck norris cyberlink to temp table
+cy link-quote            Add random quote cyberlink to temp table
+cy pipe-append           Append cyberlinks from pipe or parameters to temp table
+
 cy tx-send               Create sign and broadcast transaction
 
 cy copy-tsv              Copy table from the pipe into clipboard (in tsv format)
@@ -430,10 +435,5 @@ cy link-from             Add text particle into 'from' column of local_cyberlink
 cy pin-column            Upload values from the given column ('text' by default) to the local IPFS node and add the column w
 cy view-temp             View current temp cyberlinks table
 cy clear-temp            Empty temp cyberlinks table
-
-cy append-cl-pipe        Append cyberlinks from pipe or parameters to temp table
-cy append-cl-chuck       Add chuck norris cyberlink to temp table
-cy append-cl-texts       Add 2 texts cyberlink to temp table
-cy append-cl-forismatic  Add random quote cyberlink to temp table
 "
 }
