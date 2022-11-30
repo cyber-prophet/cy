@@ -390,26 +390,22 @@ export def 'tx-send' [] {
     )
     
     if $_var.code == 0 {
-        {'cy': 'cyberlinks should be successfully sent'} 
-        | merge {
-            $_var | select code txhash 
-        }
-        
+        ({'cy': 'cyberlinks should be successfully sent'} 
+        | merge $_var 
+        | select code txhash
+        ) 
 
         (open $env.cy.path.cyberlinks-csv-archive 
-            | append (
-                open $env.cy.path.cyberlinks-csv-temp 
-                | upsert neuron $env.cy.address
+        | append (
+            open $env.cy.path.cyberlinks-csv-temp 
+            | upsert neuron $env.cy.address
             ) 
-            | save $env.cy.path.cyberlinks-csv-archive
+        | save $env.cy.path.cyberlinks-csv-archive
         )
         clear-temp
 
     } else {
-        {'cy': 'error!' } | 
-            merge {
-                $_var 
-            }
+        {'cy': 'error!' } | merge $_var 
     }
 }
 
