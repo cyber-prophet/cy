@@ -38,8 +38,8 @@ export-env {
 # Create config JSON to set env varables, to use as parameters
 export def-env "config" [] {
 
-    let home = ($env.HOME + '/cy/')
-    # let old = (open ($home + 'config.json'))
+    let cy_home = ($env.HOME + '/cy/')
+    # let old = (open ($cy_home + 'config.json'))
 
     let _exec = (input 'Choose cyber executable name (*cyber* or pussy): ')
     let _exec = (
@@ -72,19 +72,21 @@ export def-env "config" [] {
         'keyring-backend': $backend
         'chain-id': $chain_id
         'path': {
-            'home': $home
-            'backup_folder': ($home + 'backup/')
-            'cyberlinks-csv-temp': ($home + 'cyberlinks_temp.csv')
-            'cyberlinks-csv-archive': ($home + 'cyberlinks_archive.csv')
-            'tx-signed' : ($home + 'temp/tx-signed.json')
-            'tx-unsigned' : ($home + 'temp/tx-unsigned.json')
+            'cy_home': $cy_home
+            'cy_temp': ($cy_home + 'temp/')
+            'backups': ($cy_home + 'backups/')
+            'cyberlinks-csv-temp': ($cy_home + 'cyberlinks_temp.csv')
+            'cyberlinks-csv-archive': ($cy_home + 'cyberlinks_archive.csv')
+            'tx-signed' : ($cy_home + 'temp/tx-signed.json')
+            'tx-unsigned' : ($cy_home + 'temp/tx-unsigned.json')
         }
     } 
     
-    mkdir $temp_env.path.home
-    mkdir $temp_env.path.backup_folder
+    mkdir $temp_env.path.cy_home
+    mkdir $temp_env.path.cy_temp
+    mkdir $temp_env.path.backups
 
-    $temp_env | save ($temp_env.path.home + 'cy_config.json')
+    $temp_env | save ($temp_env.path.cy_home + 'cy_config.json')
     
     let-env cy = $temp_env
 
@@ -296,7 +298,7 @@ export def 'pin-column' [
 export def 'temp-clear' [] {
 
     let dt1 = (date now | date format '%Y%m%d-%H%M%S')
-    let path2 = $env.cy.path.home + 'backup/' + 'cyberlinks_temp_' + $dt1 + '.csv'
+    let path2 = $env.cy.path.backups + 'cyberlinks_temp_' + $dt1 + '.csv'
 
     if (
         $env.cy.path.cyberlinks-csv-temp
