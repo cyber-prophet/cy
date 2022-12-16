@@ -4,12 +4,12 @@ Cy - nushell wrapper, interface to cyber family blockchains CLIs (Bostrom, Pussy
 
 ## Installation
 
-1. Install kubo (IPFS in Go) https://github.com/ipfs/kubo
-2. Install nushell https://www.nushell.sh/
+1. Install the kubo app (IPFS in Go) https://github.com/ipfs/kubo
+2. Install the nushell app https://www.nushell.sh/
 3. Launch nushell by typing `nu` in your terminal app
 4. Clone this repository or download the `cy.nu` file
 5. Type command in nushell: `overlay use ~/path/to/cy.nu as cy -p`. For more information on how to use overlays check [nushell's help](https://www.nushell.sh/book/overlays.html)
-6. Go trough wizzard `cy create config json`
+6. Go trough a wizzard `cy create config json`
 7. See all the commands by entering `cy` + tab
 
 ## Commands
