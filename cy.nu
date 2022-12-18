@@ -1,4 +1,4 @@
-# Cy - nushell wrapper, interface to cyber family blockchains CLIs (Bostrom, Pussy)
+# Cy - the nushell wrapper, interface to cyber family blockchains CLIs (Bostrom, Pussy)
 # Git: https://github.com/cyber-prophet/cy
 # 
 # Use:
@@ -120,16 +120,31 @@ export def-env "config" [] {
 
 #################################################
 
-# Pin a text particle to the local node
+# Pin a text particle
 export def 'pin-text' [
     text?: string
+    --local (-l) # Pin a text to the local node
 ] {
 
-    let text = if ($text | is-empty) {$in} else {$text}
+    let text = (
+        (
+            if ($text | is-empty) {$in} else {$text}
+        ) 
+        | into string 
+    ) 
 
-    (echo ( $text | into string ) 
-    | ipfs add -Q 
-    | str replace '\n' '')
+    let cid = if $local {(
+        echo $text
+        | ipfs add -Q 
+        | str replace '\n' ''
+    )} else {(
+        echo $text 
+        | curl --silent -X POST -F file=@- "https://io.cybernode.ai/add" 
+        | from json 
+        | get cid./
+    )}
+
+    echo $cid
 }
 
 
@@ -427,7 +442,7 @@ export def 'help' [] {
     echo "
 cy config                Create config JSON to set env varables, to use as parameters
 
-cy pin a-text              Pin text particle to the local node
+cy pin-text              Pin a text particle 
 cy Pin-files             Add the current files arguments the local node to ipfs, output the cyberlinks table
 
 cy link a-t-xts            Add 2 texts cyberlink to the temp table
