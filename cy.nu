@@ -41,7 +41,7 @@ export def-env "config" [] {
     let cy_home = ($env.HOME + '/cy/')
     # let old = (open ($cy_home + 'config.json'))
 
-    let _exec = (input 'Choose cyber executable name (*cyber* or pussy): ')
+    let _exec = (input 'Choose the name of cyber executable (*cyber* or pussy): ')
     let _exec = (
         if ($_exec | is-empty) {
             'cyber'
@@ -50,7 +50,16 @@ export def-env "config" [] {
         }
     )
 
-    let address = (input 'Enter address to send transactions from: ')
+    echo "Here are the keys that you have:"
+
+    if ($_exec == 'cyber') {
+            cyber keys list --output json | from json | flatten | select name address
+        } else {
+            pussy keys list --output json | from json | flatten | select name address
+        }
+
+
+    let address = (input 'Enter the address to send transactions from: ')
     let address = (
         if ($address | is-empty) {
             'bostrom1aypv5wxute0nnhfv44jkhyfkzt7zyrden85tel'
@@ -111,7 +120,7 @@ export def-env "config" [] {
 
 #################################################
 
-# Pin text particle to the local node
+# Pin a text particle to the local node
 export def 'pin-text' [
     text?: string
 ] {
@@ -124,7 +133,7 @@ export def 'pin-text' [
 }
 
 
-# Add 2 texts cyberlink to temp table
+# Add a 2-texts cyberlink to the temp table
 export def 'link-texts' [
     text_from
     text_to
@@ -146,7 +155,7 @@ export def 'link-texts' [
 }
 
 
-# Append cyberlinks to temp table
+# Append cyberlinks to the temp table
 export def 'temp-append' [
     cyberlinks?    #cyberlinks table
     --dont_show_out_table
@@ -174,9 +183,9 @@ export def 'temp-append' [
 }
 
 
-# Add files from folder (all or only listed as arguments) to ipfs, output the cyberlinks table
+# Pin files from the current folder to the local node, output the cyberlinks table
 export def 'pin-files' [
-    ...files: string                # filenames to add into local ipfs node
+    ...files: string                # filenames to add into the local ipfs node
     --cyberlink_filenames_to_their_files
     --dont_append_to_cyberlinks_temp_csv (-d)
 ] {
@@ -215,7 +224,7 @@ export def 'pin-files' [
 
 }
 
-# Add random quote cyberlink to temp table
+# Add a random quote cyberlink to the temp table
 export def 'link-quote' [] {
     let q1 = (
         fetch -r https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=json 
@@ -234,7 +243,7 @@ export def 'link-quote' [] {
     link-texts $quoteAuthor $q1.quoteText
 }
 
-# Add chuck norris cyberlink to temp table
+# Add chuck norris cyberlink to the temp table
 export def 'link-chuck' [
     --dont_append_to_cyberlinks_temp_csv (-d)
 ] {
@@ -257,18 +266,18 @@ export def 'link-chuck' [
 } 
 
 
-# Add text particle into 'from' column of temp cyberlinks table
+# Add a text particle into the 'from' column of the temp cyberlinks table
 export def 'link-from' [
-    text: string                    # Text to upload to ipfs
+    text: string                    # a text to upload to ipfs
 ] {(
     $in 
     | upsert from (pin-text $text) 
     | select from to
 )}
 
-# Add text particle into 'to' column of temp cyberlinks table
+# Add a text particle into 'to' column of the temp cyberlinks table
 export def 'link-to' [
-    text: string                    # Text to upload to ipfs
+    text: string                    # a text to upload to ipfs
 ] {( 
     $in 
     | rename -c ['to' 'from'] 
@@ -277,11 +286,11 @@ export def 'link-to' [
 )}
 
 
-# Upload values from the given column ('text' by default) to the local IPFS node and add the column with the new CIDs.
+# Upload values from a given column ('text' by default) to the local IPFS node and add a column with the new CIDs.
 export def 'pin-column' [
     cyberlinks?: table
-    --column_with_text: string = 'text' # column name to take values from to upload to IPFS. If is ommited default value is 'text'
-    --column_to_write_cid: string = 'from' # column name to write CIDs to. If is ommited default value is 'from'
+    --column_with_text: string = 'text' # a column name to take values from to upload to IPFS. If is ommited, the default value is 'text'
+    --column_to_write_cid: string = 'from' # a column name to write CIDs to. If this option is ommited, the default value is 'from'
 ] {
     let cyberlinks = if ($cyberlinks | is-empty) {$in} else {$cyberlinks}
 
@@ -294,7 +303,7 @@ export def 'pin-column' [
 }
 
 
-# Empty temp cyberlinks table
+# Empty the temp cyberlinks table
 export def 'temp-clear' [] {
 
     let dt1 = (date now | date format '%Y%m%d-%H%M%S')
@@ -311,30 +320,30 @@ export def 'temp-clear' [] {
 
 #################################################
 
-# Paste table from clipboard
+# Paste a table from clipboard
 export def 'paste-tsv' [] {
     let _table = ( pbpaste | from tsv )
     $_table
 }
 
-# Copy table from the pipe into clipboard (in tsv format)
+# Copy a table from the pipe into clipboard (in tsv format)
 export def 'copy-tsv' [] {
     let _table =  $in
     echo $_table
     $_table | to tsv | pbcopy
 }
 
-# View current temp cyberlinks table
+# View the temp cyberlinks table
 export def 'temp-view' [] {
     open $env.cy.path.cyberlinks-csv-temp 
 }
 
 #################################################
 
-# Create custom tx-unsigned cyberlinks transaction
+# Create a custom unsigned cyberlinks transaction
 def 'create tx json from temp cyberlinks' [
-    # cyberlinks?                     # the table of cyberlinks
-    # --neuron: string                # address of neuron who will create cyberlinks
+    # cyberlinks?                     # a table of cyberlinks
+    # --neuron: string                # an address of the neuron who will create cyberlinks
 ] {
     let cyberlinks = (open $env.cy.path.cyberlinks-csv-temp | select from to)
 
@@ -376,7 +385,7 @@ def 'tx sign and broadcast' [] {
     }
 }
 
-# Create tx from temp table, sign and broadcast transaction
+# Create a tx from the temp cyberlinks table, sign and broadcast it
 export def 'tx-send' [] {
     if not (is-connected) {
         error make {msg: "there is no internet!"}
@@ -418,25 +427,25 @@ export def 'help' [] {
     echo "
 cy config                Create config JSON to set env varables, to use as parameters
 
-cy pin-text              Pin text particle to the local node
-cy pin-files             Add files from folder (all or only listed as arguments) to ipfs, output the cyberlinks table
+cy pin a-text              Pin text particle to the local node
+cy Pin-files             Add the current files arguments the local node to ipfs, output the cyberlinks table
 
-cy link-texts            Add 2 texts cyberlink to temp table
-cy link-chuck            Add chuck norris cyberlink to temp table
-cy link-quote            Add random quote cyberlink to temp table
+cy link a-t-xts            Add 2 texts cyberlink to the temp table
+cy link-chuck            Add chuck norris cyberlink to the temp table
+cy link-quote            Add a random quote cyberlink to the temp table
 
-cy temp-append           Append cyberlinks to temp table
-cy temp-view             View current temp cyberlinks table
-cy temp-clear            Empty temp cyberlinks table
+cy temp-append           Append cyberlinks to the temp table
+cy temp-view             View the temp cyberlinks table
+cy temp-clear            Empty the temp cyberlinks table
 
-cy tx-send               Create tx from temp table, sign and broadcast transaction
+cy tx-send               Create a tx from the temp cyberlinks table, sign and broadcast it
 
-cy copy-tsv              Copy table from the pipe into clipboard (in tsv format)
-cy paste-tsv             Paste table from clipboard
+cy copy-tsv              Copy a table from the pipe into clipboard (in tsv format)
+cy paste-tsv             Paste a table from clipboard
 
-cy pin-column            Upload values from the given column ('text' by default) to the local IPFS node and add the column w
+cy pin-column            Upload values from a given column ('text' by default) to the local IPFS node and add a column w
 
-cy link-to               Add text particle into 'to' column of temp cyberlinks table
-cy link-from             Add text particle into 'from' column of temp cyberlinks table
+cy link-to               Add a text particle into 'to' column of the temp cyberlinks table
+cy link-from             Add a text particle into the 'from' column of the temp cyberlinks table
 "
 }
