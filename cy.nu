@@ -39,7 +39,6 @@ export-env {
 export def-env "config" [] {
 
     let cy_home = ($env.HOME + '/cy/')
-    # let old = (open ($cy_home + 'config.json'))
 
     let _exec = (input 'Choose the name of cyber executable (*cyber* or pussy): ')
     let _exec = (
@@ -71,8 +70,6 @@ export def-env "config" [] {
     let backend = (input 'Enter keyring backend: ')
     let backend = (if ($backend | is-empty) {'os'} else {$backend})
 
-    # let chain_id = (input 'Enter chain-id: ')
-    # let chain_id = (if ($chain_id | is-empty) {'bostrom'} else {$chain_id})
     let chain_id = (if ($_exec == 'cyber') {'bostrom'} else {'space-pussy'})
 
     let temp_env = {
@@ -91,14 +88,12 @@ export def-env "config" [] {
         }
     } 
     
-    mkdir $temp_env.path.cy_home
     mkdir $temp_env.path.cy_temp
     mkdir $temp_env.path.backups
 
     $temp_env | save ($temp_env.path.cy_home + 'cy_config.json')
     
     let-env cy = $temp_env
-
 
     if (
         not ($env.cy.path.cyberlinks-csv-temp | path exists)
