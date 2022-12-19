@@ -27,9 +27,9 @@ def is-connected []  {
 export-env { 
     banner
     let path1 = $env.HOME + '/cy/cy_config.json'
-    let-env cy = if ($path1 | path exists ) {
+    let-env cy = try {
         open ($path1)
-    } else {
+    } catch {
         echo 'cy_config.json is not found. Run "cy config"'
         ''
     }
@@ -48,20 +48,27 @@ export def-env "config" [] {
             $_exec
         }
     )
+    echo ''
 
     echo "Here are the keys that you have:"
 
-    if ($_exec == 'cyber') {
+    let addr_table = (
+        if ($_exec == 'cyber') {
             cyber keys list --output json | from json | flatten | select name address
         } else {
             pussy keys list --output json | from json | flatten | select name address
         }
+    )
 
+    $addr_table
+    echo ''
 
     let address = (input 'Enter the address to send transactions from: ')
     let address = (
         if ($address | is-empty) {
-            'bostrom1aypv5wxute0nnhfv44jkhyfkzt7zyrden85tel'
+            let def_address = ($addr_table | get address.0)
+            echo $"the first address from the list above is used: ($def_address)"
+            $def_address
         } else {
             $address
         }
@@ -72,11 +79,15 @@ export def-env "config" [] {
 
     let chain_id = (if ($_exec == 'cyber') {'bostrom'} else {'space-pussy'})
 
+    let ipfs_storage = (input 'Select ipfs service to use (local, cyb.ai, both): ')
+    let ipfs_storage = (if ($ipfs_storage | is-empty) {'cyb.ai'} else {$ipfs_storage})
+
     let temp_env = {
         'exec': $_exec
         'address': $address
         'keyring-backend': $backend
         'chain-id': $chain_id
+        'ipfs-storage': $ipfs_storage
         'path': {
             'cy_home': $cy_home
             'cy_temp': ($cy_home + 'temp/')
@@ -118,26 +129,33 @@ export def-env "config" [] {
 # Pin a text particle
 export def 'pin-text' [
     text?: string
-    --local (-l) # Pin a text to the local node
 ] {
 
     let text = (
         (
             if ($text | is-empty) {$in} else {$text}
         ) 
-        | into string 
+        | into string # To coerce numbers into strings
     ) 
 
-    let cid = if $local {(
-        echo $text
-        | ipfs add -Q 
-        | str replace '\n' ''
-    )} else {(
-        echo $text 
-        | curl --silent -X POST -F file=@- "https://io.cybernode.ai/add" 
-        | from json 
-        | get cid./
-    )}
+    let cid = if (
+        ($env.cy.ipfs-storage == 'local') or ($env.cy.ipfs-storage == 'both')
+        ) {(
+            echo $text
+            | ipfs add -Q 
+            | str replace '\n' ''
+        )} 
+        
+    let cid = if (
+        ($env.cy.ipfs-storage == 'cyb.ai') or ($env.cy.ipfs-storage == 'both')
+        ) {(
+            echo $text 
+            | curl --silent -X POST -F file=@- "https://io.cybernode.ai/add" 
+            | from json 
+            | get cid./
+        )} else {
+            $cid
+        }
 
     echo $cid
 }
