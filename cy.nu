@@ -35,7 +35,7 @@ export-env {
     }
 }
 
-# Create config JSON to set env varables, to use as parameters
+# Create config JSON to set env variables, to use them as parameters in cyber cli
 export def-env "config" [] {
 
     let cy_home = ($env.HOME + '/cy/')
@@ -74,18 +74,18 @@ export def-env "config" [] {
         }
     )
 
-    let backend = (input 'Enter keyring backend: ')
-    let backend = (if ($backend | is-empty) {'os'} else {$backend})
+    # let backend = (input 'Enter the keyring backend: ')
+    # let backend = (if ($backend | is-empty) {'os'} else {$backend})
 
     let chain_id = (if ($_exec == 'cyber') {'bostrom'} else {'space-pussy'})
 
-    let ipfs_storage = (input 'Select ipfs service to use (local, cyb.ai, both): ')
+    let ipfs_storage = (input 'Select the ipfs service to use (kubo, cyb.ai, both): ')
     let ipfs_storage = (if ($ipfs_storage | is-empty) {'cyb.ai'} else {$ipfs_storage})
 
     let temp_env = {
         'exec': $_exec
         'address': $address
-        'keyring-backend': $backend
+        # 'keyring-backend': $backend
         'chain-id': $chain_id
         'ipfs-storage': $ipfs_storage
         'path': {
@@ -119,7 +119,7 @@ export def-env "config" [] {
     }
 
     echo ''
-    echo 'JSON is updated'
+    echo 'JSON is updated. You can find below what was written there.'
     echo ''
     echo $env.cy
 }
@@ -139,7 +139,7 @@ export def 'pin-text' [
     ) 
 
     let cid = if (
-        ($env.cy.ipfs-storage == 'local') or ($env.cy.ipfs-storage == 'both')
+        ($env.cy.ipfs-storage == 'kubo') or ($env.cy.ipfs-storage == 'both')
         ) {(
             echo $text
             | ipfs add -Q 
@@ -185,8 +185,8 @@ export def 'link-texts' [
 
 # Append cyberlinks to the temp table
 export def 'temp-append' [
-    cyberlinks?    #cyberlinks table
-    --dont_show_out_table
+    cyberlinks?             # cyberlinks table
+    --dont_show_out_table   
 ] {
     let cyberlinks = if ($cyberlinks | is-empty) {$in} else {$cyberlinks}
 
@@ -205,7 +205,7 @@ export def 'temp-append' [
     )
 
     if (not $dont_show_out_table)  { 
-        open $env.cy.path.cyberlinks-csv-temp 
+        open $env.cy.path.cyberlinks-csv-temp | select from_text to_text from to date_time
     }
     
 }
@@ -283,8 +283,8 @@ export def 'link-chuck' [
     let cid_to = (pin-text $quote)
     
     let $_table = (
-        [[from to 'from_text' 'to_text'];
-        [$cid_from $cid_to 'chuck norris' $quote]]
+        [['from_text' 'to_text' from to];
+        ['chuck norris' $quote $cid_from $cid_to]]
     )
 
     if $dont_append_to_cyberlinks_temp_csv {$_table} else {(
@@ -397,17 +397,17 @@ def 'create tx json from temp cyberlinks' [
 
 def 'tx sign and broadcast' [] {
     if $env.cy.exec == 'cyber' {
-        (cyber tx sign $env.cy.path.tx-unsigned --from $env.cy.address  
+        ( cyber tx sign $env.cy.path.tx-unsigned --from $env.cy.address  
             --chain-id $env.cy.chain-id 
-            --keyring-backend $env.cy.keyring-backend 
-            --output-document $env.cy.path.tx-signed)
+            # --keyring-backend $env.cy.keyring-backend 
+            --output-document $env.cy.path.tx-signed )
 
         cyber tx broadcast $env.cy.path.tx-signed --broadcast-mode block
     } else {
-        (pussy tx sign $env.cy.path.tx-unsigned --from $env.cy.address  
+        ( pussy tx sign $env.cy.path.tx-unsigned --from $env.cy.address  
             --chain-id $env.cy.chain-id 
-            --keyring-backend $env.cy.keyring-backend 
-            --output-document $env.cy.path.tx-signed)
+            # --keyring-backend $env.cy.keyring-backend 
+            --output-document $env.cy.path.tx-signed )
 
         pussy tx broadcast $env.cy.path.tx-signed --broadcast-mode block
     }
@@ -451,14 +451,15 @@ export def 'tx-send' [] {
     }
 }
 
+# ordered list of cy commands
 export def 'help' [] {
     echo "
-cy config                Create config JSON to set env varables, to use as parameters
+cy config                Create config JSON to set env variables, to use them as parameters in cyber cli
 
 cy pin-text              Pin a text particle 
-cy Pin-files             Add the current files arguments the local node to ipfs, output the cyberlinks table
+cy pin-files             Pin files from the current folder to the local node, output the cyberlinks table
 
-cy link a-t-xts            Add 2 texts cyberlink to the temp table
+cy link-texts            Add 2 texts cyberlink to the temp table
 cy link-chuck            Add chuck norris cyberlink to the temp table
 cy link-quote            Add a random quote cyberlink to the temp table
 
