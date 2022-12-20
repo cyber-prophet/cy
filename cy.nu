@@ -31,7 +31,7 @@ export-env {
         open ($path1)
     } catch {
         echo 'cy_config.json is not found. Run "cy config"'
-        ''
+        echo ''
     }
 }
 
@@ -282,20 +282,20 @@ export def 'temp-append' [
     )
 
     (
-        open $env.cy.path.cyberlinks-csv-temp 
+        temp-view 
         | append $cyberlinks 
         | save $env.cy.path.cyberlinks-csv-temp
     )
 
     if (not $dont_show_out_table)  { 
-        open $env.cy.path.cyberlinks-csv-temp | select from_text to_text from to date_time
+        temp-view 
     }
     
 }
 
 # View the temp cyberlinks table
 export def 'temp-view' [] {
-    open $env.cy.path.cyberlinks-csv-temp 
+    open $env.cy.path.cyberlinks-csv-temp | select from_text to_text from to date_time
 }
 
 # Empty the temp cyberlinks table
@@ -359,7 +359,7 @@ def 'create tx json from temp cyberlinks' [
     # cyberlinks?                     # a table of cyberlinks
     # --neuron: string                # an address of the neuron who will create cyberlinks
 ] {
-    let cyberlinks = (open $env.cy.path.cyberlinks-csv-temp | select from to)
+    let cyberlinks = (temp-view | select from to)
 
     # let cyberlinks = if ($cyberlinks | is-empty) {$in} else {$cyberlinks}
     # let neuron = if ($neuron | is-empty) { $env.cy.address } else {$neuron}
@@ -407,7 +407,7 @@ export def 'tx-send' [] {
         (
             open $env.cy.path.cyberlinks-csv-archive 
             | append (
-                open $env.cy.path.cyberlinks-csv-temp 
+                temp-view 
                 | upsert neuron $env.cy.address
             ) 
         | save $env.cy.path.cyberlinks-csv-archive
@@ -453,7 +453,7 @@ export def 'pin-column' [
     }
 }
 
-
+#################################################
 
 # An ordered list of cy commands
 export def 'help' [] {
