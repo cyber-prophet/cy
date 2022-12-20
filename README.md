@@ -1,6 +1,6 @@
 # cy
 
-Cy - nushell wrapper, interface to cyber family blockchains CLIs (Bostrom, Pussy) and IPFS
+Cy - a [nushell](https://www.nushell.sh/) wrapper, an interface to the cyber family blockchains CLIs (Bostrom, Pussy) and IPFS.
 
 ## Installation
 
@@ -9,7 +9,7 @@ Cy - nushell wrapper, interface to cyber family blockchains CLIs (Bostrom, Pussy
 3. Launch nushell by typing `nu` in your terminal app
 4. Clone this repository or download the `cy.nu` file
 5. Type command in nushell: `overlay use ~/path/to/cy.nu as cy -p`. For more information on how to use overlays check [nushell's help](https://www.nushell.sh/book/overlays.html)
-6. Go trough a wizzard `cy create config json`
+6. Go trough the wizzard `cy config`
 7. See all the commands by entering `cy` + tab
 
 ## Commands
