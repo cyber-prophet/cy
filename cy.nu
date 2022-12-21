@@ -37,10 +37,10 @@ export-env {
 
 # Create config JSON to set env variables, to use them as parameters in cyber cli
 export def-env "config" [] {
-
+    echo "This wizzard will walk you through setup of cy."
     let cy_home = ($env.HOME + '/cy/')
 
-    let _exec = (input 'Choose the name of cyber executable (*cyber* or pussy): ')
+    let _exec = (input 'Choose the name of cyber executable (cyber or pussy): ')
     let _exec = (
         if ($_exec | is-empty) {
             'cyber'
@@ -48,9 +48,8 @@ export def-env "config" [] {
             $_exec
         }
     )
-    echo ''
 
-    echo "Here are the keys that you have:"
+    echo "\nHere are the keys that you have:"
 
     let addr_table = (
         if ($_exec == 'cyber') {
@@ -60,22 +59,18 @@ export def-env "config" [] {
         }
     )
 
-    $addr_table
+    echo $addr_table
     echo ''
 
     let address = (input 'Enter the address to send transactions from: ')
     let address = (
         if ($address | is-empty) {
             let def_address = ($addr_table | get address.0)
-            echo $"the first address from the list above is used: ($def_address)"
             $def_address
         } else {
             $address
         }
     )
-
-    # let backend = (input 'Enter the keyring backend: ')
-    # let backend = (if ($backend | is-empty) {'os'} else {$backend})
 
     let chain_id = (if ($_exec == 'cyber') {'bostrom'} else {'space-pussy'})
 
@@ -85,7 +80,6 @@ export def-env "config" [] {
     let temp_env = {
         'exec': $_exec
         'address': $address
-        # 'keyring-backend': $backend
         'chain-id': $chain_id
         'ipfs-storage': $ipfs_storage
         'path': {
@@ -118,9 +112,8 @@ export def-env "config" [] {
         "from,to,address,timestamp,txhash" | save $env.cy.path.cyberlinks-csv-archive
     }
 
-    echo ''
-    echo 'JSON is updated. You can find below what was written there.'
-    echo ''
+    echo '\nJSON is updated. You can find below what was written there.\n'
+    
     echo $env.cy
 }
 
@@ -130,7 +123,6 @@ export def-env "config" [] {
 export def 'pin-text' [
     text?: string
 ] {
-
     let text = (
         (
             if ($text | is-empty) {$in} else {$text}
@@ -166,7 +158,6 @@ export def 'pin-files' [
     --cyberlink_filenames_to_their_files
     --dont_append_to_cyberlinks_temp_csv (-d)
 ] {
-
     let files = (
         if $files == [] {
             ls | where type == file | get name
@@ -223,7 +214,7 @@ export def 'link-texts' [
     }
 }
 
-# Add chuck norris cyberlink to the temp table
+# Add a random chuck norris cyberlink to the temp table
 export def 'link-chuck' [
     --dont_append_to_cyberlinks_temp_csv (-d)
 ] {
@@ -284,7 +275,7 @@ export def 'temp-append' [
     (
         temp-view 
         | append $cyberlinks 
-        | save $env.cy.path.cyberlinks-csv-temp
+        | save $env.cy.path.cyberlinks-csv-temp --force
     )
 
     if (not $dont_show_out_table)  { 
@@ -295,12 +286,12 @@ export def 'temp-append' [
 
 # View the temp cyberlinks table
 export def 'temp-view' [] {
-    open $env.cy.path.cyberlinks-csv-temp | select from_text to_text from to date_time
+    open $env.cy.path.cyberlinks-csv-temp 
+    | select from_text to_text from to date_time
 }
 
 # Empty the temp cyberlinks table
 export def 'temp-clear' [] {
-
     let dt1 = (date now | date format '%Y%m%d-%H%M%S')
     let path2 = $env.cy.path.backups + 'cyberlinks_temp_' + $dt1 + '.csv'
 
@@ -310,14 +301,14 @@ export def 'temp-clear' [] {
     ) {
         ^mv $env.cy.path.cyberlinks-csv-temp $path2
     }
-    'from,to' | save $env.cy.path.cyberlinks-csv-temp
+    'from,to' | save $env.cy.path.cyberlinks-csv-temp --force
 }
 
 #################################################
 
 # Add a text particle into 'to' column of the temp cyberlinks table
 export def 'link-to' [
-    text: string                    # a text to upload to ipfs
+    text: string  # a text to upload to ipfs
 ] {( 
     $in 
     | rename -c ['to' 'from'] 
@@ -355,14 +346,9 @@ def 'tx sign and broadcast' [] {
 }
 
 # Create a custom unsigned cyberlinks transaction
-def 'create tx json from temp cyberlinks' [
-    # cyberlinks?                     # a table of cyberlinks
-    # --neuron: string                # an address of the neuron who will create cyberlinks
-] {
+def 'create tx json from temp cyberlinks' [] {
     let cyberlinks = (temp-view | select from to)
 
-    # let cyberlinks = if ($cyberlinks | is-empty) {$in} else {$cyberlinks}
-    # let neuron = if ($neuron | is-empty) { $env.cy.address } else {$neuron}
     let neuron = $env.cy.address
 
     let trans = ('{"body":{"messages":[
@@ -378,7 +364,7 @@ def 'create tx json from temp cyberlinks' [
     $trans 
     | upsert body.messages.neuron $neuron 
     | upsert body.messages.links $cyberlinks 
-    | save $env.cy.path.tx-unsigned
+    | save $env.cy.path.tx-unsigned --force
 }
 
 # Create a tx from the temp cyberlinks table, sign and broadcast it
@@ -410,7 +396,7 @@ export def 'tx-send' [] {
                 temp-view 
                 | upsert neuron $env.cy.address
             ) 
-        | save $env.cy.path.cyberlinks-csv-archive
+        | save $env.cy.path.cyberlinks-csv-archive --force
         )
         temp-clear
 
@@ -423,7 +409,7 @@ export def 'tx-send' [] {
 
 # Copy a table from the pipe into clipboard (in tsv format)
 export def 'copy-tsv' [] {
-    let _table =  $in
+    let _table = $in
     echo $_table
     $_table | to tsv | pbcopy
 }
@@ -463,8 +449,8 @@ cy config                Create config JSON to set env variables, to use them as
 cy pin-text              Pin a text particle 
 cy pin-files             Pin files from the current folder to the local node, output the cyberlinks table
 
-cy link-texts            Add 2 texts cyberlink to the temp table
-cy link-chuck            Add chuck norris cyberlink to the temp table
+cy link-texts            Add a 2-texts cyberlink to the temp table
+cy link-chuck            Add a random chuck norris cyberlink to the temp table
 cy link-quote            Add a random quote cyberlink to the temp table
 
 cy temp-append           Append cyberlinks to the temp table
