@@ -334,14 +334,14 @@ def 'tx sign and broadcast' [] {
             # --keyring-backend $env.cy.keyring-backend 
             --output-document $env.cy.path.tx-signed )
 
-        cyber tx broadcast $env.cy.path.tx-signed --broadcast-mode block
+        cyber tx broadcast $env.cy.path.tx-signed --broadcast-mode block --output json
     } else {
         ( pussy tx sign $env.cy.path.tx-unsigned --from $env.cy.address  
             --chain-id $env.cy.chain-id 
             # --keyring-backend $env.cy.keyring-backend 
             --output-document $env.cy.path.tx-signed )
 
-        pussy tx broadcast $env.cy.path.tx-signed --broadcast-mode block
+        pussy tx broadcast $env.cy.path.tx-signed --broadcast-mode block --output json
     }
 }
 
