@@ -30,19 +30,20 @@ export-env {
     let-env cy = try {
         open ($path1)
     } catch {
-        echo 'cy_config.json is not found. Run "cy config"'
+        echo 'cy_config json was not found. Run "cy config"'
         echo ''
     }
 }
 
 # Create config JSON to set env variables, to use them as parameters in cyber cli
 export def-env "config" [] {
-    echo "This wizzard will walk you through setup of cy."
+    echo "This wizzard will walk you through the setup of cy"
     let cy_home = ($env.HOME + '/cy/')
 
     let _exec = (input 'Choose the name of cyber executable (cyber or pussy): ')
     let _exec = (
         if ($_exec | is-empty) {
+            echo 'cyber was used'
             'cyber'
         } else {
             $_exec
@@ -52,11 +53,10 @@ export def-env "config" [] {
     echo "\nHere are the keys that you have:"
 
     let addr_table = (
-        if ($_exec == 'cyber') {
-            cyber keys list --output json | from json | flatten | select name address
-        } else {
-            pussy keys list --output json | from json | flatten | select name address
-        }
+        ^($_exec) keys list --output json 
+        | from json 
+        | flatten 
+        | select name address
     )
 
     echo $addr_table
@@ -66,16 +66,28 @@ export def-env "config" [] {
     let address = (
         if ($address | is-empty) {
             let def_address = ($addr_table | get address.0)
+            echo $"($def_address) was used"
             $def_address
         } else {
             $address
         }
     )
 
-    let chain_id = (if ($_exec == 'cyber') {'bostrom'} else {'space-pussy'})
+    let chain_id = (if ($_exec == 'cyber') {
+            'bostrom'
+        } else {
+            'space-pussy'
+        }
+    )
 
     let ipfs_storage = (input 'Select the ipfs service to use (kubo, cybernode, both): ')
-    let ipfs_storage = (if ($ipfs_storage | is-empty) {'cybernode'} else {$ipfs_storage})
+    let ipfs_storage = (if ($ipfs_storage | is-empty) {
+            echo 'cybernode was used'
+            'cybernode'
+        } else {
+            $ipfs_storage
+        }
+    )
 
     let temp_env = {
         'exec': $_exec
@@ -112,7 +124,7 @@ export def-env "config" [] {
         "from,to,address,timestamp,txhash" | save $env.cy.path.cyberlinks-csv-archive
     }
 
-    echo '\nJSON is updated. You can find below what was written there.\n'
+    echo 'config JSON was updated. You can find below what was written there.'
     
     echo $env.cy
 }
@@ -362,21 +374,17 @@ export def 'tmp-link-from' [
 #################################################
 
 def 'tx sign and broadcast' [] {
-    if $env.cy.exec == 'cyber' {
-        ( cyber tx sign $env.cy.path.tx-unsigned --from $env.cy.address  
-            --chain-id $env.cy.chain-id 
-            # --keyring-backend $env.cy.keyring-backend 
-            --output-document $env.cy.path.tx-signed )
+    ( 
+        ^($env.cy.exec) tx sign $env.cy.path.tx-unsigned --from $env.cy.address  
+        --chain-id $env.cy.chain-id 
+        # --keyring-backend $env.cy.keyring-backend 
+        --output-document $env.cy.path.tx-signed 
+    )
 
-        cyber tx broadcast $env.cy.path.tx-signed --broadcast-mode block --output json
-    } else {
-        ( pussy tx sign $env.cy.path.tx-unsigned --from $env.cy.address  
-            --chain-id $env.cy.chain-id 
-            # --keyring-backend $env.cy.keyring-backend 
-            --output-document $env.cy.path.tx-signed )
-
-        pussy tx broadcast $env.cy.path.tx-signed --broadcast-mode block --output json
-    }
+    (
+        ^($env.cy.exec) tx broadcast $env.cy.path.tx-signed --broadcast-mode block 
+        --output json
+    )
 }
 
 # Create a custom unsigned cyberlinks transaction
