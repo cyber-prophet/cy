@@ -1,0 +1,1 @@
+open cy.nu | parse -r "[\r\n](# )(.*?)(?:=?\r|\n)export def '(.*)'"
