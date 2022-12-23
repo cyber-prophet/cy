@@ -96,7 +96,7 @@ export def-env "config" [] {
     mkdir $temp_env.path.cy_temp
     mkdir $temp_env.path.backups
 
-    $temp_env | save ($temp_env.path.cy_home + 'cy_config.json')
+    $temp_env | save ($temp_env.path.cy_home + 'cy_config.json') --force
     
     let-env cy = $temp_env
 
@@ -121,31 +121,33 @@ export def-env "config" [] {
 
 # Pin a text particle
 export def 'pin-text' [
-    text?: string
+    text_param?: string
 ] {
+    let text_in = $in
+    
     let text = (
         (
-            if ($text | is-empty) {$in} else {$text}
+            if ($text_in | is-empty) {$text_param} else {$text_in}
         ) 
         | into string # To coerce numbers into strings
     ) 
 
     let cid = if (
         ($env.cy.ipfs-storage == 'kubo') or ($env.cy.ipfs-storage == 'both')
-        ) {(
+        ) {
             echo $text
             | ipfs add -Q 
             | str replace '\n' ''
-        )} 
+        } 
         
     let cid = if (
         ($env.cy.ipfs-storage == 'cyb.ai') or ($env.cy.ipfs-storage == 'both')
-        ) {(
+        ) {
             echo $text 
             | curl --silent -X POST -F file=@- "https://io.cybernode.ai/add" 
             | from json 
             | get cid./
-        )} else {
+        } else {
             $cid
         }
 
@@ -171,24 +173,24 @@ export def 'pin-files' [
     )
 
     let out_table = (
-        if $cyberlink_filenames_to_their_files {(
+        if $cyberlink_filenames_to_their_files {
             $cid_table.filename 
             | each {
                 |it| pin-text $it 
                 } 
             | wrap from 
             | merge {$cid_table}
-        )} else {
+        } else {
             $cid_table
         }
     )
 
     if $dont_append_to_cyberlinks_temp_csv {
         $out_table
-    } else {(
+    } else {
         $out_table 
         | tmp-append
-    )}
+    }
 }
 
 #################################################
@@ -218,10 +220,17 @@ export def 'link-texts' [
 export def 'link-chuck' [
     --dont_append_to_cyberlinks_temp_csv (-d)
 ] {
-    let cid_from = (pin-text 'chuck norris')
+    # let cid_from = (pin-text 'chuck norris')
+    let cid_from = 'QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1'
     
-    let quote = (fetch https://api.chucknorris.io/jokes/random).value 
-    # echo $quote
+    let quote = (
+        "> " + (fetch https://api.chucknorris.io/jokes/random).value + 
+        "\n\n" + "via [Chucknorris.io](https://chucknorris.io)"
+    )
+    
+    echo "========" 
+    echo $quote 
+    echo "========\n"
 
     let cid_to = (pin-text $quote)
     
@@ -230,9 +239,11 @@ export def 'link-chuck' [
         ['chuck norris' $quote $cid_from $cid_to]]
     )
 
-    if $dont_append_to_cyberlinks_temp_csv {$_table} else {(
-        $_table
-        | tmp-append
+    if $dont_append_to_cyberlinks_temp_csv {
+            $_table
+        } else {(
+            $_table
+            | tmp-append
     )}
 } 
 
@@ -252,7 +263,7 @@ export def 'link-quote' [] {
         }
     )
 
-    link-texts $quoteAuthor $q1.quoteText
+    link-texts $quoteAuthor $q1.quoteText | tmp-append
 }
 
 #################################################
@@ -275,19 +286,40 @@ export def 'tmp-append' [
     (
         tmp-view 
         | append $cyberlinks 
+        | tmp-replace
+    )
+
+    # if (not $dont_show_out_table)  {
+    #     echo "Current temp cyberlinks table:" 
+    #     tmp-view 
+    # }
+    
+}
+
+# Replace cyberlinks in the temp table
+export def 'tmp-replace' [
+    cyberlinks?             # cyberlinks table
+    --dont_show_out_table   
+] {
+    let cyberlinks = if ($cyberlinks | is-empty) {$in} else {$cyberlinks}
+
+    (
+        $cyberlinks 
         | save $env.cy.path.cyberlinks-csv-temp --force
     )
 
-    if (not $dont_show_out_table)  { 
-        tmp-view 
+    if (not $dont_show_out_table)  {
+        # echo "Current temp cyberlinks table:" 
+        tmp-view
     }
     
 }
 
 # View the temp cyberlinks table
 export def 'tmp-view' [] {
-    open $env.cy.path.cyberlinks-csv-temp 
-    | select from_text to_text from to date_time
+    let t1 = open $env.cy.path.cyberlinks-csv-temp 
+    # if (($t1 | length) == 0) {[[from to from_text to_text];["" "" "" ""]]} 
+    $t1
 }
 
 # Empty the temp cyberlinks table
@@ -301,7 +333,8 @@ export def 'tmp-clear' [] {
     ) {
         ^mv $env.cy.path.cyberlinks-csv-temp $path2
     }
-    'from,to' | save $env.cy.path.cyberlinks-csv-temp --force
+
+    'from,to,from_text,to_text' | save $env.cy.path.cyberlinks-csv-temp --force
 }
 
 #################################################
@@ -309,21 +342,22 @@ export def 'tmp-clear' [] {
 # Add a text particle into 'to' column of the temp cyberlinks table
 export def 'tmp-link-to' [
     text: string  # a text to upload to ipfs
-] {( 
-    $in 
-    | rename -c ['to' 'from'] 
-    | upsert to (pin-text $text) 
-    | select from to
-)}
+] {
+    tmp-view
+    | upsert to (pin-text $text)
+    | upsert to_text $text 
+    | tmp-replace
+}
 
 # Add a text particle into the 'from' column of the temp cyberlinks table
 export def 'tmp-link-from' [
     text: string                    # a text to upload to ipfs
-] {(
-    $in 
+] {
+    tmp-view
     | upsert from (pin-text $text) 
-    | select from to
-)}
+    | upsert from_text $text
+    | tmp-replace
+}
 
 #################################################
 
@@ -351,7 +385,8 @@ def 'create tx json from temp cyberlinks' [] {
 
     let neuron = $env.cy.address
 
-    let trans = ('{"body":{"messages":[
+    let trans = (
+        '{"body":{"messages":[
         {"@type":"/cyber.graph.v1beta1.MsgCyberlink",
         "neuron":"","links":[{"from":"","to":""}]}
         ],"memo":"","timeout_height":"0",
@@ -375,7 +410,7 @@ export def 'tx-send' [] {
 
     create tx json from temp cyberlinks
 
-    let var0 = (tx sign and broadcast)
+    let var0 = tx sign and broadcast
 
     let _var = ( 
         $var0 
@@ -384,20 +419,17 @@ export def 'tx-send' [] {
     )
     
     if $_var.code == 0 {
-        (
-            {'cy': 'cyberlinks should be successfully sent'} 
-            | merge $_var 
-            | select code txhash
-        ) 
+        {'cy': 'cyberlinks should be successfully sent'} 
+        | merge $_var 
+        | select code txhash
 
-        (
-            open $env.cy.path.cyberlinks-csv-archive 
-            | append (
-                tmp-view 
-                | upsert neuron $env.cy.address
-            ) 
+        open $env.cy.path.cyberlinks-csv-archive 
+        | append (
+            tmp-view 
+            | upsert neuron $env.cy.address
+        ) 
         | save $env.cy.path.cyberlinks-csv-archive --force
-        )
+
         tmp-clear
 
     } else {
@@ -411,13 +443,13 @@ export def 'tx-send' [] {
 export def 'copy-tsv' [] {
     let _table = $in
     echo $_table
+
     $_table | to tsv | pbcopy
 }
 
 # Paste a table from clipboard
 export def 'paste-tsv' [] {
-    let _table = ( pbpaste | from tsv )
-    $_table
+    pbpaste | from tsv
 }
 
 #################################################
@@ -429,14 +461,19 @@ export def 'tmp-pin-col' [
     --column_with_text: string = 'text' # a column name to take values from to upload to IPFS. If is ommited, the default value is 'text'
     --column_to_write_cid: string = 'from' # a column name to write CIDs to. If this option is ommited, the default value is 'from'
 ] {
-    let cyberlinks = if ($cyberlinks | is-empty) {$in} else {$cyberlinks}
+    # let cyberlinks_in = $in
+    # let cyberlinks = if ($cyberlinks_in | is-empty) {$cyberlinks} else {$cyberlinks_in}
+    # echo $cyberlinks
 
-    $cyberlinks 
+    let new_text_col_name = ( $column_to_write_cid + "_text" )
+
+    tmp-view 
     | upsert $column_to_write_cid {
-        |it| $it 
-        | get $column_with_text 
-        | pin-text 
-    }
+        |it| $it | get $column_with_text | pin-text 
+        }
+    | rename -c [$column_with_text $new_text_col_name]
+    | tmp-replace
+
 }
 
 #################################################
