@@ -74,8 +74,8 @@ export def-env "config" [] {
 
     let chain_id = (if ($_exec == 'cyber') {'bostrom'} else {'space-pussy'})
 
-    let ipfs_storage = (input 'Select the ipfs service to use (kubo, cyb.ai, both): ')
-    let ipfs_storage = (if ($ipfs_storage | is-empty) {'cyb.ai'} else {$ipfs_storage})
+    let ipfs_storage = (input 'Select the ipfs service to use (kubo, cybernode, both): ')
+    let ipfs_storage = (if ($ipfs_storage | is-empty) {'cybernode'} else {$ipfs_storage})
 
     let temp_env = {
         'exec': $_exec
@@ -141,7 +141,7 @@ export def 'pin-text' [
         } 
         
     let cid = if (
-        ($env.cy.ipfs-storage == 'cyb.ai') or ($env.cy.ipfs-storage == 'both')
+        ($env.cy.ipfs-storage == 'cybernode') or ($env.cy.ipfs-storage == 'both')
         ) {
             echo $text 
             | curl --silent -X POST -F file=@- "https://io.cybernode.ai/add" 
@@ -491,6 +491,7 @@ cy link-chuck           Add a random chuck norris cyberlink to the temp table
 cy link-quote           Add a random quote cyberlink to the temp table
 
 cy tmp-append           Append cyberlinks to the temp table
+cy tmp-replace          Replace cyberlinks in the temp table
 cy tmp-view             View the temp cyberlinks table
 cy tmp-clear            Empty the temp cyberlinks table
 
