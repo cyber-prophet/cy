@@ -30,20 +30,19 @@ export-env {
     let-env cy = try {
         open ($path1)
     } catch {
-        echo 'cy_config json was not found. Run "cy config"'
-        echo ''
+        'file "cy_config.json" was not found. Run "cy config"' | cprint -c green_italic
     }
 }
 
 # Create config JSON to set env variables, to use them as parameters in cyber cli
 export def-env "config" [] {
-    echo "This wizzard will walk you through the setup of cy"
+    "This wizzard will walk you through the setup of cy" | cprint -c green_italic
     let cy_home = ($env.HOME + '/cy/')
 
     let _exec = (input 'Choose the name of cyber executable (cyber or pussy): ')
     let _exec = (
         if ($_exec | is-empty) {
-            echo 'cyber was used'
+            'cyber was used' | cprint -c blue
             'cyber'
         } else {
             $_exec
@@ -66,7 +65,7 @@ export def-env "config" [] {
     let address = (
         if ($address | is-empty) {
             let def_address = ($addr_table | get address.0)
-            echo $"($def_address) was used"
+            $"($def_address) was used" | cprint -c blue
             $def_address
         } else {
             $address
@@ -82,7 +81,7 @@ export def-env "config" [] {
 
     let ipfs_storage = (input 'Select the ipfs service to use (kubo, cybernode, both): ')
     let ipfs_storage = (if ($ipfs_storage | is-empty) {
-            echo 'cybernode was used'
+            'cybernode was used' | cprint -c blue
             'cybernode'
         } else {
             $ipfs_storage
@@ -124,7 +123,7 @@ export def-env "config" [] {
         "from,to,address,timestamp,txhash" | save $env.cy.path.cyberlinks-csv-archive
     }
 
-    echo 'config JSON was updated. You can find below what was written there.'
+    'config JSON was updated. You can find below what was written there.' | cprint -c green_italic
     
     echo $env.cy
 }
@@ -321,7 +320,6 @@ export def 'tmp-replace' [
     )
 
     if (not $dont_show_out_table)  {
-        # echo "Current temp cyberlinks table:" 
         tmp-view
     }
     
@@ -329,6 +327,7 @@ export def 'tmp-replace' [
 
 # View the temp cyberlinks table
 export def 'tmp-view' [] {
+    "Current temp cyberlinks table" | cprint -c green_italic
     let t1 = open $env.cy.path.cyberlinks-csv-temp 
     # if (($t1 | length) == 0) {[[from to from_text to_text];["" "" "" ""]]} 
     $t1
@@ -486,6 +485,25 @@ export def 'tmp-pin-col' [
 
 #################################################
 
+# Print string colourfully
+def cprint [
+    ...args
+    --color (-c): string@'nu-complete colors' = 'default'
+] {
+    let text = if ($args == []) {
+        $in
+    } else {
+        $args | str join ' '
+    }
+
+    $text | str join ' ' | print $'(ansi $color)($in)(ansi reset)' 
+}
+
+def 'nu-complete colors' [] {
+    ansi --list | get name | each while {|it| if $it != 'reset' {$it} }
+}
+
+
 # An ordered list of cy commands
 export def 'help' [] {
     echo "
@@ -514,3 +532,4 @@ cy paste-tsv            Paste a table from clipboard
 cy tmp-pin-col          Upload values from a given column ('text' by default) to the local IPFS node and add a column w
 "
 }
+
