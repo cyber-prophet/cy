@@ -30,26 +30,22 @@ export-env {
     let-env cy = try {
         open ($path1)
     } catch {
-        'file "cy_config.json" was not found. Run "cy config"' | cprint -c green_italic
+        'file "cy_config.json" was not found. Run "cy config"' | cprint -c green_underline
     }
 }
 
 # Create config JSON to set env variables, to use them as parameters in cyber cli
 export def-env "config" [] {
-    "This wizzard will walk you through the setup of cy" | cprint -c green_italic
+    "This wizzard will walk you through the setup of cy." | cprint -c green_underline -a 2
+    "If you skip entering the value - the default will be used." | cprint
     let cy_home = ($env.HOME + '/cy/')
 
-    let _exec = (input 'Choose the name of cyber executable (cyber or pussy): ')
-    let _exec = (
-        if ($_exec | is-empty) {
-            'cyber was used' | cprint -c blue
-            'cyber'
-        } else {
-            $_exec
-        }
-    )
+    'Choose the name of executable (cyber or pussy). ' | cprint -a 0 -b 1
+    'Default: cyber' | cprint -c yellow_italic
 
-    echo "\nHere are the keys that you have:"
+    let _exec = if-empty (input) -a 'cyber'
+
+    "Here are the keys that you have:" | cprint -b 1
 
     let addr_table = (
         ^($_exec) keys list --output json 
@@ -58,19 +54,13 @@ export def-env "config" [] {
         | select name address
     )
 
-    echo $addr_table
-    echo ''
+    print $addr_table
+    
+    let def_address = ($addr_table | get address.0)
 
-    let address = (input 'Enter the address to send transactions from: ')
-    let address = (
-        if ($address | is-empty) {
-            let def_address = ($addr_table | get address.0)
-            $"($def_address) was used" | cprint -c blue
-            $def_address
-        } else {
-            $address
-        }
-    )
+    'Enter the address to send transactions from. ' | cprint -b 1 -a 0
+    $'Default: ($def_address)' | cprint -c yellow_italic
+    let address = if-empty (input) -a $def_address
 
     let chain_id = (if ($_exec == 'cyber') {
             'bostrom'
@@ -79,14 +69,10 @@ export def-env "config" [] {
         }
     )
 
-    let ipfs_storage = (input 'Select the ipfs service to use (kubo, cybernode, both): ')
-    let ipfs_storage = (if ($ipfs_storage | is-empty) {
-            'cybernode was used' | cprint -c blue
-            'cybernode'
-        } else {
-            $ipfs_storage
-        }
-    )
+    'Select the ipfs service to use (kubo, cybernode, both). ' | cprint -b 1 -a 0
+    'Default: cybernode' | cprint -c yellow_italic
+
+    let ipfs_storage = if-empty (input) -a 'cybernode'
 
     let temp_env = {
         'exec': $_exec
@@ -123,7 +109,7 @@ export def-env "config" [] {
         "from,to,address,timestamp,txhash" | save $env.cy.path.cyberlinks-csv-archive
     }
 
-    'config JSON was updated. You can find below what was written there.' | cprint -c green_italic
+    'config JSON was updated. You can find below what was written there.' | cprint -c green_underline
     
     echo $env.cy
 }
@@ -143,26 +129,30 @@ export def 'pin-text' [
         | into string # To coerce numbers into strings
     ) 
 
-    let cid = if (
-        ($env.cy.ipfs-storage == 'kubo') or ($env.cy.ipfs-storage == 'both')
-        ) {
-            echo $text
-            | ipfs add -Q 
-            | str replace '\n' ''
-        } 
-        
-    let cid = if (
-        ($env.cy.ipfs-storage == 'cybernode') or ($env.cy.ipfs-storage == 'both')
-        ) {
-            echo $text 
-            | curl --silent -X POST -F file=@- "https://io.cybernode.ai/add" 
-            | from json 
-            | get cid./
-        } else {
-            $cid
-        }
+    let cid = if (is-cid $text) {$text} else {
+        let cid = if (
+            ($env.cy.ipfs-storage == 'kubo') or ($env.cy.ipfs-storage == 'both')
+            ) {
+                $text
+                | ipfs add -Q 
+                | str replace '\n' ''
+            } 
+            
+        let cid = if (
+            ($env.cy.ipfs-storage == 'cybernode') or ($env.cy.ipfs-storage == 'both')
+            ) {
+                $text 
+                | curl --silent -X POST -F file=@- "https://io.cybernode.ai/add" 
+                | from json 
+                | get cid./
+            } else {
+                $cid
+            }
 
-    echo $cid
+        $cid
+    }
+
+    $cid
 }
 
 # Pin files from the current folder to the local node, output the cyberlinks table
@@ -216,8 +206,8 @@ export def 'link-texts' [
     let cid_to = (pin-text $text_to)
     
     let $out_table = (
-        [[from to 'from_text' 'to_text'];
-        [$cid_from $cid_to $text_from $text_to]]
+        [['from_text' 'to_text' from to];
+        [$text_from $text_to $cid_from $cid_to]]
     )
 
     if $dont_append_to_cyberlinks_temp_csv {
@@ -238,10 +228,8 @@ export def 'link-chuck' [
         "> " + (fetch https://api.chucknorris.io/jokes/random).value + 
         "\n\n" + "via [Chucknorris.io](https://chucknorris.io)"
     )
-    
-    echo "========" 
-    echo $quote 
-    echo "========\n"
+
+    $quote | cprint -f "="
 
     let cid_to = (pin-text $quote)
     
@@ -268,13 +256,21 @@ export def 'link-quote' [] {
 
     let quoteAuthor = (
         if $q1.quoteAuthor == '' {
-            'quote'
+            ""
         } else {
-            $q1.quoteAuthor
+            "\n>> " + $q1.quoteAuthor
         }
     )
 
-    link-texts $quoteAuthor $q1.quoteText | tmp-append
+    let quote = (
+        "> " + $q1.quoteText + 
+        $quoteAuthor +
+        "\n\n" + "via [forismatic.com](https://forismatic.com)"
+    )
+
+    $quote | cprint -f "="
+
+    link-texts "quote" $quote
 }
 
 #################################################
@@ -299,12 +295,6 @@ export def 'tmp-append' [
         | append $cyberlinks 
         | tmp-replace
     )
-
-    # if (not $dont_show_out_table)  {
-    #     echo "Current temp cyberlinks table:" 
-    #     tmp-view 
-    # }
-    
 }
 
 # Replace cyberlinks in the temp table
@@ -320,17 +310,20 @@ export def 'tmp-replace' [
     )
 
     if (not $dont_show_out_table)  {
-        tmp-view
+        tmp-view --title
     }
     
 }
 
 # View the temp cyberlinks table
-export def 'tmp-view' [] {
-    "Current temp cyberlinks table" | cprint -c green_italic
-    let t1 = open $env.cy.path.cyberlinks-csv-temp 
-    # if (($t1 | length) == 0) {[[from to from_text to_text];["" "" "" ""]]} 
-    $t1
+export def 'tmp-view' [
+    --title (-t) # show title
+] {
+    if ($title) {
+        "Current temp cyberlinks table:" | cprint -c green_underline
+    }
+
+    open $env.cy.path.cyberlinks-csv-temp 
 }
 
 # Empty the temp cyberlinks table
@@ -372,20 +365,6 @@ export def 'tmp-link-from' [
 
 #################################################
 
-def 'tx sign and broadcast' [] {
-    ( 
-        ^($env.cy.exec) tx sign $env.cy.path.tx-unsigned --from $env.cy.address  
-        --chain-id $env.cy.chain-id 
-        # --keyring-backend $env.cy.keyring-backend 
-        --output-document $env.cy.path.tx-signed 
-    )
-
-    (
-        ^($env.cy.exec) tx broadcast $env.cy.path.tx-signed --broadcast-mode block 
-        --output json
-    )
-}
-
 # Create a custom unsigned cyberlinks transaction
 def 'create tx json from temp cyberlinks' [] {
     let cyberlinks = (tmp-view | select from to)
@@ -409,6 +388,20 @@ def 'create tx json from temp cyberlinks' [] {
     | save $env.cy.path.tx-unsigned --force
 }
 
+def 'tx sign and broadcast' [] {
+    ( 
+        ^($env.cy.exec) tx sign $env.cy.path.tx-unsigned --from $env.cy.address  
+        --chain-id $env.cy.chain-id 
+        # --keyring-backend $env.cy.keyring-backend 
+        --output-document $env.cy.path.tx-signed 
+    )
+
+    (
+        ^($env.cy.exec) tx broadcast $env.cy.path.tx-signed --broadcast-mode block 
+        --output json
+    )
+}
+
 # Create a tx from the temp cyberlinks table, sign and broadcast it
 export def 'tx-send' [] {
     if not (is-connected) {
@@ -418,6 +411,7 @@ export def 'tx-send' [] {
     create tx json from temp cyberlinks
 
     let var0 = tx sign and broadcast
+    let cyberlinks_count = (tmp-view | length)
 
     let _var = ( 
         $var0 
@@ -426,9 +420,9 @@ export def 'tx-send' [] {
     )
     
     if $_var.code == 0 {
-        {'cy': 'cyberlinks should be successfully sent'} 
+        {'cy': $'($cyberlinks_count) cyberlinks should be successfully sent'} 
         | merge $_var 
-        | select code txhash
+        | select cy code txhash
 
         open $env.cy.path.cyberlinks-csv-archive 
         | append (
@@ -464,13 +458,10 @@ export def 'paste-tsv' [] {
 
 # Upload values from a given column ('text' by default) to the local IPFS node and add a column with the new CIDs.
 export def 'tmp-pin-col' [
-    cyberlinks?: table
     --column_with_text: string = 'text' # a column name to take values from to upload to IPFS. If is ommited, the default value is 'text'
     --column_to_write_cid: string = 'from' # a column name to write CIDs to. If this option is ommited, the default value is 'from'
 ] {
-    # let cyberlinks_in = $in
-    # let cyberlinks = if ($cyberlinks_in | is-empty) {$cyberlinks} else {$cyberlinks_in}
-    # echo $cyberlinks
+
 
     let new_text_col_name = ( $column_to_write_cid + "_text" )
 
@@ -489,20 +480,51 @@ export def 'tmp-pin-col' [
 def cprint [
     ...args
     --color (-c): string@'nu-complete colors' = 'default'
+    --frame (-f): any
+    --before (-b): int = 0
+    --after (-a): int = 1
 ] {
-    let text = if ($args == []) {
+    mut text = if ($args == []) {
         $in
     } else {
         $args | str join ' '
     }
 
-    $text | str join ' ' | print $'(ansi $color)($in)(ansi reset)' 
+    if $frame != null {
+        let width = (term size | get columns) - 2
+        $text = (
+            (" " | str rpad -l $width -c $frame) + "\n" +
+            (
+                $text 
+                # | split row "\n" 
+                # | each {
+                #     str replace '(^.)' '    $1'
+                # } | str collect "\n"
+            ) + "\n" +
+            (" " | str rpad -l $width -c $frame)
+        )
+    }
+    seq 1 $before | each {|i| print ""}
+    $text | print $'(ansi $color)($in)(ansi reset)' -n 
+    seq 1 $after | each {|i| print ""}
 }
 
 def 'nu-complete colors' [] {
     ansi --list | get name | each while {|it| if $it != 'reset' {$it} }
 }
 
+def 'if-empty' [
+    value?
+    --alternative (-a): any
+] {
+     (
+         if ($value | is-empty) {
+             $alternative
+         } else {
+             $value
+         }
+     )
+ }
 
 # An ordered list of cy commands
 export def 'help' [] {
