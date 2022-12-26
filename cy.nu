@@ -30,21 +30,22 @@ export-env {
     let-env cy = try {
         open ($path1)
     } catch {
-        'file "cy_config.json" was not found. Run "cy config"' | cprint -c green_italic
+        'file "cy_config.json" was not found. Run "cy config"' | cprint -c green_underline
     }
 }
 
 # Create config JSON to set env variables, to use them as parameters in cyber cli
 export def-env "config" [] {
-    "This wizzard will walk you through the setup of cy." | cprint -c green_italic
-    "If you skip entering the value - the default will be used." | cprint -c default
+    "This wizzard will walk you through the setup of cy." | cprint -c green_underline -a 2
+    "If you skip entering the value - the default will be used." | cprint
     let cy_home = ($env.HOME + '/cy/')
 
-    'Choose the name of executable (cyber or pussy). Default: cyber' | cprint -c purple_underline
+    'Choose the name of executable (cyber or pussy). ' | cprint -a 0 -b 1
+    'Default: cyber' | cprint -c yellow_italic
 
     let _exec = if-empty (input) -a 'cyber'
 
-    "\nHere are the keys that you have:" | cprint -c purple_underline
+    "Here are the keys that you have:" | cprint -b 1
 
     let addr_table = (
         ^($_exec) keys list --output json 
@@ -57,7 +58,8 @@ export def-env "config" [] {
     
     let def_address = ($addr_table | get address.0)
 
-    $'Enter the address to send transactions from. Default: ($def_address)' | cprint -c purple_underline
+    'Enter the address to send transactions from. ' | cprint -b 1 -a 0
+    $'Default: ($def_address)' | cprint -c yellow_italic
     let address = if-empty (input) -a $def_address
 
     let chain_id = (if ($_exec == 'cyber') {
@@ -67,7 +69,9 @@ export def-env "config" [] {
         }
     )
 
-    'Select the ipfs service to use (kubo, cybernode, both). Default: cybernode' | cprint -c purple_underline
+    'Select the ipfs service to use (kubo, cybernode, both). ' | cprint -b 1 -a 0
+    'Default: cybernode' | cprint -c yellow_italic
+
     let ipfs_storage = if-empty (input) -a 'cybernode'
 
     let temp_env = {
@@ -105,7 +109,7 @@ export def-env "config" [] {
         "from,to,address,timestamp,txhash" | save $env.cy.path.cyberlinks-csv-archive
     }
 
-    'config JSON was updated. You can find below what was written there.' | cprint -c green_italic
+    'config JSON was updated. You can find below what was written there.' | cprint -c green_underline
     
     echo $env.cy
 }
@@ -124,6 +128,8 @@ export def 'pin-text' [
         ) 
         | into string # To coerce numbers into strings
     ) 
+
+    # let cid = if (is-cid $text) {$text}
 
     let cid = if (
         ($env.cy.ipfs-storage == 'kubo') or ($env.cy.ipfs-storage == 'both')
@@ -220,9 +226,8 @@ export def 'link-chuck' [
         "> " + (fetch https://api.chucknorris.io/jokes/random).value + 
         "\n\n" + "via [Chucknorris.io](https://chucknorris.io)"
     )
-    # "========" | cprint -c purple_underline
-    $quote | cprint -c purple_underline -f "="
-    # "========\n" | cprint -c purple_underline
+
+    $quote | cprint -f "="
 
     let cid_to = (pin-text $quote)
     
@@ -261,7 +266,7 @@ export def 'link-quote' [] {
         "\n\n" + "via [forismatic.com](https://forismatic.com)"
     )
 
-    $quote | cprint -c purple_underline -f "="
+    $quote | cprint -f "="
 
     link-texts "quote" $quote
 }
@@ -288,12 +293,6 @@ export def 'tmp-append' [
         | append $cyberlinks 
         | tmp-replace
     )
-
-    # if (not $dont_show_out_table)  {
-    #     echo "Current temp cyberlinks table:" 
-    #     tmp-view 
-    # }
-    
 }
 
 # Replace cyberlinks in the temp table
@@ -319,7 +318,7 @@ export def 'tmp-view' [
     --title (-t) # show title
 ] {
     if ($title) {
-        "Current temp cyberlinks table:" | cprint -c green_italic
+        "Current temp cyberlinks table:" | cprint -c green_underline
     }
 
     open $env.cy.path.cyberlinks-csv-temp 
@@ -479,31 +478,32 @@ def cprint [
     ...args
     --color (-c): string@'nu-complete colors' = 'default'
     --frame (-f): any
-    # --fsymbol (-s) = "="
+    --before (-b): int = 0
+    --after (-a): int = 1
 ] {
     mut text = if ($args == []) {
         $in
     } else {
         $args | str join ' '
     }
-    # echo $frame
+
     if $frame != null {
         let width = (term size | get columns) - 2
         $text = (
             (" " | str rpad -l $width -c $frame) + "\n" +
-            ($text | str replace '(^.)' '    $1') + "\n" +
+            (
+                $text 
+                | split row "\n" 
+                | each {
+                    str replace '(^.)' '    $1'
+                } | str collect "\n"
+            ) + "\n" +
             (" " | str rpad -l $width -c $frame)
         )
-
-    } 
-
-    $text | print $'(ansi $color)($in)(ansi reset)' 
-    
-    # if $frame != null {
-    #     let width = (term size | get columns) - 2
-    #     print (" " | str rpad -l $width -c $frame)
-    # } 
-
+    }
+    seq 1 $before | each {|i| print ""}
+    $text | print $'(ansi $color)($in)(ansi reset)' -n 
+    seq 1 $after | each {|i| print ""}
 }
 
 def 'nu-complete colors' [] {
@@ -522,15 +522,6 @@ def 'if-empty' [
          }
      )
  }
-    # (
-    #     if ($address | is-empty) {
-    #         $def_address
-    #     } else {
-    #         $address
-    #     }
-    # )
-# }
-
 
 # An ordered list of cy commands
 export def 'help' [] {
