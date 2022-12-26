@@ -220,10 +220,9 @@ export def 'link-chuck' [
         "> " + (fetch https://api.chucknorris.io/jokes/random).value + 
         "\n\n" + "via [Chucknorris.io](https://chucknorris.io)"
     )
-    
-    "========" | cprint -c purple_underline
-    $quote | cprint -c purple_underline
-    "========\n" | cprint -c purple_underline
+    # "========" | cprint -c purple_underline
+    $quote | cprint -c purple_underline -f "="
+    # "========\n" | cprint -c purple_underline
 
     let cid_to = (pin-text $quote)
     
@@ -250,13 +249,21 @@ export def 'link-quote' [] {
 
     let quoteAuthor = (
         if $q1.quoteAuthor == '' {
-            'quote'
+            ""
         } else {
-            $q1.quoteAuthor
+            "\n>> " + $q1.quoteAuthor
         }
     )
 
-    link-texts $quoteAuthor $q1.quoteText | tmp-append
+    let quote = (
+        "> " + $q1.quoteText + 
+        $quoteAuthor +
+        "\n\n" + "via [forismatic.com](https://forismatic.com)"
+    )
+
+    $quote | cprint -c purple_underline -f "="
+
+    link-texts "quote" $quote
 }
 
 #################################################
@@ -471,14 +478,32 @@ export def 'tmp-pin-col' [
 def cprint [
     ...args
     --color (-c): string@'nu-complete colors' = 'default'
+    --frame (-f): any
+    # --fsymbol (-s) = "="
 ] {
-    let text = if ($args == []) {
+    mut text = if ($args == []) {
         $in
     } else {
         $args | str join ' '
     }
+    # echo $frame
+    if $frame != null {
+        let width = (term size | get columns) - 2
+        $text = (
+            (" " | str rpad -l $width -c $frame) + "\n" +
+            ($text | str replace '(^.)' '    $1') + "\n" +
+            (" " | str rpad -l $width -c $frame)
+        )
 
-    $text | str join ' ' | print $'(ansi $color)($in)(ansi reset)' 
+    } 
+
+    $text | print $'(ansi $color)($in)(ansi reset)' 
+    
+    # if $frame != null {
+    #     let width = (term size | get columns) - 2
+    #     print (" " | str rpad -l $width -c $frame)
+    # } 
+
 }
 
 def 'nu-complete colors' [] {
