@@ -42,14 +42,7 @@ export def-env "config" [] {
 
     'Choose the name of executable (cyber or pussy). Default: cyber' | cprint -c purple_underline
 
-    let _exec = (input)
-    let _exec = (
-        if ($_exec | is-empty) {
-            'cyber'
-        } else {
-            $_exec
-        }
-    )
+    let _exec = if-empty (input) -a 'cyber'
 
     "\nHere are the keys that you have:" | cprint -c purple_underline
 
@@ -65,14 +58,7 @@ export def-env "config" [] {
     let def_address = ($addr_table | get address.0)
 
     $'Enter the address to send transactions from. Default: ($def_address)' | cprint -c purple_underline
-    let address = (input)
-    let address = (
-        if ($address | is-empty) {
-            $def_address
-        } else {
-            $address
-        }
-    )
+    let address = if-empty (input) -a $def_address
 
     let chain_id = (if ($_exec == 'cyber') {
             'bostrom'
@@ -82,13 +68,7 @@ export def-env "config" [] {
     )
 
     'Select the ipfs service to use (kubo, cybernode, both). Default: cybernode' | cprint -c purple_underline
-    let ipfs_storage = (input)
-    let ipfs_storage = (if ($ipfs_storage | is-empty) {
-            'cybernode'
-        } else {
-            $ipfs_storage
-        }
-    )
+    let ipfs_storage = if-empty (input) -a 'cybernode'
 
     let temp_env = {
         'exec': $_exec
@@ -504,6 +484,27 @@ def cprint [
 def 'nu-complete colors' [] {
     ansi --list | get name | each while {|it| if $it != 'reset' {$it} }
 }
+
+def 'if-empty' [
+    value?
+    --alternative (-a): any
+] {
+     (
+         if ($value | is-empty) {
+             $alternative
+         } else {
+             $value
+         }
+     )
+ }
+    # (
+    #     if ($address | is-empty) {
+    #         $def_address
+    #     } else {
+    #         $address
+    #     }
+    # )
+# }
 
 
 # An ordered list of cy commands
