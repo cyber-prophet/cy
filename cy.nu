@@ -129,26 +129,28 @@ export def 'pin-text' [
         | into string # To coerce numbers into strings
     ) 
 
-    # let cid = if (is-cid $text) {$text}
+    let cid = if (is-cid $text) {$text} else {
+        let cid = if (
+            ($env.cy.ipfs-storage == 'kubo') or ($env.cy.ipfs-storage == 'both')
+            ) {
+                $text
+                | ipfs add -Q 
+                | str replace '\n' ''
+            } 
+            
+        let cid = if (
+            ($env.cy.ipfs-storage == 'cybernode') or ($env.cy.ipfs-storage == 'both')
+            ) {
+                $text 
+                | curl --silent -X POST -F file=@- "https://io.cybernode.ai/add" 
+                | from json 
+                | get cid./
+            } else {
+                $cid
+            }
 
-    let cid = if (
-        ($env.cy.ipfs-storage == 'kubo') or ($env.cy.ipfs-storage == 'both')
-        ) {
-            $text
-            | ipfs add -Q 
-            | str replace '\n' ''
-        } 
-        
-    let cid = if (
-        ($env.cy.ipfs-storage == 'cybernode') or ($env.cy.ipfs-storage == 'both')
-        ) {
-            $text 
-            | curl --silent -X POST -F file=@- "https://io.cybernode.ai/add" 
-            | from json 
-            | get cid./
-        } else {
-            $cid
-        }
+        $cid
+    }
 
     $cid
 }
@@ -204,8 +206,8 @@ export def 'link-texts' [
     let cid_to = (pin-text $text_to)
     
     let $out_table = (
-        [[from to 'from_text' 'to_text'];
-        [$cid_from $cid_to $text_from $text_to]]
+        [['from_text' 'to_text' from to];
+        [$text_from $text_to $cid_from $cid_to]]
     )
 
     if $dont_append_to_cyberlinks_temp_csv {
@@ -409,6 +411,7 @@ export def 'tx-send' [] {
     create tx json from temp cyberlinks
 
     let var0 = tx sign and broadcast
+    let cyberlinks_count = (tmp-view | length)
 
     let _var = ( 
         $var0 
@@ -417,9 +420,9 @@ export def 'tx-send' [] {
     )
     
     if $_var.code == 0 {
-        {'cy': 'cyberlinks should be successfully sent'} 
+        {'cy': $'($cyberlinks_count) cyberlinks should be successfully sent'} 
         | merge $_var 
-        | select code txhash
+        | select cy code txhash
 
         open $env.cy.path.cyberlinks-csv-archive 
         | append (
@@ -493,10 +496,10 @@ def cprint [
             (" " | str rpad -l $width -c $frame) + "\n" +
             (
                 $text 
-                | split row "\n" 
-                | each {
-                    str replace '(^.)' '    $1'
-                } | str collect "\n"
+                # | split row "\n" 
+                # | each {
+                #     str replace '(^.)' '    $1'
+                # } | str collect "\n"
             ) + "\n" +
             (" " | str rpad -l $width -c $frame)
         )
