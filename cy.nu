@@ -36,20 +36,22 @@ export-env {
 
 # Create config JSON to set env variables, to use them as parameters in cyber cli
 export def-env "config" [] {
-    "This wizzard will walk you through the setup of cy" | cprint -c green_italic
+    "This wizzard will walk you through the setup of cy." | cprint -c green_italic
+    "If you skip entering the value - the default will be used." | cprint -c default
     let cy_home = ($env.HOME + '/cy/')
 
-    let _exec = (input 'Choose the name of cyber executable (cyber or pussy): ')
+    'Choose the name of executable (cyber or pussy). Default: cyber' | cprint -c purple_underline
+
+    let _exec = (input)
     let _exec = (
         if ($_exec | is-empty) {
-            'cyber was used' | cprint -c blue
             'cyber'
         } else {
             $_exec
         }
     )
 
-    echo "\nHere are the keys that you have:"
+    "\nHere are the keys that you have:" | cprint -c purple_underline
 
     let addr_table = (
         ^($_exec) keys list --output json 
@@ -58,14 +60,14 @@ export def-env "config" [] {
         | select name address
     )
 
-    echo $addr_table
-    echo ''
+    print $addr_table
+    
+    let def_address = ($addr_table | get address.0)
 
-    let address = (input 'Enter the address to send transactions from: ')
+    $'Enter the address to send transactions from. Default: ($def_address)' | cprint -c purple_underline
+    let address = (input)
     let address = (
         if ($address | is-empty) {
-            let def_address = ($addr_table | get address.0)
-            $"($def_address) was used" | cprint -c blue
             $def_address
         } else {
             $address
@@ -79,9 +81,9 @@ export def-env "config" [] {
         }
     )
 
-    let ipfs_storage = (input 'Select the ipfs service to use (kubo, cybernode, both): ')
+    'Select the ipfs service to use (kubo, cybernode, both). Default: cybernode' | cprint -c purple_underline
+    let ipfs_storage = (input)
     let ipfs_storage = (if ($ipfs_storage | is-empty) {
-            'cybernode was used' | cprint -c blue
             'cybernode'
         } else {
             $ipfs_storage
@@ -146,7 +148,7 @@ export def 'pin-text' [
     let cid = if (
         ($env.cy.ipfs-storage == 'kubo') or ($env.cy.ipfs-storage == 'both')
         ) {
-            echo $text
+            $text
             | ipfs add -Q 
             | str replace '\n' ''
         } 
@@ -154,7 +156,7 @@ export def 'pin-text' [
     let cid = if (
         ($env.cy.ipfs-storage == 'cybernode') or ($env.cy.ipfs-storage == 'both')
         ) {
-            echo $text 
+            $text 
             | curl --silent -X POST -F file=@- "https://io.cybernode.ai/add" 
             | from json 
             | get cid./
@@ -162,7 +164,7 @@ export def 'pin-text' [
             $cid
         }
 
-    echo $cid
+    $cid
 }
 
 # Pin files from the current folder to the local node, output the cyberlinks table
@@ -239,9 +241,9 @@ export def 'link-chuck' [
         "\n\n" + "via [Chucknorris.io](https://chucknorris.io)"
     )
     
-    echo "========" 
-    echo $quote 
-    echo "========\n"
+    "========" | cprint -c purple_underline
+    $quote | cprint -c purple_underline
+    "========\n" | cprint -c purple_underline
 
     let cid_to = (pin-text $quote)
     
@@ -320,17 +322,20 @@ export def 'tmp-replace' [
     )
 
     if (not $dont_show_out_table)  {
-        tmp-view
+        tmp-view --title
     }
     
 }
 
 # View the temp cyberlinks table
-export def 'tmp-view' [] {
-    "Current temp cyberlinks table" | cprint -c green_italic
-    let t1 = open $env.cy.path.cyberlinks-csv-temp 
-    # if (($t1 | length) == 0) {[[from to from_text to_text];["" "" "" ""]]} 
-    $t1
+export def 'tmp-view' [
+    --title (-t) # show title
+] {
+    if ($title) {
+        "Current temp cyberlinks table:" | cprint -c green_italic
+    }
+
+    open $env.cy.path.cyberlinks-csv-temp 
 }
 
 # Empty the temp cyberlinks table
@@ -372,20 +377,6 @@ export def 'tmp-link-from' [
 
 #################################################
 
-def 'tx sign and broadcast' [] {
-    ( 
-        ^($env.cy.exec) tx sign $env.cy.path.tx-unsigned --from $env.cy.address  
-        --chain-id $env.cy.chain-id 
-        # --keyring-backend $env.cy.keyring-backend 
-        --output-document $env.cy.path.tx-signed 
-    )
-
-    (
-        ^($env.cy.exec) tx broadcast $env.cy.path.tx-signed --broadcast-mode block 
-        --output json
-    )
-}
-
 # Create a custom unsigned cyberlinks transaction
 def 'create tx json from temp cyberlinks' [] {
     let cyberlinks = (tmp-view | select from to)
@@ -407,6 +398,20 @@ def 'create tx json from temp cyberlinks' [] {
     | upsert body.messages.neuron $neuron 
     | upsert body.messages.links $cyberlinks 
     | save $env.cy.path.tx-unsigned --force
+}
+
+def 'tx sign and broadcast' [] {
+    ( 
+        ^($env.cy.exec) tx sign $env.cy.path.tx-unsigned --from $env.cy.address  
+        --chain-id $env.cy.chain-id 
+        # --keyring-backend $env.cy.keyring-backend 
+        --output-document $env.cy.path.tx-signed 
+    )
+
+    (
+        ^($env.cy.exec) tx broadcast $env.cy.path.tx-signed --broadcast-mode block 
+        --output json
+    )
 }
 
 # Create a tx from the temp cyberlinks table, sign and broadcast it
@@ -464,13 +469,10 @@ export def 'paste-tsv' [] {
 
 # Upload values from a given column ('text' by default) to the local IPFS node and add a column with the new CIDs.
 export def 'tmp-pin-col' [
-    cyberlinks?: table
     --column_with_text: string = 'text' # a column name to take values from to upload to IPFS. If is ommited, the default value is 'text'
     --column_to_write_cid: string = 'from' # a column name to write CIDs to. If this option is ommited, the default value is 'from'
 ] {
-    # let cyberlinks_in = $in
-    # let cyberlinks = if ($cyberlinks_in | is-empty) {$cyberlinks} else {$cyberlinks_in}
-    # echo $cyberlinks
+
 
     let new_text_col_name = ( $column_to_write_cid + "_text" )
 
