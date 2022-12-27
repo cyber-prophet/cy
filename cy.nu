@@ -363,6 +363,24 @@ export def 'tmp-link-from' [
     | tmp-replace
 }
 
+# Upload values from a given column ('text' by default) to the local IPFS node and add a column with the new CIDs.
+export def 'tmp-pin-col' [
+    --column_with_text: string = 'text' # a column name to take values from to upload to IPFS. If is ommited, the default value is 'text'
+    --column_to_write_cid: string = 'from' # a column name to write CIDs to. If this option is ommited, the default value is 'from'
+] {
+
+
+    let new_text_col_name = ( $column_to_write_cid + '_text' )
+
+    tmp-view 
+    | upsert $column_to_write_cid {
+        |it| $it | get $column_with_text | pin-text 
+        }
+    | rename -c [$column_with_text $new_text_col_name]
+    | tmp-replace
+
+}
+
 #################################################
 
 # Create a custom unsigned cyberlinks transaction
@@ -441,7 +459,7 @@ export def 'tx-send' [] {
 #################################################
 
 # Copy a table from the pipe into clipboard (in tsv format)
-export def 'copy-tsv' [] {
+export def 'tsv-copy' [] {
     let _table = $in
     echo $_table
 
@@ -449,29 +467,21 @@ export def 'copy-tsv' [] {
 }
 
 # Paste a table from clipboard
-export def 'paste-tsv' [] {
+export def 'tsv-paste' [] {
     pbpaste | from tsv
 }
 
 #################################################
 
-
-# Upload values from a given column ('text' by default) to the local IPFS node and add a column with the new CIDs.
-export def 'tmp-pin-col' [
-    --column_with_text: string = 'text' # a column name to take values from to upload to IPFS. If is ommited, the default value is 'text'
-    --column_to_write_cid: string = 'from' # a column name to write CIDs to. If this option is ommited, the default value is 'from'
-] {
-
-
-    let new_text_col_name = ( $column_to_write_cid + '_text' )
-
-    tmp-view 
-    | upsert $column_to_write_cid {
-        |it| $it | get $column_with_text | pin-text 
-        }
-    | rename -c [$column_with_text $new_text_col_name]
-    | tmp-replace
-
+# An ordered list of cy commands
+export def 'help' [] {
+    (
+        view-source cy 
+        | parse -r "([\r\n](# )(?<desc>.*?)(?:=?\r|\n)export (def|def.env) '(?<command>.*)')"
+        | select command desc 
+        | upsert command {|row index| ('cy ' + $row.command)}
+        | table --width (term size).columns
+    )
 }
 
 #################################################
@@ -480,7 +490,7 @@ export def 'tmp-pin-col' [
 def cprint [
     ...args
     --color (-c): string@'nu-complete colors' = 'default'
-    --frame (-f): any
+    --frame (-f): string
     --before (-b): int = 0
     --after (-a): int = 1
 ] {
@@ -525,14 +535,3 @@ def 'if-empty' [
          }
      )
  }
-
-# An ordered list of cy commands
-export def 'help' [] {
-    (
-        view-source cy 
-        | parse -r "([\r\n](# )(?<desc>.*?)(?:=?\r|\n)export (def|def.env) '(?<command>.*)')"
-        | select command desc 
-        | upsert command {|row index| ('cy ' + $row.command)}
-        | table --width (term size).columns
-    )
-}
