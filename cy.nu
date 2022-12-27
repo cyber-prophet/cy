@@ -396,6 +396,9 @@ def 'tx sign and broadcast' [] {
         --chain-id $env.cy.chain-id 
         # --keyring-backend $env.cy.keyring-backend 
         --output-document $env.cy.path.tx-signed 
+
+        | complete 
+        | if ($in.exit_code != 0) {error make {msg: 'Error of signing the transaction!'}}
     )
 
     (
@@ -422,7 +425,7 @@ export def 'tx-send' [] {
     )
     
     if $_var.code == 0 {
-        {'cy': $'($cyberlinks_count) cyberlinks should be successfully sent'} 
+        {'cy': $'($cyberlinks_count) cyberlink(s) should be successfully sent'} 
         | merge $_var 
         | select cy code txhash
 
