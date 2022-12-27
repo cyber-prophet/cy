@@ -1,8 +1,11 @@
 # Cy - the nushell wrapper, interface to cyber family blockchains CLIs (Bostrom, Pussy)
 # Git: https://github.com/cyber-prophet/cy
-# 
+#
+# Install/update to the latest version
+# > mkdir ~/cy | fetch https://raw.githubusercontent.com/cyber-prophet/cy/main/cy.nu | save ~/cy/cy.nu -f
+#
 # Use:
-# > overlay use ~/apps-files/github/cy/cy.nu as cy -p
+# > overlay use ~/cy/cy.nu as cy -p
 
 export-env { 
     banner
