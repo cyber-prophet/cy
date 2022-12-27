@@ -138,7 +138,7 @@ export def 'pin-text' [
 # Pin files from the current folder to the local node, output the cyberlinks table
 export def 'pin-files' [
     ...files: string                # filenames to add into the local ipfs node
-    --cyberlink_filenames_to_their_files
+    --cyberlink_filenames_to_their_files (-n)
     --dont_append_to_cyberlinks_temp_csv (-d)
 ] {
     let files = (
@@ -205,11 +205,11 @@ export def 'link-chuck' [
     let cid_from = 'QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1'
     
     let quote = (
-        '> ' + (fetch https://api.chucknorris.io/jokes/random).value + 
-        '\n\n' + 'via [Chucknorris.io](https://chucknorris.io)'
+        "> " + (fetch https://api.chucknorris.io/jokes/random).value + 
+        "\n\n" + "via [Chucknorris.io](https://chucknorris.io)"
     )
 
-    $quote | cprint -f '='
+    $quote | cprint -f "="
 
     let cid_to = (pin-text $quote)
     
@@ -230,27 +230,28 @@ export def 'link-chuck' [
 export def 'link-quote' [] {
     let q1 = (
         fetch -r https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=json 
-        | str replace '\\\\' '' 
+        | str replace "\\\\" "" 
         | from json
     )
 
     let quoteAuthor = (
-        if $q1.quoteAuthor == '' {
-            ''
+        if $q1.quoteAuthor == "" {
+            ""
         } else {
-            '\n>> ' + $q1.quoteAuthor
+            "\n>> " + $q1.quoteAuthor
         }
     )
 
     let quote = (
-        '> ' + $q1.quoteText + 
+        "> " + $q1.quoteText + 
         $quoteAuthor +
-        '\n\n' + 'via [forismatic.com](https://forismatic.com)'
+        "\n\n" + "via [forismatic.com](https://forismatic.com)"
     )
 
     $quote | cprint -f '='
 
     link-texts 'quote' $quote
+    # link-texts 'QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna' $quote
 }
 
 #################################################
@@ -323,7 +324,7 @@ export def 'tmp-clear' [] {
 
 #################################################
 
-# Add a text particle into 'to' column of the temp cyberlinks table
+# Add a text particle into the 'to' column of the temp cyberlinks table
 export def 'tmp-link-to' [
     text: string  # a text to upload to ipfs
 ] {
@@ -503,20 +504,20 @@ def cprint [
     if $frame != null {
         let width = (term size | get columns) - 2
         $text = (
-            (' ' | str rpad -l $width -c $frame) + '\n' +
+            (" " | str rpad -l $width -c $frame) + "\n" +
             (
                 $text 
-                # | split row '\n' 
+                # | split row "\n" 
                 # | each {
-                #     str replace '(^.)' '    $1'
-                # } | str collect '\n'
-            ) + '\n' +
-            (' ' | str rpad -l $width -c $frame)
+                #     str replace "(^.)" "    $1"
+                # } | str collect "\n"
+            ) + "\n" +
+            (" " | str rpad -l $width -c $frame)
         )
     }
-    seq 1 $before | each {|i| print ''}
-    $text | print $'(ansi $color)($in)(ansi reset)' -n 
-    seq 1 $after | each {|i| print ''}
+    seq 1 $before | each {|i| print ""}
+    $text | print $"(ansi $color)($in)(ansi reset)" -n 
+    seq 1 $after | each {|i| print ""}
 }
 
 def 'nu-complete colors' [] {
