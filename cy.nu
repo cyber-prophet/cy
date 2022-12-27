@@ -35,9 +35,9 @@ export-env {
 }
 
 # Create config JSON to set env variables, to use them as parameters in cyber cli
-export def-env "config" [] {
-    "This wizzard will walk you through the setup of cy." | cprint -c green_underline -a 2
-    "If you skip entering the value - the default will be used." | cprint
+export def-env 'config' [] {
+    'This wizzard will walk you through the setup of cy.' | cprint -c green_underline -a 2
+    'If you skip entering the value - the default will be used.' | cprint
     let cy_home = ($env.HOME + '/cy/')
 
     'Choose the name of executable (cyber or pussy). ' | cprint -a 0 -b 1
@@ -45,7 +45,7 @@ export def-env "config" [] {
 
     let _exec = if-empty (input) -a 'cyber'
 
-    "Here are the keys that you have:" | cprint -b 1
+    'Here are the keys that you have:' | cprint -b 1
 
     let addr_table = (
         ^($_exec) keys list --output json 
@@ -100,13 +100,13 @@ export def-env "config" [] {
     if (
         not ($env.cy.path.cyberlinks-csv-temp | path exists)
     ) {
-        "from,to" | save $env.cy.path.cyberlinks-csv-temp
+        'from,to' | save $env.cy.path.cyberlinks-csv-temp
     }
 
     if (
         not ($env.cy.path.cyberlinks-csv-archive | path exists)
     ) {
-        "from,to,address,timestamp,txhash" | save $env.cy.path.cyberlinks-csv-archive
+        'from,to,address,timestamp,txhash' | save $env.cy.path.cyberlinks-csv-archive
     }
 
     'config JSON was updated. You can find below what was written there.' | cprint -c green_underline
@@ -142,7 +142,7 @@ export def 'pin-text' [
             ($env.cy.ipfs-storage == 'cybernode') or ($env.cy.ipfs-storage == 'both')
             ) {
                 $text 
-                | curl --silent -X POST -F file=@- "https://io.cybernode.ai/add" 
+                | curl --silent -X POST -F file=@- 'https://io.cybernode.ai/add' 
                 | from json 
                 | get cid./
             } else {
@@ -225,11 +225,11 @@ export def 'link-chuck' [
     let cid_from = 'QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1'
     
     let quote = (
-        "> " + (fetch https://api.chucknorris.io/jokes/random).value + 
-        "\n\n" + "via [Chucknorris.io](https://chucknorris.io)"
+        '> ' + (fetch https://api.chucknorris.io/jokes/random).value + 
+        '\n\n' + 'via [Chucknorris.io](https://chucknorris.io)'
     )
 
-    $quote | cprint -f "="
+    $quote | cprint -f '='
 
     let cid_to = (pin-text $quote)
     
@@ -250,27 +250,27 @@ export def 'link-chuck' [
 export def 'link-quote' [] {
     let q1 = (
         fetch -r https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=json 
-        | str replace "\\\\" "" 
+        | str replace '\\\\' '' 
         | from json
     )
 
     let quoteAuthor = (
         if $q1.quoteAuthor == '' {
-            ""
+            ''
         } else {
-            "\n>> " + $q1.quoteAuthor
+            '\n>> ' + $q1.quoteAuthor
         }
     )
 
     let quote = (
-        "> " + $q1.quoteText + 
+        '> ' + $q1.quoteText + 
         $quoteAuthor +
-        "\n\n" + "via [forismatic.com](https://forismatic.com)"
+        '\n\n' + 'via [forismatic.com](https://forismatic.com)'
     )
 
-    $quote | cprint -f "="
+    $quote | cprint -f '='
 
-    link-texts "quote" $quote
+    link-texts 'quote' $quote
 }
 
 #################################################
@@ -320,7 +320,7 @@ export def 'tmp-view' [
     --title (-t) # show title
 ] {
     if ($title) {
-        "Current temp cyberlinks table:" | cprint -c green_underline
+        'Current temp cyberlinks table:' | cprint -c green_underline
     }
 
     open $env.cy.path.cyberlinks-csv-temp 
@@ -405,7 +405,7 @@ def 'tx sign and broadcast' [] {
 # Create a tx from the temp cyberlinks table, sign and broadcast it
 export def 'tx-send' [] {
     if not (is-connected) {
-        error make {msg: "there is no internet!"}
+        error make {msg: 'there is no internet!'}
     }
 
     create tx json from temp cyberlinks
@@ -463,7 +463,7 @@ export def 'tmp-pin-col' [
 ] {
 
 
-    let new_text_col_name = ( $column_to_write_cid + "_text" )
+    let new_text_col_name = ( $column_to_write_cid + '_text' )
 
     tmp-view 
     | upsert $column_to_write_cid {
@@ -493,20 +493,20 @@ def cprint [
     if $frame != null {
         let width = (term size | get columns) - 2
         $text = (
-            (" " | str rpad -l $width -c $frame) + "\n" +
+            (' ' | str rpad -l $width -c $frame) + '\n' +
             (
                 $text 
-                # | split row "\n" 
+                # | split row '\n' 
                 # | each {
                 #     str replace '(^.)' '    $1'
-                # } | str collect "\n"
-            ) + "\n" +
-            (" " | str rpad -l $width -c $frame)
+                # } | str collect '\n'
+            ) + '\n' +
+            (' ' | str rpad -l $width -c $frame)
         )
     }
-    seq 1 $before | each {|i| print ""}
+    seq 1 $before | each {|i| print ''}
     $text | print $'(ansi $color)($in)(ansi reset)' -n 
-    seq 1 $after | each {|i| print ""}
+    seq 1 $after | each {|i| print ''}
 }
 
 def 'nu-complete colors' [] {
@@ -528,30 +528,11 @@ def 'if-empty' [
 
 # An ordered list of cy commands
 export def 'help' [] {
-    echo "
-cy config               Create config JSON to set env variables, to use them as parameters in cyber cli
-
-cy pin-text             Pin a text particle 
-cy pin-files            Pin files from the current folder to the local node, output the cyberlinks table
-
-cy link-texts           Add a 2-texts cyberlink to the temp table
-cy link-chuck           Add a random chuck norris cyberlink to the temp table
-cy link-quote           Add a random quote cyberlink to the temp table
-
-cy tmp-append           Append cyberlinks to the temp table
-cy tmp-replace          Replace cyberlinks in the temp table
-cy tmp-view             View the temp cyberlinks table
-cy tmp-clear            Empty the temp cyberlinks table
-
-cy tmp-link-to          Add a text particle into 'to' column of the temp cyberlinks table
-cy tmp-link-from        Add a text particle into the 'from' column of the temp cyberlinks table
-
-cy tx-send              Create a tx from the temp cyberlinks table, sign and broadcast it
-
-cy copy-tsv             Copy a table from the pipe into clipboard (in tsv format)
-cy paste-tsv            Paste a table from clipboard
-
-cy tmp-pin-col          Upload values from a given column ('text' by default) to the local IPFS node and add a column w
-"
+    (
+        view-source cy 
+        | parse -r "([\r\n](# )(?<desc>.*?)(?:=?\r|\n)export (def|def.env) '(?<command>.*)')"
+        | select command desc 
+        | upsert command {|row index| ('cy ' + $row.command)}
+        | table --width (term size).columns
+    )
 }
-
