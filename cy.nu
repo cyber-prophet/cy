@@ -4,26 +4,6 @@
 # Use:
 # > overlay use ~/apps-files/github/cy/cy.nu as cy -p
 
-def 'banner' [] {
-    echo "
-     ____ _   _    
-    / ___) | | |   
-   ( (___| |_| |   
-    \\____)\\__  |   cy nushell module is loaded
-         (____/    have fun"
-}
-
-
-def parse-ipfs-table [] {parse -r '(?<status>\w+) (?<to>Qm\w{44}) (?<filename>.+)'}
-
-def is-cid [particle: string] {
-    ($particle =~ '^Qm\w{44}$') 
-}
-
-def is-connected []  {
-    (do -i {fetch https://www.iana.org} | describe) == 'raw input'
-}
-
 export-env { 
     banner
     let path1 = $env.HOME + '/cy/cy_config.json'
@@ -363,7 +343,7 @@ export def 'tmp-link-from' [
     | tmp-replace
 }
 
-# Upload values from a given column ('text' by default) to the local IPFS node and add a column with the new CIDs.
+# Pin values from a given column to IPFS node and add a column with their CIDs
 export def 'tmp-pin-col' [
     --column_with_text: string = 'text' # a column name to take values from to upload to IPFS. If is ommited, the default value is 'text'
     --column_to_write_cid: string = 'from' # a column name to write CIDs to. If this option is ommited, the default value is 'from'
@@ -485,6 +465,26 @@ export def 'help' [] {
 }
 
 #################################################
+
+def 'banner' [] {
+    echo "
+     ____ _   _    
+    / ___) | | |   
+   ( (___| |_| |   
+    \\____)\\__  |   cy nushell module is loaded
+         (____/    have fun"
+}
+
+
+def parse-ipfs-table [] {parse -r '(?<status>\w+) (?<to>Qm\w{44}) (?<filename>.+)'}
+
+def is-cid [particle: string] {
+    ($particle =~ '^Qm\w{44}$') 
+}
+
+def is-connected []  {
+    (do -i {fetch https://www.iana.org} | describe) == 'raw input'
+}
 
 # Print string colourfully
 def cprint [
