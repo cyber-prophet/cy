@@ -1,28 +1,11 @@
 # Cy - the nushell wrapper, interface to cyber family blockchains CLIs (Bostrom, Pussy)
 # Git: https://github.com/cyber-prophet/cy
-# 
+#
+# Install/update to the latest version
+# > mkdir ~/cy | fetch https://raw.githubusercontent.com/cyber-prophet/cy/main/cy.nu | save ~/cy/cy.nu -f
+#
 # Use:
-# > overlay use ~/apps-files/github/cy/cy.nu as cy -p
-
-def 'banner' [] {
-    echo "
-     ____ _   _    
-    / ___) | | |   
-   ( (___| |_| |   
-    \\____)\\__  |   cy nushell module is loaded
-         (____/    have fun"
-}
-
-
-def parse-ipfs-table [] {parse -r '(?<status>\w+) (?<to>Qm\w{44}) (?<filename>.+)'}
-
-def is-cid [particle: string] {
-    ($particle =~ '^Qm\w{44}$') 
-}
-
-def is-connected []  {
-    (do -i {fetch https://www.iana.org} | describe) == 'raw input'
-}
+# > overlay use ~/cy/cy.nu as cy -p
 
 export-env { 
     banner
@@ -158,7 +141,7 @@ export def 'pin-text' [
 # Pin files from the current folder to the local node, output the cyberlinks table
 export def 'pin-files' [
     ...files: string                # filenames to add into the local ipfs node
-    --cyberlink_filenames_to_their_files
+    --cyberlink_filenames_to_their_files (-n)
     --dont_append_to_cyberlinks_temp_csv (-d)
 ] {
     let files = (
@@ -225,11 +208,11 @@ export def 'link-chuck' [
     let cid_from = 'QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1'
     
     let quote = (
-        '> ' + (fetch https://api.chucknorris.io/jokes/random).value + 
-        '\n\n' + 'via [Chucknorris.io](https://chucknorris.io)'
+        "> " + (fetch https://api.chucknorris.io/jokes/random).value + 
+        "\n\n" + "via [Chucknorris.io](https://chucknorris.io)"
     )
 
-    $quote | cprint -f '='
+    $quote | cprint -f "="
 
     let cid_to = (pin-text $quote)
     
@@ -250,27 +233,28 @@ export def 'link-chuck' [
 export def 'link-quote' [] {
     let q1 = (
         fetch -r https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=json 
-        | str replace '\\\\' '' 
+        | str replace "\\\\" "" 
         | from json
     )
 
     let quoteAuthor = (
-        if $q1.quoteAuthor == '' {
-            ''
+        if $q1.quoteAuthor == "" {
+            ""
         } else {
-            '\n>> ' + $q1.quoteAuthor
+            "\n>> " + $q1.quoteAuthor
         }
     )
 
     let quote = (
-        '> ' + $q1.quoteText + 
+        "> " + $q1.quoteText + 
         $quoteAuthor +
-        '\n\n' + 'via [forismatic.com](https://forismatic.com)'
+        "\n\n" + "via [forismatic.com](https://forismatic.com)"
     )
 
     $quote | cprint -f '='
 
     link-texts 'quote' $quote
+    # link-texts 'QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna' $quote
 }
 
 #################################################
@@ -343,7 +327,7 @@ export def 'tmp-clear' [] {
 
 #################################################
 
-# Add a text particle into 'to' column of the temp cyberlinks table
+# Add a text particle into the 'to' column of the temp cyberlinks table
 export def 'tmp-link-to' [
     text: string  # a text to upload to ipfs
 ] {
@@ -361,6 +345,24 @@ export def 'tmp-link-from' [
     | upsert from (pin-text $text) 
     | upsert from_text $text
     | tmp-replace
+}
+
+# Pin values from a given column to IPFS node and add a column with their CIDs
+export def 'tmp-pin-col' [
+    --column_with_text: string = 'text' # a column name to take values from to upload to IPFS. If is ommited, the default value is 'text'
+    --column_to_write_cid: string = 'from' # a column name to write CIDs to. If this option is ommited, the default value is 'from'
+] {
+
+
+    let new_text_col_name = ( $column_to_write_cid + '_text' )
+
+    tmp-view 
+    | upsert $column_to_write_cid {
+        |it| $it | get $column_with_text | pin-text 
+        }
+    | rename -c [$column_with_text $new_text_col_name]
+    | tmp-replace
+
 }
 
 #################################################
@@ -394,6 +396,9 @@ def 'tx sign and broadcast' [] {
         --chain-id $env.cy.chain-id 
         # --keyring-backend $env.cy.keyring-backend 
         --output-document $env.cy.path.tx-signed 
+
+        | complete 
+        | if ($in.exit_code != 0) {error make {msg: 'Error of signing the transaction!'}}
     )
 
     (
@@ -420,7 +425,7 @@ export def 'tx-send' [] {
     )
     
     if $_var.code == 0 {
-        {'cy': $'($cyberlinks_count) cyberlinks should be successfully sent'} 
+        {'cy': $'($cyberlinks_count) cyberlink(s) should be successfully sent'} 
         | merge $_var 
         | select cy code txhash
 
@@ -441,7 +446,7 @@ export def 'tx-send' [] {
 #################################################
 
 # Copy a table from the pipe into clipboard (in tsv format)
-export def 'copy-tsv' [] {
+export def 'tsv-copy' [] {
     let _table = $in
     echo $_table
 
@@ -449,38 +454,50 @@ export def 'copy-tsv' [] {
 }
 
 # Paste a table from clipboard
-export def 'paste-tsv' [] {
+export def 'tsv-paste' [] {
     pbpaste | from tsv
 }
 
 #################################################
 
-
-# Upload values from a given column ('text' by default) to the local IPFS node and add a column with the new CIDs.
-export def 'tmp-pin-col' [
-    --column_with_text: string = 'text' # a column name to take values from to upload to IPFS. If is ommited, the default value is 'text'
-    --column_to_write_cid: string = 'from' # a column name to write CIDs to. If this option is ommited, the default value is 'from'
-] {
-
-
-    let new_text_col_name = ( $column_to_write_cid + '_text' )
-
-    tmp-view 
-    | upsert $column_to_write_cid {
-        |it| $it | get $column_with_text | pin-text 
-        }
-    | rename -c [$column_with_text $new_text_col_name]
-    | tmp-replace
-
+# An ordered list of cy commands
+export def 'help' [] {
+    (
+        view-source cy 
+        | parse -r "([\r\n](# )(?<desc>.*?)(?:=?\r|\n)export (def|def.env) '(?<command>.*)')"
+        | select command desc 
+        | upsert command {|row index| ('cy ' + $row.command)}
+        | table --width (term size).columns
+    )
 }
 
 #################################################
+
+def 'banner' [] {
+    echo "
+     ____ _   _    
+    / ___) | | |   
+   ( (___| |_| |   
+    \\____)\\__  |   cy nushell module is loaded
+         (____/    have fun"
+}
+
+
+def parse-ipfs-table [] {parse -r '(?<status>\w+) (?<to>Qm\w{44}) (?<filename>.+)'}
+
+def is-cid [particle: string] {
+    ($particle =~ '^Qm\w{44}$') 
+}
+
+def is-connected []  {
+    (do -i {fetch https://www.iana.org} | describe) == 'raw input'
+}
 
 # Print string colourfully
 def cprint [
     ...args
     --color (-c): string@'nu-complete colors' = 'default'
-    --frame (-f): any
+    --frame (-f): string
     --before (-b): int = 0
     --after (-a): int = 1
 ] {
@@ -493,20 +510,20 @@ def cprint [
     if $frame != null {
         let width = (term size | get columns) - 2
         $text = (
-            (' ' | str rpad -l $width -c $frame) + '\n' +
+            (" " | str rpad -l $width -c $frame) + "\n" +
             (
                 $text 
-                # | split row '\n' 
+                # | split row "\n" 
                 # | each {
-                #     str replace '(^.)' '    $1'
-                # } | str collect '\n'
-            ) + '\n' +
-            (' ' | str rpad -l $width -c $frame)
+                #     str replace "(^.)" "    $1"
+                # } | str collect "\n"
+            ) + "\n" +
+            (" " | str rpad -l $width -c $frame)
         )
     }
-    seq 1 $before | each {|i| print ''}
-    $text | print $'(ansi $color)($in)(ansi reset)' -n 
-    seq 1 $after | each {|i| print ''}
+    seq 1 $before | each {|i| print ""}
+    $text | print $"(ansi $color)($in)(ansi reset)" -n 
+    seq 1 $after | each {|i| print ""}
 }
 
 def 'nu-complete colors' [] {
@@ -525,14 +542,3 @@ def 'if-empty' [
          }
      )
  }
-
-# An ordered list of cy commands
-export def 'help' [] {
-    (
-        view-source cy 
-        | parse -r "([\r\n](# )(?<desc>.*?)(?:=?\r|\n)export (def|def.env) '(?<command>.*)')"
-        | select command desc 
-        | upsert command {|row index| ('cy ' + $row.command)}
-        | table --width (term size).columns
-    )
-}
