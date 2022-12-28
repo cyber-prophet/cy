@@ -302,11 +302,17 @@ export def 'tmp-replace' [
 export def 'tmp-view' [
     --title (-t) # show title
 ] {
+    let t1 = open $env.cy.path.cyberlinks-csv-temp 
+
     if ($title) {
-        'Current temp cyberlinks table:' | cprint -c green_underline
+        if ($t1 | length) == 0 {
+            "them temp cyberlinks table is empty!" | cprint -c red
+        } else {
+            "Current temp cyberlinks table:" | cprint -c green_underline
+        }
     }
 
-    open $env.cy.path.cyberlinks-csv-temp 
+    $t1
 }
 
 # Empty the temp cyberlinks table
@@ -458,6 +464,55 @@ export def 'tsv-paste' [] {
 }
 
 #################################################
+
+# Check if any of the links in tmp table exist
+def 'link-exist' [
+    from
+    to
+    neuron
+] {
+    let out1 = (do -i {
+        ^($env.cy.exec) query rank is-exist $from $to $neuron -o json | complete 
+    })
+
+    if $out1.exit_code == 0 {
+        $out1.stdout | from json | get "exist"
+    } else {
+        false
+    }
+}
+
+export def 'tmp-remove-exist' [] {
+    let links_with_status = (
+        tmp-view 
+        | upsert link_exist {
+            |row| (link-exist  $row.from $row.to $env.cy.address)
+        }
+    )
+
+    let existed_links = (
+        $links_with_status 
+        | filter {|x| $x.link_exist} 
+    )
+
+    let existed_links_count = ($existed_links | length)
+
+    if $existed_links_count > 0 {
+        $links_with_status | filter {|x| not $x.link_exist} | tmp-replace
+
+        $"($existed_links_count) cyberlinks are already created by ($env.cy.address)" | cprint 
+        print $existed_links
+        "So they were removed" | cprint -c red
+    } else {
+        "There are no cyberlinks from the tmp table existed in the blockchain" | cprint
+    }
+}
+
+# Update cy to the latest version
+export def 'update-cy' [] {
+    mkdir ~/cy | fetch https://raw.githubusercontent.com/cyber-prophet/cy/main/cy.nu | save ~/cy/cy.nu -f
+    # overlay use ~/cy/cy.nu as cy -p -r
+}
 
 # An ordered list of cy commands
 export def 'help' [
