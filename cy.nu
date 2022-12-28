@@ -9,9 +9,8 @@
 
 export-env { 
     banner
-    let path1 = $env.HOME + '/cy/cy_config.json'
     let-env cy = try {
-        open ($path1)
+        open ($env.HOME + '/cy/cy_config.json')
     } catch {
         'file "cy_config.json" was not found. Run "cy config"' | cprint -c green_underline
     }
@@ -461,20 +460,27 @@ export def 'tsv-paste' [] {
 #################################################
 
 # An ordered list of cy commands
-export def 'help' [] {
-    (
+export def 'help' [
+    --to_md (-m) #export table as markdown
+] {
+    let text = (
         view-source cy 
-        | parse -r "([\r\n](# )(?<desc>.*?)(?:=?\r|\n)export (def|def.env) '(?<command>.*)')"
+        | parse -r "(\n(# )(?<desc>.*?)(?:=?\n)export (def|def.env) '(?<command>.*)')"
         | select command desc 
         | upsert command {|row index| ('cy ' + $row.command)}
-        | table --width (term size).columns
     )
+    
+    if $to_md {
+        $text | to md --pretty
+    } else {
+        $text | table --width (term size).columns
+    }
 }
 
 #################################################
 
 def 'banner' [] {
-    echo "
+    print "
      ____ _   _    
     / ___) | | |   
    ( (___| |_| |   
