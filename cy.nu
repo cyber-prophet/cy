@@ -302,17 +302,19 @@ export def 'tmp-replace' [
 export def 'tmp-view' [
     --title (-t) # show title
 ] {
-    let t1 = open $env.cy.path.cyberlinks-csv-temp 
+    let tmp_links = open $env.cy.path.cyberlinks-csv-temp 
+
+    let links_count = ($tmp_links | length)
 
     if ($title) {
-        if ($t1 | length) == 0 {
-            "them temp cyberlinks table is empty!" | cprint -c red
+        if $links_count == 0 {
+            "The temp cyberlinks table is empty now!" | cprint -c red
         } else {
-            "Current temp cyberlinks table:" | cprint -c green_underline
+            $"There are ($links_count) cyberlinks in the temp table:" | cprint -c green_underline
         }
     }
 
-    $t1
+    $tmp_links
 }
 
 # Empty the temp cyberlinks table
@@ -403,12 +405,20 @@ def 'tx sign and broadcast' [] {
         --output-document $env.cy.path.tx-signed 
 
         | complete 
-        | if ($in.exit_code != 0) {error make {msg: 'Error of signing the transaction!'}}
+        | if ($in.exit_code != 0) {
+            error make {msg: 'Error of signing the transaction!'}
+        }
     )
 
     (
         ^($env.cy.exec) tx broadcast $env.cy.path.tx-signed --broadcast-mode block 
         --output json
+        | complete 
+        | if ($in.exit_code != 0) {
+            error make {
+                msg: 'If the problem is with the already existed cyberlinks, use "cy tmp-remove-existed"'
+            }
+        }
     )
 }
 
@@ -482,7 +492,7 @@ def 'link-exist' [
     }
 }
 
-export def 'tmp-remove-exist' [] {
+export def 'tmp-remove-existed' [] {
     let links_with_status = (
         tmp-view 
         | upsert link_exist {
@@ -498,11 +508,12 @@ export def 'tmp-remove-exist' [] {
     let existed_links_count = ($existed_links | length)
 
     if $existed_links_count > 0 {
-        $links_with_status | filter {|x| not $x.link_exist} | tmp-replace
-
-        $"($existed_links_count) cyberlinks are already created by ($env.cy.address)" | cprint 
+        
+        $"($existed_links_count) cyberlink/s was/were already created by ($env.cy.address)" | cprint 
         print $existed_links
-        "So they were removed" | cprint -c red
+        "So they were removed from the temp table!" | cprint -c red -a 2
+        
+        $links_with_status | filter {|x| not $x.link_exist} | tmp-replace
     } else {
         "There are no cyberlinks from the tmp table existed in the blockchain" | cprint
     }
