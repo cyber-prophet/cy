@@ -424,7 +424,7 @@ export def 'tx-send' [] {
     )
     
     if $_var.code == 0 {
-        {'cy': $'($cyberlinks_count) cyberlink(s) should be successfully sent'} 
+        {'cy': $'($cyberlinks_count) cyberlinks should be successfully sent'} 
         | merge $_var 
         | select cy code txhash
 
