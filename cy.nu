@@ -182,7 +182,7 @@ export def 'pin-files' [
                 |it| pin-text $it 
                 } 
             | wrap from 
-            | merge {$cid_table}
+            | merge $cid_table
         } else {
             $cid_table
         }
