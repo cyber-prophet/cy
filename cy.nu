@@ -19,10 +19,10 @@ export-env {
 # Create config JSON to set env variables, to use them as parameters in cyber cli
 export def-env 'config' [] {
     'This wizzard will walk you through the setup of cy.' | cprint -c green_underline -a 2
-    'If you skip entering the value - the default will be used.' | cprint
+    'If you skip entering the value - the default will be used.' | cprint -c yellow_italic
     let cy_home = ($env.HOME + '/cy/')
 
-    'Choose the name of executable (cyber or pussy). ' | cprint -a 0 -b 1
+    'Choose the name of executable (cyber or pussy). ' | cprint --before 1 --after 0
     'Default: cyber' | cprint -c yellow_italic
 
     let _exec = if-empty (input) -a 'cyber'
@@ -38,29 +38,49 @@ export def-env 'config' [] {
 
     print $addr_table
     
-    let def_address = ($addr_table | get address.0)
+    let address_def = ($addr_table | get address.0)
 
-    'Enter the address to send transactions from. ' | cprint -b 1 -a 0
-    $'Default: ($def_address)' | cprint -c yellow_italic
-    let address = if-empty (input) -a $def_address
+    'Enter the address to send transactions from. ' | cprint --before 1 --after 0
+    $'Default: ($address_def)' | cprint -c yellow_italic
+    let address = if-empty (input) -a $address_def
 
-    let chain_id = (if ($_exec == 'cyber') {
+
+    let chain_id_def = (if ($_exec == 'cyber') {
             'bostrom'
         } else {
             'space-pussy'
         }
     )
 
-    'Select the ipfs service to use (kubo, cybernode, both). ' | cprint -b 1 -a 0
+    'Enter the chain-id for interacting with the blockchain. ' | cprint --before 1 --after 0
+    $'Default: ($chain_id_def)' | cprint -c yellow_italic
+    let chain_id = if-empty (input) -a $chain_id_def
+
+
+    let rpc_def = (if ($_exec == 'cyber') {
+        'https://rpc.bostrom.cybernode.ai:443'
+    } else {
+        'https://rpc.space-pussy.cybernode.ai:443'
+    }
+)
+
+    'Enter the address of RPC api for interacting with the blockchain. ' | cprint --before 1 --after 0
+    $'Default: ($rpc_def)' | cprint -c yellow_italic
+    let rpc_address = if-empty (input) -a $rpc_def
+
+
+    'Select the ipfs service to use (kubo, cybernode, both). ' | cprint --before 1 --after 0
     'Default: cybernode' | cprint -c yellow_italic
 
     let ipfs_storage = if-empty (input) -a 'cybernode'
+
 
     let temp_env = {
         'exec': $_exec
         'address': $address
         'chain-id': $chain_id
         'ipfs-storage': $ipfs_storage
+        'node': $rpc_address
         'path': {
             'cy_home': $cy_home
             'cy_temp': ($cy_home + 'temp/')
@@ -274,7 +294,7 @@ export def 'tmp-append' [
     )
 
     (
-        tmp-view 
+        tmp-view -d 
         | append $cyberlinks 
         | tmp-replace
     )
@@ -283,7 +303,7 @@ export def 'tmp-append' [
 # Replace cyberlinks in the temp table
 export def 'tmp-replace' [
     cyberlinks?             # cyberlinks table
-    --dont_show_out_table   
+    --dont_show_out_table (-d)   
 ] {
     let cyberlinks = if ($cyberlinks | is-empty) {$in} else {$cyberlinks}
 
@@ -293,20 +313,29 @@ export def 'tmp-replace' [
     )
 
     if (not $dont_show_out_table)  {
-        tmp-view --title
+        tmp-view
     }
     
 }
 
 # View the temp cyberlinks table
 export def 'tmp-view' [
-    --title (-t) # show title
+    --disable_title (-d) # show title
 ] {
-    if ($title) {
-        'Current temp cyberlinks table:' | cprint -c green_underline
+    let tmp_links = open $env.cy.path.cyberlinks-csv-temp 
+
+    let links_count = ($tmp_links | length)
+
+    if (not $disable_title) {
+        if $links_count == 0 {
+            $"The temp cyberlinks table ($env.cy.path.cyberlinks-csv-temp) is empty now!" | cprint -c red
+            $"You can add cyberlinks to it manually or by using commands like 'cy link-texts'" | cprint
+        } else {
+            $"There are ($links_count) cyberlinks in the temp table:" | cprint -c green_underline
+        }
     }
 
-    open $env.cy.path.cyberlinks-csv-temp 
+    $tmp_links
 }
 
 # Empty the temp cyberlinks table
@@ -330,7 +359,7 @@ export def 'tmp-clear' [] {
 export def 'tmp-link-to' [
     text: string  # a text to upload to ipfs
 ] {
-    tmp-view
+    tmp-view -d
     | upsert to (pin-text $text)
     | upsert to_text $text 
     | tmp-replace
@@ -340,7 +369,7 @@ export def 'tmp-link-to' [
 export def 'tmp-link-from' [
     text: string                    # a text to upload to ipfs
 ] {
-    tmp-view
+    tmp-view -d
     | upsert from (pin-text $text) 
     | upsert from_text $text
     | tmp-replace
@@ -355,7 +384,7 @@ export def 'tmp-pin-col' [
 
     let new_text_col_name = ( $column_to_write_cid + '_text' )
 
-    tmp-view 
+    tmp-view -d 
     | upsert $column_to_write_cid {
         |it| $it | get $column_with_text | pin-text 
         }
@@ -364,11 +393,59 @@ export def 'tmp-pin-col' [
 
 }
 
+# Check if any of the links in tmp table exist
+def 'link-exist' [
+    from
+    to
+    neuron
+] {
+    let out1 = (do -i {(
+        ^($env.cy.exec) query rank is-exist $from $to $neuron 
+        --output json 
+        --node $env.cy.node 
+        | complete 
+    )})
+
+    if $out1.exit_code == 0 {
+        $out1.stdout | from json | get "exist"
+    } else {
+        false
+    }
+}
+
+# Remove existed cyberlinks from the temp cyberlinks table
+export def 'tmp-remove-existed' [] {
+    let links_with_status = (
+        tmp-view -d 
+        | upsert link_exist {
+            |row| (link-exist  $row.from $row.to $env.cy.address)
+        }
+    )
+
+    let existed_links = (
+        $links_with_status 
+        | filter {|x| $x.link_exist} 
+    )
+
+    let existed_links_count = ($existed_links | length)
+
+    if $existed_links_count > 0 {
+        
+        $"($existed_links_count) cyberlink/s was/were already created by ($env.cy.address)" | cprint 
+        print $existed_links
+        "So they were removed from the temp table!" | cprint -c red -a 2
+        
+        $links_with_status | filter {|x| not $x.link_exist} | tmp-replace
+    } else {
+        "There are no cyberlinks from the tmp table existed in the blockchain" | cprint
+    }
+}
+
 #################################################
 
 # Create a custom unsigned cyberlinks transaction
 def 'create tx json from temp cyberlinks' [] {
-    let cyberlinks = (tmp-view | select from to)
+    let cyberlinks = (tmp-view -d | select from to)
 
     let neuron = $env.cy.address
 
@@ -393,17 +470,31 @@ def 'tx sign and broadcast' [] {
     ( 
         ^($env.cy.exec) tx sign $env.cy.path.tx-unsigned --from $env.cy.address  
         --chain-id $env.cy.chain-id 
+        --node $env.cy.node
         # --keyring-backend $env.cy.keyring-backend 
         --output-document $env.cy.path.tx-signed 
 
         | complete 
-        | if ($in.exit_code != 0) {error make {msg: 'Error of signing the transaction!'}}
+        | if ($in.exit_code != 0) {
+            error make {msg: 'Error of signing the transaction!'}
+        }
     )
 
-    (
-        ^($env.cy.exec) tx broadcast $env.cy.path.tx-signed --broadcast-mode block 
-        --output json
+    let broadcast_complete = (
+        ^($env.cy.exec) tx broadcast $env.cy.path.tx-signed 
+        --broadcast-mode block 
+        --output json 
+        --node $env.cy.node
+        | complete 
     )
+
+    if ($broadcast_complete.exit_code != 0 ) {
+        error make {
+            msg: 'exit code is not 0'
+        }
+    } else {
+        $broadcast_complete.stdout
+    }
 }
 
 # Create a tx from the temp cyberlinks table, sign and broadcast it
@@ -415,7 +506,7 @@ export def 'tx-send' [] {
     create tx json from temp cyberlinks
 
     let var0 = tx sign and broadcast
-    let cyberlinks_count = (tmp-view | length)
+    let cyberlinks_count = (tmp-view -d | length)
 
     let _var = ( 
         $var0 
@@ -430,7 +521,7 @@ export def 'tx-send' [] {
 
         open $env.cy.path.cyberlinks-csv-archive 
         | append (
-            tmp-view 
+            tmp-view -d 
             | upsert neuron $env.cy.address
         ) 
         | save $env.cy.path.cyberlinks-csv-archive --force
@@ -438,7 +529,8 @@ export def 'tx-send' [] {
         tmp-clear
 
     } else {
-        {'cy': 'error!' } | merge $_var 
+        {'cy': 'If the problem is with the already existed cyberlinks, use "cy tmp-remove-existed"' } 
+        | merge $_var 
     }
 }
 
@@ -461,8 +553,14 @@ export def 'tsv-paste' [] {
 
 # Update cy to the latest version
 export def 'update-cy' [] {
-    mkdir ~/cy | fetch https://raw.githubusercontent.com/cyber-prophet/cy/main/cy.nu | save ~/cy/cy.nu -f
-    # overlay use ~/cy/cy.nu as cy -p -r
+
+    mkdir ~/cy 
+    | fetch https://raw.githubusercontent.com/cyber-prophet/cy/main/cy.nu 
+    | save ~/cy/cy.nu -f
+    
+    # overlay below freezes nu 0.7.3 inside Alacritty Version 0.11.0 (8dbaa0b)
+    # overlay use ~/cy/cy.nu as cy -p -r   
+
 }
 
 # An ordered list of cy commands
