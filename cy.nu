@@ -294,7 +294,7 @@ export def 'tmp-append' [
     )
 
     (
-        tmp-view 
+        tmp-view -d 
         | append $cyberlinks 
         | tmp-replace
     )
@@ -303,7 +303,7 @@ export def 'tmp-append' [
 # Replace cyberlinks in the temp table
 export def 'tmp-replace' [
     cyberlinks?             # cyberlinks table
-    --dont_show_out_table   
+    --dont_show_out_table (-d)   
 ] {
     let cyberlinks = if ($cyberlinks | is-empty) {$in} else {$cyberlinks}
 
@@ -313,22 +313,23 @@ export def 'tmp-replace' [
     )
 
     if (not $dont_show_out_table)  {
-        tmp-view --title
+        tmp-view
     }
     
 }
 
 # View the temp cyberlinks table
 export def 'tmp-view' [
-    --title (-t) # show title
+    --disable_title (-d) # show title
 ] {
     let tmp_links = open $env.cy.path.cyberlinks-csv-temp 
 
     let links_count = ($tmp_links | length)
 
-    if ($title) {
+    if (not $disable_title) {
         if $links_count == 0 {
-            "The temp cyberlinks table is empty now!" | cprint -c red
+            $"The temp cyberlinks table ($env.cy.path.cyberlinks-csv-temp) is empty now!" | cprint -c red
+            $"You can add cyberlinks to it manually or by using commands like 'cy link-texts'" | cprint
         } else {
             $"There are ($links_count) cyberlinks in the temp table:" | cprint -c green_underline
         }
@@ -358,7 +359,7 @@ export def 'tmp-clear' [] {
 export def 'tmp-link-to' [
     text: string  # a text to upload to ipfs
 ] {
-    tmp-view
+    tmp-view -d
     | upsert to (pin-text $text)
     | upsert to_text $text 
     | tmp-replace
@@ -368,7 +369,7 @@ export def 'tmp-link-to' [
 export def 'tmp-link-from' [
     text: string                    # a text to upload to ipfs
 ] {
-    tmp-view
+    tmp-view -d
     | upsert from (pin-text $text) 
     | upsert from_text $text
     | tmp-replace
@@ -383,7 +384,7 @@ export def 'tmp-pin-col' [
 
     let new_text_col_name = ( $column_to_write_cid + '_text' )
 
-    tmp-view 
+    tmp-view -d 
     | upsert $column_to_write_cid {
         |it| $it | get $column_with_text | pin-text 
         }
@@ -415,7 +416,7 @@ def 'link-exist' [
 # Remove existed cyberlinks from the temp cyberlinks table
 export def 'tmp-remove-existed' [] {
     let links_with_status = (
-        tmp-view 
+        tmp-view -d 
         | upsert link_exist {
             |row| (link-exist  $row.from $row.to $env.cy.address)
         }
@@ -444,7 +445,7 @@ export def 'tmp-remove-existed' [] {
 
 # Create a custom unsigned cyberlinks transaction
 def 'create tx json from temp cyberlinks' [] {
-    let cyberlinks = (tmp-view | select from to)
+    let cyberlinks = (tmp-view -d | select from to)
 
     let neuron = $env.cy.address
 
@@ -479,18 +480,21 @@ def 'tx sign and broadcast' [] {
         }
     )
 
-    (
+    let broadcast_complete = (
         ^($env.cy.exec) tx broadcast $env.cy.path.tx-signed 
         --broadcast-mode block 
         --output json 
         --node $env.cy.node
         | complete 
-        | if ($in.exit_code != 0) {
-            error make {
-                msg: 'If the problem is with the already existed cyberlinks, use "cy tmp-remove-existed"'
-            }
-        }
     )
+
+    if ($broadcast_complete.exit_code != 0 ) {
+        error make {
+            msg: 'exit code is not 0'
+        }
+    } else {
+        $broadcast_complete.stdout
+    }
 }
 
 # Create a tx from the temp cyberlinks table, sign and broadcast it
@@ -502,7 +506,7 @@ export def 'tx-send' [] {
     create tx json from temp cyberlinks
 
     let var0 = tx sign and broadcast
-    let cyberlinks_count = (tmp-view | length)
+    let cyberlinks_count = (tmp-view -d | length)
 
     let _var = ( 
         $var0 
@@ -511,13 +515,13 @@ export def 'tx-send' [] {
     )
     
     if $_var.code == 0 {
-        {'cy': $'($cyberlinks_count) cyberlink(s) should be successfully sent'} 
+        {'cy': $'($cyberlinks_count) cyberlinks should be successfully sent'} 
         | merge $_var 
         | select cy code txhash
 
         open $env.cy.path.cyberlinks-csv-archive 
         | append (
-            tmp-view 
+            tmp-view -d 
             | upsert neuron $env.cy.address
         ) 
         | save $env.cy.path.cyberlinks-csv-archive --force
@@ -525,7 +529,8 @@ export def 'tx-send' [] {
         tmp-clear
 
     } else {
-        {'cy': 'error!' } | merge $_var 
+        {'cy': 'If the problem is with the already existed cyberlinks, use "cy tmp-remove-existed"' } 
+        | merge $_var 
     }
 }
 
