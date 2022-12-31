@@ -8,7 +8,7 @@ Cy - a [nushell](https://www.nushell.sh/) wrapper, an interface to the cyber fam
 2. Install the nushell app https://www.nushell.sh/ `brew install nushell`
 3. Launch nushell by typing `nu` in your terminal app
 4. Execute `mkdir ~/cy | fetch https://raw.githubusercontent.com/cyber-prophet/cy/main/cy.nu | save ~/cy/cy.nu -f`
-5. Execute: `overlay use ~/cy/cy.nu as cy -p`. For more information on how to use overlays check [nushell's help](https://www.nushell.sh/book/overlays.html)
+5. Execute: `overlay use ~/cy/cy.nu as cy -p -r`. For more information on how to use overlays check [nushell's help](https://www.nushell.sh/book/overlays.html)
 6. Go through the wizzard `cy config`
 7. See all the commands by entering `cy` + tab
 

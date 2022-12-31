@@ -5,7 +5,7 @@
 # > mkdir ~/cy | fetch https://raw.githubusercontent.com/cyber-prophet/cy/main/cy.nu | save ~/cy/cy.nu -f
 #
 # Use:
-# > overlay use ~/cy/cy.nu as cy -p
+# > overlay use ~/cy/cy.nu as cy -p -r
 
 export-env { 
     banner
@@ -553,12 +553,14 @@ export def 'tsv-paste' [] {
 
 # Update cy to the latest version
 export def 'update-cy' [] {
+
     mkdir ~/cy 
     | fetch https://raw.githubusercontent.com/cyber-prophet/cy/main/cy.nu 
     | save ~/cy/cy.nu -f
     
     # overlay below freezes nu 0.7.3 inside Alacritty Version 0.11.0 (8dbaa0b)
     # overlay use ~/cy/cy.nu as cy -p -r   
+
 }
 
 # An ordered list of cy commands
