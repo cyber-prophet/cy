@@ -231,7 +231,8 @@ export def 'link-chuck' [
         "\n\n" + "via [Chucknorris.io](https://chucknorris.io)"
     )
 
-    $quote | cprint -f "="
+    # $quote | cprint -f "="
+    $quote | glow - -w 120 
 
     let cid_to = (pin-text $quote)
     
@@ -260,7 +261,7 @@ export def 'link-quote' [] {
         if $q1.quoteAuthor == "" {
             ""
         } else {
-            "\n>> " + $q1.quoteAuthor
+            "\n\n>> " + $q1.quoteAuthor
         }
     )
 
@@ -270,7 +271,8 @@ export def 'link-quote' [] {
         "\n\n" + "via [forismatic.com](https://forismatic.com)"
     )
 
-    $quote | cprint -f '='
+    # $quote | cprint -f '='
+    $quote | glow - -w 120
 
     link-texts 'quote' $quote
     # link-texts 'QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna' $quote
@@ -598,6 +600,11 @@ def parse-ipfs-table [] {parse -r '(?<status>\w+) (?<to>Qm\w{44}) (?<filename>.+
 def is-cid [particle: string] {
     ($particle =~ '^Qm\w{44}$') 
 }
+
+# export def is-neuron [particle: string] {
+#     ($particle =~ '^bostrom1\w{38}') 
+# }
+
 
 def is-connected []  {
     (do -i {fetch https://www.iana.org} | describe) == 'raw input'
