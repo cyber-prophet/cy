@@ -14,9 +14,6 @@ Cy - a [nushell](https://www.nushell.sh/) wrapper, an interface to the cyber fam
 
 ## Commands
 
-| command               | desc                                                                             |
-| --------------------- | -------------------------------------------------------------------------------- |
-| cy config             | Create config JSON to set env variables, to use them as parameters in cyber cli  |
 |command|desc|
 |-|-|
 |cy config|Create config JSON to set env variables, to use them as parameters in cyber cli|
