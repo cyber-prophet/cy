@@ -575,7 +575,7 @@ export def 'help' [
     )
     
     if $to_md {
-        $text | to md --pretty
+        $text | to md 
     } else {
         $text | table --width (term size).columns
     }
