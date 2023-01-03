@@ -663,9 +663,9 @@ def is-cid [particle: string] {
     ($particle =~ '^Qm\w{44}$') 
 }
 
-# export def is-neuron [particle: string] {
-#     ($particle =~ '^bostrom1\w{38}') 
-# }
+def is-neuron [particle: string] {
+    ($particle =~ '^bostrom1\w{38}') 
+}
 
 
 def is-connected []  {
