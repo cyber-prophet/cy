@@ -35,4 +35,7 @@ Cy - a [nushell](https://www.nushell.sh/) wrapper, an interface to the cyber fam
 |cy tsv-copy|Copy a table from the pipe into clipboard (in tsv format)|
 |cy tsv-paste|Paste a table from clipboard|
 |cy update-cy|Update cy to the latest version|
+|cy get-passport-by-address|Get a passport by providing a neuron's address|
+|cy get-passport-by-nick|Get a passport by providing a neuron's nick|
+|cy set-passport-particle|Set a passport's particle for a given nickname|
 |cy help|An ordered list of cy commands|
