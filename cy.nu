@@ -599,7 +599,7 @@ export def 'get-passport-by-address' [
     let json = ($'{"active_passport": {"address": "($address)"}}')
     (
         cyber query wasm contract-state smart bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel $json 
-        --node $env.cy.rpc-address 
+        --node https://rpc.bostrom.cybernode.ai:443 
     ) | from json
 }
 
@@ -610,7 +610,7 @@ export def 'get-passport-by-nick' [
     let json = ($'{"metadata_by_nickname": {"nickname": "($nickname)"}}')
     (
         cyber query wasm contract-state smart bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel $json 
-        --node $env.cy.rpc-address 
+        --node https://rpc.bostrom.cybernode.ai:443 
     ) | from json
 }
 
@@ -623,7 +623,7 @@ export def 'set-passport-particle' [
     (
         cyber tx wasm execute bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel $json 
         --from $env.cy.address 
-        --node $env.cy.rpc-address 
+        --node https://rpc.bostrom.cybernode.ai:443 
     ) | from json 
 }
 
