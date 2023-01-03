@@ -80,7 +80,7 @@ export def-env 'config' [] {
         'address': $address
         'chain-id': $chain_id
         'ipfs-storage': $ipfs_storage
-        'node': $rpc_address
+        'rpc-address': $rpc_address
         'path': {
             'cy_home': $cy_home
             'cy_temp': ($cy_home + 'temp/')
@@ -402,7 +402,7 @@ def 'link-exist' [
     let out1 = (do -i {(
         ^($env.cy.exec) query rank is-exist $from $to $neuron 
         --output json 
-        --node $env.cy.node 
+        --node $env.cy.rpc-address 
         | complete 
     )})
 
@@ -470,7 +470,7 @@ def 'tx sign and broadcast' [] {
     ( 
         ^($env.cy.exec) tx sign $env.cy.path.tx-unsigned --from $env.cy.address  
         --chain-id $env.cy.chain-id 
-        --node $env.cy.node
+        --node $env.cy.rpc-address
         # --keyring-backend $env.cy.keyring-backend 
         --output-document $env.cy.path.tx-signed 
 
@@ -484,7 +484,7 @@ def 'tx sign and broadcast' [] {
         ^($env.cy.exec) tx broadcast $env.cy.path.tx-signed 
         --broadcast-mode block 
         --output json 
-        --node $env.cy.node
+        --node $env.cy.rpc-address
         | complete 
     )
 
@@ -561,6 +561,41 @@ export def 'update-cy' [] {
     # overlay below freezes nu 0.7.3 inside Alacritty Version 0.11.0 (8dbaa0b)
     # overlay use ~/cy/cy.nu as cy -p -r   
 
+}
+
+# Get a passport by providing a neuron's address
+export def 'passport-by-address' [
+    address
+] { 
+    let json = ($'{"active_passport": {"address": "($address)"}}')
+    (
+        cyber query wasm contract-state smart bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel $json 
+        --node $env.cy.rpc-address 
+    ) | from json
+}
+
+# Get a passport by providing a neuron's nick
+export def 'passport-by-nick' [
+    nickname
+] { 
+    let json = ($'{"metadata_by_nickname": {"nickname": "($nickname)"}}')
+    (
+        cyber query wasm contract-state smart bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel $json 
+        --node $env.cy.rpc-address 
+    ) | from json
+}
+
+# Set a passport's particle for a given nickname
+export def 'set-passport-particle' [
+    nickname
+    particle
+] {
+    let json = $'{"update_particle":{"nickname":"($nickname)","particle":"($particle)"}}'
+    (
+        cyber tx wasm execute bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel $json 
+        --from $env.cy.address 
+        --node $env.cy.rpc-address 
+    ) | from json 
 }
 
 # An ordered list of cy commands
