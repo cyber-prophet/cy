@@ -19,7 +19,7 @@ export-env {
 # Create config JSON to set env variables, to use them as parameters in cyber cli
 export def-env 'config' [] {
     'This wizzard will walk you through the setup of cy.' | cprint -c green_underline -a 2
-    'If you skip entering the value - the default will be used.' | cprint -c yellow_italic
+    'If you skip entering the value - the _default_ will be used.' | cprint -c yellow_italic
     let cy_home = ($env.HOME + '/cy/')
 
     'Choose the name of executable (cyber or pussy). ' | cprint --before 1 --after 0
@@ -210,6 +210,27 @@ export def 'link-texts' [
     let $out_table = (
         [['from_text' 'to_text' from to];
         [$text_from $text_to $cid_from $cid_to]]
+    )
+
+    if $dont_append_to_cyberlinks_temp_csv {
+        $out_table
+    } else {
+        $out_table | tmp-append
+    }
+}
+
+# Add a tweet
+export def 'tweet' [
+    text_to
+    --dont_append_to_cyberlinks_temp_csv (-d)
+] {
+    # let cid_from = pin-text "tweet"
+    let cid_from = 'QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx'
+    let cid_to = (pin-text $text_to)
+    
+    let $out_table = (
+        [['from_text' 'to_text' from to];
+        ['tweet' $text_to $cid_from $cid_to]]
     )
 
     if $dont_append_to_cyberlinks_temp_csv {
