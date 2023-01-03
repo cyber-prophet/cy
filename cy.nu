@@ -182,7 +182,7 @@ export def 'pin-files' [
                 |it| pin-text $it 
                 } 
             | wrap from 
-            | merge {$cid_table}
+            | merge $cid_table
         } else {
             $cid_table
         }
@@ -210,6 +210,27 @@ export def 'link-texts' [
     let $out_table = (
         [['from_text' 'to_text' from to];
         [$text_from $text_to $cid_from $cid_to]]
+    )
+
+    if $dont_append_to_cyberlinks_temp_csv {
+        $out_table
+    } else {
+        $out_table | tmp-append
+    }
+}
+
+# Add a tweet
+export def 'tweet' [
+    text_to
+    --dont_append_to_cyberlinks_temp_csv (-d)
+] {
+    # let cid_from = pin-text "tweet"
+    let cid_from = 'QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx'
+    let cid_to = (pin-text $text_to)
+    
+    let $out_table = (
+        [['from_text' 'to_text' from to];
+        ['tweet' $text_to $cid_from $cid_to]]
     )
 
     if $dont_append_to_cyberlinks_temp_csv {
@@ -260,7 +281,7 @@ export def 'link-quote' [] {
         if $q1.quoteAuthor == "" {
             ""
         } else {
-            "\n>> " + $q1.quoteAuthor
+            "\n\n>> " + $q1.quoteAuthor
         }
     )
 
@@ -641,6 +662,11 @@ def parse-ipfs-table [] {parse -r '(?<status>\w+) (?<to>Qm\w{44}) (?<filename>.+
 def is-cid [particle: string] {
     ($particle =~ '^Qm\w{44}$') 
 }
+
+# export def is-neuron [particle: string] {
+#     ($particle =~ '^bostrom1\w{38}') 
+# }
+
 
 def is-connected []  {
     (do -i {fetch https://www.iana.org} | describe) == 'raw input'
