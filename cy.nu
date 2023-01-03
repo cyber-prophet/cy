@@ -564,7 +564,7 @@ export def 'update-cy' [] {
 }
 
 # Get a passport by providing a neuron's address
-export def 'passport-by-address' [
+export def 'get-passport-by-address' [
     address
 ] { 
     let json = ($'{"active_passport": {"address": "($address)"}}')
@@ -575,7 +575,7 @@ export def 'passport-by-address' [
 }
 
 # Get a passport by providing a neuron's nick
-export def 'passport-by-nick' [
+export def 'get-passport-by-nick' [
     nickname
 ] { 
     let json = ($'{"metadata_by_nickname": {"nickname": "($nickname)"}}')
@@ -600,7 +600,7 @@ export def 'set-passport-particle' [
 
 # An ordered list of cy commands
 export def 'help' [
-    --to_md (-m) #export table as markdown
+    --to_md (-m) # export table as markdown
 ] {
     let text = (
         view-source cy 
