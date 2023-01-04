@@ -16,8 +16,27 @@ export-env {
     }
 }
 
+def 'nu-complete-config-names' [] {
+    
+    # let a1 = (
+    ls '~/cy/config/' | sort-by modified -r | get name | parse '{short}.{ext}'  | where ext == "yaml" | get short
+    # )
+
+    # $a1
+}
+
+def 'load_config' [
+    --name: string@'nu-complete-config-names' = 'default'
+] {
+    cd '~/cy/config'
+    let filename = (if-empty $name -a 'default') + '.yaml'
+    open $filename 
+}
+
 # Create config JSON to set env variables, to use them as parameters in cyber cli
-export def-env 'config' [] {
+export def-env 'config' [
+    name?: string@'nu-complete-config-names' = 'default'
+] {
     'This wizzard will walk you through the setup of cy.' | cprint -c green_underline -a 2
     'If you skip entering the value - the default will be used.' | cprint -c yellow_italic
     let cy_home = ($env.HOME + '/cy/')
@@ -92,10 +111,14 @@ export def-env 'config' [] {
         }
     } 
     
-    mkdir $temp_env.path.cy_temp
-    mkdir $temp_env.path.backups
+    mkdir ~/cy/temp/
+    mkdir ~/cy/backups/
+    let config_folder = (mkdir ~/cy/config/ -v).0
 
-    $temp_env | save ($temp_env.path.cy_home + 'cy_config.json') --force
+    # $temp_env | save ($'($config_folder)/($name).json') --force
+    print $config_folder
+
+    $temp_env | save ($'($config_folder)/($name).yaml') --force
     
     let-env cy = $temp_env
 
@@ -111,9 +134,15 @@ export def-env 'config' [] {
         'from,to,address,timestamp,txhash' | save $env.cy.path.cyberlinks-csv-archive
     }
 
-    'config JSON was updated. You can find below what was written there.' | cprint -c green_underline
+    $'config "~/cy/config/($name).yml" was updated. You can find below what was written there.' | cprint -c green_underline
     
     echo $env.cy
+}
+
+export def-env 'config-update' [
+    name_of_config
+] {
+
 }
 
 #################################################
