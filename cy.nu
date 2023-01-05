@@ -19,18 +19,47 @@ export-env {
 def 'nu-complete-config-names' [] {
     
     # let a1 = (
-    ls '~/cy/config/' | sort-by modified -r | get name | parse '{short}.{ext}'  | where ext == "yaml" | get short
+    ls '~/cy/config/' -s
+    | sort-by modified -r 
+    | get name 
+    | parse '{short}.{ext}'  
+    | where ext == "yaml" 
+    | get short
     # )
 
     # $a1
 }
 
-def 'load_config' [
-    --name: string@'nu-complete-config-names' = 'default'
+export def 'config view' [
+    name (-n): string@'nu-complete-config-names'
 ] {
-    cd '~/cy/config'
-    let filename = (if-empty $name -a 'default') + '.yaml'
+    let filename = ($env.HOME + '/cy/config/') + (if-empty $name -a 'default') + '.yaml'
     open $filename 
+}
+
+export def 'config save' [
+    --name (-n): string@'nu-complete-config-names' = 'default'
+] {
+    let name = input "enter the name of the config file to save"
+    let a1 = (if-empty $name -a 'default')
+}
+
+# Create config JSON to set env variables, to use them as parameters in cyber cli
+export def-env 'config load' [
+    name?: string@'nu-complete-config-names'
+] {
+    let filename = ($env.HOME + '/cy/config/') + (if-empty $name -a 'default') + '.yaml'
+    let-env cy = open $filename
+    print $"($filename) is loaded"
+}
+
+export-env { 
+    banner
+    let-env cy = try {
+        open ($env.HOME + '/cy/cy_config.json')
+    } catch {
+        'file "cy_config.json" was not found. Run "cy config"' | cprint -c green_underline
+    }
 }
 
 # Create config JSON to set env variables, to use them as parameters in cyber cli
@@ -739,7 +768,7 @@ def 'nu-complete colors' [] {
 }
 
 def 'if-empty' [
-    value?
+    value? 
     --alternative (-a): any
 ] {
      (
