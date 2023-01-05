@@ -31,14 +31,14 @@ def 'nu-complete-config-names' [] {
 }
 
 export def 'config view' [
-    name (-n): string@'nu-complete-config-names'
+    name?: string@'nu-complete-config-names'
 ] {
     let filename = ($env.HOME + '/cy/config/') + (if-empty $name -a 'default') + '.yaml'
     open $filename 
 }
 
 export def 'config save' [
-    --name (-n): string@'nu-complete-config-names' = 'default'
+    name?: string@'nu-complete-config-names'
 ] {
     let name = input "enter the name of the config file to save"
     let a1 = (if-empty $name -a 'default')
@@ -49,7 +49,9 @@ export def-env 'config load' [
     name?: string@'nu-complete-config-names'
 ] {
     let filename = ($env.HOME + '/cy/config/') + (if-empty $name -a 'default') + '.yaml'
-    let-env cy = open $filename
+    let file = open $filename
+    print $file
+    let-env cy = $file
     print $"($filename) is loaded"
 }
 
@@ -64,7 +66,7 @@ export-env {
 
 # Create config JSON to set env variables, to use them as parameters in cyber cli
 export def-env 'config' [
-    name?: string@'nu-complete-config-names' = 'default'
+    name?: string@'nu-complete-config-names'
 ] {
     'This wizzard will walk you through the setup of cy.' | cprint -c green_underline -a 2
     'If you skip entering the value - the default will be used.' | cprint -c yellow_italic
