@@ -226,6 +226,8 @@ export def 'pin-files' [
     let files = (
         if $files == [] {
             ls | where type == file | get name
+        } else {
+            $files
         }
     )
 
@@ -480,12 +482,9 @@ def 'link-exist' [
     to
     neuron
 ] {
-    let out1 = (do -i {(
-        ^($env.cy.exec) query rank is-exist $from $to $neuron 
-        --output json 
-        --node $env.cy.rpc-address 
-        | complete 
-    )})
+    let out1 = (do -i { 
+        ^($env.cy.exec) query rank is-exist $from $to $neuron --output json --node $env.cy.rpc-address | complete 
+    })
 
     if $out1.exit_code == 0 {
         $out1.stdout | from json | get "exist"
@@ -518,7 +517,7 @@ export def 'tmp-remove-existed' [] {
         
         $links_with_status | filter {|x| not $x.link_exist} | tmp-replace
     } else {
-        "There are no cyberlinks from the tmp table existed in the blockchain" | cprint
+        "There are no cyberlinks from the tmp table for the current adress exist in the blockchain" | cprint
     }
 }
 
