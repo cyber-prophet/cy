@@ -29,7 +29,6 @@ export def-env 'config new' [
 
     let _exec = if-empty (input) -a 'cyber'
 
-    
     let addr_table = (
         ^($_exec) keys list --output json 
         | from json 
@@ -134,7 +133,9 @@ export def-env 'config save' [
 
     let config_name = (
         if $config_name == null {
-            input "enter the name of the config file to save: "
+            "Enter the name of the config file to save. " | cprint --before 1 --after 0
+            $"Default: (datetime_fn)" | cprint -c yellow_italic 
+            input 
         } else {
             $config_name
         }
