@@ -181,15 +181,15 @@ After adding a key - come back and launch this wizzard again'}
         'chain-id': $chain_id
         'ipfs-storage': $ipfs_storage
         'rpc-address': $rpc_address
-        'path': {
-            'cy_home': $cy_home
-            'cy_temp': ($cy_home + 'temp/')
-            'backups': ($cy_home + 'backups/')
-            'cyberlinks-csv-temp': ($cy_home + 'cyberlinks_temp.csv')
-            'cyberlinks-csv-archive': ($cy_home + 'cyberlinks_archive.csv')
-            'tx-signed' : ($cy_home + 'temp/tx-signed.json')
-            'tx-unsigned' : ($cy_home + 'temp/tx-unsigned.json')
-        }
+        # 'path': {
+        #     'cy_home': $cy_home
+        #     'cy_temp': ($cy_home + 'temp/')
+        #     'backups': ($cy_home + 'backups/')
+        #     # 'cyberlinks-csv-temp': ($cy_home + 'cyberlinks_temp.csv')
+        #     # 'cyberlinks-csv-archive': ($cy_home + 'cyberlinks_archive.csv')
+        #     'tx-signed' : ($cy_home + 'temp/tx-signed.json')
+        #     'tx-unsigned' : ($cy_home + 'temp/tx-unsigned.json')
+        # }
     } 
     
     mkdir ~/cy/temp/
@@ -204,15 +204,15 @@ After adding a key - come back and launch this wizzard again'}
     let-env cy = $temp_env
 
     if (
-        not ($env.cy.path.cyberlinks-csv-temp | path exists)
+        not ($"($env.HOME)/cy/cyberlinks_temp.csv" | path exists)
     ) {
-        'from,to' | save $env.cy.path.cyberlinks-csv-temp
+        'from,to' | save $"($env.HOME)/cy/cyberlinks_temp.csv"
     }
 
     if (
-        not ($env.cy.path.cyberlinks-csv-archive | path exists)
+        not ($"($env.HOME)/cy/cyberlinks_archive.csv" | path exists)
     ) {
-        'from,to,address,timestamp,txhash' | save $env.cy.path.cyberlinks-csv-archive
+        'from,to,address,timestamp,txhash' | save $"($env.HOME)/cy/cyberlinks_archive.csv"
     }
 }
 
@@ -438,7 +438,7 @@ export def 'tmp-replace' [
 
     (
         $cyberlinks 
-        | save $env.cy.path.cyberlinks-csv-temp --force
+        | save $"($env.HOME)/cy/cyberlinks_temp.csv" --force
     )
 
     if (not $dont_show_out_table)  {
@@ -451,13 +451,13 @@ export def 'tmp-replace' [
 export def 'tmp-view' [
     --disable_title (-d) # show title
 ] {
-    let tmp_links = open $env.cy.path.cyberlinks-csv-temp 
+    let tmp_links = open $"($env.HOME)/cy/cyberlinks_temp.csv" 
 
     let links_count = ($tmp_links | length)
 
     if (not $disable_title) {
         if $links_count == 0 {
-            $"The temp cyberlinks table ($env.cy.path.cyberlinks-csv-temp) is empty now!" | cprint -c red
+            $"The temp cyberlinks table ($"($env.HOME)/cy/cyberlinks_temp.csv") is empty now!" | cprint -c red
             $"You can add cyberlinks to it manually or by using commands like 'cy link-texts'" | cprint
         } else {
             $"There are ($links_count) cyberlinks in the temp table:" | cprint -c green_underline
@@ -486,9 +486,9 @@ def 'backup1' [
 
 # Empty the temp cyberlinks table
 export def 'tmp-clear' [] {
-    backup1 $env.cy.path.cyberlinks-csv-temp 
+    backup1 $"($env.HOME)/cy/cyberlinks_temp.csv" 
 
-    'from,to,from_text,to_text' | save $env.cy.path.cyberlinks-csv-temp --force
+    'from,to,from_text,to_text' | save $"($env.HOME)/cy/cyberlinks_temp.csv" --force
     print "TMP-table is clear now."
 }
 
@@ -599,16 +599,16 @@ def 'create tx json from temp cyberlinks' [] {
     $trans 
     | upsert body.messages.neuron $neuron 
     | upsert body.messages.links $cyberlinks 
-    | save $env.cy.path.tx-unsigned --force
+    | save $"($env.HOME)/cy/temp/tx-unsigned.json" --force
 }
 
 def 'tx sign and broadcast' [] {
     ( 
-        ^($env.cy.exec) tx sign $env.cy.path.tx-unsigned --from $env.cy.address  
+        ^($env.cy.exec) tx sign $"($env.HOME)/cy/temp/tx-unsigned.json" --from $env.cy.address  
         --chain-id $env.cy.chain-id 
         --node $env.cy.rpc-address
         # --keyring-backend $env.cy.keyring-backend 
-        --output-document $env.cy.path.tx-signed 
+        --output-document $"($env.HOME)/cy/temp/tx-signed.json" 
 
         | complete 
         | if ($in.exit_code != 0) {
@@ -617,7 +617,7 @@ def 'tx sign and broadcast' [] {
     )
 
     let broadcast_complete = (
-        ^($env.cy.exec) tx broadcast $env.cy.path.tx-signed 
+        ^($env.cy.exec) tx broadcast $"($env.HOME)/cy/temp/tx-signed.json" 
         --broadcast-mode block 
         --output json 
         --node $env.cy.rpc-address
@@ -655,12 +655,12 @@ export def 'tx-send' [] {
         | merge $_var 
         | select cy code txhash
 
-        open $env.cy.path.cyberlinks-csv-archive 
+        open $"($env.HOME)/cy/cyberlinks_archive.csv" 
         | append (
             tmp-view -d 
             | upsert neuron $env.cy.address
         ) 
-        | save $env.cy.path.cyberlinks-csv-archive --force
+        | save $"($env.HOME)/cy/cyberlinks_archive.csv" --force
 
         tmp-clear
 
