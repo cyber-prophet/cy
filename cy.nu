@@ -34,25 +34,57 @@ export def 'config view' [
     name?: string@'nu-complete-config-names'
 ] {
     let filename = ($env.HOME + '/cy/config/') + (if-empty $name -a 'default') + '.yaml'
+    # let filename = ($env.HOME + '/cy/config/') + ($name | default 'default') + '.yaml'
     open $filename 
 }
 
-export def 'config save' [
+export def-env 'config save' [
     name?: string@'nu-complete-config-names'
 ] {
-    let name = input "enter the name of the config file to save"
-    let a1 = (if-empty $name -a 'default')
+    let inpipe = $in
+
+    let name = (
+        if $name == null {
+            input "enter the name of the config file to save: "
+        } else {
+            $name
+        }
+    )
+    let name = (if-empty $name -a 'default')
+
+    let filename = $"($env.HOME)/cy/config/($name).yaml"
+
+    if ($filename | path exists) {
+        let prompt1 = (input $"($filename) exists. Do you want to overwrite it? \(y/n\) ")
+
+        if $prompt1 == "y" {
+            backup1 $filename
+            $inpipe | save $filename -f
+            print $"($filename) is saved"
+        } else {
+            let dt1 = (date now | date format '%Y%m%d-%H%M%S')
+            let $tempfilename = $"($env.HOME)/cy/config/($dt1).yaml"
+            $inpipe | save $tempfilename
+            print $"File is saved under ($tempfilename)."
+        }
+    } else {
+        $inpipe | save $filename -f
+        print $"($filename) is saved"
+    }
+
+
+    # let use_it = if (input "Type no, if you don't want to use the config now")
 }
 
 # Create config JSON to set env variables, to use them as parameters in cyber cli
 export def-env 'config load' [
     name?: string@'nu-complete-config-names'
 ] {
-    let filename = ($env.HOME + '/cy/config/') + (if-empty $name -a 'default') + '.yaml'
-    let file = open $filename
+    # let filename = ($env.HOME + '/cy/config/') + (if-empty $name -a 'default') + '.yaml'
+    let file = config view $name
     print $file
     let-env cy = $file
-    print $"($filename) is loaded"
+    print $"($name) is loaded"
 }
 
 export-env { 
@@ -65,10 +97,10 @@ export-env {
 }
 
 # Create config JSON to set env variables, to use them as parameters in cyber cli
-export def-env 'config' [
+export def-env 'config new' [
     name?: string@'nu-complete-config-names'
 ] {
-    'This wizzard will walk you through the setup of cy.' | cprint -c green_underline -a 2
+    'This wizzard will walk you through the setup of CY.' | cprint -c green_underline -a 2
     'If you skip entering the value - the default will be used.' | cprint -c yellow_italic
     let cy_home = ($env.HOME + '/cy/')
 
@@ -77,16 +109,25 @@ export def-env 'config' [
 
     let _exec = if-empty (input) -a 'cyber'
 
-    'Here are the keys that you have:' | cprint -b 1
-
+    
     let addr_table = (
         ^($_exec) keys list --output json 
         | from json 
         | flatten 
         | select name address
-    )
+        )
+        
+    if ($addr_table | length) == 0 {
+        'Here are the keys that you have:' | cprint -b 1
+        print $addr_table
+    } else {
 
-    print $addr_table
+        error make -u {msg: $'
+There are no addresses in ($_exec). To use CY you need to add one.
+You can do that by running the command "($_exec) keys add -h". 
+After adding a key - come back and launch this wizzard again'}
+    help: $'try "($_exec) keys add -h"'
+    }
     
     let address_def = ($addr_table | get address.0)
 
@@ -147,7 +188,7 @@ export def-env 'config' [
     let config_folder = (mkdir ~/cy/config/ -v).0
 
     # $temp_env | save ($'($config_folder)/($name).json') --force
-    print $config_folder
+    # print $config_folder
 
     $temp_env | save ($'($config_folder)/($name).yaml') --force
     
@@ -170,11 +211,11 @@ export def-env 'config' [
     echo $env.cy
 }
 
-export def-env 'config-update' [
-    name_of_config
-] {
+# export def-env 'config-update' [
+#     name_of_config
+# ] {
 
-}
+# }
 
 #################################################
 
@@ -421,19 +462,30 @@ export def 'tmp-view' [
     $tmp_links
 }
 
-# Empty the temp cyberlinks table
-export def 'tmp-clear' [] {
+def 'backup1' [
+    filename
+] {
+    let basename1 = ($filename | path basename)
     let dt1 = (date now | date format '%Y%m%d-%H%M%S')
-    let path2 = $env.cy.path.backups + 'cyberlinks_temp_' + $dt1 + '.csv'
+    let path2 = $"($env.HOME)/cy/backups/($dt1)($basename1)"
 
     if (
-        $env.cy.path.cyberlinks-csv-temp
+        $filename
         | path exists 
     ) {
-        ^mv $env.cy.path.cyberlinks-csv-temp $path2
+        ^mv $filename $path2
+        print $"Previous version of ($filename) is backed up to ($path2)"
+    } else {
+        print $"($filename) does not exist"
     }
+}
+
+# Empty the temp cyberlinks table
+export def 'tmp-clear' [] {
+    backup1 $env.cy.path.cyberlinks-csv-temp 
 
     'from,to,from_text,to_text' | save $env.cy.path.cyberlinks-csv-temp --force
+    print "TMP-table is clear now."
 }
 
 #################################################
