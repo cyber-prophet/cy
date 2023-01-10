@@ -17,74 +17,83 @@ export-env {
 }
 
 def 'nu-complete-config-names' [] {
-    
-    # let a1 = (
     ls '~/cy/config/' -s
     | sort-by modified -r 
     | get name 
     | parse '{short}.{ext}'  
     | where ext == "yaml" 
     | get short
-    # )
-
-    # $a1
 }
 
 export def 'config view' [
-    name?: string@'nu-complete-config-names'
+    config_name?: string@'nu-complete-config-names'
 ] {
-    let filename = ($env.HOME + '/cy/config/') + (if-empty $name -a 'default') + '.yaml'
-    # let filename = ($env.HOME + '/cy/config/') + ($name | default 'default') + '.yaml'
-    open $filename 
+    if $config_name == null {
+        print "current config is:"
+        $env.cy
+    } else {
+        let filename = $"($env.HOME)/cy/config/($config_name).yaml"
+        open $filename 
+    }
 }
 
 export def-env 'config save' [
-    name?: string@'nu-complete-config-names'
+    config_name?: string@'nu-complete-config-names'
+    --inactive # Don't activate current config
 ] {
-    let inpipe = $in
+    let in_config = $in
 
-    let name = (
-        if $name == null {
+    let config_name = (
+        if $config_name == null {
             input "enter the name of the config file to save: "
         } else {
-            $name
+            $config_name
         }
     )
-    let name = (if-empty $name -a 'default')
+    let config_name = (if-empty $config_name -a datetime_fn)
 
-    let filename = $"($env.HOME)/cy/config/($name).yaml"
+    mut file_name = $"($env.HOME)/cy/config/($config_name).yaml"
 
-    if ($filename | path exists) {
-        let prompt1 = (input $"($filename) exists. Do you want to overwrite it? \(y/n\) ")
+    if ($file_name | path exists) {
+        let prompt1 = (input $"($file_name) exists. Do you want to overwrite it? \(y/n\) ")
 
         if $prompt1 == "y" {
-            backup1 $filename
-            $inpipe | save $filename -f
-            print $"($filename) is saved"
+            backup1 $file_name
+            $in_config | save $file_name -f
         } else {
-            let dt1 = (date now | date format '%Y%m%d-%H%M%S')
-            let $tempfilename = $"($env.HOME)/cy/config/($dt1).yaml"
-            $inpipe | save $tempfilename
-            print $"File is saved under ($tempfilename)."
+            $file_name = $"($env.HOME)/cy/config/(datetime_fn).yaml"
+            $in_config | save $file_name
         }
     } else {
-        $inpipe | save $filename -f
-        print $"($filename) is saved"
+        $in_config | save $file_name -f
     }
 
+    print $"($file_name) is saved"
+
+    if (not $inactive) {
+        $in_config | config load
+    }
 
     # let use_it = if (input "Type no, if you don't want to use the config now")
 }
 
 # Create config JSON to set env variables, to use them as parameters in cyber cli
 export def-env 'config load' [
-    name?: string@'nu-complete-config-names'
+    config_name?: string@'nu-complete-config-names'
 ] {
-    # let filename = ($env.HOME + '/cy/config/') + (if-empty $name -a 'default') + '.yaml'
-    let file = config view $name
+    let inconfig = $in
+    let file = (
+        if $inconfig == $nothing {
+            config view $config_name
+        } else {
+            $inconfig 
+        }
+    )
+
+    
     print $file
+    print "Config is loaded"
     let-env cy = $file
-    print $"($name) is loaded"
 }
 
 export-env { 
@@ -98,7 +107,7 @@ export-env {
 
 # Create config JSON to set env variables, to use them as parameters in cyber cli
 export def-env 'config new' [
-    name?: string@'nu-complete-config-names'
+    config_name?: string@'nu-complete-config-names'
 ] {
     'This wizzard will walk you through the setup of CY.' | cprint -c green_underline -a 2
     'If you skip entering the value - the default will be used.' | cprint -c yellow_italic
@@ -117,7 +126,7 @@ export def-env 'config new' [
         | select name address
         )
         
-    if ($addr_table | length) == 0 {
+    if ($addr_table | length) > 0 {
         'Here are the keys that you have:' | cprint -b 1
         print $addr_table
     } else {
@@ -187,10 +196,10 @@ After adding a key - come back and launch this wizzard again'}
     mkdir ~/cy/backups/
     let config_folder = (mkdir ~/cy/config/ -v).0
 
-    # $temp_env | save ($'($config_folder)/($name).json') --force
+    # $temp_env | save ($'($config_folder)/($config_name).json') --force
     # print $config_folder
 
-    $temp_env | save ($'($config_folder)/($name).yaml') --force
+    $temp_env | config save $config_name
     
     let-env cy = $temp_env
 
@@ -205,10 +214,6 @@ After adding a key - come back and launch this wizzard again'}
     ) {
         'from,to,address,timestamp,txhash' | save $env.cy.path.cyberlinks-csv-archive
     }
-
-    $'config "~/cy/config/($name).yml" was updated. You can find below what was written there.' | cprint -c green_underline
-    
-    echo $env.cy
 }
 
 # export def-env 'config-update' [
@@ -466,8 +471,7 @@ def 'backup1' [
     filename
 ] {
     let basename1 = ($filename | path basename)
-    let dt1 = (date now | date format '%Y%m%d-%H%M%S')
-    let path2 = $"($env.HOME)/cy/backups/($dt1)($basename1)"
+    let path2 = $"($env.HOME)/cy/backups/(datetime_fn)($basename1)"
 
     if (
         $filename
@@ -832,3 +836,7 @@ def 'if-empty' [
          }
      )
  }
+
+def 'datetime_fn' [] {
+    date now | date format '%Y%m%d-%H%M%S'
+}
