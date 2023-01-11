@@ -599,10 +599,6 @@ export def 'tx-send' [] {
     )
     
     if $_var.code == 0 {
-        {'cy': $'($cyberlinks_count) cyberlinks should be successfully sent'} 
-        | merge $_var 
-        | select cy code txhash
-
         open $"($env.HOME)/cy/cyberlinks_archive.csv" 
         | append (
             tmp-view -d 
@@ -612,6 +608,10 @@ export def 'tx-send' [] {
 
         tmp-clear
 
+        {'cy': $'($cyberlinks_count) cyberlinks should be successfully sent'} 
+        | merge $_var 
+        | select cy code txhash
+        
     } else {
         {'cy': 'If the problem is with the already existed cyberlinks, use "cy tmp-remove-existed"' } 
         | merge $_var 
