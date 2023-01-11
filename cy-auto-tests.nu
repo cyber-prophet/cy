@@ -46,7 +46,6 @@ source /Users/user/cy/cy.nu
 
     def test-link-chuck [] {
         let expect = 1
-    
 
         let result = (
             tmp-clear ;
@@ -60,7 +59,21 @@ source /Users/user/cy/cy.nu
         }
     }
 
+    def test-link-chuck [] {
+        let expect = 1
 
+        let result = (
+            tmp-clear ;
+            link-chuck | length
+        )
+
+        if $result == $expect {
+            "passed"
+        } else {
+            $result
+        }
+    }
+    
     export def run-tests [] {
         [
             [test result];
