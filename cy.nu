@@ -10,9 +10,9 @@
 export-env { 
     banner
     let-env cy = try {
-        open ($env.HOME + '/cy/cy_config.json')
+        open $"($env.HOME)/cy/config/default.yaml"
     } catch {
-        'file "cy_config.json" was not found. Run "cy config"' | cprint -c green_underline
+        'file "/config/default.yaml" was not found. Run "cy config new"' | cprint -c green_underline
     }
 }
 
@@ -85,6 +85,7 @@ After adding a key - come back and launch this wizzard again'}
 
 
     let temp_env = {
+        'config-name': $config_name
         'exec': $_exec
         'address': $address
         'chain-id': $chain_id
@@ -117,7 +118,7 @@ export def 'config view' [
 ] {
     if $config_name == null {
         print "current config is:"
-        $env.cy
+        open $"($env.HOME)/cy/config/default.yaml"
     } else {
         let filename = $"($env.HOME)/cy/config/($config_name).yaml"
         open $filename 
@@ -178,9 +179,11 @@ export def-env 'config activate' [
         }
     )
 
+    let-env cy = $file
+    $file | save $"($env.HOME)/cy/config/default.yaml" -f
+
     print $file
     print "Config is loaded"
-    let-env cy = $file
 }
 
 
@@ -199,7 +202,7 @@ export def 'pin-text' [
         | into string # To coerce numbers into strings
     ) 
 
-    let cid = if (is-cid $text) {$text} else {
+    let cid = if (is-cid $text) {$text; return} else {
         let cid = if (
             ($env.cy.ipfs-storage == 'kubo') or ($env.cy.ipfs-storage == 'both')
             ) {
