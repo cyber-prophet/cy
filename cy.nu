@@ -1,121 +1,188 @@
 # Cy - the nushell wrapper, interface to cyber family blockchains CLIs (Bostrom, Pussy)
 # Git: https://github.com/cyber-prophet/cy
-# 
+#
+# Install/update to the latest version
+# > mkdir ~/cy | fetch https://raw.githubusercontent.com/cyber-prophet/cy/main/cy.nu | save ~/cy/cy.nu -f
+#
 # Use:
-# > overlay use ~/apps-files/github/cy/cy.nu as cy -p
-
-def 'banner' [] {
-    echo "
-     ____ _   _    
-    / ___) | | |   
-   ( (___| |_| |   
-    \\____)\\__  |   cy nushell module is loaded
-         (____/    have fun"
-}
-
-
-def parse-ipfs-table [] {parse -r '(?<status>\w+) (?<to>Qm\w{44}) (?<filename>.+)'}
-
-def is-cid [particle: string] {
-    ($particle =~ '^Qm\w{44}$') 
-}
-
-def is-connected []  {
-    (do -i {fetch https://www.iana.org} | describe) == 'raw input'
-}
+# > overlay use ~/cy/cy.nu as cy -p -r
 
 export-env { 
     banner
-    let path1 = $env.HOME + '/cy/cy_config.json'
     let-env cy = try {
-        open ($path1)
+        open ($env.HOME + '/cy/cy_config.json')
     } catch {
-        echo 'cy_config.json is not found. Run "cy config"'
-        echo ''
+        'file "cy_config.json" was not found. Run "cy config"' | cprint -c green_underline
     }
 }
 
 # Create config JSON to set env variables, to use them as parameters in cyber cli
-export def-env "config" [] {
-    echo "This wizzard will walk you through setup of cy."
+export def-env 'config new' [
+    config_name?: string@'nu-complete-config-names'
+] {
+    'This wizzard will walk you through the setup of CY.' | cprint -c green_underline -a 2
+    'If you skip entering the value - the default will be used.' | cprint -c yellow_italic
     let cy_home = ($env.HOME + '/cy/')
 
-    let _exec = (input 'Choose the name of cyber executable (cyber or pussy): ')
-    let _exec = (
-        if ($_exec | is-empty) {
-            'cyber'
-        } else {
-            $_exec
-        }
-    )
+    'Choose the name of executable (cyber or pussy). ' | cprint --before 1 --after 0
+    'Default: cyber' | cprint -c yellow_italic
 
-    echo "\nHere are the keys that you have:"
+    let _exec = if-empty (input) -a 'cyber'
 
     let addr_table = (
-        if ($_exec == 'cyber') {
-            cyber keys list --output json | from json | flatten | select name address
+        ^($_exec) keys list --output json 
+        | from json 
+        | flatten 
+        | select name address
+        )
+        
+    if ($addr_table | length) > 0 {
+        'Here are the keys that you have:' | cprint -b 1
+        print $addr_table
+    } else {
+
+        error make -u {msg: $'
+There are no addresses in ($_exec). To use CY you need to add one.
+You can do that by running the command "($_exec) keys add -h". 
+After adding a key - come back and launch this wizzard again'}
+    help: $'try "($_exec) keys add -h"'
+    }
+    
+    let address_def = ($addr_table | get address.0)
+
+    'Enter the address to send transactions from. ' | cprint --before 1 --after 0
+    $'Default: ($address_def)' | cprint -c yellow_italic
+    let address = if-empty (input) -a $address_def
+
+
+    let chain_id_def = (if ($_exec == 'cyber') {
+            'bostrom'
         } else {
-            pussy keys list --output json | from json | flatten | select name address
+            'space-pussy'
         }
     )
 
-    echo $addr_table
-    echo ''
+    'Enter the chain-id for interacting with the blockchain. ' | cprint --before 1 --after 0
+    $'Default: ($chain_id_def)' | cprint -c yellow_italic
+    let chain_id = if-empty (input) -a $chain_id_def
 
-    let address = (input 'Enter the address to send transactions from: ')
-    let address = (
-        if ($address | is-empty) {
-            let def_address = ($addr_table | get address.0)
-            $def_address
-        } else {
-            $address
-        }
-    )
 
-    let chain_id = (if ($_exec == 'cyber') {'bostrom'} else {'space-pussy'})
+    let rpc_def = (if ($_exec == 'cyber') {
+        'https://rpc.bostrom.cybernode.ai:443'
+    } else {
+        'https://rpc.space-pussy.cybernode.ai:443'
+    }
+)
 
-    let ipfs_storage = (input 'Select the ipfs service to use (kubo, cyb.ai, both): ')
-    let ipfs_storage = (if ($ipfs_storage | is-empty) {'cyb.ai'} else {$ipfs_storage})
+    'Enter the address of RPC api for interacting with the blockchain. ' | cprint --before 1 --after 0
+    $'Default: ($rpc_def)' | cprint -c yellow_italic
+    let rpc_address = if-empty (input) -a $rpc_def
+
+
+    'Select the ipfs service to use (kubo, cybernode, both). ' | cprint --before 1 --after 0
+    'Default: cybernode' | cprint -c yellow_italic
+    let ipfs_storage = if-empty (input) -a 'cybernode'
+
 
     let temp_env = {
         'exec': $_exec
         'address': $address
         'chain-id': $chain_id
         'ipfs-storage': $ipfs_storage
-        'path': {
-            'cy_home': $cy_home
-            'cy_temp': ($cy_home + 'temp/')
-            'backups': ($cy_home + 'backups/')
-            'cyberlinks-csv-temp': ($cy_home + 'cyberlinks_temp.csv')
-            'cyberlinks-csv-archive': ($cy_home + 'cyberlinks_archive.csv')
-            'tx-signed' : ($cy_home + 'temp/tx-signed.json')
-            'tx-unsigned' : ($cy_home + 'temp/tx-unsigned.json')
-        }
+        'rpc-address': $rpc_address
     } 
     
-    mkdir $temp_env.path.cy_temp
-    mkdir $temp_env.path.backups
+    mkdir ~/cy/temp/
+    mkdir ~/cy/backups/
+    mkdir ~/cy/config/
 
-    $temp_env | save ($temp_env.path.cy_home + 'cy_config.json') --force
-    
-    let-env cy = $temp_env
+    $temp_env | config save $config_name
 
     if (
-        not ($env.cy.path.cyberlinks-csv-temp | path exists)
+        not ($"($env.HOME)/cy/cyberlinks_temp.csv" | path exists)
     ) {
-        "from,to" | save $env.cy.path.cyberlinks-csv-temp
+        'from,to' | save $"($env.HOME)/cy/cyberlinks_temp.csv"
     }
 
     if (
-        not ($env.cy.path.cyberlinks-csv-archive | path exists)
+        not ($"($env.HOME)/cy/cyberlinks_archive.csv" | path exists)
     ) {
-        "from,to,address,timestamp,txhash" | save $env.cy.path.cyberlinks-csv-archive
+        'from,to,address,timestamp,txhash' | save $"($env.HOME)/cy/cyberlinks_archive.csv"
     }
-
-    echo '\nJSON is updated. You can find below what was written there.\n'
-    
-    echo $env.cy
 }
+
+# View a saved JSON config file
+export def 'config view' [
+    config_name?: string@'nu-complete-config-names'
+] {
+    if $config_name == null {
+        print "current config is:"
+        $env.cy
+    } else {
+        let filename = $"($env.HOME)/cy/config/($config_name).yaml"
+        open $filename 
+    }
+}
+
+# Save the piped in JSON config file
+export def-env 'config save' [
+    config_name?: string@'nu-complete-config-names'
+    --inactive # Don't activate current config
+] {
+    let in_config = $in
+
+    let config_name = (
+        if $config_name == null {
+            "Enter the name of the config file to save. " | cprint --before 1 --after 0
+            $"Default: (datetime_fn)" | cprint -c yellow_italic 
+            input 
+        } else {
+            $config_name
+        }
+    )
+    let config_name = (if-empty $config_name -a datetime_fn)
+
+    mut file_name = $"($env.HOME)/cy/config/($config_name).yaml"
+
+    if ($file_name | path exists) {
+        let prompt1 = (input $"($file_name) exists. Do you want to overwrite it? \(y/n\) ")
+
+        if $prompt1 == "y" {
+            backup1 $file_name
+            $in_config | save $file_name -f
+        } else {
+            $file_name = $"($env.HOME)/cy/config/(datetime_fn).yaml"
+            $in_config | save $file_name
+        }
+    } else {
+        $in_config | save $file_name -f
+    }
+
+    print $"($file_name) is saved"
+
+    if (not $inactive) {
+        $in_config | config activate
+    }
+}
+
+# Activate config JSON
+export def-env 'config activate' [
+    config_name?: string@'nu-complete-config-names'
+] {
+    let inconfig = $in
+    let file = (
+        if $inconfig == $nothing {
+            config view $config_name
+        } else {
+            $inconfig 
+        }
+    )
+
+    print $file
+    print "Config is loaded"
+    let-env cy = $file
+}
+
 
 #################################################
 
@@ -132,37 +199,43 @@ export def 'pin-text' [
         | into string # To coerce numbers into strings
     ) 
 
-    let cid = if (
-        ($env.cy.ipfs-storage == 'kubo') or ($env.cy.ipfs-storage == 'both')
-        ) {
-            echo $text
-            | ipfs add -Q 
-            | str replace '\n' ''
-        } 
-        
-    let cid = if (
-        ($env.cy.ipfs-storage == 'cyb.ai') or ($env.cy.ipfs-storage == 'both')
-        ) {
-            echo $text 
-            | curl --silent -X POST -F file=@- "https://io.cybernode.ai/add" 
-            | from json 
-            | get cid./
-        } else {
-            $cid
-        }
+    let cid = if (is-cid $text) {$text} else {
+        let cid = if (
+            ($env.cy.ipfs-storage == 'kubo') or ($env.cy.ipfs-storage == 'both')
+            ) {
+                $text
+                | ipfs add -Q 
+                | str replace '\n' ''
+            } 
+            
+        let cid = if (
+            ($env.cy.ipfs-storage == 'cybernode') or ($env.cy.ipfs-storage == 'both')
+            ) {
+                $text 
+                | curl --silent -X POST -F file=@- 'https://io.cybernode.ai/add' 
+                | from json 
+                | get cid./
+            } else {
+                $cid
+            }
 
-    echo $cid
+        $cid
+    }
+
+    $cid
 }
 
 # Pin files from the current folder to the local node, output the cyberlinks table
 export def 'pin-files' [
     ...files: string                # filenames to add into the local ipfs node
-    --cyberlink_filenames_to_their_files
+    --cyberlink_filenames_to_their_files (-n)
     --dont_append_to_cyberlinks_temp_csv (-d)
 ] {
     let files = (
         if $files == [] {
             ls | where type == file | get name
+        } else {
+            $files
         }
     )
 
@@ -179,7 +252,7 @@ export def 'pin-files' [
                 |it| pin-text $it 
                 } 
             | wrap from 
-            | merge {$cid_table}
+            | merge $cid_table
         } else {
             $cid_table
         }
@@ -205,8 +278,29 @@ export def 'link-texts' [
     let cid_to = (pin-text $text_to)
     
     let $out_table = (
-        [[from to 'from_text' 'to_text'];
-        [$cid_from $cid_to $text_from $text_to]]
+        [['from_text' 'to_text' from to];
+        [$text_from $text_to $cid_from $cid_to]]
+    )
+
+    if $dont_append_to_cyberlinks_temp_csv {
+        $out_table
+    } else {
+        $out_table | tmp-append
+    }
+}
+
+# Add a tweet
+export def 'tweet' [
+    text_to
+    --dont_append_to_cyberlinks_temp_csv (-d)
+] {
+    # let cid_from = pin-text "tweet"
+    let cid_from = 'QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx'
+    let cid_to = (pin-text $text_to)
+    
+    let $out_table = (
+        [['from_text' 'to_text' from to];
+        ['tweet' $text_to $cid_from $cid_to]]
     )
 
     if $dont_append_to_cyberlinks_temp_csv {
@@ -227,10 +321,8 @@ export def 'link-chuck' [
         "> " + (fetch https://api.chucknorris.io/jokes/random).value + 
         "\n\n" + "via [Chucknorris.io](https://chucknorris.io)"
     )
-    
-    echo "========" 
-    echo $quote 
-    echo "========\n"
+
+    $quote | cprint -f "="
 
     let cid_to = (pin-text $quote)
     
@@ -256,14 +348,23 @@ export def 'link-quote' [] {
     )
 
     let quoteAuthor = (
-        if $q1.quoteAuthor == '' {
-            'quote'
+        if $q1.quoteAuthor == "" {
+            ""
         } else {
-            $q1.quoteAuthor
+            "\n\n>> " + $q1.quoteAuthor
         }
     )
 
-    link-texts $quoteAuthor $q1.quoteText | tmp-append
+    let quote = (
+        "> " + $q1.quoteText + 
+        $quoteAuthor +
+        "\n\n" + "via [forismatic.com](https://forismatic.com)"
+    )
+
+    $quote | cprint -f '='
+
+    link-texts 'quote' $quote
+    # link-texts 'QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna' $quote
 }
 
 #################################################
@@ -284,66 +385,65 @@ export def 'tmp-append' [
     )
 
     (
-        tmp-view 
+        tmp-view -d 
         | append $cyberlinks 
         | tmp-replace
     )
-
-    # if (not $dont_show_out_table)  {
-    #     echo "Current temp cyberlinks table:" 
-    #     tmp-view 
-    # }
-    
 }
 
 # Replace cyberlinks in the temp table
 export def 'tmp-replace' [
     cyberlinks?             # cyberlinks table
-    --dont_show_out_table   
+    --dont_show_out_table (-d)   
 ] {
     let cyberlinks = if ($cyberlinks | is-empty) {$in} else {$cyberlinks}
 
     (
         $cyberlinks 
-        | save $env.cy.path.cyberlinks-csv-temp --force
+        | save $"($env.HOME)/cy/cyberlinks_temp.csv" --force
     )
 
     if (not $dont_show_out_table)  {
-        # echo "Current temp cyberlinks table:" 
         tmp-view
     }
     
 }
 
 # View the temp cyberlinks table
-export def 'tmp-view' [] {
-    let t1 = open $env.cy.path.cyberlinks-csv-temp 
-    # if (($t1 | length) == 0) {[[from to from_text to_text];["" "" "" ""]]} 
-    $t1
+export def 'tmp-view' [
+    --disable_title (-d) # show title
+] {
+    let tmp_links = open $"($env.HOME)/cy/cyberlinks_temp.csv" 
+
+    let links_count = ($tmp_links | length)
+
+    if (not $disable_title) {
+        if $links_count == 0 {
+            $"The temp cyberlinks table ($"($env.HOME)/cy/cyberlinks_temp.csv") is empty now!" | cprint -c red
+            $"You can add cyberlinks to it manually or by using commands like 'cy link-texts'" | cprint
+        } else {
+            $"There are ($links_count) cyberlinks in the temp table:" | cprint -c green_underline
+        }
+    }
+
+    $tmp_links
 }
 
 # Empty the temp cyberlinks table
 export def 'tmp-clear' [] {
-    let dt1 = (date now | date format '%Y%m%d-%H%M%S')
-    let path2 = $env.cy.path.backups + 'cyberlinks_temp_' + $dt1 + '.csv'
+    backup1 $"($env.HOME)/cy/cyberlinks_temp.csv" 
 
-    if (
-        $env.cy.path.cyberlinks-csv-temp
-        | path exists 
-    ) {
-        ^mv $env.cy.path.cyberlinks-csv-temp $path2
-    }
-
-    'from,to,from_text,to_text' | save $env.cy.path.cyberlinks-csv-temp --force
+    'from,to,from_text,to_text' | save $"($env.HOME)/cy/cyberlinks_temp.csv" --force
+    print "TMP-table is clear now."
 }
 
 #################################################
 
-# Add a text particle into 'to' column of the temp cyberlinks table
+# Add a text particle into the 'to' column of the temp cyberlinks table
 export def 'tmp-link-to' [
     text: string  # a text to upload to ipfs
 ] {
-    tmp-view
+    tmp-view -d
     | upsert to (pin-text $text)
     | upsert to_text $text 
     | tmp-replace
@@ -353,35 +453,80 @@ export def 'tmp-link-to' [
 export def 'tmp-link-from' [
     text: string                    # a text to upload to ipfs
 ] {
-    tmp-view
+    tmp-view -d
     | upsert from (pin-text $text) 
     | upsert from_text $text
     | tmp-replace
 }
 
-#################################################
+# Pin values from a given column to IPFS node and add a column with their CIDs
+export def 'tmp-pin-col' [
+    --column_with_text: string = 'text' # a column name to take values from to upload to IPFS. If is ommited, the default value is 'text'
+    --column_to_write_cid: string = 'from' # a column name to write CIDs to. If this option is ommited, the default value is 'from'
+] {
 
-def 'tx sign and broadcast' [] {
-    if $env.cy.exec == 'cyber' {
-        ( cyber tx sign $env.cy.path.tx-unsigned --from $env.cy.address  
-            --chain-id $env.cy.chain-id 
-            # --keyring-backend $env.cy.keyring-backend 
-            --output-document $env.cy.path.tx-signed )
 
-        cyber tx broadcast $env.cy.path.tx-signed --broadcast-mode block --output json
+    let new_text_col_name = ( $column_to_write_cid + '_text' )
+
+    tmp-view -d 
+    | upsert $column_to_write_cid {
+        |it| $it | get $column_with_text | pin-text 
+        }
+    | rename -c [$column_with_text $new_text_col_name]
+    | tmp-replace
+
+}
+
+# Check if any of the links in tmp table exist
+def 'link-exist' [
+    from
+    to
+    neuron
+] {
+    let out1 = (do -i { 
+        ^($env.cy.exec) query rank is-exist $from $to $neuron --output json --node $env.cy.rpc-address | complete 
+    })
+
+    if $out1.exit_code == 0 {
+        $out1.stdout | from json | get "exist"
     } else {
-        ( pussy tx sign $env.cy.path.tx-unsigned --from $env.cy.address  
-            --chain-id $env.cy.chain-id 
-            # --keyring-backend $env.cy.keyring-backend 
-            --output-document $env.cy.path.tx-signed )
-
-        pussy tx broadcast $env.cy.path.tx-signed --broadcast-mode block --output json
+        false
     }
 }
 
+# Remove existed cyberlinks from the temp cyberlinks table
+export def 'tmp-remove-existed' [] {
+    let links_with_status = (
+        tmp-view -d 
+        | upsert link_exist {
+            |row| (link-exist  $row.from $row.to $env.cy.address)
+        }
+    )
+
+    let existed_links = (
+        $links_with_status 
+        | filter {|x| $x.link_exist} 
+    )
+
+    let existed_links_count = ($existed_links | length)
+
+    if $existed_links_count > 0 {
+        
+        $"($existed_links_count) cyberlink/s was/were already created by ($env.cy.address)" | cprint 
+        print $existed_links
+        "So they were removed from the temp table!" | cprint -c red -a 2
+        
+        $links_with_status | filter {|x| not $x.link_exist} | tmp-replace
+    } else {
+        "There are no cyberlinks from the tmp table for the current adress exist in the blockchain" | cprint
+    }
+}
+
+#################################################
+
 # Create a custom unsigned cyberlinks transaction
 def 'create tx json from temp cyberlinks' [] {
-    let cyberlinks = (tmp-view | select from to)
+    let cyberlinks = (tmp-view -d | select from to)
 
     let neuron = $env.cy.address
 
@@ -399,18 +544,50 @@ def 'create tx json from temp cyberlinks' [] {
     $trans 
     | upsert body.messages.neuron $neuron 
     | upsert body.messages.links $cyberlinks 
-    | save $env.cy.path.tx-unsigned --force
+    | save $"($env.HOME)/cy/temp/tx-unsigned.json" --force
+}
+
+def 'tx sign and broadcast' [] {
+    ( 
+        ^($env.cy.exec) tx sign $"($env.HOME)/cy/temp/tx-unsigned.json" --from $env.cy.address  
+        --chain-id $env.cy.chain-id 
+        --node $env.cy.rpc-address
+        # --keyring-backend $env.cy.keyring-backend 
+        --output-document $"($env.HOME)/cy/temp/tx-signed.json" 
+
+        | complete 
+        | if ($in.exit_code != 0) {
+            error make {msg: 'Error of signing the transaction!'}
+        }
+    )
+
+    let broadcast_complete = (
+        ^($env.cy.exec) tx broadcast $"($env.HOME)/cy/temp/tx-signed.json" 
+        --broadcast-mode block 
+        --output json 
+        --node $env.cy.rpc-address
+        | complete 
+    )
+
+    if ($broadcast_complete.exit_code != 0 ) {
+        error make {
+            msg: 'exit code is not 0'
+        }
+    } else {
+        $broadcast_complete.stdout
+    }
 }
 
 # Create a tx from the temp cyberlinks table, sign and broadcast it
 export def 'tx-send' [] {
     if not (is-connected) {
-        error make {msg: "there is no internet!"}
+        error make {msg: 'there is no internet!'}
     }
 
     create tx json from temp cyberlinks
 
     let var0 = tx sign and broadcast
+    let cyberlinks_count = (tmp-view -d | length)
 
     let _var = ( 
         $var0 
@@ -419,28 +596,29 @@ export def 'tx-send' [] {
     )
     
     if $_var.code == 0 {
-        {'cy': 'cyberlinks should be successfully sent'} 
+        {'cy': $'($cyberlinks_count) cyberlinks should be successfully sent'} 
         | merge $_var 
-        | select code txhash
+        | select cy code txhash
 
-        open $env.cy.path.cyberlinks-csv-archive 
+        open $"($env.HOME)/cy/cyberlinks_archive.csv" 
         | append (
-            tmp-view 
+            tmp-view -d 
             | upsert neuron $env.cy.address
         ) 
-        | save $env.cy.path.cyberlinks-csv-archive --force
+        | save $"($env.HOME)/cy/cyberlinks_archive.csv" --force
 
         tmp-clear
 
     } else {
-        {'cy': 'error!' } | merge $_var 
+        {'cy': 'If the problem is with the already existed cyberlinks, use "cy tmp-remove-existed"' } 
+        | merge $_var 
     }
 }
 
 #################################################
 
 # Copy a table from the pipe into clipboard (in tsv format)
-export def 'copy-tsv' [] {
+export def 'tsv-copy' [] {
     let _table = $in
     echo $_table
 
@@ -448,60 +626,183 @@ export def 'copy-tsv' [] {
 }
 
 # Paste a table from clipboard
-export def 'paste-tsv' [] {
+export def 'tsv-paste' [] {
     pbpaste | from tsv
 }
 
 #################################################
 
-
-# Upload values from a given column ('text' by default) to the local IPFS node and add a column with the new CIDs.
-export def 'tmp-pin-col' [
-    cyberlinks?: table
-    --column_with_text: string = 'text' # a column name to take values from to upload to IPFS. If is ommited, the default value is 'text'
-    --column_to_write_cid: string = 'from' # a column name to write CIDs to. If this option is ommited, the default value is 'from'
+# Update cy to the latest version
+export def 'update-cy' [
+    --development_version (-d)
 ] {
-    # let cyberlinks_in = $in
-    # let cyberlinks = if ($cyberlinks_in | is-empty) {$cyberlinks} else {$cyberlinks_in}
-    # echo $cyberlinks
 
-    let new_text_col_name = ( $column_to_write_cid + "_text" )
+    let url = if $development_version {
+        "https://raw.githubusercontent.com/cyber-prophet/cy/dev/cy.nu" 
+    } else {
+        "https://raw.githubusercontent.com/cyber-prophet/cy/main/cy.nu" 
+    }
 
-    tmp-view 
-    | upsert $column_to_write_cid {
-        |it| $it | get $column_with_text | pin-text 
-        }
-    | rename -c [$column_with_text $new_text_col_name]
-    | tmp-replace
+    mkdir ~/cy 
+    | fetch $url
+    | save ~/cy/cy.nu -f
+    
+    # overlay below freezes nu 0.7.3 inside Alacritty Version 0.11.0 (8dbaa0b)
+    # overlay use ~/cy/cy.nu as cy -p -r   
 
+}
+
+# Get a passport by providing a neuron's address
+export def 'get-passport-by-address' [
+    address
+] { 
+    let json = ($'{"active_passport": {"address": "($address)"}}')
+    (
+        cyber query wasm contract-state smart bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel $json 
+        --node https://rpc.bostrom.cybernode.ai:443 
+    ) | from json
+}
+
+# Get a passport by providing a neuron's nick
+export def 'get-passport-by-nick' [
+    nickname
+] { 
+    let json = ($'{"metadata_by_nickname": {"nickname": "($nickname)"}}')
+    (
+        cyber query wasm contract-state smart bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel $json 
+        --node https://rpc.bostrom.cybernode.ai:443 
+    ) | from json
+}
+
+# Set a passport's particle for a given nickname
+export def 'set-passport-particle' [
+    nickname
+    particle
+] {
+    let json = $'{"update_particle":{"nickname":"($nickname)","particle":"($particle)"}}'
+    (
+        cyber tx wasm execute bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel $json 
+        --from $env.cy.address 
+        --node https://rpc.bostrom.cybernode.ai:443 
+    ) | from json 
+}
+
+# An ordered list of cy commands
+export def 'help' [
+    --to_md (-m) # export table as markdown
+] {
+    let text = (
+        view-source cy 
+        | parse -r "(\n(# )(?<desc>.*?)(?:=?\n)export (def|def.env) '(?<command>.*)')"
+        | select command desc 
+        | upsert command {|row index| ('cy ' + $row.command)}
+    )
+    
+    if $to_md {
+        $text | to md 
+    } else {
+        $text | table --width (term size).columns
+    }
 }
 
 #################################################
 
-# An ordered list of cy commands
-export def 'help' [] {
-    echo "
-cy config               Create config JSON to set env variables, to use them as parameters in cyber cli
+def 'banner' [] {
+    print "
+     ____ _   _    
+    / ___) | | |   
+   ( (___| |_| |   
+    \\____)\\__  |   cy nushell module is loaded
+         (____/    have fun"
+}
 
-cy pin-text             Pin a text particle 
-cy pin-files            Pin files from the current folder to the local node, output the cyberlinks table
 
-cy link-texts           Add a 2-texts cyberlink to the temp table
-cy link-chuck           Add a random chuck norris cyberlink to the temp table
-cy link-quote           Add a random quote cyberlink to the temp table
+def parse-ipfs-table [] {parse -r '(?<status>\w+) (?<to>Qm\w{44}) (?<filename>.+)'}
 
-cy tmp-append           Append cyberlinks to the temp table
-cy tmp-view             View the temp cyberlinks table
-cy tmp-clear            Empty the temp cyberlinks table
+def is-cid [particle: string] {
+    ($particle =~ '^Qm\w{44}$') 
+}
 
-cy tmp-link-to          Add a text particle into 'to' column of the temp cyberlinks table
-cy tmp-link-from        Add a text particle into the 'from' column of the temp cyberlinks table
+def is-neuron [particle: string] {
+    ($particle =~ '^bostrom1\w{38}') 
+}
 
-cy tx-send              Create a tx from the temp cyberlinks table, sign and broadcast it
+def is-connected []  {
+    (do -i {fetch https://www.iana.org} | describe) == 'raw input'
+}
 
-cy copy-tsv             Copy a table from the pipe into clipboard (in tsv format)
-cy paste-tsv            Paste a table from clipboard
+# Print string colourfully
+def cprint [
+    ...args
+    --color (-c): string@'nu-complete colors' = 'default'
+    --frame (-f): string
+    --before (-b): int = 0
+    --after (-a): int = 1
+] {
+    mut text = if ($args == []) {
+        $in
+    } else {
+        $args | str join ' '
+    }
 
-cy tmp-pin-col          Upload values from a given column ('text' by default) to the local IPFS node and add a column w
-"
+    if $frame != null {
+        let width = (term size | get columns) - 2
+        $text = (
+            (" " | str rpad -l $width -c $frame) + "\n" +
+            (
+                $text 
+            ) + "\n" +
+            (" " | str rpad -l $width -c $frame)
+        )
+    }
+    seq 1 $before | each {|i| print ""}
+    $text | print $"(ansi $color)($in)(ansi reset)" -n 
+    seq 1 $after | each {|i| print ""}
+}
+
+def 'nu-complete colors' [] {
+    ansi --list | get name | each while {|it| if $it != 'reset' {$it} }
+}
+
+def 'if-empty' [
+    value? 
+    --alternative (-a): any
+] {
+     (
+         if ($value | is-empty) {
+             $alternative
+         } else {
+             $value
+         }
+     )
+ }
+
+def 'datetime_fn' [] {
+    date now | date format '%Y%m%d-%H%M%S'
+}
+
+def 'nu-complete-config-names' [] {
+    ls '~/cy/config/' -s
+    | sort-by modified -r 
+    | get name 
+    | parse '{short}.{ext}'  
+    | where ext == "yaml" 
+    | get short
+}
+
+def 'backup1' [
+    filename
+] {
+    let basename1 = ($filename | path basename)
+    let path2 = $"($env.HOME)/cy/backups/(datetime_fn)($basename1)"
+
+    if (
+        $filename
+        | path exists 
+    ) {
+        ^mv $filename $path2
+        print $"Previous version of ($filename) is backed up to ($path2)"
+    } else {
+        print $"($filename) does not exist"
+    }
 }
