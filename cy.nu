@@ -852,11 +852,31 @@ def 'backup1' [
         }
     }
 
+    def test-link-chuck [] {
+        let expect = [
+            1
+        ]
+    
+
+        let result = (
+            tmp-clear ;
+            link-chuck | length
+        )
+
+        if $result == $expect {
+            "passed"
+        } else {
+            $result
+        }
+    }
+
+
     export def run-tests [] {
         [
             [test result];
             ['link-texts' (do { test-link-texts })]
             ['link-files' (do { test-link-files })]
+            ['link-files' (do { test-link-chuck })]
         ]
     }
 # }
