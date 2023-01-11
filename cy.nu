@@ -229,7 +229,7 @@ export def 'pin text' [
 }
 
 # Pin files from the current folder to the local node, output the cyberlinks table
-export def 'pin-files' [
+export def 'pin files' [
     ...files: string                # filenames to add into the local ipfs node
     --cyberlink_filenames_to_their_files (-n)
     --dont_append_to_cyberlinks_temp_csv (-d)
