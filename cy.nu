@@ -265,7 +265,7 @@ export def 'pin-files' [
         $out_table
     } else {
         $out_table 
-        | tmp-append
+        | tmp append
  }
 }
 
@@ -288,7 +288,7 @@ export def 'link texts' [
     if $dont_append_to_cyberlinks_temp_csv {
         $out_table
     } else {
-        $out_table | tmp-append
+        $out_table | tmp append
  }
 }
 
@@ -309,7 +309,7 @@ export def 'tweet' [
     if $dont_append_to_cyberlinks_temp_csv {
         $out_table
     } else {
-        $out_table | tmp-append
+        $out_table | tmp append
  }
 }
 
@@ -338,7 +338,7 @@ export def 'link chuck' [
             $_table
         } else {(
             $_table
-            | tmp-append
+            | tmp append
  )}
 } 
 
