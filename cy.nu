@@ -10,15 +10,17 @@
 export-env { 
     banner
     let-env cy = try {
-        open ($env.HOME + '/cy/cy_config.json')
+        open $"($env.HOME)/cy/config/default.yaml"
     } catch {
-        'file "cy_config.json" was not found. Run "cy config"' | cprint -c green_underline
+        'file "/config/default.yaml" was not found. Run "cy config new"' | cprint -c green_underline
     }
 }
 
 # Create config JSON to set env variables, to use them as parameters in cyber cli
-export def-env 'config' [] {
-    'This wizzard will walk you through the setup of cy.' | cprint -c green_underline -a 2
+export def-env 'config new' [
+    config_name?: string@'nu-complete-config-names'
+] {
+    'This wizzard will walk you through the setup of CY.' | cprint -c green_underline -a 2
     'If you skip entering the value - the default will be used.' | cprint -c yellow_italic
     let cy_home = ($env.HOME + '/cy/')
 
@@ -27,16 +29,24 @@ export def-env 'config' [] {
 
     let _exec = if-empty (input) -a 'cyber'
 
-    'Here are the keys that you have:' | cprint -b 1
-
     let addr_table = (
         ^($_exec) keys list --output json 
         | from json 
         | flatten 
         | select name address
-    )
+        )
+        
+    if ($addr_table | length) > 0 {
+        'Here are the keys that you have:' | cprint -b 1
+        print $addr_table
+    } else {
 
-    print $addr_table
+        error make -u {msg: $'
+There are no addresses in ($_exec). To use CY you need to add one.
+You can do that by running the command "($_exec) keys add -h". 
+After adding a key - come back and launch this wizzard again'}
+    help: $'try "($_exec) keys add -h"'
+    }
     
     let address_def = ($addr_table | get address.0)
 
@@ -71,50 +81,111 @@ export def-env 'config' [] {
 
     'Select the ipfs service to use (kubo, cybernode, both). ' | cprint --before 1 --after 0
     'Default: cybernode' | cprint -c yellow_italic
-
     let ipfs_storage = if-empty (input) -a 'cybernode'
 
 
     let temp_env = {
+        'config-name': $config_name
         'exec': $_exec
         'address': $address
         'chain-id': $chain_id
         'ipfs-storage': $ipfs_storage
         'rpc-address': $rpc_address
-        'path': {
-            'cy_home': $cy_home
-            'cy_temp': ($cy_home + 'temp/')
-            'backups': ($cy_home + 'backups/')
-            'cyberlinks-csv-temp': ($cy_home + 'cyberlinks_temp.csv')
-            'cyberlinks-csv-archive': ($cy_home + 'cyberlinks_archive.csv')
-            'tx-signed' : ($cy_home + 'temp/tx-signed.json')
-            'tx-unsigned' : ($cy_home + 'temp/tx-unsigned.json')
-        }
     } 
     
-    mkdir $temp_env.path.cy_temp
-    mkdir $temp_env.path.backups
+    mkdir ~/cy/temp/
+    mkdir ~/cy/backups/
+    mkdir ~/cy/config/
 
-    $temp_env | save ($temp_env.path.cy_home + 'cy_config.json') --force
-    
-    let-env cy = $temp_env
+    $temp_env | config save $config_name
 
     if (
-        not ($env.cy.path.cyberlinks-csv-temp | path exists)
+        not ($"($env.HOME)/cy/cyberlinks_temp.csv" | path exists)
     ) {
-        'from,to' | save $env.cy.path.cyberlinks-csv-temp
+        'from,to' | save $"($env.HOME)/cy/cyberlinks_temp.csv"
     }
 
     if (
-        not ($env.cy.path.cyberlinks-csv-archive | path exists)
+        not ($"($env.HOME)/cy/cyberlinks_archive.csv" | path exists)
     ) {
-        'from,to,address,timestamp,txhash' | save $env.cy.path.cyberlinks-csv-archive
+        'from,to,address,timestamp,txhash' | save $"($env.HOME)/cy/cyberlinks_archive.csv"
     }
-
-    'config JSON was updated. You can find below what was written there.' | cprint -c green_underline
-    
-    echo $env.cy
 }
+
+# View a saved JSON config file
+export def 'config view' [
+    config_name?: string@'nu-complete-config-names'
+] {
+    if $config_name == null {
+        print "current config is:"
+        open $"($env.HOME)/cy/config/default.yaml"
+    } else {
+        let filename = $"($env.HOME)/cy/config/($config_name).yaml"
+        open $filename 
+    }
+}
+
+# Save the piped in JSON config file
+export def-env 'config save' [
+    config_name?: string@'nu-complete-config-names'
+    --inactive # Don't activate current config
+] {
+    let in_config = $in
+
+    let config_name = (
+        if $config_name == null {
+            "Enter the name of the config file to save. " | cprint --before 1 --after 0
+            $"Default: (datetime_fn)" | cprint -c yellow_italic 
+            input 
+        } else {
+            $config_name
+        }
+    )
+    let config_name = (if-empty $config_name -a datetime_fn)
+
+    mut file_name = $"($env.HOME)/cy/config/($config_name).yaml"
+
+    if ($file_name | path exists) {
+        let prompt1 = (input $"($file_name) exists. Do you want to overwrite it? \(y/n\) ")
+
+        if $prompt1 == "y" {
+            backup1 $file_name
+            $in_config | save $file_name -f
+        } else {
+            $file_name = $"($env.HOME)/cy/config/(datetime_fn).yaml"
+            $in_config | save $file_name
+        }
+    } else {
+        $in_config | save $file_name -f
+    }
+
+    print $"($file_name) is saved"
+
+    if (not $inactive) {
+        $in_config | config activate
+    }
+}
+
+# Activate config JSON
+export def-env 'config activate' [
+    config_name?: string@'nu-complete-config-names'
+] {
+    let inconfig = $in
+    let file = (
+        if $inconfig == $nothing {
+            config view $config_name
+        } else {
+            $inconfig 
+        }
+    )
+
+    let-env cy = $file
+    $file | save $"($env.HOME)/cy/config/default.yaml" -f
+
+    print $file
+    print "Config is loaded"
+}
+
 
 #################################################
 
@@ -131,7 +202,7 @@ export def 'pin-text' [
         | into string # To coerce numbers into strings
     ) 
 
-    let cid = if (is-cid $text) {$text} else {
+    let cid = if (is-cid $text) {$text; return} else {
         let cid = if (
             ($env.cy.ipfs-storage == 'kubo') or ($env.cy.ipfs-storage == 'both')
             ) {
@@ -332,7 +403,7 @@ export def 'tmp-replace' [
 
     (
         $cyberlinks 
-        | save $env.cy.path.cyberlinks-csv-temp --force
+        | save $"($env.HOME)/cy/cyberlinks_temp.csv" --force
     )
 
     if (not $dont_show_out_table)  {
@@ -345,13 +416,13 @@ export def 'tmp-replace' [
 export def 'tmp-view' [
     --disable_title (-d) # show title
 ] {
-    let tmp_links = open $env.cy.path.cyberlinks-csv-temp 
+    let tmp_links = open $"($env.HOME)/cy/cyberlinks_temp.csv" 
 
     let links_count = ($tmp_links | length)
 
     if (not $disable_title) {
         if $links_count == 0 {
-            $"The temp cyberlinks table ($env.cy.path.cyberlinks-csv-temp) is empty now!" | cprint -c red
+            $"The temp cyberlinks table ($"($env.HOME)/cy/cyberlinks_temp.csv") is empty now!" | cprint -c red
             $"You can add cyberlinks to it manually or by using commands like 'cy link-texts'" | cprint
         } else {
             $"There are ($links_count) cyberlinks in the temp table:" | cprint -c green_underline
@@ -363,17 +434,10 @@ export def 'tmp-view' [
 
 # Empty the temp cyberlinks table
 export def 'tmp-clear' [] {
-    let dt1 = (date now | date format '%Y%m%d-%H%M%S')
-    let path2 = $env.cy.path.backups + 'cyberlinks_temp_' + $dt1 + '.csv'
+    backup1 $"($env.HOME)/cy/cyberlinks_temp.csv" 
 
-    if (
-        $env.cy.path.cyberlinks-csv-temp
-        | path exists 
-    ) {
-        ^mv $env.cy.path.cyberlinks-csv-temp $path2
-    }
-
-    'from,to,from_text,to_text' | save $env.cy.path.cyberlinks-csv-temp --force
+    'from,to,from_text,to_text' | save $"($env.HOME)/cy/cyberlinks_temp.csv" --force
+    print "TMP-table is clear now."
 }
 
 #################################################
@@ -483,16 +547,16 @@ def 'create tx json from temp cyberlinks' [] {
     $trans 
     | upsert body.messages.neuron $neuron 
     | upsert body.messages.links $cyberlinks 
-    | save $env.cy.path.tx-unsigned --force
+    | save $"($env.HOME)/cy/temp/tx-unsigned.json" --force
 }
 
 def 'tx sign and broadcast' [] {
     ( 
-        ^($env.cy.exec) tx sign $env.cy.path.tx-unsigned --from $env.cy.address  
+        ^($env.cy.exec) tx sign $"($env.HOME)/cy/temp/tx-unsigned.json" --from $env.cy.address  
         --chain-id $env.cy.chain-id 
         --node $env.cy.rpc-address
         # --keyring-backend $env.cy.keyring-backend 
-        --output-document $env.cy.path.tx-signed 
+        --output-document $"($env.HOME)/cy/temp/tx-signed.json" 
 
         | complete 
         | if ($in.exit_code != 0) {
@@ -501,7 +565,7 @@ def 'tx sign and broadcast' [] {
     )
 
     let broadcast_complete = (
-        ^($env.cy.exec) tx broadcast $env.cy.path.tx-signed 
+        ^($env.cy.exec) tx broadcast $"($env.HOME)/cy/temp/tx-signed.json" 
         --broadcast-mode block 
         --output json 
         --node $env.cy.rpc-address
@@ -539,12 +603,12 @@ export def 'tx-send' [] {
         | merge $_var 
         | select cy code txhash
 
-        open $env.cy.path.cyberlinks-csv-archive 
+        open $"($env.HOME)/cy/cyberlinks_archive.csv" 
         | append (
             tmp-view -d 
             | upsert neuron $env.cy.address
         ) 
-        | save $env.cy.path.cyberlinks-csv-archive --force
+        | save $"($env.HOME)/cy/cyberlinks_archive.csv" --force
 
         tmp-clear
 
@@ -666,7 +730,6 @@ def is-neuron [particle: string] {
     ($particle =~ '^bostrom1\w{38}') 
 }
 
-
 def is-connected []  {
     (do -i {fetch https://www.iana.org} | describe) == 'raw input'
 }
@@ -691,10 +754,6 @@ def cprint [
             (" " | str rpad -l $width -c $frame) + "\n" +
             (
                 $text 
-                # | split row "\n" 
-                # | each {
-                #     str replace "(^.)" "    $1"
-                # } | str collect "\n"
             ) + "\n" +
             (" " | str rpad -l $width -c $frame)
         )
@@ -709,7 +768,7 @@ def 'nu-complete colors' [] {
 }
 
 def 'if-empty' [
-    value?
+    value? 
     --alternative (-a): any
 ] {
      (
@@ -720,3 +779,33 @@ def 'if-empty' [
          }
      )
  }
+
+def 'datetime_fn' [] {
+    date now | date format '%Y%m%d-%H%M%S'
+}
+
+def 'nu-complete-config-names' [] {
+    ls '~/cy/config/' -s
+    | sort-by modified -r 
+    | get name 
+    | parse '{short}.{ext}'  
+    | where ext == "yaml" 
+    | get short
+}
+
+def 'backup1' [
+    filename
+] {
+    let basename1 = ($filename | path basename)
+    let path2 = $"($env.HOME)/cy/backups/(datetime_fn)($basename1)"
+
+    if (
+        $filename
+        | path exists 
+    ) {
+        ^mv $filename $path2
+        print $"Previous version of ($filename) is backed up to ($path2)"
+    } else {
+        print $"($filename) does not exist"
+    }
+}
