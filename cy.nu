@@ -16,179 +16,6 @@ export-env {
     }
 }
 
-# Create config JSON to set env variables, to use them as parameters in cyber cli
-export def-env 'config new' [
-    config_name?: string@'nu-complete-config-names'
-] {
-    'This wizzard will walk you through the setup of CY.' | cprint -c green_underline -a 2
-    'If you skip entering the value - the default will be used.' | cprint -c yellow_italic
-    let cy_home = ($env.HOME + '/cy/')
-
-    'Choose the name of executable (cyber or pussy). ' | cprint --before 1 --after 0
-    'Default: cyber' | cprint -c yellow_italic
-
-    let _exec = if-empty (input) -a 'cyber'
-
-    let addr_table = (
-        ^($_exec) keys list --output json 
-        | from json 
-        | flatten 
-        | select name address
-        )
-        
-    if ($addr_table | length) > 0 {
-        'Here are the keys that you have:' | cprint -b 1
-        print $addr_table
-    } else {
-
-        error make -u {msg: $'
-There are no addresses in ($_exec). To use CY you need to add one.
-You can do that by running the command "($_exec) keys add -h". 
-After adding a key - come back and launch this wizzard again'}
-    help: $'try "($_exec) keys add -h"'
-    }
-    
-    let address_def = ($addr_table | get address.0)
-
-    'Enter the address to send transactions from. ' | cprint --before 1 --after 0
-    $'Default: ($address_def)' | cprint -c yellow_italic
-    let address = if-empty (input) -a $address_def
-
-
-    let chain_id_def = (if ($_exec == 'cyber') {
-            'bostrom'
-        } else {
-            'space-pussy'
-        }
-    )
-
-    'Enter the chain-id for interacting with the blockchain. ' | cprint --before 1 --after 0
-    $'Default: ($chain_id_def)' | cprint -c yellow_italic
-    let chain_id = if-empty (input) -a $chain_id_def
-
-
-    let rpc_def = (if ($_exec == 'cyber') {
-        'https://rpc.bostrom.cybernode.ai:443'
-    } else {
-        'https://rpc.space-pussy.cybernode.ai:443'
-    }
-)
-
-    'Enter the address of RPC api for interacting with the blockchain. ' | cprint --before 1 --after 0
-    $'Default: ($rpc_def)' | cprint -c yellow_italic
-    let rpc_address = if-empty (input) -a $rpc_def
-
-
-    'Select the ipfs service to use (kubo, cybernode, both). ' | cprint --before 1 --after 0
-    'Default: cybernode' | cprint -c yellow_italic
-    let ipfs_storage = if-empty (input) -a 'cybernode'
-
-
-    let temp_env = {
-        'config-name': $config_name
-        'exec': $_exec
-        'address': $address
-        'chain-id': $chain_id
-        'ipfs-storage': $ipfs_storage
-        'rpc-address': $rpc_address
-    } 
-    
-    mkdir ~/cy/temp/
-    mkdir ~/cy/backups/
-    mkdir ~/cy/config/
-
-    $temp_env | config save $config_name
-
-    if (
-        not ($"($env.HOME)/cy/cyberlinks_temp.csv" | path exists)
-    ) {
-        'from,to' | save $"($env.HOME)/cy/cyberlinks_temp.csv"
-    }
-
-    if (
-        not ($"($env.HOME)/cy/cyberlinks_archive.csv" | path exists)
-    ) {
-        'from,to,address,timestamp,txhash' | save $"($env.HOME)/cy/cyberlinks_archive.csv"
-    }
-}
-
-# View a saved JSON config file
-export def 'config view' [
-    config_name?: string@'nu-complete-config-names'
-] {
-    if $config_name == null {
-        print "current config is:"
-        open $"($env.HOME)/cy/config/default.yaml"
-    } else {
-        let filename = $"($env.HOME)/cy/config/($config_name).yaml"
-        open $filename 
-    }
-}
-
-# Save the piped in JSON config file
-export def-env 'config save' [
-    config_name?: string@'nu-complete-config-names'
-    --inactive # Don't activate current config
-] {
-    let in_config = $in
-
-    let config_name = (
-        if $config_name == null {
-            "Enter the name of the config file to save. " | cprint --before 1 --after 0
-            $"Default: (datetime_fn)" | cprint -c yellow_italic 
-            input 
-        } else {
-            $config_name
-        }
-    )
-    let config_name = (if-empty $config_name -a datetime_fn)
-
-    mut file_name = $"($env.HOME)/cy/config/($config_name).yaml"
-
-    if ($file_name | path exists) {
-        let prompt1 = (input $"($file_name) exists. Do you want to overwrite it? \(y/n\) ")
-
-        if $prompt1 == "y" {
-            backup1 $file_name
-            $in_config | save $file_name -f
-        } else {
-            $file_name = $"($env.HOME)/cy/config/(datetime_fn).yaml"
-            $in_config | save $file_name
-        }
-    } else {
-        $in_config | save $file_name -f
-    }
-
-    print $"($file_name) is saved"
-
-    if (not $inactive) {
-        $in_config | config activate
-    }
-}
-
-# Activate config JSON
-export def-env 'config activate' [
-    config_name?: string@'nu-complete-config-names'
-] {
-    let inconfig = $in
-    let file = (
-        if $inconfig == $nothing {
-            config view $config_name
-        } else {
-            $inconfig 
-        }
-    )
-
-    let-env cy = $file
-    $file | save $"($env.HOME)/cy/config/default.yaml" -f
-
-    print $file
-    print "Config is loaded"
-}
-
-
-#################################################
-
 # Pin a text particle
 export def 'pin text' [
     text_param?: string
@@ -689,6 +516,178 @@ export def 'set passport particle' [
         --node https://rpc.bostrom.cybernode.ai:443 
     ) | from json 
 }
+
+# Create config JSON to set env variables, to use them as parameters in cyber cli
+export def-env 'config new' [
+    config_name?: string@'nu-complete-config-names'
+] {
+    'This wizzard will walk you through the setup of CY.' | cprint -c green_underline -a 2
+    'If you skip entering the value - the default will be used.' | cprint -c yellow_italic
+    let cy_home = ($env.HOME + '/cy/')
+
+    'Choose the name of executable (cyber or pussy). ' | cprint --before 1 --after 0
+    'Default: cyber' | cprint -c yellow_italic
+
+    let _exec = if-empty (input) -a 'cyber'
+
+    let addr_table = (
+        ^($_exec) keys list --output json 
+        | from json 
+        | flatten 
+        | select name address
+        )
+        
+    if ($addr_table | length) > 0 {
+        'Here are the keys that you have:' | cprint -b 1
+        print $addr_table
+    } else {
+
+        error make -u {msg: $'
+There are no addresses in ($_exec). To use CY you need to add one.
+You can do that by running the command "($_exec) keys add -h". 
+After adding a key - come back and launch this wizzard again'}
+    help: $'try "($_exec) keys add -h"'
+    }
+    
+    let address_def = ($addr_table | get address.0)
+
+    'Enter the address to send transactions from. ' | cprint --before 1 --after 0
+    $'Default: ($address_def)' | cprint -c yellow_italic
+    let address = if-empty (input) -a $address_def
+
+
+    let chain_id_def = (if ($_exec == 'cyber') {
+            'bostrom'
+        } else {
+            'space-pussy'
+        }
+    )
+
+    'Enter the chain-id for interacting with the blockchain. ' | cprint --before 1 --after 0
+    $'Default: ($chain_id_def)' | cprint -c yellow_italic
+    let chain_id = if-empty (input) -a $chain_id_def
+
+
+    let rpc_def = (if ($_exec == 'cyber') {
+        'https://rpc.bostrom.cybernode.ai:443'
+    } else {
+        'https://rpc.space-pussy.cybernode.ai:443'
+    }
+)
+
+    'Enter the address of RPC api for interacting with the blockchain. ' | cprint --before 1 --after 0
+    $'Default: ($rpc_def)' | cprint -c yellow_italic
+    let rpc_address = if-empty (input) -a $rpc_def
+
+
+    'Select the ipfs service to use (kubo, cybernode, both). ' | cprint --before 1 --after 0
+    'Default: cybernode' | cprint -c yellow_italic
+    let ipfs_storage = if-empty (input) -a 'cybernode'
+
+
+    let temp_env = {
+        'config-name': $config_name
+        'exec': $_exec
+        'address': $address
+        'chain-id': $chain_id
+        'ipfs-storage': $ipfs_storage
+        'rpc-address': $rpc_address
+    } 
+    
+    mkdir ~/cy/temp/
+    mkdir ~/cy/backups/
+    mkdir ~/cy/config/
+
+    $temp_env | config save $config_name
+
+    if (
+        not ($"($env.HOME)/cy/cyberlinks_temp.csv" | path exists)
+    ) {
+        'from,to' | save $"($env.HOME)/cy/cyberlinks_temp.csv"
+    }
+
+    if (
+        not ($"($env.HOME)/cy/cyberlinks_archive.csv" | path exists)
+    ) {
+        'from,to,address,timestamp,txhash' | save $"($env.HOME)/cy/cyberlinks_archive.csv"
+    }
+}
+
+# View a saved JSON config file
+export def 'config view' [
+    config_name?: string@'nu-complete-config-names'
+] {
+    if $config_name == null {
+        print "current config is:"
+        open $"($env.HOME)/cy/config/default.yaml"
+    } else {
+        let filename = $"($env.HOME)/cy/config/($config_name).yaml"
+        open $filename 
+    }
+}
+
+# Save the piped in JSON config file
+export def-env 'config save' [
+    config_name?: string@'nu-complete-config-names'
+    --inactive # Don't activate current config
+] {
+    let in_config = $in
+
+    let config_name = (
+        if $config_name == null {
+            "Enter the name of the config file to save. " | cprint --before 1 --after 0
+            $"Default: (datetime_fn)" | cprint -c yellow_italic 
+            input 
+        } else {
+            $config_name
+        }
+    )
+    let config_name = (if-empty $config_name -a datetime_fn)
+
+    mut file_name = $"($env.HOME)/cy/config/($config_name).yaml"
+
+    if ($file_name | path exists) {
+        let prompt1 = (input $"($file_name) exists. Do you want to overwrite it? \(y/n\) ")
+
+        if $prompt1 == "y" {
+            backup1 $file_name
+            $in_config | save $file_name -f
+        } else {
+            $file_name = $"($env.HOME)/cy/config/(datetime_fn).yaml"
+            $in_config | save $file_name
+        }
+    } else {
+        $in_config | save $file_name -f
+    }
+
+    print $"($file_name) is saved"
+
+    if (not $inactive) {
+        $in_config | config activate
+    }
+}
+
+# Activate config JSON
+export def-env 'config activate' [
+    config_name?: string@'nu-complete-config-names'
+] {
+    let inconfig = $in
+    let file = (
+        if $inconfig == $nothing {
+            config view $config_name
+        } else {
+            $inconfig 
+        }
+    )
+
+    let-env cy = $file
+    $file | save $"($env.HOME)/cy/config/default.yaml" -f
+
+    print $file
+    print "Config is loaded"
+}
+
+#################################################
 
 # An ordered list of cy commands
 export def 'help' [
