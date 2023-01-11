@@ -59,12 +59,12 @@ source /Users/user/cy/cy.nu
         }
     }
 
-    def test-link-chuck [] {
-        let expect = 1
+    def test-tx-send [] {
+        let expect = 0
 
         let result = (
-            tmp-clear ;
-            link-chuck | length
+            config activate hot-pussy ;
+            tx-send | get code
         )
 
         if $result == $expect {
@@ -80,6 +80,7 @@ source /Users/user/cy/cy.nu
             ['link-texts' (do { test-link-texts })]
             ['link-files' (do { test-link-files })]
             ['link-chuck' (do { test-link-chuck })]
+            ['tx-send' (do { test-tx-send })]
         ]
     }
 # }
