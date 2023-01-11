@@ -199,7 +199,7 @@ export def 'pin-text' [
         | into string # To coerce numbers into strings
     ) 
 
-    let cid = if (is-cid $text) {$text} else {
+    let cid = if (is-cid $text) {$text; return} else {
         let cid = if (
             ($env.cy.ipfs-storage == 'kubo') or ($env.cy.ipfs-storage == 'both')
             ) {
