@@ -22,9 +22,9 @@ Cy - a [nushell](https://www.nushell.sh/) wrapper, an interface to the cyber fam
 |cy tweet|Add a tweet|
 |cy link chuck|Add a random chuck norris cyberlink to the temp table|
 |cy link quote|Add a random quote cyberlink to the temp table|
+|cy tmp view|View the temp cyberlinks table|
 |cy tmp append|Append cyberlinks to the temp table|
 |cy tmp replace|Replace cyberlinks in the temp table|
-|cy tmp view|View the temp cyberlinks table|
 |cy tmp clear|Empty the temp cyberlinks table|
 |cy tmp link to|Add a text particle into the 'to' column of the temp cyberlinks table|
 |cy tmp link from|Add a text particle into the 'from' column of the temp cyberlinks table|
