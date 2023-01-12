@@ -636,18 +636,22 @@ export def-env 'config save' [
 ] {
     let in_config = $in
 
+    let dt1 = datetime_fn
+
     let config_name = (
         if $config_name == null {
             "Enter the name of the config file to save. " | cprint --before 1 --after 0
-            $"Default: (datetime-fn)" | cprint -c yellow_italic 
+            $"Default: ($dt1)" | cprint -c yellow_italic 
             input 
         } else {
             $config_name
         }
     )
-    let config_name = (if-empty $config_name -a datetime-fn)
+    let config_name = (if-empty $config_name -a $dt1)
 
     mut file_name = $"($env.HOME)/cy/config/($config_name).yaml"
+
+    let in_config = ($in_config | upsert config-name $config_name)
 
     if ($file_name | path exists) {
         let prompt1 = (input $"($file_name) exists. Do you want to overwrite it? \(y/n\) ")
@@ -656,7 +660,7 @@ export def-env 'config save' [
             backup1 $file_name
             $in_config | save $file_name -f
         } else {
-            $file_name = $"($env.HOME)/cy/config/(datetime-fn).yaml"
+            $file_name = $"($env.HOME)/cy/config/($dt1).yaml"
             $in_config | save $file_name
         }
     } else {
@@ -782,7 +786,7 @@ def 'if-empty' [
      )
  }
 
-def 'datetime-fn' [] {
+def 'datetime_fn' [] {
     date now | date format '%Y%m%d-%H%M%S'
 }
 
@@ -799,7 +803,7 @@ def 'backup1' [
     filename
 ] {
     let basename1 = ($filename | path basename)
-    let path2 = $"($env.HOME)/cy/backups/(datetime-fn)($basename1)"
+    let path2 = $"($env.HOME)/cy/backups/(datetime_fn)($basename1)"
 
     if (
         $filename
