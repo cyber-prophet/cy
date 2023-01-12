@@ -4,5 +4,4 @@ cyberlinks_archive.csv
 cyberlinks_temp.csv
 temp/
 backups/
-release.nu
 *.yaml
