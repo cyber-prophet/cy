@@ -199,6 +199,26 @@ export def 'link quote' [] {
 
 #################################################
 
+# View the temp cyberlinks table
+export def 'tmp view' [
+    --disable_title (-d) # show title
+] {
+    let tmp_links = open $"($env.HOME)/cy/cyberlinks_temp.csv" 
+
+    let links_count = ($tmp_links | length)
+
+    if (not $disable_title) {
+        if $links_count == 0 {
+            $"The temp cyberlinks table ($"($env.HOME)/cy/cyberlinks_temp.csv") is empty now!" | cprint -c red
+            $"You can add cyberlinks to it manually or by using commands like 'cy link texts'" | cprint
+        } else {
+            $"There are ($links_count) cyberlinks in the temp table:" | cprint -c green_underline
+        }
+    }
+
+    $tmp_links
+}
+
 # Append cyberlinks to the temp table
 export def 'tmp append' [
     cyberlinks?             # cyberlinks table
@@ -239,26 +259,6 @@ export def 'tmp replace' [
     
 }
 
-# View the temp cyberlinks table
-export def 'tmp view' [
-    --disable_title (-d) # show title
-] {
-    let tmp_links = open $"($env.HOME)/cy/cyberlinks_temp.csv" 
-
-    let links_count = ($tmp_links | length)
-
-    if (not $disable_title) {
-        if $links_count == 0 {
-            $"The temp cyberlinks table ($"($env.HOME)/cy/cyberlinks_temp.csv") is empty now!" | cprint -c red
-            $"You can add cyberlinks to it manually or by using commands like 'cy link texts'" | cprint
-        } else {
-            $"There are ($links_count) cyberlinks in the temp table:" | cprint -c green_underline
-        }
-    }
-
-    $tmp_links
-}
-
 # Empty the temp cyberlinks table
 export def 'tmp clear' [] {
     backup1 $"($env.HOME)/cy/cyberlinks_temp.csv" 
@@ -291,8 +291,8 @@ export def 'tmp link from' [
 
 # Pin values from a given column to IPFS node and add a column with their CIDs
 export def 'tmp pin col' [
-    --column_with_text: string = 'text' # a column name to take values from to upload to IPFS. If is ommited, the default value is 'text'
-    --column_to_write_cid: string = 'from' # a column name to write CIDs to. If this option is ommited, the default value is 'from'
+    --column_with_text: string = 'text' # a column name to take values from to upload to IPFS. Default is 'text
+    --column_to_write_cid: string = 'from' # a column name to write CIDs to. Default is 'from'
 ] {
 
 
