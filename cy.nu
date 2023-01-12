@@ -483,7 +483,6 @@ export def 'update cy' [
 }
 
 # Get a passport by providing a neuron's address
-
 export def 'passport get by address' [
     address
 ] { 
@@ -496,7 +495,6 @@ export def 'passport get by address' [
 }
 
 # Get a passport by providing a neuron's nick
-
 export def 'passport get by nick' [
     nickname
 ] { 
@@ -509,7 +507,6 @@ export def 'passport get by nick' [
 }
 
 # Set a passport's particle for a given nickname
-
 export def 'passport set particle' [
     nickname
     particle
