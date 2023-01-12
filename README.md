@@ -30,13 +30,13 @@ Cy - a [nushell](https://www.nushell.sh/) wrapper, an interface to the cyber fam
 |cy tmp link from|Add a text particle into the 'from' column of the temp cyberlinks table|
 |cy tmp pin col|Pin values from a given column to IPFS node and add a column with their CIDs|
 |cy tmp remove existed|Remove existed cyberlinks from the temp cyberlinks table|
-|cy tx send|Create a tx from the temp cyberlinks table, sign and broadcast it|
+|cy tmp send tx|Create a tx from the temp cyberlinks table, sign and broadcast it|
 |cy tsv copy|Copy a table from the pipe into clipboard (in tsv format)|
 |cy tsv paste|Paste a table from clipboard|
 |cy update cy|Update cy to the latest version|
-|cy get passport by address|Get a passport by providing a neuron's address|
-|cy get passport by nick|Get a passport by providing a neuron's nick|
-|cy set passport particle|Set a passport's particle for a given nickname|
+|cy passport get by address|Get a passport by providing a neuron's address|
+|cy passport get by nick|Get a passport by providing a neuron's nick|
+|cy passport set particle|Set a passport's particle for a given nickname|
 |cy config new|Create config JSON to set env variables, to use them as parameters in cyber cli|
 |cy config view|View a saved JSON config file|
 |cy config save|Save the piped in JSON config file|
