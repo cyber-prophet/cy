@@ -59,12 +59,31 @@ source /Users/user/cy/cy.nu
         }
     }
 
-    def 'test tx send' [] {
+    def 'test tmp send tx' [] {
         let expect = 0
 
         let result = (
             config activate hot-pussy ;
             tx send | get code
+        )
+
+        if $result == $expect {
+            "passed"
+        } else {
+            $result
+        }
+    }
+
+    def 'test get passport by address' [] {
+            let expect = {data: {owner: "bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8", 
+            approvals: [], token_uri: null, extension: {addresses: null, 
+            avatar: "QmNprvRpqVsQEqEoTRJfZUB57RHEVSK2KLPsaHSULWb28j", 
+            nickname: maxim, data: null, 
+            particle: "QmRumrGFrqxayDpySEkhjZS1WEtMyJcfXiqeVsngqig3ak"}}
+        }
+
+        let result = (
+            cy get passport by address bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
         )
 
         if $result == $expect {
@@ -80,7 +99,8 @@ source /Users/user/cy/cy.nu
             ['link texts' (do { test link texts })]
             ['link files' (do { test link files })]
             ['link chuck' (do { test link chuck })]
-            ['tx send' (do { test tx send })]
+            ['tmp send tx' (do { test tmp send tx })]
+            ['get passport by address' (do { test get passport by address })]
         ]
     }
 # }
