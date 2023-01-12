@@ -636,13 +636,13 @@ export def-env 'config save' [
     let config_name = (
         if $config_name == null {
             "Enter the name of the config file to save. " | cprint --before 1 --after 0
-            $"Default: (datetime_fn)" | cprint -c yellow_italic 
+            $"Default: (datetime-fn)" | cprint -c yellow_italic 
             input 
         } else {
             $config_name
         }
     )
-    let config_name = (if-empty $config_name -a datetime_fn)
+    let config_name = (if-empty $config_name -a datetime-fn)
 
     mut file_name = $"($env.HOME)/cy/config/($config_name).yaml"
 
@@ -653,7 +653,7 @@ export def-env 'config save' [
             backup1 $file_name
             $in_config | save $file_name -f
         } else {
-            $file_name = $"($env.HOME)/cy/config/(datetime_fn).yaml"
+            $file_name = $"($env.HOME)/cy/config/(datetime-fn).yaml"
             $in_config | save $file_name
         }
     } else {
@@ -779,7 +779,7 @@ def 'if-empty' [
      )
  }
 
-def 'datetime_fn' [] {
+def 'datetime-fn' [] {
     date now | date format '%Y%m%d-%H%M%S'
 }
 
@@ -796,7 +796,7 @@ def 'backup1' [
     filename
 ] {
     let basename1 = ($filename | path basename)
-    let path2 = $"($env.HOME)/cy/backups/(datetime_fn)($basename1)"
+    let path2 = $"($env.HOME)/cy/backups/(datetime-fn)($basename1)"
 
     if (
         $filename
