@@ -64,7 +64,7 @@ source /Users/user/cy/cy.nu
 
         let result = (
             config activate hot-pussy ;
-            tx send | get code
+            tmp send tx | get code
         )
 
         if $result == $expect {
@@ -83,7 +83,7 @@ source /Users/user/cy/cy.nu
         }
 
         let result = (
-            cy get passport by address bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
+            passport get by address bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
         )
 
         if $result == $expect {
@@ -100,7 +100,7 @@ source /Users/user/cy/cy.nu
             ['link files' (do { test link files })]
             ['link chuck' (do { test link chuck })]
             ['tmp send tx' (do { test tmp send tx })]
-            ['get passport by address' (do { test get passport by address })]
+            ['passport get by address' (do { test get passport by address })]
         ]
     }
 # }
