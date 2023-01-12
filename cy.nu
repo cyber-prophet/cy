@@ -409,7 +409,7 @@ def 'tx sign and broadcast' [] {
 }
 
 # Create a tx from the temp cyberlinks table, sign and broadcast it
-export def 'tx send' [] {
+export def 'tmp send tx' [] {
     if not (is-connected) {
         error make {msg: 'there is no internet!'}
     }
