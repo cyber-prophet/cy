@@ -71,7 +71,7 @@ export def 'pin files' [
 
     let cid_table = (
         $files 
-        | each {|f| ipfs add $f -Q} 
+        | each {|f| ipfs add $f -Q | str replace '\n' ''} 
         | wrap to
     )
 
@@ -260,7 +260,7 @@ export def 'tmp clear' [] {
     backup1 $"($env.HOME)/cy/cyberlinks_temp.csv" 
 
     'from,to,from_text,to_text' | save $"($env.HOME)/cy/cyberlinks_temp.csv" --force
-    print "TMP-table is clear now."
+    # print "TMP-table is clear now."
 }
 
 # Add a text particle into the 'to' column of the temp cyberlinks table
@@ -796,7 +796,7 @@ def 'backup1' [
         | path exists 
     ) {
         ^mv $filename $path2
-        print $"Previous version of ($filename) is backed up to ($path2)"
+        # print $"Previous version of ($filename) is backed up to ($path2)"
     } else {
         print $"($filename) does not exist"
     }
