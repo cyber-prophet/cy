@@ -96,8 +96,6 @@ export def 'pin files' [
  }
 }
 
-#################################################
-
 # Add a 2-texts cyberlink to the temp table
 export def 'link texts' [
     text_from
@@ -197,17 +195,15 @@ export def 'link quote' [] {
     # link texts 'QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna' $quote
 }
 
-#################################################
-
 # View the temp cyberlinks table
 export def 'tmp view' [
-    --disable_title (-d) # show title
+    --quiet (-q) # Don't print info
 ] {
     let tmp_links = open $"($env.HOME)/cy/cyberlinks_temp.csv" 
 
     let links_count = ($tmp_links | length)
 
-    if (not $disable_title) {
+    if (not $quiet) {
         if $links_count == 0 {
             $"The temp cyberlinks table ($"($env.HOME)/cy/cyberlinks_temp.csv") is empty now!" | cprint -c red
             $"You can add cyberlinks to it manually or by using commands like 'cy link texts'" | cprint
@@ -235,7 +231,7 @@ export def 'tmp append' [
     )
 
     (
-        tmp view -d 
+        tmp view -q 
         | append $cyberlinks 
         | tmp replace
     )
@@ -254,7 +250,7 @@ export def 'tmp replace' [
     )
 
     if (not $dont_show_out_table)  {
-        tmp view
+        tmp view -q
     }
     
 }
@@ -267,13 +263,11 @@ export def 'tmp clear' [] {
     print "TMP-table is clear now."
 }
 
-#################################################
-
 # Add a text particle into the 'to' column of the temp cyberlinks table
 export def 'tmp link to' [
     text: string  # a text to upload to ipfs
 ] {
-    tmp view -d
+    tmp view -q
     | upsert to (pin text $text)
     | upsert to_text $text 
     | tmp replace
@@ -283,7 +277,7 @@ export def 'tmp link to' [
 export def 'tmp link from' [
     text: string                    # a text to upload to ipfs
 ] {
-    tmp view -d
+    tmp view -q
     | upsert from (pin text $text) 
     | upsert from_text $text
     | tmp replace
@@ -298,7 +292,7 @@ export def 'tmp pin col' [
 
     let new_text_col_name = ( $column_to_write_cid + '_text' )
 
-    tmp view -d 
+    tmp view -q 
     | upsert $column_to_write_cid {
         |it| $it | get $column_with_text | pin text 
         }
@@ -327,7 +321,7 @@ def 'link-exist' [
 # Remove existed cyberlinks from the temp cyberlinks table
 export def 'tmp remove existed' [] {
     let links_with_status = (
-        tmp view -d 
+        tmp view -q 
         | upsert link_exist {
             |row| (link-exist  $row.from $row.to $env.cy.address)
         }
@@ -352,11 +346,9 @@ export def 'tmp remove existed' [] {
     }
 }
 
-#################################################
-
 # Create a custom unsigned cyberlinks transaction
 def 'create tx json from temp cyberlinks' [] {
-    let cyberlinks = (tmp view -d | select from to)
+    let cyberlinks = (tmp view -q | select from to)
 
     let neuron = $env.cy.address
 
@@ -417,7 +409,7 @@ export def 'tmp send tx' [] {
     create tx json from temp cyberlinks
 
     let var0 = tx sign and broadcast
-    let cyberlinks_count = (tmp view -d | length)
+    let cyberlinks_count = (tmp view -q | length)
 
     let _var = ( 
         $var0 
@@ -428,7 +420,7 @@ export def 'tmp send tx' [] {
     if $_var.code == 0 {
         open $"($env.HOME)/cy/cyberlinks_archive.csv" 
         | append (
-            tmp view -d 
+            tmp view -q 
             | upsert neuron $env.cy.address
         ) 
         | save $"($env.HOME)/cy/cyberlinks_archive.csv" --force
@@ -445,8 +437,6 @@ export def 'tmp send tx' [] {
     }
 }
 
-#################################################
-
 # Copy a table from the pipe into clipboard (in tsv format)
 export def 'tsv copy' [] {
     let _table = $in
@@ -459,8 +449,6 @@ export def 'tsv copy' [] {
 export def 'tsv paste' [] {
     pbpaste | from tsv
 }
-
-#################################################
 
 # Update cy to the latest version
 export def 'update cy' [
@@ -694,8 +682,6 @@ export def-env 'config activate' [
     print "Config is loaded"
 }
 
-#################################################
-
 # An ordered list of cy commands
 export def 'help' [
     --to_md (-m) # export table as markdown
@@ -714,15 +700,17 @@ export def 'help' [
     }
 }
 
-#################################################
-
 def 'banner' [] {
-    print "
+    print $"
      ____ _   _    
-    / ___) | | |   
-   ( (___| |_| |   
-    \\____)\\__  |   cy nushell module is loaded
-         (____/    have fun"
+    / ___\) | | |   
+   \( \(___| |_| |   
+    \\____)\\__  |   (ansi yellow)cy(ansi reset) nushell module is loaded
+         \(____/    have fun"
+}
+
+def 'banner2' [] {
+    print "(ansi yellow)cy(ansi reset) is loaded"
 }
 
 
