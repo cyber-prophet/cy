@@ -58,8 +58,8 @@ export def 'pin text' [
 # Pin files from the current folder to the local node, output the cyberlinks table
 export def 'pin files' [
     ...files: string                # filenames to add into the local ipfs node
-    --cyberlink_filenames_to_their_files (-n)
-    --dont_append_to_cyberlinks_temp_csv (-d)
+    --link_filenames (-n)
+    --dont_append (-d)
 ] {
     let files = (
         if $files == [] {
@@ -71,13 +71,13 @@ export def 'pin files' [
 
     let cid_table = (
         $files 
-        | each {|f| ipfs add $f} 
-        | parse-ipfs-table 
+        | each {|f| ipfs add $f -Q} 
+        | wrap to
     )
 
     let out_table = (
-        if $cyberlink_filenames_to_their_files {
-            $cid_table.filename 
+        if $link_filenames {
+            $files
             | each {
                 |it| pin text $it 
                 } 
@@ -88,7 +88,7 @@ export def 'pin files' [
         }
     )
 
-    if $dont_append_to_cyberlinks_temp_csv {
+    if $dont_append {
         $out_table
     } else {
         $out_table 
@@ -102,7 +102,7 @@ export def 'pin files' [
 export def 'link texts' [
     text_from
     text_to
-    --dont_append_to_cyberlinks_temp_csv (-d)
+    --dont_append (-d)
 ] {
     let cid_from = (pin text $text_from)
     let cid_to = (pin text $text_to)
@@ -112,7 +112,7 @@ export def 'link texts' [
         [$text_from $text_to $cid_from $cid_to]]
     )
 
-    if $dont_append_to_cyberlinks_temp_csv {
+    if $dont_append {
         $out_table
     } else {
         $out_table | tmp append
@@ -122,7 +122,7 @@ export def 'link texts' [
 # Add a tweet
 export def 'tweet' [
     text_to
-    --dont_append_to_cyberlinks_temp_csv (-d)
+    --dont_append (-d)
 ] {
     # let cid_from = pin text "tweet"
     let cid_from = 'QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx'
@@ -133,7 +133,7 @@ export def 'tweet' [
         ['tweet' $text_to $cid_from $cid_to]]
     )
 
-    if $dont_append_to_cyberlinks_temp_csv {
+    if $dont_append {
         $out_table
     } else {
         $out_table | tmp append
@@ -142,7 +142,7 @@ export def 'tweet' [
 
 # Add a random chuck norris cyberlink to the temp table
 export def 'link chuck' [
-    --dont_append_to_cyberlinks_temp_csv (-d)
+    --dont_append (-d)
 ] {
     # let cid_from = (pin text 'chuck norris')
     let cid_from = 'QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1'
@@ -161,7 +161,7 @@ export def 'link chuck' [
         ['chuck norris' $quote $cid_from $cid_to]]
     )
 
-    if $dont_append_to_cyberlinks_temp_csv {
+    if $dont_append {
             $_table
         } else {(
             $_table
@@ -726,8 +726,6 @@ def 'banner' [] {
 }
 
 
-def parse-ipfs-table [] {parse -r '(?<status>\w+) (?<to>Qm\w{44}) (?<filename>.+)'}
-
 def is-cid [particle: string] {
     ($particle =~ '^Qm\w{44}$') 
 }
@@ -814,4 +812,116 @@ def 'backup1' [
     } else {
         print $"($filename) does not exist"
     }
+}
+
+# Print string colourfully
+def cecho [
+    ...args
+    --color (-c): string@'nu-complete colors' = 'default'
+    --frame (-f): string
+    --framecolor: string@'nu-complete colors' = 'default'
+    --before (-b): int = 0
+    --after (-a): int = 1
+    --remleadspaces (-r)
+    --indent (-i) = 0
+    --width (-w) = 120
+    --print (-p)
+    --md (-M) # Disable parsing and rendering of markdown tags
+    --mdcolor (-m): string@'nu-complete colors' = 'green'
+] {
+    mut text = if ($args == []) {
+        $in
+    } else {
+        $args | str join ' '
+    }
+
+    if $remleadspaces {
+        $text = (
+            $text 
+            | split row "\n"
+            | each {
+                |i| $i 
+                | str replace "^[ \t]+" ""
+            }
+            | str join "\n"
+        )
+    }
+
+
+    if $indent > 0 {
+        let indent_spaces = (seq 1 $indent | each {|i| " "} | str join "")
+
+        $text = (
+            $text 
+            | split row "\n"
+            | each {
+                |i| [$indent_spaces $i] | str join ""
+            }
+            | str join "\n"
+        )
+    }
+
+    if (not $md) {
+        $text = (mdown $text --mdcolor $mdcolor --defcolor $color )
+    } else {
+        $text = $"(ansi $color)($text)(ansi reset)"
+    }
+
+    if $frame != null {
+        let width = (term size | get columns)
+        $text = ( [
+            (seq 1 $width | each {|i| $frame} | str join "" | $"(ansi ($framecolor))($in)(ansi reset)" ) 
+            $text 
+            (seq 1 $width | each {|i| $frame} | str join "" | $"(ansi ($framecolor))($in)(ansi reset)")
+        ] | str join "\n" )
+    }
+
+    let output = ([
+        (seq 1 $before | each {|i| "\n"} | str join "")
+        $text
+        (seq 1 $after | each {|i| "\n"} | str join "")
+    ] | str join "")
+
+    if $print {
+        print $output
+    } else {
+        $output
+    }
+}
+
+def mdown [
+    text
+    --mdcolor (-c) = green
+    --defcolor (-d) = default
+] {
+
+    let t1 =  {
+        '**': $'(ansi reset)(ansi -e {fg: ($mdcolor) attr: b})', 
+        '*': $'(ansi reset)(ansi -e {fg: ($mdcolor) attr: i})', 
+        '_': $'(ansi reset)(ansi -e {fg: ($mdcolor) attr: u})'
+    }
+
+    let t2 = {
+        '**': $'(ansi reset)(ansi -e {fg: ($defcolor)})', 
+        '*': $'(ansi reset)(ansi -e {fg: ($defcolor)})', 
+        '_': $'(ansi reset)(ansi -e {fg: ($defcolor)})'
+    }
+
+    $text
+    | $"(ansi -e {fg: ($defcolor)})($text)(ansi reset)"
+    | split row "\n"
+    | each {
+        |l| $l 
+        | split row " "
+        | each {
+            |w|
+            $w
+            | parse -r "^(?<start>\\*{1,2}|_)?(?<a>.+?)(?<end>\\*{1,2}|_)?$"
+            | upsert fin {
+                |i|  $"($t1 | get -i $i.start)($i.a)($t2 | get -i $i.end)"
+            }
+            | get -i fin 
+            | str join ""
+         } | str join " "
+    } | str join "\n"
 }
