@@ -33,7 +33,7 @@ source /Users/user/cy/cy.nu
             cd /Users/user/apps-files/github/cytests/files;
             tmp clear ;
             # pin files
-            pin files --cyberlink_filenames_to_their_files
+            pin files --link_filenames
             | select from to
         )
 
