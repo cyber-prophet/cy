@@ -29,7 +29,7 @@ export def 'pin text' [
         | into string # To coerce numbers into strings
     ) 
 
-    let cid = if (is-cid $text) {$text; return} else {
+    let cid = if (is-cid $text) {$text} else {
         let cid = if (
             ($env.cy.ipfs-storage == 'kubo') or ($env.cy.ipfs-storage == 'both')
             ) {
@@ -127,8 +127,10 @@ export def 'tweet' [
     let cid_to = (pin text $text_to)
     
     let $out_table = (
-        [['from_text' 'to_text' from to];
-        ['tweet' $text_to $cid_from $cid_to]]
+        [
+            ['from_text', 'to_text', from, to];
+            ['tweet', $text_to, $cid_from, $cid_to]
+        ]
     )
 
     if $dont_append {
@@ -432,7 +434,7 @@ export def 'tmp send tx' [] {
         | select cy code txhash
         
     } else {
-        {'cy': 'If the problem is with the already existed cyberlinks, use "cy tmp remove existed"' } 
+        {'cy': $'If the problem is with the already existed cyberlinks, use (ansi yellow)"cy tmp remove existed"(ansi reset)' } 
         | merge $_var 
     }
 }
