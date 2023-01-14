@@ -207,7 +207,7 @@ export def 'tmp view' [
 
     if (not $quiet) {
         if $links_count == 0 {
-            $"The temp cyberlinks table ($"($env.HOME)/cy/cyberlinks_temp.csv") is empty now!" | cprint -c red
+            $"The temp cyberlinks table ($"($env.HOME)/cy/cyberlinks_temp.csv") is empty." | cprint -c yellow
             $"You can add cyberlinks to it manually or by using commands like 'cy link texts'" | cprint
         } else {
             $"There are ($links_count) cyberlinks in the temp table:" | cprint -c green_underline
@@ -481,19 +481,19 @@ export def 'passport get by address' [
     (
         cyber query wasm contract-state smart $pcontract $json 
         --node https://rpc.bostrom.cybernode.ai:443 
-    ) | from json
+    ) | from json | get data
 }
 
 # Get a passport by providing a neuron's nick
 export def 'passport get by nick' [
     nickname
 ] { 
-    let json = ($'{"metadata_by_nickname": {"nickname": "($nickname)"}}')
+    let json = ($'{"passport_by_nickname": {"nickname": "($nickname)"}}')
     let pcontract = 'bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel'
     (
         cyber query wasm contract-state smart $pcontract $json 
         --node https://rpc.bostrom.cybernode.ai:443 
-    ) | from json
+    ) | from json | get data
 }
 
 # Set a passport's particle for a given nickname
