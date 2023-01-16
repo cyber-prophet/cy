@@ -352,8 +352,6 @@ export def 'tmp remove existed' [] {
 def 'create tx json from temp cyberlinks' [] {
     let cyberlinks = (tmp view -q | select from to)
 
-    let neuron = $env.cy.address
-
     let trans = (
         '{"body":{"messages":[
         {"@type":"/cyber.graph.v1beta1.MsgCyberlink",
@@ -366,7 +364,7 @@ def 'create tx json from temp cyberlinks' [] {
     )
 
     $trans 
-    | upsert body.messages.neuron $neuron 
+    | upsert body.messages.neuron $env.cy.address 
     | upsert body.messages.links $cyberlinks 
     | save $"($env.HOME)/cy/temp/tx-unsigned.json" --force
 }
@@ -591,6 +589,8 @@ After adding a key - come back and launch this wizzard again'}
     mkdir ~/cy/backups/
     mkdir ~/cy/config/
 
+    ipfs files mkdir -p '/cy/cache'
+
     $temp_env | config save $config_name
 
     if (
@@ -682,6 +682,75 @@ export def-env 'config activate' [
 
     print $file
     print "Config is loaded"
+}
+
+# cyber query rank search (cy pin text 'chuck norris') 0 10 | from json | get result | upsert safe {|i| let particle = (ipfs cat $i.particle -l 400); $particle | file - | if ($in | str contains "/dev/stdin: ASCII text") {$particle} } | select safe rank | table --width (term size | get columns)
+
+
+export def 'search' [
+    query
+] {
+    let cid = if (is-cid $query) {
+        $query
+    } else {
+        (pin text $query)
+    }
+    
+    (
+        ^($env.cy.exec) query rank search $cid 0 10 
+        | from json 
+        | get result 
+        | upsert safe {
+            |i| let particle = (
+                ipfs cat $i.particle -l 400
+            ); 
+            $particle 
+            | file - 
+            | if (
+                $in | str contains "/dev/stdin: ASCII text"
+            ) {$particle}
+        } 
+        | select safe rank 
+        | table --width (term size | get columns)
+    )
+
+
+    # let results = (^($env.cy.exec) query rank search $cid 0 3 | from json | get result)
+
+    # print $results
+    
+    # let cat1 = (
+    #     $results.particle 
+    #     |   par-each {
+    #         |i| ipfs cat $i -l 400
+    #     })
+    # let type = ($cat1 | each {|i| $i | file -})
+    
+    # let safety = ($type | each {|i| if ($i | str contains "/dev/stdin: ASCII text") {
+    #     "safe"
+    # } } )
+
+    # $cat1
+}
+
+
+export def 'get-headers' [
+    cid
+    gate_url = 'https://gateway.ipfs.cybernode.ai/ipfs/'
+] {
+    curl -s -I $"($gate_url)($cid)"
+    | lines
+    | parse "{header}: {value}"
+    | transpose -d -r -i
+}
+
+export def 'pin-mfs' [
+    cid
+] {
+    let contenttype = ((get-headers $cid) | get -i 'Content-Type')
+    if $contenttype == 'text/plain; charset=utf-8' {
+        ipfs files cp $'/ipfs/($cid)' $'/cy/cache/($cid).txt'
+    }
 }
 
 # An ordered list of cy commands
@@ -785,6 +854,7 @@ def 'nu-complete-config-names' [] {
     | parse '{short}.{ext}'  
     | where ext == "yaml" 
     | get short
+    | filter {|x| $x != "default"}
 }
 
 def 'backup1' [
