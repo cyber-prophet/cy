@@ -5,3 +5,4 @@ cyberlinks_temp.csv
 temp/
 backups/
 *.yaml
+cache/
