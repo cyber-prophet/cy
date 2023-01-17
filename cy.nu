@@ -686,9 +686,10 @@ export def-env 'config activate' [
 
 # cyber query rank search (cy pin text 'chuck norris') 0 10 | from json | get result | upsert safe {|i| let particle = (ipfs cat $i.particle -l 400); $particle | file - | if ($in | str contains "/dev/stdin: ASCII text") {$particle} } | select safe rank | table --width (term size | get columns)
 
-
 export def 'search' [
     query
+    --pretty (-P)
+    --page (-p) = 0
 ] {
     let cid = if (is-cid $query) {
         $query
@@ -696,11 +697,11 @@ export def 'search' [
         (pin text $query)
     }
     
-    (
-        ^($env.cy.exec) query rank search $cid 0 10 
+    let serp = (
+        ^($env.cy.exec) query rank search $cid $page 10 
         | from json 
         | get result 
-        | upsert safe {
+        | upsert particle {
             |i| let particle = (
                 ipfs cat $i.particle -l 400
             ); 
@@ -708,11 +709,21 @@ export def 'search' [
             | file - 
             | if (
                 $in | str contains "/dev/stdin: ASCII text"
-            ) {$particle}
+            ) {
+                $"($particle)\n(ansi grey)($i.particle)(ansi reset)"
+            } else {
+                $"Non-text particle. Is not supported yet.\n(ansi grey)($i.particle)(ansi reset)"
+            }
         } 
-        | select safe rank 
+        | select particle rank 
+        )
+
+    if $pretty {
+        $serp 
         | table --width (term size | get columns)
-    )
+    } else {
+        $serp
+    }
 
 
     # let results = (^($env.cy.exec) query rank search $cid 0 3 | from json | get result)
@@ -734,7 +745,7 @@ export def 'search' [
 }
 
 
-export def 'get-headers' [
+def 'get-headers-gateway' [
     cid
     gate_url = 'https://gateway.ipfs.cybernode.ai/ipfs/'
 ] {
@@ -744,13 +755,19 @@ export def 'get-headers' [
     | transpose -d -r -i
 }
 
-export def 'pin-mfs' [
+export def 'mfs-pin' [
     cid
 ] {
-    let contenttype = ((get-headers $cid) | get -i 'Content-Type')
-    if $contenttype == 'text/plain; charset=utf-8' {
+    let type1 = ((get-headers-gateway $cid) | get -i 'Content-Type')
+    if $type1 == 'text/plain; charset=utf-8' {
         ipfs files cp $'/ipfs/($cid)' $'/cy/cache/($cid).txt'
     }
+}
+
+export def 'mfs-read' [
+    cid
+] {
+    ipfs files read $'/cy/cache/($cid).txt'
 }
 
 # An ordered list of cy commands
