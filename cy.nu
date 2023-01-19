@@ -510,7 +510,7 @@ export def 'passport set particle' [
 
 # Create config JSON to set env variables, to use them as parameters in cyber cli
 export def-env 'config new' [
-    config_name?: string@'nu-complete-config-names'
+    # config_name?: string@'nu-complete-config-names'
 ] {
     'This wizzard will walk you through the setup of CY.' | cprint -c green_underline -a 2
     'If you skip entering the value - the default will be used.' | cprint -c yellow_italic
@@ -546,6 +546,12 @@ After adding a key - come back and launch this wizzard again'}
     $'Default: ($address_def)' | cprint -c yellow_italic
     let address = if-empty (input) -a $address_def
 
+    let config_name =  (
+        $addr_table 
+        | select address name 
+        | transpose -r -d
+        | get $address
+    )
 
     let chain_id_def = (if ($_exec == 'cyber') {
             'bostrom'
@@ -588,10 +594,16 @@ After adding a key - come back and launch this wizzard again'}
     mkdir ~/cy/temp/
     mkdir ~/cy/backups/
     mkdir ~/cy/config/
+    mkdir ~/cy/cache/
+    mkdir ~/cy/cache/other/
+    mkdir ~/cy/cache/progress/
+    mkdir ~/cy/cache/safe/
+    mkdir ~/cy/cache/queue/
+
 
     ipfs files mkdir -p '/cy/cache'
 
-    $temp_env | config save $config_name
+    $temp_env | config save $config_name 
 
     if (
         not ($"($env.HOME)/cy/cyberlinks_temp.csv" | path exists)
