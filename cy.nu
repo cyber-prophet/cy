@@ -744,25 +744,112 @@ export def 'search' [
     # $cat1
 }
 
+export def 'search2' [
+    query
+    --pretty (-P)
+    --page (-p) = 0
+] {
+    let cid = if (is-cid $query) {
+        $query
+    } else {
+        (pin text $query)
+    }
+    
+    let serp = (
+        ^($env.cy.exec) query rank search $cid $page 10 
+        | from json 
+        | get result 
+        | upsert particle {
+            |i| file-request $i.particle
+        } 
+        | select particle rank 
+        )
 
-def 'get-headers-gateway' [
+    if $pretty {
+        $serp 
+        | table --width (term size | get columns)
+    } else {
+        $serp
+    }
+}
+
+export def 'file-request' [
+    cid
+] {
+    let a1 = (
+        do -i {open $"($env.HOME)/cy/cache/safe/($cid).txt"}
+    )
+
+    let a1 = if ($a1 == null) {
+        (do -i {open $"($env.HOME)/cy/cache/other/($cid).txt"})
+    } else {$a1}
+
+    let a1 = if ($a1 == null) {
+        (do -i {open $"($env.HOME)/cy/cache/progress/($cid)"})
+    } else {$a1}
+
+    let a1 = if ($a1 == null) {
+        (do -i {open $"($env.HOME)/cy/cache/queue/($cid)"})
+    } else {$a1}
+
+    if $a1 == null {
+        let message = $"($cid) is in queue since (datetime_fn)"
+        $message | save $"($env.HOME)/cy/cache/queue/($cid)"
+        $message
+    } else {
+        $a1
+    }
+
+}
+
+export def 'check-queue' [] {
+    let files = (ls -s $"($env.HOME)/cy/cache/queue/")
+    if ( ($files | length) > 0 ) {
+        $files
+        | get name -i
+        | par-each {
+            |i| 
+            mv $"($env.HOME)/cy/cache/queue/($i)" $"($env.HOME)/cy/cache/progress/($i)"
+            let result = gateway-get $i
+            if $result != null {
+                rm $"($env.HOME)/cy/cache/progress/($i)"
+            }
+        # $result
+        }
+    } else {
+        "the queue is empty"
+    }
+}
+
+def 'gateway-get' [
     cid
     gate_url = 'https://gateway.ipfs.cybernode.ai/ipfs/'
 ] {
-    curl -s -I $"($gate_url)($cid)"
-    | lines
-    | parse "{header}: {value}"
-    | transpose -d -r -i
+    let headers = (
+        curl -s -I $"($gate_url)($cid)"
+        | lines
+        | parse "{header}: {value}"
+        | transpose -d -r -i
+    )
+
+    let type1 = ($headers | get -i 'Content-Type')
+    if $type1 == 'text/plain; charset=utf-8' {
+        fetch $"($gate_url)($cid)" | save $"($env.HOME)/cy/cache/safe/($cid).txt"
+    } else if ($type1 != null) {
+        $type1 | save $"($env.HOME)/cy/cache/other/($cid).txt"
+    }
+    echo $type1
 }
 
 export def 'mfs-pin' [
     cid
 ] {
-    let type1 = ((get-headers-gateway $cid) | get -i 'Content-Type')
+    let type1 = ((gateway-get $cid) | get -i 'Content-Type')
     if $type1 == 'text/plain; charset=utf-8' {
         ipfs files cp $'/ipfs/($cid)' $'/cy/cache/($cid).txt'
     }
 }
+
 
 export def 'mfs-read' [
     cid
