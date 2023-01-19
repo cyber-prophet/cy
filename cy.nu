@@ -551,6 +551,7 @@ After adding a key - come back and launch this wizzard again'}
         | select address name 
         | transpose -r -d
         | get $address
+        | $"($in)+($_exec)" 
     )
 
     let chain_id_def = (if ($_exec == 'cyber') {
@@ -690,10 +691,10 @@ export def-env 'config activate' [
     )
 
     let-env cy = $file
-    $file | save $"($env.HOME)/cy/config/default.yaml" -f
 
-    print $file
-    print "Config is loaded"
+    "Config is loaded" | cprint -c green_underline
+    $file | save $"($env.HOME)/cy/config/default.yaml" -f
+    $file
 }
 
 # cyber query rank search (cy pin text 'chuck norris') 0 10 | from json | get result | upsert safe {|i| let particle = (ipfs cat $i.particle -l 400); $particle | file - | if ($in | str contains "/dev/stdin: ASCII text") {$particle} } | select safe rank | table --width (term size | get columns)
@@ -822,7 +823,7 @@ export def 'check-queue' [] {
         | par-each {
             |i| 
             mv $"($env.HOME)/cy/cache/queue/($i)" $"($env.HOME)/cy/cache/progress/($i)"
-            let result = gateway-get $i
+            let result = gateway-get $i --gate_url "http://127.0.0.1:8080/ipfs/"
             if $result != null {
                 rm $"($env.HOME)/cy/cache/progress/($i)"
             }
@@ -835,7 +836,7 @@ export def 'check-queue' [] {
 
 def 'gateway-get' [
     cid
-    gate_url = 'https://gateway.ipfs.cybernode.ai/ipfs/'
+    --gate_url: string = 'https://gateway.ipfs.cybernode.ai/ipfs/'
 ] {
     let headers = (
         curl -s -I $"($gate_url)($cid)"
@@ -846,7 +847,7 @@ def 'gateway-get' [
 
     let type1 = ($headers | get -i 'Content-Type')
     if $type1 == 'text/plain; charset=utf-8' {
-        fetch $"($gate_url)($cid)" | save $"($env.HOME)/cy/cache/safe/($cid).txt"
+        fetch $"($gate_url)($cid)" -t 60 | save $"($env.HOME)/cy/cache/safe/($cid).txt"
     } else if ($type1 != null) {
         $type1 | save $"($env.HOME)/cy/cache/other/($cid).txt"
     }
