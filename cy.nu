@@ -546,7 +546,7 @@ After adding a key - come back and launch this wizzard again'}
     $'Default: ($address_def)' | cprint -c yellow_italic
     let address = if-empty (input) -a $address_def
 
-    let config_name =  (
+    let config_name = (
         $addr_table 
         | select address name 
         | transpose -r -d
@@ -757,6 +757,31 @@ export def 'search' [
     # $cat1
 }
 
+export def ipfs-get [
+    cid
+] {
+    let particle = (
+        ipfs cat --timeout 60s $cid -l 400
+    )
+    let type = if ($particle == null) {
+        return
+    } else {
+        $particle 
+        | file - 
+    }
+    
+    if (
+        $type
+        | str contains "/dev/stdin: ASCII text"
+        ) {
+            ipfs get --timeout 120s $cid $"($env.HOME)/cy/cache/safe/($cid).txt"
+        } else {
+            $type
+            | save -f $"($env.HOME)/cy/cache/other/($cid).txt"
+        }
+
+}
+
 export def 'search2' [
     query
     --pretty (-P)
@@ -790,15 +815,18 @@ export def 'file-request' [
     cid
 ] {
     let a1 = (
-        do -i {open $"($env.HOME)/cy/cache/safe/($cid).txt"}
+        do -i {
+            open $"($env.HOME)/cy/cache/safe/($cid).txt"}
     )
 
     let a1 = if ($a1 == null) {
-        (do -i {open $"($env.HOME)/cy/cache/other/($cid).txt"})
+        (do -i {
+            open $"($env.HOME)/cy/cache/other/($cid).txt"})
     } else {$a1}
 
     let a1 = if ($a1 == null) {
-        (do -i {open $"($env.HOME)/cy/cache/progress/($cid)"})
+        (do -i {
+            open $"($env.HOME)/cy/cache/progress/($cid)"})
     } else {$a1}
 
     let a1 = if ($a1 == null) {
@@ -823,7 +851,26 @@ export def 'check-queue' [] {
         | par-each {
             |i| 
             mv $"($env.HOME)/cy/cache/queue/($i)" $"($env.HOME)/cy/cache/progress/($i)"
-            let result = gateway-get $i --gate_url "http://127.0.0.1:8080/ipfs/"
+            let result = ipfs-get $i
+            # let result = ipfs-get $i --gate_url "http://127.0.0.1:8080/ipfs/"
+            if $result != null {
+                rm $"($env.HOME)/cy/cache/progress/($i)"
+            }
+        # $result
+        }
+    } else {
+            "the queue is empty"
+    }
+
+    let files = (ls -s $"($env.HOME)/cy/cache/progress/")
+    if ( ($files | length) > 0 ) {
+        $files
+        | get name -i
+        | par-each {
+            |i| 
+            # mv $"($env.HOME)/cy/cache/queue/($i)" $"($env.HOME)/cy/cache/progress/($i)"
+            let result = ipfs-get $i 
+            # let result = ipfs-get $i --gate_url "http://127.0.0.1:8080/ipfs/"
             if $result != null {
                 rm $"($env.HOME)/cy/cache/progress/($i)"
             }
@@ -839,7 +886,7 @@ def 'gateway-get' [
     --gate_url: string = 'https://gateway.ipfs.cybernode.ai/ipfs/'
 ] {
     let headers = (
-        curl -s -I $"($gate_url)($cid)"
+        curl -s -I -m 60 $"($gate_url)($cid)"
         | lines
         | parse "{header}: {value}"
         | transpose -d -r -i
@@ -847,9 +894,9 @@ def 'gateway-get' [
 
     let type1 = ($headers | get -i 'Content-Type')
     if $type1 == 'text/plain; charset=utf-8' {
-        fetch $"($gate_url)($cid)" -t 60 | save $"($env.HOME)/cy/cache/safe/($cid).txt"
+        fetch $"($gate_url)($cid)" -t 60 | save -f $"($env.HOME)/cy/cache/safe/($cid).txt" 
     } else if ($type1 != null) {
-        $type1 | save $"($env.HOME)/cy/cache/other/($cid).txt"
+        $type1 | save -f $"($env.HOME)/cy/cache/other/($cid).txt"
     }
     echo $type1
 }
@@ -863,12 +910,6 @@ export def 'mfs-pin' [
     }
 }
 
-
-export def 'mfs-read' [
-    cid
-] {
-    ipfs files read $'/cy/cache/($cid).txt'
-}
 
 # An ordered list of cy commands
 export def 'help' [
