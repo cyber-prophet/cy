@@ -267,9 +267,17 @@ export def 'tmp clear' [] {
 
 # Add a text particle into the 'to' column of the temp cyberlinks table
 export def 'tmp link to' [
-    text: string  # a text to upload to ipfs
+    text: string # a text to upload to ipfs
+    --non-empty # fill non-empty cells too   
 ] {
-    tmp view -q
+    let in_links = $in
+    let links = if ($in_links == null) {
+        tmp view -q
+    } else {
+        $in_links
+    }
+
+    $links
     | upsert to (pin text $text)
     | upsert to_text $text 
     | tmp replace
@@ -277,9 +285,17 @@ export def 'tmp link to' [
 
 # Add a text particle into the 'from' column of the temp cyberlinks table
 export def 'tmp link from' [
-    text: string                    # a text to upload to ipfs
+    text: string # a text to upload to ipfs
+    --non-empty # fill non-empty cells too
 ] {
-    tmp view -q
+    let in_links = $in
+    let links = if ($in_links == null) {
+        tmp view -q
+    } else {
+        $in_links
+    }
+
+    $links
     | upsert from (pin text $text) 
     | upsert from_text $text
     | tmp replace
@@ -349,8 +365,15 @@ export def 'tmp remove existed' [] {
 }
 
 # Create a custom unsigned cyberlinks transaction
-def 'create tx json from temp cyberlinks' [] {
-    let cyberlinks = (tmp view -q | select from to)
+def 'tx json create from cybelinks' [] {
+    let in_cyberlinks = $in
+    let cyberlinks = if ($in_cyberlinks == null) {
+        tmp view -q
+    } else {
+        $in_cyberlinks
+    }
+
+    let cyberlinks = ($cyberlinks | select from to)
 
     let trans = (
         '{"body":{"messages":[
@@ -406,7 +429,13 @@ export def 'tmp send tx' [] {
         error make {msg: 'there is no internet!'}
     }
 
-    create tx json from temp cyberlinks
+    let in_cyberlinks = $in
+
+    if $in_cyberlinks == null {
+        tx json create from cybelinks
+    } else {
+        $in_cyberlinks | tx json create from cybelinks 
+    }
 
     let var0 = tx sign and broadcast
     let cyberlinks_count = (tmp view -q | length)
@@ -464,9 +493,6 @@ export def 'update cy' [
     mkdir ~/cy 
     | fetch $url
     | save ~/cy/cy.nu -f
-    
-    # overlay below freezes nu 0.7.3 inside Alacritty Version 0.11.0 (8dbaa0b)
-    # overlay use ~/cy/cy.nu as cy -p -r   
 
 }
 
@@ -602,7 +628,7 @@ After adding a key - come back and launch this wizzard again'}
     mkdir ~/cy/cache/queue/
 
 
-    ipfs files mkdir -p '/cy/cache'
+    # ipfs files mkdir -p '/cy/cache'
 
     $temp_env | config save $config_name 
 
@@ -760,19 +786,18 @@ export def 'search' [
 export def ipfs-get [
     cid
 ] {
-    let particle = (
-        ipfs cat --timeout 60s $cid -l 400
-    )
+    let particle = do -i {ipfs cat --timeout 60s $cid -l 400}
+
+    print $particle
+
     let type = if ($particle == null) {
         return
     } else {
-        $particle 
-        | file - 
+        $particle | file - | $in + "" | str replace "/dev/stdin: " ""
     }
     
     if (
-        $type
-        | str contains "/dev/stdin: ASCII text"
+        $type | str contains "/dev/stdin: ASCII text"
         ) {
             ipfs get --timeout 120s $cid $"($env.HOME)/cy/cache/safe/($cid).txt"
         } else {
