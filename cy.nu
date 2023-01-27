@@ -120,7 +120,7 @@ export def 'link texts' [
 # Add a tweet
 export def 'tweet' [
     text_to
-    --dont_append (-d)
+    --disable_send (-d)
 ] {
     # let cid_from = pin text "tweet"
     let cid_from = 'QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx'
@@ -133,8 +133,8 @@ export def 'tweet' [
         ]
     )
 
-    if $dont_append {
-        $out_table
+    if (not $disable_send) {
+        $out_table | tmp send tx
     } else {
         $out_table | tmp append
  }
@@ -425,11 +425,11 @@ def 'tx sign and broadcast' [] {
 
 # Create a tx from the temp cyberlinks table, sign and broadcast it
 export def 'tmp send tx' [] {
+    let in_cyberlinks = $in
+
     if not (is-connected) {
         error make {msg: 'there is no internet!'}
     }
-
-    let in_cyberlinks = $in
 
     if $in_cyberlinks == null {
         tx json create from cybelinks
