@@ -228,7 +228,7 @@ export def 'tmp append' [
         $cyberlinks 
         | upsert date_time (
             date now 
-            | date format '%y%m%d-%H%M'
+            | date format '%y%m%d-%H%M%S'
         )
     )
 
@@ -431,14 +431,16 @@ export def 'tmp send tx' [] {
         error make {msg: 'there is no internet!'}
     }
 
-    if $in_cyberlinks == null {
-        tx json create from cybelinks
+    let cyberlinks = if $in_cyberlinks == null {
+        tmp view -q
     } else {
-        $in_cyberlinks | tx json create from cybelinks 
+        $in_cyberlinks
     }
 
+    $cyberlinks | tx json create from cybelinks 
+
     let var0 = tx sign and broadcast
-    let cyberlinks_count = (tmp view -q | length)
+    let cyberlinks_count = ($cyberlinks | length)
 
     let _var = ( 
         $var0 
@@ -449,12 +451,14 @@ export def 'tmp send tx' [] {
     if $_var.code == 0 {
         open $"($env.HOME)/cy/cyberlinks_archive.csv" 
         | append (
-            tmp view -q 
+            $cyberlinks
             | upsert neuron $env.cy.address
         ) 
         | save $"($env.HOME)/cy/cyberlinks_archive.csv" --force
 
-        tmp clear
+        if ($in_cyberlinks != null) {
+            tmp clear
+        } 
 
         {'cy': $'($cyberlinks_count) cyberlinks should be successfully sent'} 
         | merge $_var 
@@ -1027,7 +1031,7 @@ def 'if-empty' [
  }
 
 def 'datetime_fn' [] {
-    date now | date format '%Y%m%d-%H%M%S'
+    date now | date format '%Y%m%d-%H%M%S%S'
 }
 
 def 'nu-complete-config-names' [] {
