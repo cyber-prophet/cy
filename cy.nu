@@ -59,7 +59,7 @@ export def 'pin text' [
 export def 'pin files' [
     ...files: string                # filenames to add into the local ipfs node
     --link_filenames (-n)
-    --dont_append (-d)
+    --disable_append (-d)
 ] {
     let files = (
         if $files == [] {
@@ -88,7 +88,7 @@ export def 'pin files' [
         }
     )
 
-    if $dont_append {
+    if $disable_append {
         $out_table
     } else {
         $out_table 
@@ -100,7 +100,7 @@ export def 'pin files' [
 export def 'link texts' [
     text_from
     text_to
-    --dont_append (-d)
+    --disable_append (-d)
 ] {
     let cid_from = (pin text $text_from)
     let cid_to = (pin text $text_to)
@@ -110,7 +110,7 @@ export def 'link texts' [
         [$text_from $text_to $cid_from $cid_to]]
     )
 
-    if $dont_append {
+    if $disable_append {
         $out_table
     } else {
         $out_table | tmp append
@@ -142,7 +142,7 @@ export def 'tweet' [
 
 # Add a random chuck norris cyberlink to the temp table
 export def 'link chuck' [
-    --dont_append (-d)
+    --disable_append (-d)
 ] {
     # let cid_from = (pin text 'chuck norris')
     let cid_from = 'QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1'
@@ -161,7 +161,7 @@ export def 'link chuck' [
         ['chuck norris' $quote $cid_from $cid_to]]
     )
 
-    if $dont_append {
+    if $disable_append {
             $_table
         } else {(
             $_table
@@ -354,7 +354,7 @@ export def 'tmp remove existed' [] {
 
     if $existed_links_count > 0 {
         
-        $"($existed_links_count) cyberlink/s was/were already created by ($env.cy.address)" | cprint 
+        $"($existed_links_count) cyberlink(s) was/were already created by ($env.cy.address)" | cprint 
         print $existed_links
         "So they were removed from the temp table!" | cprint -c red -a 2
         
@@ -456,7 +456,7 @@ export def 'tmp send tx' [] {
         ) 
         | save $"($env.HOME)/cy/cyberlinks_archive.csv" --force
 
-        if ($in_cyberlinks != null) {
+        if ($in_cyberlinks == null) {
             tmp clear
         } 
 
@@ -726,8 +726,6 @@ export def-env 'config activate' [
     $file | save $"($env.HOME)/cy/config/default.yaml" -f
     $file
 }
-
-# cyber query rank search (cy pin text 'chuck norris') 0 10 | from json | get result | upsert safe {|i| let particle = (ipfs cat $i.particle -l 400); $particle | file - | if ($in | str contains "/dev/stdin: ASCII text") {$particle} } | select safe rank | table --width (term size | get columns)
 
 export def 'search' [
     query
