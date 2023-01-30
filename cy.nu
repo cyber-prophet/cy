@@ -163,10 +163,10 @@ export def 'link chuck' [
 
     if $disable_append {
             $_table
-        } else {(
+        } else {
             $_table
             | tmp append
- )}
+ }
 } 
 
 # Add a random quote cyberlink to the temp table
@@ -268,7 +268,7 @@ export def 'tmp clear' [] {
 # Add a text particle into the 'to' column of the temp cyberlinks table
 export def 'tmp link to' [
     text: string # a text to upload to ipfs
-    --non-empty # fill non-empty cells too   
+    --non-empty # fill non-empty only
 ] {
     let in_links = $in
     let links = if ($in_links == null) {
@@ -286,7 +286,7 @@ export def 'tmp link to' [
 # Add a text particle into the 'from' column of the temp cyberlinks table
 export def 'tmp link from' [
     text: string # a text to upload to ipfs
-    --non-empty # fill non-empty cells too
+    --non-empty # fill non-empty only
 ] {
     let in_links = $in
     let links = if ($in_links == null) {
