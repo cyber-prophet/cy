@@ -641,7 +641,7 @@ After adding a key - come back and launch this wizzard again'}
     mkdir ~/cy/config/
     mkdir ~/cy/cache/
     mkdir ~/cy/cache/other/
-    mkdir ~/cy/cache/progress/
+    # mkdir ~/cy/cache/progress/
     mkdir ~/cy/cache/safe/
     mkdir ~/cy/cache/queue/
 
@@ -799,30 +799,6 @@ export def 'search' [
     # $cat1
 }
 
-export def ipfs-get [
-    cid
-] {
-    let particle = do -i {ipfs cat --timeout 60s $cid -l 400}
-
-    print $particle
-
-    let type = if ($particle == null) {
-        return
-    } else {
-        $particle | file - | $in + "" | str replace "/dev/stdin: " ""
-    }
-    
-    if (
-        $type | str contains "/dev/stdin: ASCII text"
-        ) {
-            ipfs get --timeout 120s $cid $"($env.HOME)/cy/cache/safe/($cid).txt"
-        } else {
-            $type
-            | save -f $"($env.HOME)/cy/cache/other/($cid).txt"
-        }
-
-}
-
 export def 'search2' [
     query
     --pretty (-P)
@@ -839,7 +815,7 @@ export def 'search2' [
         | from json 
         | get result 
         | upsert particle {
-            |i| file-request $i.particle
+            |i| request-file-from-cache $i.particle
         } 
         | select particle rank 
         )
@@ -852,7 +828,63 @@ export def 'search2' [
     }
 }
 
-export def 'file-request' [
+export def `download cid from ipfs` [
+    cid
+] {
+    let cid_cat = do -i {ipfs cat --timeout 240s $cid -l 400}
+
+    print $cid_cat "\n"
+
+    let type1 = if ($cid_cat == null) {
+        return
+    } else {
+        $cid_cat | file - | $in + "" | str replace "/dev/stdin: " ""
+    }
+    
+    if (
+        $type1 
+        | str contains "ASCII text"
+        ) {
+            print $"found text ($cid)"
+            let result = (
+                ipfs get --timeout 240s -o $"($env.HOME)/cy/cache/safe/($cid).txt" $cid 
+                | complete
+            )
+            if ($result.exit_code == 0) {
+                rm -f $"($env.HOME)/cy/cache/queue/($cid)" 
+            }
+        } else {
+            print $"found non-text ($cid)"
+            $type1
+            | save -f $"($env.HOME)/cy/cache/other/($cid).txt"
+
+            rm -f $"($env.HOME)/cy/cache/queue/($cid)" 
+        }
+
+}
+
+def 'download cid from gateway' [
+    cid
+    --gate_url: string = 'https://gateway.ipfs.cybernode.ai/ipfs/'
+] {
+    let headers = (
+        curl -s -I -m 60 $"($gate_url)($cid)"
+        | lines
+        | parse "{header}: {value}"
+        | transpose -d -r -i
+    )
+
+    let type1 = ($headers | get -i 'Content-Type')
+    if $type1 == 'text/plain; charset=utf-8' {
+        fetch $"($gate_url)($cid)" -t 60 | save -f $"($env.HOME)/cy/cache/safe/($cid).txt" 
+    } else if ($type1 != null) {
+        $type1 | save -f $"($env.HOME)/cy/cache/other/($cid).txt"
+    }
+    echo $type1
+}
+
+
+export def 'request-file-from-cache' [
     cid
 ] {
     let a1 = (
@@ -865,10 +897,10 @@ export def 'file-request' [
             open $"($env.HOME)/cy/cache/other/($cid).txt"})
     } else {$a1}
 
-    let a1 = if ($a1 == null) {
-        (do -i {
-            open $"($env.HOME)/cy/cache/progress/($cid)"})
-    } else {$a1}
+    # let a1 = if ($a1 == null) {
+    #     (do -i {
+    #         open $"($env.HOME)/cy/cache/progress/($cid)"})
+    # } else {$a1}
 
     let a1 = if ($a1 == null) {
         (do -i {open $"($env.HOME)/cy/cache/queue/($cid)"})
@@ -891,65 +923,45 @@ export def 'check-queue' [] {
         | get name -i
         | par-each {
             |i| 
-            mv $"($env.HOME)/cy/cache/queue/($i)" $"($env.HOME)/cy/cache/progress/($i)"
-            let result = ipfs-get $i
-            # let result = ipfs-get $i --gate_url "http://127.0.0.1:8080/ipfs/"
-            if $result != null {
-                rm $"($env.HOME)/cy/cache/progress/($i)"
-            }
+            # mv $"($env.HOME)/cy/cache/queue/($i)" $"($env.HOME)/cy/cache/progress/($i)"
+            download cid from ipfs $i
+            # let result = download cid from ipfs $i --gate_url "http://127.0.0.1:8080/ipfs/"
+            # if $result != null {
+            #     rm $"($env.HOME)/cy/cache/progress/($i)"
+            # }
         # $result
         }
     } else {
             "the queue is empty"
     }
 
-    let files = (ls -s $"($env.HOME)/cy/cache/progress/")
-    if ( ($files | length) > 0 ) {
-        $files
-        | get name -i
-        | par-each {
-            |i| 
-            # mv $"($env.HOME)/cy/cache/queue/($i)" $"($env.HOME)/cy/cache/progress/($i)"
-            let result = ipfs-get $i 
-            # let result = ipfs-get $i --gate_url "http://127.0.0.1:8080/ipfs/"
-            if $result != null {
-                rm $"($env.HOME)/cy/cache/progress/($i)"
-            }
-        # $result
-        }
-    } else {
-        "the queue is empty"
-    }
+    # let files = (ls -s $"($env.HOME)/cy/cache/progress/")
+    # if ( ($files | length) > 0 ) {
+    #     $files
+    #     | get name -i
+    #     | par-each {
+    #         |i| 
+    #         # mv $"($env.HOME)/cy/cache/queue/($i)" $"($env.HOME)/cy/cache/progress/($i)"
+    #         let result = download cid from ipfs $i 
+    #         # let result = download cid from ipfs $i --gate_url "http://127.0.0.1:8080/ipfs/"
+    #         if $result != null {
+    #             rm $"($env.HOME)/cy/cache/progress/($i)"
+    #         }
+    #     # $result
+    #     }
+    # } else {
+    #     "the queue is empty"
+    # }
 }
 
-def 'gateway-get' [
-    cid
-    --gate_url: string = 'https://gateway.ipfs.cybernode.ai/ipfs/'
-] {
-    let headers = (
-        curl -s -I -m 60 $"($gate_url)($cid)"
-        | lines
-        | parse "{header}: {value}"
-        | transpose -d -r -i
-    )
-
-    let type1 = ($headers | get -i 'Content-Type')
-    if $type1 == 'text/plain; charset=utf-8' {
-        fetch $"($gate_url)($cid)" -t 60 | save -f $"($env.HOME)/cy/cache/safe/($cid).txt" 
-    } else if ($type1 != null) {
-        $type1 | save -f $"($env.HOME)/cy/cache/other/($cid).txt"
-    }
-    echo $type1
-}
-
-export def 'mfs-pin' [
-    cid
-] {
-    let type1 = ((gateway-get $cid) | get -i 'Content-Type')
-    if $type1 == 'text/plain; charset=utf-8' {
-        ipfs files cp $'/ipfs/($cid)' $'/cy/cache/($cid).txt'
-    }
-}
+# export def 'mfs-pin' [
+#     cid
+# ] {
+#     let type1 = ((download cid from gateway $cid) | get -i 'Content-Type')
+#     if $type1 == 'text/plain; charset=utf-8' {
+#         ipfs files cp $'/ipfs/($cid)' $'/cy/cache/($cid).txt'
+#     }
+# }
 
 
 # An ordered list of cy commands
