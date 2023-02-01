@@ -826,16 +826,8 @@ export def `download cid from ipfs` [
 ] {
 
     print $"cid to download ($cid)"
-    let cid_cat = do -i {(ipfs cat --timeout 120s -l 400 $cid | complete)}
-    # let cid_cat = (ipfs cat --timeout 120s -l 400 $cid)
+    let type1 = do -i {(ipfs cat --timeout 120s -l 400 $cid | file - | $in + "" | str replace "/dev/stdin: " "")}
 
-    let type1 = if ($cid_cat.exit_code == 1) {
-        return
-    } else {
-        # print $"not-null ($cid_cat.stdout)"
-        $cid_cat.stdout | file - | $in + "" | str replace "/dev/stdin: " ""
-    }
-    
     if (
         $type1 =~ "(ASCII text)|(Unicode text)"
         ) {
@@ -890,22 +882,24 @@ export def 'request-file-from-cache' [
             open $"($env.HOME)/cy/cache/other/($cid).txt"})
     } else {$a1}
 
-    # let a1 = if ($a1 == null) {
-    #     (do -i {
-    #         open $"($env.HOME)/cy/cache/progress/($cid)"})
-    # } else {$a1}
-
     let a1 = if ($a1 == null) {
         (do -i {open $"($env.HOME)/cy/cache/queue/($cid)"})
     } else {$a1}
 
-    if $a1 == null {
+    let a1 = if ($a1 == null) {
         let message = $"($cid) is in queue since (datetime_fn)"
         $message | save $"($env.HOME)/cy/cache/queue/($cid)"
         $message
     } else {
-        $"($a1)\n(ansi grey)($cid)(ansi reset)"
+        $"($a1)"
     }
+
+    (
+        $a1 
+        | str substring '0,400'
+        | str replace "\n" "↩" --all 
+        | $"($in)\n(ansi grey)($cid)(ansi reset)"
+    )
 
 }
 
@@ -915,46 +909,12 @@ export def 'check-queue' [] {
         $files
         | get name -i
         | par-each {
-            |i| 
-            # mv $"($env.HOME)/cy/cache/queue/($i)" $"($env.HOME)/cy/cache/progress/($i)"
-            download cid from ipfs $i
-            # let result = download cid from ipfs $i --gate_url "http://127.0.0.1:8080/ipfs/"
-            # if $result != null {
-            #     rm $"($env.HOME)/cy/cache/progress/($i)"
-            # }
-        # $result
+            |i| download cid from ipfs $i
         }
     } else {
             "the queue is empty"
     }
-
-    # let files = (ls -s $"($env.HOME)/cy/cache/progress/")
-    # if ( ($files | length) > 0 ) {
-    #     $files
-    #     | get name -i
-    #     | par-each {
-    #         |i| 
-    #         # mv $"($env.HOME)/cy/cache/queue/($i)" $"($env.HOME)/cy/cache/progress/($i)"
-    #         let result = download cid from ipfs $i 
-    #         # let result = download cid from ipfs $i --gate_url "http://127.0.0.1:8080/ipfs/"
-    #         if $result != null {
-    #             rm $"($env.HOME)/cy/cache/progress/($i)"
-    #         }
-    #     # $result
-    #     }
-    # } else {
-    #     "the queue is empty"
-    # }
 }
-
-# export def 'mfs-pin' [
-#     cid
-# ] {
-#     let type1 = ((download cid from gateway $cid) | get -i 'Content-Type')
-#     if $type1 == 'text/plain; charset=utf-8' {
-#         ipfs files cp $'/ipfs/($cid)' $'/cy/cache/($cid).txt'
-#     }
-# }
 
 export def `cache clear` [] {
     backup1 $"($env.HOME)/cy/cache" 
@@ -1012,7 +972,6 @@ def make_default_folders_fn [] {
     mkdir ~/cy/config/
     mkdir ~/cy/cache/
     mkdir ~/cy/cache/other/
-    # mkdir ~/cy/cache/progress/
     mkdir ~/cy/cache/safe/
     mkdir ~/cy/cache/queue/
 }
