@@ -636,15 +636,8 @@ After adding a key - come back and launch this wizzard again'}
         'rpc-address': $rpc_address
     } 
     
-    mkdir ~/cy/temp/
-    mkdir ~/cy/backups/
-    mkdir ~/cy/config/
-    mkdir ~/cy/cache/
-    mkdir ~/cy/cache/other/
-    # mkdir ~/cy/cache/progress/
-    mkdir ~/cy/cache/safe/
-    mkdir ~/cy/cache/queue/
 
+    make_default_folders_fn
 
     # ipfs files mkdir -p '/cy/cache'
 
@@ -831,32 +824,32 @@ export def 'search2' [
 export def `download cid from ipfs` [
     cid
 ] {
-    let cid_cat = do -i {ipfs cat --timeout 240s $cid -l 400}
 
-    print $cid_cat "\n"
+    print $"cid to download ($cid)"
+    let cid_cat = do -i {(ipfs cat --timeout 120s -l 400 $cid | complete)}
+    # let cid_cat = (ipfs cat --timeout 120s -l 400 $cid)
 
-    let type1 = if ($cid_cat == null) {
+    let type1 = if ($cid_cat.exit_code == 1) {
         return
     } else {
-        $cid_cat | file - | $in + "" | str replace "/dev/stdin: " ""
+        # print $"not-null ($cid_cat.stdout)"
+        $cid_cat.stdout | file - | $in + "" | str replace "/dev/stdin: " ""
     }
     
     if (
-        $type1 
-        | str contains "ASCII text"
+        $type1 =~ "(ASCII text)|(Unicode text)"
         ) {
-            print $"found text ($cid)"
+            print $"found text ($type1) ($cid)"
             let result = (
-                ipfs get --timeout 240s -o $"($env.HOME)/cy/cache/safe/($cid).txt" $cid 
+                ipfs get --progress=false --timeout 120s -o $"($env.HOME)/cy/cache/safe/($cid).txt" $cid 
                 | complete
             )
             if ($result.exit_code == 0) {
                 rm -f $"($env.HOME)/cy/cache/queue/($cid)" 
             }
         } else {
-            print $"found non-text ($cid)"
-            $type1
-            | save -f $"($env.HOME)/cy/cache/other/($cid).txt"
+            print $"found non-text ($cid) ($type1)"
+            $type1 | save -f $"($env.HOME)/cy/cache/other/($cid).txt"
 
             rm -f $"($env.HOME)/cy/cache/queue/($cid)" 
         }
@@ -911,14 +904,14 @@ export def 'request-file-from-cache' [
         $message | save $"($env.HOME)/cy/cache/queue/($cid)"
         $message
     } else {
-        $a1
+        $"($a1)\n(ansi grey)($cid)(ansi reset)"
     }
 
 }
 
 export def 'check-queue' [] {
     let files = (ls -s $"($env.HOME)/cy/cache/queue/")
-    if ( ($files | length) > 0 ) {
+    if ( ($files | length | inspect) > 0 ) {
         $files
         | get name -i
         | par-each {
@@ -963,6 +956,11 @@ export def 'check-queue' [] {
 #     }
 # }
 
+export def `cache clear` [] {
+    backup1 $"($env.HOME)/cy/cache" 
+    make_default_folders_fn
+}
+
 
 # An ordered list of cy commands
 export def 'help' [
@@ -1006,6 +1004,17 @@ def is-neuron [particle: string] {
 
 def is-connected []  {
     (do -i {fetch https://www.iana.org} | describe) == 'raw input'
+}
+
+def make_default_folders_fn [] {
+    mkdir ~/cy/temp/
+    mkdir ~/cy/backups/
+    mkdir ~/cy/config/
+    mkdir ~/cy/cache/
+    mkdir ~/cy/cache/other/
+    # mkdir ~/cy/cache/progress/
+    mkdir ~/cy/cache/safe/
+    mkdir ~/cy/cache/queue/
 }
 
 # Print string colourfully
@@ -1068,7 +1077,7 @@ def 'nu-complete-config-names' [] {
     | filter {|x| $x != "default"}
 }
 
-def 'backup1' [
+export def 'backup1' [
     filename
 ] {
     let basename1 = ($filename | path basename)
@@ -1195,4 +1204,18 @@ def mdown [
             | str join ""
          } | str join " "
     } | str join "\n"
+}
+
+def inspect [
+    callback?: closure
+] {
+    let input = $in
+
+    if $callback == $nothing {
+        print $input
+    } else {
+        do $callback $input
+    }
+
+    $input
 }
