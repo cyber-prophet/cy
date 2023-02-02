@@ -984,22 +984,25 @@ def cprint [
     --before (-b): int = 0
     --after (-a): int = 1
 ] {
-    mut text = if ($args == []) {
+    let text = if ($args == []) {
         $in
     } else {
         $args | str join ' '
     }
 
-    if $frame != null {
-        let width = (term size | get columns) - 2
-        $text = (
-            (" " | str rpad -l $width -c $frame) + "\n" +
+    let text = (
+        if $frame != null {
+            let width = (term size | get columns) - 2
             (
-                $text 
-            ) + "\n" +
-            (" " | str rpad -l $width -c $frame)
-        )
-    }
+                (" " | str rpad -l $width -c $frame) + "\n" +
+                ( $text ) + "\n" +
+                (" " | str rpad -l $width -c $frame)
+            )
+        } else {
+            $text
+        }
+    )
+
     seq 1 $before | each {|i| print ""}
     $text | print $"(ansi $color)($in)(ansi reset)" -n 
     seq 1 $after | each {|i| print ""}
@@ -1068,14 +1071,14 @@ def cecho [
     --md (-M) # Disable parsing and rendering of markdown tags
     --mdcolor (-m): string@'nu-complete colors' = 'green'
 ] {
-    mut text = if ($args == []) {
+    let text = if ($args == []) {
         $in
     } else {
         $args | str join ' '
     }
 
-    if $remleadspaces {
-        $text = (
+    let text = (
+        if $remleadspaces {
             $text 
             | split row "\n"
             | each {
@@ -1083,37 +1086,49 @@ def cecho [
                 | str replace "^[ \t]+" ""
             }
             | str join "\n"
-        )
-    }
+        } else {
+            text
+        }
+    )
 
 
-    if $indent > 0 {
-        let indent_spaces = (seq 1 $indent | each {|i| " "} | str join "")
+    let text = (
+        if $indent > 0 {
+            let indent_spaces = (seq 1 $indent | each {|i| " "} | str join "")
 
-        $text = (
             $text 
             | split row "\n"
             | each {
                 |i| [$indent_spaces $i] | str join ""
             }
             | str join "\n"
-        )
-    }
+        } else {
+            $text
+        }
+    )
 
-    if (not $md) {
-        $text = (mdown $text --mdcolor $mdcolor --defcolor $color )
-    } else {
-        $text = $"(ansi $color)($text)(ansi reset)"
-    }
+    let text = (
+        if (not $md) {
+            (mdown $text --mdcolor $mdcolor --defcolor $color )
+        } else {
+            $"(ansi $color)($text)(ansi reset)"
+        }
+    )
 
-    if $frame != null {
-        let width = (term size | get columns)
-        $text = ( [
-            (seq 1 $width | each {|i| $frame} | str join "" | $"(ansi ($framecolor))($in)(ansi reset)" ) 
-            $text 
-            (seq 1 $width | each {|i| $frame} | str join "" | $"(ansi ($framecolor))($in)(ansi reset)")
-        ] | str join "\n" )
-    }
+    let text = (
+        if $frame != null {
+            let width = (term size | get columns)
+            ( 
+                [
+                    (seq 1 $width | each {|i| $frame} | str join "" | $"(ansi ($framecolor))($in)(ansi reset)" ) 
+                    $text 
+                    (seq 1 $width | each {|i| $frame} | str join "" | $"(ansi ($framecolor))($in)(ansi reset)")
+                ] | str join "\n" 
+            )
+        } else {
+            $text
+        }
+    )
 
     let output = ([
         (seq 1 $before | each {|i| "\n"} | str join "")
