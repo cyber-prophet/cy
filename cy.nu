@@ -7,6 +7,8 @@
 # Use:
 # > overlay use ~/cy/cy.nu as cy -p -r
 
+export def main [] { help }
+
 export-env { 
     banner
     let-env cy = try {
