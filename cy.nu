@@ -19,6 +19,7 @@ export-env {
 # Pin a text particle
 export def 'pin text' [
     text_param?: string
+    --offline
 ] {
     let text_in = $in
     
@@ -259,7 +260,7 @@ export def 'tmp replace' [
 
 # Empty the temp cyberlinks table
 export def 'tmp clear' [] {
-    backup1 $"($env.HOME)/cy/cyberlinks_temp.csv" 
+    backup_fn $"($env.HOME)/cy/cyberlinks_temp.csv" 
 
     'from,to,from_text,to_text' | save $"($env.HOME)/cy/cyberlinks_temp.csv" --force
     # print "TMP-table is clear now."
@@ -697,7 +698,7 @@ export def-env 'config save' [
         let prompt1 = (input $"($file_name) exists. Do you want to overwrite it? \(y/n\) ")
 
         if $prompt1 == "y" {
-            backup1 $file_name
+            backup_fn $file_name
             $in_config | save $file_name -f
         } else {
             $file_name = $"($env.HOME)/cy/config/($dt1).yaml"
@@ -821,6 +822,39 @@ export def 'search2' [
     }
 }
 
+export def 'search3' [
+    query
+    --pretty (-P)
+    --page (-p) = 0
+] {
+    # watch ~/cy/cache/ --glob=**/*.rs { cargo test }
+
+
+
+    let cid = if (is-cid $query) {
+        $query
+    } else {
+        (pin text $query)
+    }
+    
+    let serp = (
+        ^($env.cy.exec) query rank search $cid $page 10 
+        | from json 
+        | get result 
+        | upsert particle {
+            |i| request-file-from-cache $i.particle
+        } 
+        | select particle rank 
+        )
+
+    if $pretty {
+        $serp 
+        | table --width (term size | get columns)
+    } else {
+        $serp
+    }
+}
+
 export def `download cid from ipfs` [
     cid
 ] {
@@ -917,7 +951,7 @@ export def 'check-queue' [] {
 }
 
 export def `cache clear` [] {
-    backup1 $"($env.HOME)/cy/cache" 
+    backup_fn $"($env.HOME)/cy/cache" 
     make_default_folders_fn
 }
 
@@ -1036,7 +1070,7 @@ def 'nu-complete-config-names' [] {
     | filter {|x| $x != "default"}
 }
 
-export def 'backup1' [
+export def 'backup_fn' [
     filename
 ] {
     let basename1 = ($filename | path basename)
