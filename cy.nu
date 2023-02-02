@@ -19,7 +19,7 @@ export-env {
 # Pin a text particle
 export def 'pin text' [
     text_param?: string
-    --offline
+    --only_hash
 ] {
     let text_in = $in
     
@@ -30,7 +30,16 @@ export def 'pin text' [
         | into string # To coerce numbers into strings
     ) 
 
-    let cid = if (is-cid $text) {$text} else {
+    let cid = if (is-cid $text) {
+        $text
+    } else {
+        if $only_hash {
+            $text
+            | ipfs add -Q --only-hash
+            
+            return
+        }
+
         let cid = if (
             ($env.cy.ipfs-storage == 'kubo') or ($env.cy.ipfs-storage == 'both')
             ) {
@@ -334,7 +343,7 @@ export def 'tmp pin col' [
 
 }
 
-# Check if any of the links in tmp table exist
+# Check if any of the links in the tmp table exist
 def 'link-exist' [
     from
     to
@@ -921,7 +930,7 @@ export def 'request-file-from-cache' [
     } else {$a1}
 
     let a1 = if ($a1 == null) {
-        let message = $"($cid) is in queue since (datetime_fn)"
+        let message = $"($cid) is in the queue since (datetime_fn --pretty)"
         $message | save $"($env.HOME)/cy/cache/queue/($cid)"
         $message
     } else {
@@ -1056,8 +1065,15 @@ def 'if-empty' [
      )
  }
 
-def 'datetime_fn' [] {
-    date now | date format '%Y%m%d-%H%M%S%S'
+def 'datetime_fn' [
+    --pretty (-P)
+] {
+    if $pretty {
+        date now | date format '%Y-%m-%d-%H:%M:%S'
+    } else {
+        date now | date format '%Y%m%d-%H%M%S'
+    }
+    
 }
 
 def 'nu-complete-config-names' [] {
