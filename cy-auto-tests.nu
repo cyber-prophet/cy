@@ -2,6 +2,7 @@ source /Users/user/cy/cy.nu
 
 # module tests {
     def 'test link texts' [] {
+        print 'test link texts'
         let expect = [
             [from_text, to_text, from, to]; 
             [cyber, bostrom, "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV", "QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb"]
@@ -20,6 +21,7 @@ source /Users/user/cy/cy.nu
     }
 
     def 'test link files' [] {
+        print 'test link files'
         let expect = [
             [from, to]; 
             # [null, "QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb"], 
@@ -45,6 +47,7 @@ source /Users/user/cy/cy.nu
     }
 
     def 'test link chuck' [] {
+        print 'test link chuck'
         let expect = 1
 
         let result = (
@@ -60,6 +63,7 @@ source /Users/user/cy/cy.nu
     }
 
     def 'test tmp send tx' [] {
+        print 'test tmp send tx'
         let expect = 0
 
         let result = (
@@ -75,6 +79,7 @@ source /Users/user/cy/cy.nu
     }
 
     def 'test get passport by address' [] {
+        print 'test get passport by address'
             let expect = {data: {owner: "bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8", 
             approvals: [], token_uri: null, extension: {addresses: null, 
             avatar: "QmNprvRpqVsQEqEoTRJfZUB57RHEVSK2KLPsaHSULWb28j", 
