@@ -36,30 +36,29 @@ export def 'pin text' [
         if $only_hash {
             $text
             | ipfs add -Q --only-hash
-            
-            return
+            | str replace '\n' ''
+        } else {
+            let cid = if (
+                ($env.cy.ipfs-storage == 'kubo') or ($env.cy.ipfs-storage == 'both')
+                ) {
+                    $text
+                    | ipfs add -Q 
+                    | str replace '\n' ''
+                } 
+                
+            let cid = if (
+                ($env.cy.ipfs-storage == 'cybernode') or ($env.cy.ipfs-storage == 'both')
+                ) {
+                    $text 
+                    | curl --silent -X POST -F file=@- 'https://io.cybernode.ai/add' 
+                    | from json 
+                    | get cid./
+                } else {
+                    $cid
+                }
+    
+            $cid
         }
-
-        let cid = if (
-            ($env.cy.ipfs-storage == 'kubo') or ($env.cy.ipfs-storage == 'both')
-            ) {
-                $text
-                | ipfs add -Q 
-                | str replace '\n' ''
-            } 
-            
-        let cid = if (
-            ($env.cy.ipfs-storage == 'cybernode') or ($env.cy.ipfs-storage == 'both')
-            ) {
-                $text 
-                | curl --silent -X POST -F file=@- 'https://io.cybernode.ai/add' 
-                | from json 
-                | get cid./
-            } else {
-                $cid
-            }
-
-        $cid
     }
 
     $cid
@@ -807,11 +806,7 @@ export def 'search2' [
     --pretty (-P)
     --page (-p) = 0
 ] {
-    let cid = if (is-cid $query) {
-        $query
-    } else {
-        (pin text $query)
-    }
+    let cid = pin text $query --only_hash
     
     let serp = (
         ^($env.cy.exec) query rank search $cid $page 10 
@@ -838,23 +833,52 @@ export def 'search3' [
 ] {
     # watch ~/cy/cache/ --glob=**/*.rs { cargo test }
 
-
-
-    let cid = if (is-cid $query) {
-        $query
-    } else {
-        (pin text $query)
-    }
+    let cid = pin text $query --only_hash
     
     let serp = (
         ^($env.cy.exec) query rank search $cid $page 10 
+        | save $"~/cy/cache/search/($cid)-(date now|into int).json"
+    )
+}
+
+export def 'search4' [
+    query
+    --pretty (-P)
+    --page (-p) = 0
+] {
+    let cid = (pin text $query --only_hash)
+    print $"search4 ($cid)"
+    
+    let results = (
+        ^($env.cy.exec) query rank search $cid $page 10 
         | from json 
+    )
+
+    $results | save $"($env.HOME)/cy/cache/search/($cid)-(date now|into int).json"
+
+    print (if $pretty {
+        serp1 $results --pretty
+    } else {
+        serp1 $results
+    })
+
+    watch ~/cy/cache/queue { clear; serp1 $results --pretty }
+
+}
+
+def serp1 [
+    results
+    --pretty
+] {
+
+    let serp = (
+        $results
         | get result 
         | upsert particle {
             |i| request-file-from-cache $i.particle
         } 
         | select particle rank 
-        )
+    )
 
     if $pretty {
         $serp 
@@ -862,6 +886,10 @@ export def 'search3' [
     } else {
         $serp
     }
+}
+
+export def `watch search folder` [] {
+    watch ~/cy/cache/search { check-queue }
 }
 
 export def `download cid from ipfs` [
@@ -1014,6 +1042,7 @@ def make_default_folders_fn [] {
     mkdir ~/cy/backups/
     mkdir ~/cy/config/
     mkdir ~/cy/cache/
+    mkdir ~/cy/cache/search/
     mkdir ~/cy/cache/other/
     mkdir ~/cy/cache/safe/
     mkdir ~/cy/cache/queue/
