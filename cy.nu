@@ -845,12 +845,12 @@ export def 'search4' [
     query
     --pretty (-P)
     --page (-p) = 0
+    --results_per_page (-r) = 10
 ] {
     let cid = (pin text $query --only_hash)
-    print $"search4 ($cid)"
     
     let results = (
-        ^($env.cy.exec) query rank search $cid $page 10 
+        ^($env.cy.exec) query rank search $cid $page $results_per_page 
         | from json 
     )
 
@@ -880,12 +880,7 @@ def serp1 [
         | select particle rank 
     )
 
-    if $pretty {
-        $serp 
-        | table --width (term size | get columns)
-    } else {
-        $serp
-    }
+    $serp 
 }
 
 export def `watch search folder` [] {
