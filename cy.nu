@@ -487,9 +487,11 @@ export def 'tmp send tx' [] {
         | merge $_var 
         | select cy code txhash
         
-    } else {
-        {'cy': $'If the problem is with the already existed cyberlinks, use (ansi yellow)"cy tmp remove existed"(ansi reset)' } 
+    } else if $_var.code == 2 {
+        {'cy': $'Use (ansi yellow)"cy tmp remove existed"(ansi reset)' } 
         | merge $_var 
+    } else {
+        $_var
     }
 }
 
