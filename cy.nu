@@ -389,14 +389,12 @@ export def 'tmp remove existed' [] {
 
 # Create a custom unsigned cyberlinks transaction
 def 'tx json create from cybelinks' [] {
-    let in_cyberlinks = $in
-    let cyberlinks = if ($in_cyberlinks == null) {
-        tmp view -q
-    } else {
-        $in_cyberlinks
-    }
-
-    let cyberlinks = ($cyberlinks | select from to)
+    let cyberlinks = $in
+    let cyberlinks = (
+        $cyberlinks 
+        | select from to 
+        | uniq
+    )
 
     let trans = (
         '{"body":{"messages":[
