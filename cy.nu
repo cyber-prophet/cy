@@ -458,13 +458,12 @@ export def 'tmp send tx' [] {
         $in_cyberlinks
     }
 
-    $cyberlinks | tx json create from cybelinks 
-
-    let var0 = tx sign and broadcast
     let cyberlinks_count = ($cyberlinks | length)
 
+    $cyberlinks | tx json create from cybelinks 
+
     let _var = ( 
-        $var0 
+        tx sign and broadcast
         | from json 
         | select raw_log code txhash
     )
