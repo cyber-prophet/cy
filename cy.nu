@@ -402,10 +402,10 @@ def 'tx json create from cybelinks' [] {
         '{"body":{"messages":[
         {"@type":"/cyber.graph.v1beta1.MsgCyberlink",
         "neuron":"","links":[{"from":"","to":""}]}
-        ],"memo":"","timeout_height":"0",
+        ],"memo":"cy","timeout_height":"0",
         "extension_options":[],"non_critical_extension_options":[]},
         "auth_info":{"signer_infos":[],"fee":
-        {"amount":[],"gas_limit":"2000000","payer":"","granter":""}},
+        {"amount":[],"gas_limit":"23456789","payer":"","granter":""}},
         "signatures":[]}' | from json
     )
 
