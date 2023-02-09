@@ -849,11 +849,20 @@ export def 'search4' [
     let cid = (pin text $query --only_hash)
     
     let results = (
-        ^($env.cy.exec) query rank search $cid $page $results_per_page 
+        do -i {
+            ^($env.cy.exec) query rank search $cid $page $results_per_page 
+        }
         | from json 
     )
 
+    if $results == null {
+        print $"there is no search results for ($cid)"
+        return
+    }
+    
     $results | save $"($env.HOME)/cy/cache/search/($cid)-(date now|into int).json"
+
+    clear; print $"Searching ($env.cy.exec) for ($cid)";
 
     print (if $pretty {
         serp1 $results --pretty
@@ -861,7 +870,7 @@ export def 'search4' [
         serp1 $results
     })
 
-    watch ~/cy/cache/queue { clear; serp1 $results --pretty }
+    watch ~/cy/cache/queue { clear; print $"Searching ($env.cy.exec) for ($cid)"; serp1 $results --pretty }
 
 }
 
