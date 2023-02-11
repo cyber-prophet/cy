@@ -529,7 +529,7 @@ export def 'passport get by address' [
     let json = ($'{"active_passport": {"address": "($address)"}}')
     let pcontract = 'bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel'
     (
-        cyber query wasm contract-state smart $pcontract $json 
+        ^cyber query wasm contract-state smart $pcontract $json 
         --node https://rpc.bostrom.cybernode.ai:443 
     ) | from json | get data
 }
@@ -541,7 +541,7 @@ export def 'passport get by nick' [
     let json = ($'{"passport_by_nickname": {"nickname": "($nickname)"}}')
     let pcontract = 'bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel'
     (
-        cyber query wasm contract-state smart $pcontract $json 
+        ^cyber query wasm contract-state smart $pcontract $json 
         --node https://rpc.bostrom.cybernode.ai:443 
     ) | from json | get data
 }
@@ -554,7 +554,7 @@ export def 'passport set particle' [
     let json = $'{"update_particle":{"nickname":"($nickname)","particle":"($particle)"}}'
     let pcontract = 'bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel'
     (
-        cyber tx wasm execute $pcontract $json 
+        ^cyber tx wasm execute $pcontract $json 
         --from $env.cy.address 
         --node https://rpc.bostrom.cybernode.ai:443 
     ) | from json 
@@ -995,6 +995,51 @@ export def `cache clear` [] {
     make_default_folders_fn
 }
 
+export def 'ber' [
+    ...rest
+    --seconds: int = 86400
+    --exec: string
+] {
+
+    let exec = if ($exec == null) {
+        $env.cy.exec
+    } else {
+        $exec
+    }
+
+    let cfolder = $"($env.HOME)/cy/cache/cli_out/"
+    let command = $"($exec)_($rest | str join '_')"
+    let ts1 = (date now | into int)
+    let filename = $"($cfolder)($command)-($ts1).json"
+
+    let $cached_files1 = ls $cfolder 
+
+    let cached_file = (
+        if $cached_files1 != null {
+            $cached_files1
+            | where name =~ $"($command)-"
+            | where modified > (date now | into int | $in - $seconds | into datetime)
+            | get -i 0.name 
+        } else {
+            null
+        }
+    )
+
+    let content = (
+        if $cached_file == null {
+            print $"request command from cli, saving to ($filename)"
+            let out1 = do -i {^($exec) $rest --output json | from json} 
+            if $out1 != null {$out1 | save $filename}
+            $out1
+        } else {
+            print "cached used"
+            open $cached_file
+        }
+    )
+
+    $content
+}
+
 
 # An ordered list of cy commands
 export def 'help' [
@@ -1049,6 +1094,7 @@ def make_default_folders_fn [] {
     mkdir ~/cy/cache/other/
     mkdir ~/cy/cache/safe/
     mkdir ~/cy/cache/queue/
+    mkdir ~/cy/cache/cli_out/
 }
 
 # Print string colourfully
