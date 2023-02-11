@@ -528,10 +528,7 @@ export def 'passport get by address' [
 ] { 
     let json = ($'{"active_passport": {"address": "($address)"}}')
     let pcontract = 'bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel'
-    (
-        ^cyber query wasm contract-state smart $pcontract $json 
-        --node https://rpc.bostrom.cybernode.ai:443 
-    ) | from json | get data
+    do -i {^cyber query wasm contract-state smart $pcontract $json --node https://rpc.bostrom.cybernode.ai:443 | from json | get data}
 }
 
 # Get a passport by providing a neuron's nick
