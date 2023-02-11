@@ -1,4 +1,4 @@
-source /Users/user/cy/cy.nu
+overlay use ~/cy/cy.nu -p -r
 
 # module tests {
     def 'test link texts' [] {
@@ -9,8 +9,8 @@ source /Users/user/cy/cy.nu
         ]
 
         let result = (
-            tmp clear; 
-            link texts "cyber" "bostrom" | select from_text to_text from to
+            cy tmp clear; 
+            cy link texts "cyber" "bostrom" | select from_text to_text from to
         )
 
         if $result == $expect {
@@ -33,9 +33,9 @@ source /Users/user/cy/cy.nu
 
         let result = (
             cd /Users/user/apps-files/github/cytests/files;
-            tmp clear ;
+            cy tmp clear ;
             # pin files
-            pin files --link_filenames
+            cy pin files --link_filenames
             | select from to
         )
 
@@ -51,8 +51,8 @@ source /Users/user/cy/cy.nu
         let expect = 1
 
         let result = (
-            tmp clear ;
-            link chuck | length
+            cy tmp clear ;
+            cy link chuck | length
         )
 
         if $result == $expect {
@@ -66,10 +66,10 @@ source /Users/user/cy/cy.nu
         print 'test tmp send tx'
         let expect = 0
 
-        config activate hot-pussy 
+        cy config activate hot-pussy 
 
         let result = (
-            tmp send tx | get code
+            cy tmp send tx | get code
         )
 
         if $result == $expect {
@@ -89,7 +89,7 @@ source /Users/user/cy/cy.nu
         }
 
         let result = (
-            passport get by address bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
+            cy passport get by address bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
         )
 
         if $result == $expect {
