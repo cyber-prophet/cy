@@ -66,8 +66,9 @@ source /Users/user/cy/cy.nu
         print 'test tmp send tx'
         let expect = 0
 
+        config activate hot-pussy 
+
         let result = (
-            config activate hot-pussy ;
             tmp send tx | get code
         )
 
