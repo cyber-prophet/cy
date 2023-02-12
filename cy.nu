@@ -1024,12 +1024,12 @@ export def 'ber' [
 
     let content = (
         if $cached_file == null {
-            print $"request command from cli, saving to ($filename)"
+            # print $"request command from cli, saving to ($filename)"
             let out1 = do -i {^($exec) $rest --output json | from json} 
             if $out1 != null {$out1 | save $filename}
             $out1
         } else {
-            print "cached used"
+            # print "cached used"
             open $cached_file
         }
     )
