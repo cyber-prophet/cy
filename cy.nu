@@ -5,7 +5,7 @@
 # > mkdir ~/cy | fetch https://raw.githubusercontent.com/cyber-prophet/cy/main/cy.nu | save ~/cy/cy.nu -f
 #
 # Use:
-# > overlay use ~/cy/cy.nu as cy -p -r
+# > overlay use ~/cy/cy.nu -p -r
 
 export-env { 
     banner
@@ -1035,6 +1035,10 @@ export def 'ber' [
     )
 
     $content
+}
+
+export def 'ipfs bootstrap add congress' [] {
+    ipfs bootstrap add '/ip4/135.181.19.86/tcp/4001/p2p/12D3KooWNMcnoQynAY9hyi4JxzSu64BsRGcJ9z7vKghqk8sTrpqY'
 }
 
 
