@@ -528,7 +528,7 @@ export def 'passport get by address' [
 ] { 
     let json = ($'{"active_passport": {"address": "($address)"}}')
     let pcontract = 'bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel'
-    do -i {^cyber query wasm contract-state smart $pcontract $json --node https://rpc.bostrom.cybernode.ai:443 | from json | get data}
+    do -i {^cyber query wasm contract-state smart $pcontract $json --node https://rpc.bostrom.cybernode.ai:443 --output json | from json | get data}
 }
 
 # Get a passport by providing a neuron's nick
@@ -539,7 +539,7 @@ export def 'passport get by nick' [
     let pcontract = 'bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel'
     (
         ^cyber query wasm contract-state smart $pcontract $json 
-        --node https://rpc.bostrom.cybernode.ai:443 
+        --node https://rpc.bostrom.cybernode.ai:443 --output json 
     ) | from json | get data
 }
 
@@ -553,7 +553,7 @@ export def 'passport set particle' [
     (
         ^cyber tx wasm execute $pcontract $json 
         --from $env.cy.address 
-        --node https://rpc.bostrom.cybernode.ai:443 
+        --node https://rpc.bostrom.cybernode.ai:443 --output json 
     ) | from json 
 }
 
@@ -751,7 +751,7 @@ export def 'search' [
     }
     
     let serp = (
-        ^($env.cy.exec) query rank search $cid $page 10 
+        ^($env.cy.exec) query rank search $cid $page 10 --output json
         | from json 
         | get result 
         | upsert particle {
@@ -805,7 +805,7 @@ export def 'search2' [
     let cid = pin text $query --only_hash
     
     let serp = (
-        ^($env.cy.exec) query rank search $cid $page 10 
+        ^($env.cy.exec) query rank search $cid $page 10 --output json
         | from json 
         | get result 
         | upsert particle {
@@ -832,7 +832,7 @@ export def 'search3' [
     let cid = pin text $query --only_hash
     
     let serp = (
-        ^($env.cy.exec) query rank search $cid $page 10 
+        ^($env.cy.exec) query rank search $cid $page 10 --output json
         | save $"~/cy/cache/search/($cid)-(date now|into int).json"
     )
 }
@@ -847,7 +847,7 @@ export def 'search4' [
     
     let results = (
         do -i {
-            ^($env.cy.exec) query rank search $cid $page $results_per_page 
+            ^($env.cy.exec) query rank search $cid $page $results_per_page --output json
         }
         | from json 
     )
