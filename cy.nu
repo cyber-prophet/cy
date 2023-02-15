@@ -87,9 +87,7 @@ export def 'pin files' [
     let out_table = (
         if $link_filenames {
             $files
-            | each {
-                |it| pin text $it 
-                } 
+            | each { |it| pin text $it } 
             | wrap from 
             | merge $cid_table
         } else {
@@ -173,8 +171,7 @@ export def 'link chuck' [
     if $disable_append {
             $_table
         } else {
-            $_table
-            | tmp append
+            $_table | tmp append
  }
 } 
 
@@ -894,24 +891,28 @@ export def `watch search folder` [] {
 
 export def `download cid from ipfs` [
     cid
+    --timeout = 120s
 ] {
 
     print $"cid to download ($cid)"
-    let type1 = do -i {(ipfs cat --timeout 120s -l 400 $cid | file - | $in + "" | str replace "/dev/stdin: " "")}
+    let type1 = do -i {(ipfs cat --timeout $timeout -l 400 $cid | file - | $in + "" | str replace "/dev/stdin: " "")}
 
-    if (
-        $type1 =~ "(ASCII text)|(Unicode text)"
-        ) {
+    if ( $type1 =~ "(ASCII text)|(Unicode text)" ) {
             print $"found text ($type1) ($cid)"
+
             let result = (
-                ipfs get --progress=false --timeout 120s -o $"($env.HOME)/cy/cache/safe/($cid).txt" $cid 
+                ipfs get --progress=false --timeout $timeout -o $"($env.HOME)/cy/cache/safe/($cid).txt" $cid 
                 | complete
             )
+
             if ($result.exit_code == 0) {
                 rm -f $"($env.HOME)/cy/cache/queue/($cid)" 
             }
+        } else if ( $type1 == "empty" ) {
+            print $"($cid) not found"
         } else {
             print $"found non-text ($cid) ($type1)"
+
             $type1 | save -f $"($env.HOME)/cy/cache/other/($cid).txt"
 
             rm -f $"($env.HOME)/cy/cache/queue/($cid)" 
