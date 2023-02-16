@@ -886,10 +886,6 @@ def serp1 [
     $serp 
 }
 
-export def `watch search folder` [] {
-    watch ~/cy/cache/search { check-queue }
-}
-
 export def `download cid from ipfs` [
     cid
     --timeout = 120s
@@ -974,6 +970,10 @@ export def 'request-file-from-cache' [
         | $"($in)\n(ansi grey)($cid)(ansi reset)"
     )
 
+}
+
+export def `watch search folder` [] {
+    watch ~/cy/cache/search { check-queue }
 }
 
 export def 'check-queue' [] {
