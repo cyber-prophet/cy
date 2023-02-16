@@ -505,14 +505,10 @@ export def 'tsv paste' [] {
 
 # Update cy to the latest version
 export def 'update cy' [
-    --development_version (-d)
+    --branch: string@'nu-complete-git-branches' = 'main'
 ] {
 
-    let url = if $development_version {
-        "https://raw.githubusercontent.com/cyber-prophet/cy/dev/cy.nu" 
-    } else {
-        "https://raw.githubusercontent.com/cyber-prophet/cy/main/cy.nu" 
-    }
+    let url = $"https://raw.githubusercontent.com/cyber-prophet/($branch)/dev/cy.nu" 
 
     mkdir ~/cy 
     | fetch $url
@@ -1233,4 +1229,8 @@ def inspect [
     }
 
     $input
+}
+
+def 'nu-complete-git-branches' [] {
+    ['main', 'dev']
 }
