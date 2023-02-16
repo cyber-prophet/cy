@@ -1011,45 +1011,21 @@ export def-env 'ber' [
     let ts1 = (date now | into int)
     let filename = $"($cfolder)($command)-($ts1).json"
 
+    let $cached_files1 = ls $cfolder
 
-
-    let-env cy_cache = (
-        if ($env | get -i "cy_cache") == null {
-            print "no ls"
-            let-env cy_cache_update = date now
-            ls $cfolder 
-        } else {
-            print $"files in cache ($env.cy_cache | length)"
-            if (
-                ($env | get -i cy_cache_update) > ((date now) - 300sec)
-            ) {
-                print "get from cache"
-                $env.cy_cache
-            } else {
-                print "ls folder "
-                ls $cfolder 
-            }
-        }
-    )
-
-    print "cy_cache"
-
-    # let $cached_files1 = $env.cy_cache
-
-    print "cached_files"
+    # print "cached_files"
 
     let cached_file = (
-        if $env.cy_cache != null {
-            print "$env.cy_cache != null"
+        if $cached_files1 != null {
+            # print "$cached_files1 != null"
 
-            $env.cy_cache
+            $cached_files1
             | where name =~ $"($command)-"
-            | inspect
+            | sort-by modified --reverse
             | where modified > (date now | into int | $in - $seconds | into datetime)
-            | inspect
             | get -i name.0 
         } else {
-            print "null"
+            # print "null"
             null
         }
     )
@@ -1058,10 +1034,10 @@ export def-env 'ber' [
 
     let content = (
         if ($cached_file != null) {
-            print "cached used"
+            # print "cached used"
             open $cached_file
         } else  {
-            print $"request command from cli, saving to ($filename)"
+            # print $"request command from cli, saving to ($filename)"
             let out1 = do -i {^($exec) $rest --output json | from json} 
             if $out1 != null {$out1 | save $filename}
             $out1
