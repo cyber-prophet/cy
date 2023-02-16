@@ -14,6 +14,7 @@ export-env {
     } catch {
         'file "/config/default.yaml" was not found. Run "cy config new"' | cprint -c green_underline
     }
+    let-env cy_cache = null
 }
 
 # Pin a text particle
@@ -993,7 +994,7 @@ export def `cache clear` [] {
     make_default_folders_fn
 }
 
-export def 'ber' [
+export def-env 'ber' [
     ...rest
     --seconds: int = 86400
     --exec: string
@@ -1010,29 +1011,61 @@ export def 'ber' [
     let ts1 = (date now | into int)
     let filename = $"($cfolder)($command)-($ts1).json"
 
-    let $cached_files1 = ls $cfolder 
+
+
+    let-env cy_cache = (
+        if ($env | get -i "cy_cache") == null {
+            print "no ls"
+            let-env cy_cache_update = date now
+            ls $cfolder 
+        } else {
+            print $"files in cache ($env.cy_cache | length)"
+            if (
+                ($env | get -i cy_cache_update) > ((date now) - 300sec)
+            ) {
+                print "get from cache"
+                $env.cy_cache
+            } else {
+                print "ls folder "
+                ls $cfolder 
+            }
+        }
+    )
+
+    print "cy_cache"
+
+    # let $cached_files1 = $env.cy_cache
+
+    print "cached_files"
 
     let cached_file = (
-        if $cached_files1 != null {
-            $cached_files1
+        if $env.cy_cache != null {
+            print "$env.cy_cache != null"
+
+            $env.cy_cache
             | where name =~ $"($command)-"
+            | inspect
             | where modified > (date now | into int | $in - $seconds | into datetime)
-            | get -i 0.name 
+            | inspect
+            | get -i name.0 
         } else {
+            print "null"
             null
         }
     )
 
+    print $cached_file
+
     let content = (
-        if $cached_file == null {
-            # print $"request command from cli, saving to ($filename)"
+        if ($cached_file != null) {
+            print "cached used"
+            open $cached_file
+        } else  {
+            print $"request command from cli, saving to ($filename)"
             let out1 = do -i {^($exec) $rest --output json | from json} 
             if $out1 != null {$out1 | save $filename}
             $out1
-        } else {
-            # print "cached used"
-            open $cached_file
-        }
+        } 
     )
 
     $content
