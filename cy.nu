@@ -575,11 +575,13 @@ export def-env 'config new' [
         'Here are the keys that you have:' | cprint -b 1
         print $addr_table
     } else {
+        let error_text = (
+            $'There are no addresses in ($_exec). To use CY you need to add one.' +
+            $'You can find out how to add one by running the command "($_exec) keys add -h".' +
+            $'After adding a key - come back and launch this wizzard again'
+        )
 
-        error make -u {msg: $'
-There are no addresses in ($_exec). To use CY you need to add one.
-You can do that by running the command "($_exec) keys add -h". 
-After adding a key - come back and launch this wizzard again'}
+        error make -u {msg: $error_text}
     help: $'try "($_exec) keys add -h"'
     }
     
@@ -884,11 +886,11 @@ def serp1 [
 
 export def `download cid from ipfs` [
     cid
-    --timeout = 120s
+    --timeout = 300s
 ] {
 
     print $"cid to download ($cid)"
-    let type1 = do -i {(ipfs cat --timeout $timeout -l 400 $cid | file - | $in + "" | str replace "/dev/stdin: " "")}
+    let type1 = do -i {ipfs cat --timeout $timeout -l 400 $cid | file - | $in + "" | str replace "/dev/stdin: " ""}
 
     if ( $type1 =~ "(ASCII text)|(Unicode text)" ) {
             print $"found text ($type1) ($cid)"
@@ -994,7 +996,13 @@ export def-env 'ber' [
     ...rest
     --seconds: int = 86400
     --exec: string
+    --node: string
 ] {
+    mut flags_list = []
+
+    if $node != null {
+        $flags_list = $flags_list | append ['--node' $node]
+    }
 
     let exec = if ($exec == null) {
         $env.cy.exec
@@ -1028,13 +1036,15 @@ export def-env 'ber' [
 
     print $cached_file
 
+    let let_flags_list = $flags_list
+
     let content = (
         if ($cached_file != null) {
             # print "cached used"
             open $cached_file
         } else  {
             # print $"request command from cli, saving to ($filename)"
-            let out1 = do -i {^($exec) $rest --output json | from json} 
+            let out1 = do -i {^($exec) $rest --output json $let_flags_list | from json} 
             if $out1 != null {$out1 | save $filename}
             $out1
         } 
