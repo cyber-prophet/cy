@@ -1053,39 +1053,76 @@ export def-env 'ber' [
     $content
 }
 
-export def 'balances' [] {
-    let balances = (
-    cyber keys list --output json 
-    | from json 
-    | select name type address 
-    | par-each {
-        |i| cyber query bank balances $i.address --output json 
+export def 'balances' [
+    ...name: string@'nu-complete keys values'
+] {
+
+    let keys0 = (
+        ^($env.cy.exec) keys list --output json 
         | from json 
-        | get balances 
-        | upsert amount {
-            |b| $b.amount 
-            | into int
-        } 
-        | transpose -i -r 
-        | into record
-        | merge $i
+        | select name address 
+    )
+
+    let keys1 = (
+        if ($name | is-empty) {
+            $keys0
+        } else {
+            $keys0 | where name in $name
+        }
+    )
+
+    let balances = (
+        $keys1
+        | par-each {
+            |i| cyber query bank balances $i.address --output json 
+            | from json 
+            | get balances 
+            | upsert amount {
+                |b| $b.amount 
+                | into int
+            } 
+            | transpose -i -r 
+            | into record
+            | merge $i
     } 
 )
 
-let dummy1 = (
-    $balances | columns | prepend "name" | uniq 
-    | reverse | prepend ["address" "type"] | uniq 
-    | reverse | reduce -f {} {|i acc| $acc | merge {$i : 0}})
+    let dummy1 = (
+        $balances | columns | prepend "name" | uniq 
+        | reverse | prepend ["address" "type"] | uniq 
+        | reverse | reduce -f {} {|i acc| $acc | merge {$i : 0}})
 
-let out = ($balances | each {|i| $dummy1 | merge $i} | sort-by name)
+    let out = ($balances | each {|i| $dummy1 | merge $i} | sort-by name)
 
-$out
+    if ($name | is-empty) or (($name | length) > 1) {
+        $out 
+    } else {
+        $out | into record
+    }
 }
 
 export def 'ipfs bootstrap add congress' [] {
     ipfs bootstrap add '/ip4/135.181.19.86/tcp/4001/p2p/12D3KooWNMcnoQynAY9hyi4JxzSu64BsRGcJ9z7vKghqk8sTrpqY'
 }
 
+export def 'ibc denoms' [] {
+    let bank_total = (
+        cyber query bank total --output json 
+        | from json # here we obtain only the first page of report
+    )
+
+    let denom_trace1 = (
+        $bank_total 
+        | get supply 
+        | where denom =~ "^ibc" 
+        | upsert ibc_hash {|i| $i.denom | str replace "ibc/" ""} 
+        | upsert a1 {|i| cyber query ibc-transfer denom-trace $i.ibc_hash --output json 
+        | from json 
+        | get denom_trace}
+    )
+
+    $denom_trace1.a1 | merge $denom_trace1 | reject ibc_hash a1 | sort-by path --natural
+}
 
 # An ordered list of cy commands
 export def 'help' [
@@ -1243,4 +1280,14 @@ def inspect [
 
 def 'nu-complete-git-branches' [] {
     ['main', 'dev']
+}
+
+# cyber keys in a form of table
+def "nu-complete keys table" [] {
+    cyber keys list --output json | from json | select name address 
+}
+
+# Helper function to use addresses for completions in --from parameter
+def "nu-complete keys values" [] {
+    (nu-complete keys table).name | zip (nu-complete keys table).address | flatten
 }
