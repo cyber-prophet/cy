@@ -1089,7 +1089,7 @@ export def 'balances' [
 
     let dummy1 = (
         $balances | columns | prepend "name" | uniq 
-        | reverse | prepend ["address" "type"] | uniq 
+        | reverse | prepend ["address"] | uniq 
         | reverse | reduce -f {} {|i acc| $acc | merge {$i : 0}})
 
     let out = ($balances | each {|i| $dummy1 | merge $i} | sort-by name)
