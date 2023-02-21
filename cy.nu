@@ -997,12 +997,281 @@ export def-env 'ber' [
     --seconds: int = 86400
     --exec: string
     --node: string
+    --hex (-x)
+    --coin-type: string
+    --starting-ip-address: string
+    --algo: string
+    --trace
+    --security-contact: string
+    --account-number (-a): string
+    --spend-limit: string
+    --ledger
+    --title: string
+    --sequences: string
+    --output-document: string
+    --compute-gpu
+    --run-as: string
+    --halt-time: string
+    --details: string
+    --commission-max-rate: string
+    --delayed
+    --keyring-backend: string
+    --inter-block-cache
+    --sequence (-s): string
+    --pubkey (-p)
+    --transport: string
+    --depositor: string
+    --no-admin
+    --yes (-y)
+    --sign-mode: string
+    --minimum-gas-prices: string
+    --device (-d)
+    --interactive (-i)
+    --long
+    --signature-only
+    --home: string
+    --amount: string
+    --overwrite
+    --identity: string
+    --overwrite (-o)
+    --msg-type: string
+    --b64
+    --pruning: string
+    --proxy_app: string
+    --keep-addr-book
+    --abci: string
+    --timeout-height: string
+    --min-retain-blocks: string
+    --halt-height: string
+    --upgrade-height: string
+    --ascii
+    --output-dir (-o): string
+    --from: string
+    --pruning-interval: string
+    --period-limit: string
+    --node-dir-prefix: string
+    --node: string
+    --pruning-keep-recent: string
+    --cpu-profile: string
+    --vesting-amount: string
+    --offline
+    --genesis_hash: string
+    --index: string
+    --commission-max-change-rate: string
+    --admin: string
+    --limit: string
+    --priv_validator_laddr: string
+    --note: string
+    --page-key: string
+    --denom: string
+    --fees: string
+    --amino
+    --iavl-disable-fastnode
+    --deny-validators: string
+    --node-daemon-home: string
+    --allowed-messages: string
+    --type: string
+    --reverse
+    --multisig-threshold: string
+    --min-self-delegation: string
+    --ip: string
+    --gas: string
+    --db_backend: string
+    --new-moniker: string
+    --prove
+    --fast_sync
+    --trace-store: string
+    --node (-n): string
+    --pubkey: string
+    --dry-run
+    --latest-height
+    --fee-account: string
+    --no-auto-increment
+    --offset: string
+    --voter: string
+    --jail-allowed-addrs: string
+    --moniker: string
+    --packet-timeout-timestamp: string
+    --instantiate-only-address: string
+    --pruning-keep-every: string
+    --deposit: string
+    --pool-coin-denom: string
+    --unarmored-hex
+    --log_level: string
+    --page: string
+    --label: string
+    --address (-a)
+    --grpc-only
+    --vesting-end-time: string
+    --v: string
+    --gentx-dir: string
+    --output (-o): string
+    --nosort
+    --hd-path: string
+    --log_format: string
+    --status: string
+    --max-msgs: string
+    --output: string
+    --x-crisis-skip-assert-invariants
+    --db_dir: string
+    --broadcast-mode (-b): string
+    --height: string
+    --multisig: string
+    --generate-only
+    --account: string
+    --with-tendermint
+    --hex
+    --unsafe-skip-upgrades: string
+    --gas-prices: string
+    --force (-f)
+    --unsafe
+    --help (-h)
+    --expiration: string
+    --commission-rate: string
+    --count-total
+    --search-api
+    --address: string
+    --description: string
+    --website: string
+    --reserve-acc: string
+    --absolute-timeouts
+    --instantiate-nobody: string
+    --node-id: string
+    --unsafe-entropy
+    --proposal: string
+    --list-names (-n)
+    --commission
+    --period: string
+    --recover
+    --upgrade-info: string
+    --for-zero-height
+    --no-backup
+    --keyring-dir: string
+    --instantiate-everybody: string
+    --bech: string
+    --vesting-start-time: string
+    --chain-id: string
+    --genesis-time: string
+    --events: string
+    --packet-timeout-height: string
+    --allowed-validators: string
+    --gas-adjustment: string
+    --inv-check-period: string
 ] {
-    mut flags_list = []
+    # mut flags_list = []
 
-    if $node != null {
-        $flags_list = $flags_list | append ['--node' $node]
-    }
+    let list_flags_str = ['absolute-timeouts',
+    'address',
+    'amino',
+    'ascii',
+    'b64',
+    'commission',
+    'compute-gpu',
+    'count-total',
+    'delayed',
+    'device',
+    'dry-run',
+    'fast_sync',
+    'for-zero-height',
+    'force',
+    'generate-only',
+    'grpc-only',
+    'help',
+    'hex',
+    'iavl-disable-fastnode',
+    'inter-block-cache',
+    'interactive',
+    'keep-addr-book',
+    'latest-height',
+    'ledger',
+    'list-names',
+    'long',
+    'no-admin',
+    'no-auto-increment',
+    'no-backup',
+    'nosort',
+    'offline',
+    'overwrite',
+    'prove',
+    'pubkey',
+    'recover',
+    'reverse',
+    'search-api',
+    'signature-only',
+    'trace',
+    'unarmored-hex',
+    'unsafe',
+    'unsafe-entropy',
+    'with-tendermint',
+    'x-crisis-skip-assert-invariants',
+    'yes']
+
+let list_flags_bool = [$'absolute-timeouts',
+$'address',
+$'amino',
+$'ascii',
+$'b64',
+$'commission',
+$'compute-gpu',
+$'consensus.create_empty_blocks',
+$'count-total',
+$'delayed',
+$'device',
+$'dry-run',
+$'fast_sync',
+$'for-zero-height',
+$'force',
+$'generate-only',
+$'grpc-only',
+$'grpc-web.enable',
+$'grpc.enable',
+$'help',
+$'hex',
+$'iavl-disable-fastnode',
+$'inter-block-cache',
+$'interactive',
+$'keep-addr-book',
+$'latest-height',
+$'ledger',
+$'list-names',
+$'long',
+$'no-admin',
+$'no-auto-increment',
+$'no-backup',
+$'nosort',
+$'offline',
+$'overwrite',
+$'p2p.pex',
+$'p2p.seed_mode',
+$'p2p.upnp',
+$'prove',
+$'pubkey',
+$'recover',
+$'reverse',
+$'rpc.unsafe',
+$'search-api',
+$'signature-only',
+$'trace',
+$'unarmored-hex',
+$'unsafe',
+$'unsafe-entropy',
+$'with-tendermint',
+$'x-crisis-skip-assert-invariants',
+$'yes']
+
+    let list_flags_out = (
+        $list_flags_bool 
+        | reduce -f [] {
+            |i acc n| if $i {
+                $acc 
+                | append ($list_flags_str | get $n) 
+            }
+        }
+    )
+
+    # if $node != null {
+    #     $flags_list = $flags_list | append ['--node' $node]
+    # }
 
     let exec = if ($exec == null) {
         $env.cy.exec
@@ -1036,7 +1305,7 @@ export def-env 'ber' [
 
     print $cached_file
 
-    let let_flags_list = $flags_list
+    # let let_flags_list = $flags_list
 
     let content = (
         if ($cached_file != null) {
@@ -1044,7 +1313,8 @@ export def-env 'ber' [
             open $cached_file
         } else  {
             # print $"request command from cli, saving to ($filename)"
-            let out1 = do -i {^($exec) $rest --output json $let_flags_list | from json} 
+            print $"($exec) ($rest) --output json ($list_flags_out)"
+            let out1 = do -i {^($exec) $rest --output json $list_flags_out | from json} 
             if $out1 != null {$out1 | save $filename}
             $out1
         } 
@@ -1089,7 +1359,6 @@ export def 'balances' [
 
     let dummy1 = (
         $balances | columns | prepend "name" | uniq 
-        | reverse | prepend ["address" "type"] | uniq 
         | reverse | reduce -f {} {|i acc| $acc | merge {$i : 0}})
 
     let out = ($balances | each {|i| $dummy1 | merge $i} | sort-by name)
