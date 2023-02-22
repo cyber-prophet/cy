@@ -863,7 +863,7 @@ def 'download cid from gateway' [
 
     let type1 = ($headers | get -i 'Content-Type')
     if $type1 == 'text/plain; charset=utf-8' {
-        http get $"($gate_url)($cid)" -t 60 | save -f $"($env.HOME)/cy/cache/safe/($cid).txt" 
+        http get $"($gate_url)($cid)" -m 60 | save -f $"($env.HOME)/cy/cache/safe/($cid).txt" 
     } else if ($type1 != null) {
         $type1 | save -f $"($env.HOME)/cy/cache/other/($cid).txt"
     }
@@ -996,9 +996,9 @@ def cprint [
         if $frame != null {
             let width = (term size | get columns) - 2
             (
-                (" " | str rpad -l $width -c $frame) + "\n" +
+                (" " | fill -a r -w $width -c $frame) + "\n" +
                 ( $text ) + "\n" +
-                (" " | str rpad -l $width -c $frame)
+                (" " | fill -a r -w $width -c $frame)
             )
         } else {
             $text
