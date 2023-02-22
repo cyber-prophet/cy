@@ -1,4 +1,4 @@
-# Cy - the nushell wrapper, interface to cyber family blockchains CLIs (Bostrom, Pussy)
+# Cy - the nushell wrapper, interface to cyber family blockchains CLIs (Bostrom, Pussy) and go-ipfs (kubo)
 # Git: https://github.com/cyber-prophet/cy
 #
 # Install/update to the latest version
@@ -1368,7 +1368,7 @@ export def 'help' [
     --to_md (-m) # export table as markdown
 ] {
     let text = (
-        view-source cy 
+        open ~/cy/cy.nu --raw
         | parse -r "(\n(# )(?<desc>.*?)(?:=?\n)export (def|def.env) '(?<command>.*)')"
         | select command desc 
         | upsert command {|row index| ('cy ' + $row.command)}
