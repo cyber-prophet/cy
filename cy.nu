@@ -1167,7 +1167,7 @@ def is-neuron [particle: string] {
 }
 
 def is-connected []  {
-    (do -i {http get https://www.iana.org} | describe) == 'raw input'
+    (do -i {http get https://duckduckgo.com/} | describe) == 'raw input'
 }
 
 def make_default_folders_fn [] {
