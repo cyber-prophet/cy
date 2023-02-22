@@ -997,274 +997,204 @@ export def-env 'ber' [
     --seconds: int = 86400
     --exec: string
     --node: string
-    --hex (-x)
-    --coin-type: string
-    --starting-ip-address: string
-    --algo: string
-    --trace
-    --security-contact: string
-    --account-number (-a): string
-    --spend-limit: string
-    --ledger
-    --title: string
-    --sequences: string
-    --output-document: string
-    --compute-gpu
-    --run-as: string
-    --halt-time: string
-    --details: string
-    --commission-max-rate: string
-    --delayed
-    --keyring-backend: string
-    --inter-block-cache
-    --sequence (-s): string
-    --pubkey (-p)
-    --transport: string
-    --depositor: string
-    --no-admin
-    --yes (-y)
-    --sign-mode: string
-    --minimum-gas-prices: string
-    --device (-d)
-    --interactive (-i)
-    --long
-    --signature-only
-    --home: string
-    --amount: string
-    --overwrite
-    --identity: string
-    --overwrite (-o)
-    --msg-type: string
-    --b64
-    --pruning: string
-    --proxy_app: string
-    --keep-addr-book
-    --abci: string
-    --timeout-height: string
-    --min-retain-blocks: string
-    --halt-height: string
-    --upgrade-height: string
-    --ascii
-    --output-dir (-o): string
-    --from: string
-    --pruning-interval: string
-    --period-limit: string
-    --node-dir-prefix: string
-    --node: string
-    --pruning-keep-recent: string
-    --cpu-profile: string
-    --vesting-amount: string
-    --offline
-    --genesis_hash: string
-    --index: string
-    --commission-max-change-rate: string
-    --admin: string
-    --limit: string
-    --priv_validator_laddr: string
-    --note: string
-    --page-key: string
-    --denom: string
-    --fees: string
-    --amino
-    --iavl-disable-fastnode
-    --deny-validators: string
-    --node-daemon-home: string
-    --allowed-messages: string
-    --type: string
-    --reverse
-    --multisig-threshold: string
-    --min-self-delegation: string
-    --ip: string
-    --gas: string
-    --db_backend: string
-    --new-moniker: string
-    --prove
-    --fast_sync
-    --trace-store: string
-    --node (-n): string
-    --pubkey: string
-    --dry-run
-    --latest-height
-    --fee-account: string
-    --no-auto-increment
-    --offset: string
-    --voter: string
-    --jail-allowed-addrs: string
-    --moniker: string
-    --packet-timeout-timestamp: string
-    --instantiate-only-address: string
-    --pruning-keep-every: string
-    --deposit: string
-    --pool-coin-denom: string
-    --unarmored-hex
-    --log_level: string
-    --page: string
-    --label: string
-    --address (-a)
-    --grpc-only
-    --vesting-end-time: string
-    --v: string
-    --gentx-dir: string
-    --output (-o): string
-    --nosort
-    --hd-path: string
-    --log_format: string
-    --status: string
-    --max-msgs: string
-    --output: string
-    --x-crisis-skip-assert-invariants
-    --db_dir: string
-    --broadcast-mode (-b): string
-    --height: string
-    --multisig: string
-    --generate-only
-    --account: string
-    --with-tendermint
-    --hex
-    --unsafe-skip-upgrades: string
-    --gas-prices: string
+    --invcheckperiod: string
+    --reserveacc: string
+    --searchapi
     --force (-f)
-    --unsafe
-    --help (-h)
-    --expiration: string
-    --commission-rate: string
-    --count-total
-    --search-api
-    --address: string
-    --description: string
-    --website: string
-    --reserve-acc: string
-    --absolute-timeouts
-    --instantiate-nobody: string
-    --node-id: string
-    --unsafe-entropy
-    --proposal: string
-    --list-names (-n)
-    --commission
-    --period: string
-    --recover
-    --upgrade-info: string
-    --for-zero-height
-    --no-backup
-    --keyring-dir: string
-    --instantiate-everybody: string
-    --bech: string
-    --vesting-start-time: string
-    --chain-id: string
-    --genesis-time: string
+    --home: string
+    --overwrite
+    --cpuprofile: string
     --events: string
-    --packet-timeout-height: string
-    --allowed-validators: string
-    --gas-adjustment: string
-    --inv-check-period: string
+    --instantiateonlyaddress: string
+    --nobackup
+    --xcrisisskipassertinvariants
+    --algo: string
+    --consensuscreate_empty_blocks
+    --p2pprivate_peer_ids: string
+    --help (-h)
+    --maxmsgs: string
+    --vestingamount: string
+    --tracestore: string
+    --db_backend: string
+    --noadmin
+    --consensuscreate_empty_blocks_interval: string
+    --pruningkeeprecent: string
+    --description: string
+    --priv_validator_laddr: string
+    --forzeroheight
+    --wasmmemory_cache_size: string
+    --keyringbackend: string
+    --startingipaddress: string
+    --proposal: string
+    --hex
+    --counttotal
+    --interactive (-i)
+    --grpconly
+    --chainid: string
+    --pruninginterval: string
+    --height: string
+    --moniker: string
+    --cointype: string
+    --depositor: string
+    --status: string
+    --instantiateeverybody: string
+    --multisig: string
+    --p2punconditional_peer_ids: string
+    --offset: string
+    --abci: string
+    --from: string
+    --allowedmessages: string
+    --amino
+    --limit: string
+    --runas: string
+    --upgradeinfo: string
+    --page: string
+    --halttime: string
+    --gasadjustment: string
+    --statesyncsnapshotkeeprecent: string
+    --pruningkeepevery: string
+    --feeaccount: string
+    --minimumgasprices: string
+    --p2pupnp
+    --period: string
+    --long
+    --sequence (-s): string
+    --reverse
+    --transport: string
+    --allowedvalidators: string
+    --pruning: string
+    --iavldisablefastnode
+    --instantiatenobody: string
+    --amount: string
+    --keyringdir: string
+    --admin: string
+    --computegpu
+    --unsafe
+    --recover
+    --commissionmaxrate: string
+    --pubkey: string
+    --packettimeouttimestamp: string
+    --wasmquery_gas_limit: string
+    --trace
+    --overwrite (-o)
+    --signmode: string
+    --yes (-y)
+    --statesyncsnapshotinterval: string
+    --pagekey: string
+    --voter: string
+    --grpcwebenable
+    --denyvalidators: string
+    --type: string
+    --rpcladdr: string
+    --website: string
+    --msgtype: string
+    --securitycontact: string
+    --offline
+    --minselfdelegation: string
+    --fast_sync
+    --commissionmaxchangerate: string
+    --p2pexternaladdress: string
+    --jailallowedaddrs: string
+    --newmoniker: string
+    --address: string
+    --denom: string
+    --keepaddrbook
+    --title: string
+    --prove
+    --log_format: string
+    --rpcgrpc_laddr: string
+    --broadcastmode (-b): string
+    --consensusdouble_sign_check_height: string
+    --p2ppex
+    --outputdir (-o): string
+    --absolutetimeouts
+    --bech: string
+    --ledger
+    --pubkey (-p)
+    --unsafeskipupgrades: string
+    --packettimeoutheight: string
+    --p2pseed_mode
+    --periodlimit: string
+    --accountnumber (-a): string
+    --address (-a)
+    --db_dir: string
+    --device (-d)
+    --note: string
+    --output (-o): string
+    --grpcaddress: string
+    --gasprices: string
+    --sequences: string
+    --unarmoredhex
+    --p2pseeds: string
+    --nodedirprefix: string
+    --gas: string
+    --identity: string
+    --haltheight: string
+    --node: string
+    --nodeid: string
+    --outputdocument: string
+    --label: string
+    --commissionrate: string
+    --nosort
+    --generateonly
+    --spendlimit: string
+    --hdpath: string
+    --vestingendtime: string
+    --interblockcache
+    --deposit: string
+    --noautoincrement
+    --genesistime: string
+    --withtendermint
+    --expiration: string
+    --ascii
+    --log_level: string
+    --grpcwebaddress: string
+    --fees: string
+    --proxy_app: string
+    --p2ppersistent_peers: string
+    --rpcunsafe
+    --signatureonly
+    --timeoutheight: string
+    --nodedaemonhome: string
+    --v: string
+    --gentxdir: string
+    --details: string
+    --grpcenable
+    --poolcoindenom: string
+    --index: string
+    --b64
+    --commission
+    --p2pladdr: string
+    --node (-n): string
+    --listnames (-n)
+    --delayed
+    --unsafeentropy
+    --output: string
+    --hex (-x)
+    --latestheight
+    --upgradeheight: string
+    --vestingstarttime: string
+    --dryrun
+    --wasmsimulation_gas_limit: string
+    --rpcpprof_laddr: string
+    --minretainblocks: string
+    --ip: string
+    --multisigthreshold: string
+    --genesis_hash: string
+    --account: string    
 ] {
     # mut flags_list = []
 
-    let list_flags_str = ['absolute-timeouts',
-    'address',
-    'amino',
-    'ascii',
-    'b64',
-    'commission',
-    'compute-gpu',
-    'count-total',
-    'delayed',
-    'device',
-    'dry-run',
-    'fast_sync',
-    'for-zero-height',
-    'force',
-    'generate-only',
-    'grpc-only',
-    'help',
-    'hex',
-    'iavl-disable-fastnode',
-    'inter-block-cache',
-    'interactive',
-    'keep-addr-book',
-    'latest-height',
-    'ledger',
-    'list-names',
-    'long',
-    'no-admin',
-    'no-auto-increment',
-    'no-backup',
-    'nosort',
-    'offline',
-    'overwrite',
-    'prove',
-    'pubkey',
-    'recover',
-    'reverse',
-    'search-api',
-    'signature-only',
-    'trace',
-    'unarmored-hex',
-    'unsafe',
-    'unsafe-entropy',
-    'with-tendermint',
-    'x-crisis-skip-assert-invariants',
-    'yes']
+    let flags_nu = [$absolutetimeouts, $address, $amino, $ascii, $b64, $commission, $computegpu, $consensuscreate_empty_blocks, $counttotal, $delayed, $device, $dryrun, $fast_sync, $force, $forzeroheight, $generateonly, $grpcenable, $grpconly, $grpcwebenable, $help, $hex, $iavldisablefastnode, $interactive, $interblockcache, $keepaddrbook, $latestheight, $ledger, $listnames, $long, $noadmin, $noautoincrement, $nobackup, $nosort, $offline, $overwrite, $p2ppex, $p2pseed_mode, $p2pupnp, $prove, $pubkey, $recover, $reverse, $rpcunsafe, $searchapi, $signatureonly, $trace, $unarmoredhex, $unsafe, $unsafeentropy, $withtendermint, $xcrisisskipassertinvariants, $yes]
 
-let list_flags_bool = [$'absolute-timeouts',
-$'address',
-$'amino',
-$'ascii',
-$'b64',
-$'commission',
-$'compute-gpu',
-$'consensus.create_empty_blocks',
-$'count-total',
-$'delayed',
-$'device',
-$'dry-run',
-$'fast_sync',
-$'for-zero-height',
-$'force',
-$'generate-only',
-$'grpc-only',
-$'grpc-web.enable',
-$'grpc.enable',
-$'help',
-$'hex',
-$'iavl-disable-fastnode',
-$'inter-block-cache',
-$'interactive',
-$'keep-addr-book',
-$'latest-height',
-$'ledger',
-$'list-names',
-$'long',
-$'no-admin',
-$'no-auto-increment',
-$'no-backup',
-$'nosort',
-$'offline',
-$'overwrite',
-$'p2p.pex',
-$'p2p.seed_mode',
-$'p2p.upnp',
-$'prove',
-$'pubkey',
-$'recover',
-$'reverse',
-$'rpc.unsafe',
-$'search-api',
-$'signature-only',
-$'trace',
-$'unarmored-hex',
-$'unsafe',
-$'unsafe-entropy',
-$'with-tendermint',
-$'x-crisis-skip-assert-invariants',
-$'yes']
+    let flags_cli = ["--absolute-timeouts", "--address", "--amino", "--ascii", "--b64", "--commission", "--compute-gpu", "--consensus.create_empty_blocks", "--count-total", "--delayed", "--device", "--dry-run", "--fast_sync", "--for-zero-height", "--force", "--generate-only", "--grpc-only", "--grpc-web.enable", "--grpc.enable", "--help", "--hex", "--iavl-disable-fastnode", "--inter-block-cache", "--interactive", "--keep-addr-book", "--latest-height", "--ledger", "--list-names", "--long", "--no-admin", "--no-auto-increment", "--no-backup", "--nosort", "--offline", "--overwrite", "--p2p.pex", "--p2p.seed_mode", "--p2p.upnp", "--prove", "--pubkey", "--recover", "--reverse", "--rpc.unsafe", "--search-api", "--signature-only", "--trace", "--unarmored-hex", "--unsafe", "--unsafe-entropy", "--with-tendermint", "--x-crisis-skip-assert-invariants", "--yes"]
 
     let list_flags_out = (
-        $list_flags_bool 
+        $flags_nu 
         | reduce -f [] {
             |i acc n| if $i {
                 $acc 
-                | append ($list_flags_str | get $n) 
+                | append ($flags_cli | get $n) 
             }
         }
     )
