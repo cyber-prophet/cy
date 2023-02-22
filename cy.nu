@@ -2,10 +2,12 @@
 # Git: https://github.com/cyber-prophet/cy
 #
 # Install/update to the latest version
-# > mkdir ~/cy | fetch https://raw.githubusercontent.com/cyber-prophet/cy/main/cy.nu | save ~/cy/cy.nu -f
+# > mkdir ~/cy | http get https://raw.githubusercontent.com/cyber-prophet/cy/main/cy.nu | save ~/cy/cy.nu -f
 #
 # Use:
 # > overlay use ~/cy/cy.nu -p -r
+
+export def main [] { help }
 
 export-env { 
     banner
@@ -156,7 +158,7 @@ export def 'link chuck' [
     let cid_from = 'QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1'
     
     let quote = (
-        "> " + (fetch https://api.chucknorris.io/jokes/random).value + 
+        "> " + (http get https://api.chucknorris.io/jokes/random).value + 
         "\n\n" + "via [Chucknorris.io](https://chucknorris.io)"
     )
 
@@ -179,7 +181,7 @@ export def 'link chuck' [
 # Add a random quote cyberlink to the temp table
 export def 'link quote' [] {
     let q1 = (
-        fetch -r https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=json 
+        http get -r https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=json 
         | str replace "\\\\" "" 
         | from json
     )
@@ -511,7 +513,7 @@ export def 'update cy' [
     let url = $"https://raw.githubusercontent.com/cyber-prophet/($branch)/dev/cy.nu" 
 
     mkdir ~/cy 
-    | fetch $url
+    | http get $url
     | save ~/cy/cy.nu -f
 
 }
@@ -928,7 +930,7 @@ def 'download cid from gateway' [
 
     let type1 = ($headers | get -i 'Content-Type')
     if $type1 == 'text/plain; charset=utf-8' {
-        fetch $"($gate_url)($cid)" -t 60 | save -f $"($env.HOME)/cy/cache/safe/($cid).txt" 
+        http get $"($gate_url)($cid)" -m 60 | save -f $"($env.HOME)/cy/cache/safe/($cid).txt" 
     } else if ($type1 != null) {
         $type1 | save -f $"($env.HOME)/cy/cache/other/($cid).txt"
     }
@@ -1289,6 +1291,7 @@ export def 'balances' [
 
     let dummy1 = (
         $balances | columns | prepend "name" | uniq 
+        | reverse | prepend ["address"] | uniq 
         | reverse | reduce -f {} {|i acc| $acc | merge {$i : 0}})
 
     let out = ($balances | each {|i| $dummy1 | merge $i} | sort-by name)
@@ -1364,7 +1367,7 @@ def is-neuron [particle: string] {
 }
 
 def is-connected []  {
-    (do -i {fetch https://www.iana.org} | describe) == 'raw input'
+    (do -i {http get https://duckduckgo.com/} | describe) == 'raw input'
 }
 
 def make_default_folders_fn [] {
@@ -1387,22 +1390,25 @@ def cprint [
     --before (-b): int = 0
     --after (-a): int = 1
 ] {
-    mut text = if ($args == []) {
+    let text = if ($args == []) {
         $in
     } else {
         $args | str join ' '
     }
 
-    if $frame != null {
-        let width = (term size | get columns) - 2
-        $text = (
-            (" " | str rpad -l $width -c $frame) + "\n" +
+    let text = (
+        if $frame != null {
+            let width = (term size | get columns) - 2
             (
-                $text 
-            ) + "\n" +
-            (" " | str rpad -l $width -c $frame)
-        )
-    }
+                (" " | fill -a r -w $width -c $frame) + "\n" +
+                ( $text ) + "\n" +
+                (" " | fill -a r -w $width -c $frame)
+            )
+        } else {
+            $text
+        }
+    )
+
     seq 1 $before | each {|i| print ""}
     $text | print $"(ansi $color)($in)(ansi reset)" -n 
     seq 1 $after | each {|i| print ""}
@@ -1461,20 +1467,6 @@ export def 'backup_fn' [
     } else {
         print $"($filename) does not exist"
     }
-}
-
-def inspect [
-    callback?: closure
-] {
-    let input = $in
-
-    if $callback == $nothing {
-        print $input
-    } else {
-        do $callback $input
-    }
-
-    $input
 }
 
 def 'nu-complete-git-branches' [] {
