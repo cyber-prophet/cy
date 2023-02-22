@@ -1239,16 +1239,15 @@ export def-env 'ber' [
     let command = $"($exec)_($rest | str join '_')($important_options)"
     let ts1 = (date now | into int)
 
-    print $important_options
+    # print $important_options
     let filename = $"($cfolder)($command)-($ts1).json"
 
     let $cached_files1 = ls $cfolder
 
     # print "cached_files"
-
     let cached_file = (
         if $cached_files1 != null {
-            print "$cached_files1 != null"
+            # print "$cached_files1 != null"
 
             let a1 = (
                 $cached_files1
@@ -1257,7 +1256,7 @@ export def-env 'ber' [
             )
 
             if ($a1 | length) == 0 {
-                print "here is null"
+                # print "here is null"
                 null
             } else {
                 $a1
@@ -1266,7 +1265,7 @@ export def-env 'ber' [
                 | get -i name.0 
             }
         } else {
-            print "null"
+            # print "null"
             null
         }
     )
