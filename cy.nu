@@ -5,7 +5,7 @@
 # > mkdir ~/cy | http get https://raw.githubusercontent.com/cyber-prophet/cy/main/cy.nu | save ~/cy/cy.nu -f
 #
 # Use:
-# > overlay use ~/cy/cy.nu as cy -p -r
+# > overlay use ~/cy/cy.nu -p -r
 
 export def main [] { help }
 
@@ -16,11 +16,13 @@ export-env {
     } catch {
         'file "/config/default.yaml" was not found. Run "cy config new"' | cprint -c green_underline
     }
+    let-env cy_cache = null
 }
 
 # Pin a text particle
 export def 'pin text' [
     text_param?: string
+    --only_hash
 ] {
     let text_in = $in
     
@@ -31,27 +33,35 @@ export def 'pin text' [
         | into string # To coerce numbers into strings
     ) 
 
-    let cid = if (is-cid $text) {$text} else {
-        let cid = if (
-            ($env.cy.ipfs-storage == 'kubo') or ($env.cy.ipfs-storage == 'both')
-            ) {
-                $text
-                | ipfs add -Q 
-                | str replace '\n' ''
-            } 
-            
-        let cid = if (
-            ($env.cy.ipfs-storage == 'cybernode') or ($env.cy.ipfs-storage == 'both')
-            ) {
-                $text 
-                | curl --silent -X POST -F file=@- 'https://io.cybernode.ai/add' 
-                | from json 
-                | get cid./
-            } else {
-                $cid
-            }
-
-        $cid
+    let cid = if (is-cid $text) {
+        $text
+    } else {
+        if $only_hash {
+            $text
+            | ipfs add -Q --only-hash
+            | str replace '\n' ''
+        } else {
+            let cid = if (
+                ($env.cy.ipfs-storage == 'kubo') or ($env.cy.ipfs-storage == 'both')
+                ) {
+                    $text
+                    | ipfs add -Q 
+                    | str replace '\n' ''
+                } 
+                
+            let cid = if (
+                ($env.cy.ipfs-storage == 'cybernode') or ($env.cy.ipfs-storage == 'both')
+                ) {
+                    $text 
+                    | curl --silent -X POST -F file=@- 'https://io.cybernode.ai/add' 
+                    | from json 
+                    | get cid./
+                } else {
+                    $cid
+                }
+    
+            $cid
+        }
     }
 
     $cid
@@ -80,9 +90,7 @@ export def 'pin files' [
     let out_table = (
         if $link_filenames {
             $files
-            | each {
-                |it| pin text $it 
-                } 
+            | each { |it| pin text $it } 
             | wrap from 
             | merge $cid_table
         } else {
@@ -166,8 +174,7 @@ export def 'link chuck' [
     if $disable_append {
             $_table
         } else {
-            $_table
-            | tmp append
+            $_table | tmp append
  }
 } 
 
@@ -261,7 +268,7 @@ export def 'tmp replace' [
 
 # Empty the temp cyberlinks table
 export def 'tmp clear' [] {
-    backup1 $"($env.HOME)/cy/cyberlinks_temp.csv" 
+    backup_fn $"($env.HOME)/cy/cyberlinks_temp.csv" 
 
     'from,to,from_text,to_text' | save $"($env.HOME)/cy/cyberlinks_temp.csv" --force
     # print "TMP-table is clear now."
@@ -335,7 +342,7 @@ export def 'tmp pin col' [
 
 }
 
-# Check if any of the links in tmp table exist
+# Check if any of the links in the tmp table exist
 def 'link-exist' [
     from
     to
@@ -382,23 +389,21 @@ export def 'tmp remove existed' [] {
 
 # Create a custom unsigned cyberlinks transaction
 def 'tx json create from cybelinks' [] {
-    let in_cyberlinks = $in
-    let cyberlinks = if ($in_cyberlinks == null) {
-        tmp view -q
-    } else {
-        $in_cyberlinks
-    }
-
-    let cyberlinks = ($cyberlinks | select from to)
+    let cyberlinks = $in
+    let cyberlinks = (
+        $cyberlinks 
+        | select from to 
+        | uniq
+    )
 
     let trans = (
         '{"body":{"messages":[
         {"@type":"/cyber.graph.v1beta1.MsgCyberlink",
         "neuron":"","links":[{"from":"","to":""}]}
-        ],"memo":"","timeout_height":"0",
+        ],"memo":"cy","timeout_height":"0",
         "extension_options":[],"non_critical_extension_options":[]},
         "auth_info":{"signer_infos":[],"fee":
-        {"amount":[],"gas_limit":"2000000","payer":"","granter":""}},
+        {"amount":[],"gas_limit":"23456789","payer":"","granter":""}},
         "signatures":[]}' | from json
     )
 
@@ -453,13 +458,12 @@ export def 'tmp send tx' [] {
         $in_cyberlinks
     }
 
-    $cyberlinks | tx json create from cybelinks 
-
-    let var0 = tx sign and broadcast
     let cyberlinks_count = ($cyberlinks | length)
 
+    $cyberlinks | tx json create from cybelinks 
+
     let _var = ( 
-        $var0 
+        tx sign and broadcast
         | from json 
         | select raw_log code txhash
     )
@@ -480,9 +484,11 @@ export def 'tmp send tx' [] {
         | merge $_var 
         | select cy code txhash
         
-    } else {
-        {'cy': $'If the problem is with the already existed cyberlinks, use (ansi yellow)"cy tmp remove existed"(ansi reset)' } 
+    } else if $_var.code == 2 {
+        {'cy': $'Use (ansi yellow)"cy tmp remove existed"(ansi reset)' } 
         | merge $_var 
+    } else {
+        $_var
     }
 }
 
@@ -501,14 +507,10 @@ export def 'tsv paste' [] {
 
 # Update cy to the latest version
 export def 'update cy' [
-    --development_version (-d)
+    --branch: string@'nu-complete-git-branches' = 'main'
 ] {
 
-    let url = if $development_version {
-        "https://raw.githubusercontent.com/cyber-prophet/cy/dev/cy.nu" 
-    } else {
-        "https://raw.githubusercontent.com/cyber-prophet/cy/main/cy.nu" 
-    }
+    let url = $"https://raw.githubusercontent.com/cyber-prophet/($branch)/dev/cy.nu" 
 
     mkdir ~/cy 
     | http get $url
@@ -522,10 +524,7 @@ export def 'passport get by address' [
 ] { 
     let json = ($'{"active_passport": {"address": "($address)"}}')
     let pcontract = 'bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel'
-    (
-        cyber query wasm contract-state smart $pcontract $json 
-        --node https://rpc.bostrom.cybernode.ai:443 
-    ) | from json | get data
+    do -i {^cyber query wasm contract-state smart $pcontract $json --node https://rpc.bostrom.cybernode.ai:443 --output json | from json | get data}
 }
 
 # Get a passport by providing a neuron's nick
@@ -535,8 +534,8 @@ export def 'passport get by nick' [
     let json = ($'{"passport_by_nickname": {"nickname": "($nickname)"}}')
     let pcontract = 'bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel'
     (
-        cyber query wasm contract-state smart $pcontract $json 
-        --node https://rpc.bostrom.cybernode.ai:443 
+        ^cyber query wasm contract-state smart $pcontract $json 
+        --node https://rpc.bostrom.cybernode.ai:443 --output json 
     ) | from json | get data
 }
 
@@ -548,9 +547,9 @@ export def 'passport set particle' [
     let json = $'{"update_particle":{"nickname":"($nickname)","particle":"($particle)"}}'
     let pcontract = 'bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel'
     (
-        cyber tx wasm execute $pcontract $json 
+        ^cyber tx wasm execute $pcontract $json 
         --from $env.cy.address 
-        --node https://rpc.bostrom.cybernode.ai:443 
+        --node https://rpc.bostrom.cybernode.ai:443 --output json 
     ) | from json 
 }
 
@@ -578,11 +577,13 @@ export def-env 'config new' [
         'Here are the keys that you have:' | cprint -b 1
         print $addr_table
     } else {
+        let error_text = (
+            $'There are no addresses in ($_exec). To use CY you need to add one.' +
+            $'You can find out how to add one by running the command "($_exec) keys add -h".' +
+            $'After adding a key - come back and launch this wizzard again'
+        )
 
-        error make -u {msg: $'
-There are no addresses in ($_exec). To use CY you need to add one.
-You can do that by running the command "($_exec) keys add -h". 
-After adding a key - come back and launch this wizzard again'}
+        error make -u {msg: $error_text}
     help: $'try "($_exec) keys add -h"'
     }
     
@@ -699,7 +700,7 @@ export def-env 'config save' [
         let prompt1 = (input $"($file_name) exists. Do you want to overwrite it? \(y/n\) ")
 
         if $prompt1 == "y" {
-            backup1 $file_name
+            backup_fn $file_name
             $in_config | save $file_name -f
         } else {
             $file_name = $"($env.HOME)/cy/config/($dt1).yaml"
@@ -748,7 +749,7 @@ export def 'search' [
     }
     
     let serp = (
-        ^($env.cy.exec) query rank search $cid $page 10 
+        ^($env.cy.exec) query rank search $cid $page 10 --output json
         | from json 
         | get result 
         | upsert particle {
@@ -799,14 +800,10 @@ export def 'search2' [
     --pretty (-P)
     --page (-p) = 0
 ] {
-    let cid = if (is-cid $query) {
-        $query
-    } else {
-        (pin text $query)
-    }
+    let cid = pin text $query --only_hash
     
     let serp = (
-        ^($env.cy.exec) query rank search $cid $page 10 
+        ^($env.cy.exec) query rank search $cid $page 10 --output json
         | from json 
         | get result 
         | upsert particle {
@@ -823,26 +820,96 @@ export def 'search2' [
     }
 }
 
+export def 'search3' [
+    query
+    --pretty (-P)
+    --page (-p) = 0
+] {
+    # watch ~/cy/cache/ --glob=**/*.rs { cargo test }
+
+    let cid = pin text $query --only_hash
+    
+    let serp = (
+        ^($env.cy.exec) query rank search $cid $page 10 --output json
+        | save $"~/cy/cache/search/($cid)-(date now|into int).json"
+    )
+}
+
+export def 'search4' [
+    query
+    --pretty (-P)
+    --page (-p) = 0
+    --results_per_page (-r) = 10
+] {
+    let cid = (pin text $query --only_hash)
+    
+    let results = (
+        do -i {
+            ^($env.cy.exec) query rank search $cid $page $results_per_page --output json
+        }
+        | from json 
+    )
+
+    if $results == null {
+        print $"there is no search results for ($cid)"
+        return
+    }
+    
+    $results | save $"($env.HOME)/cy/cache/search/($cid)-(date now|into int).json"
+
+    clear; print $"Searching ($env.cy.exec) for ($cid)";
+
+    print (if $pretty {
+        serp1 $results --pretty
+    } else {
+        serp1 $results
+    })
+
+    watch ~/cy/cache/queue { clear; print $"Searching ($env.cy.exec) for ($cid)"; serp1 $results --pretty }
+
+}
+
+def serp1 [
+    results
+    --pretty
+] {
+
+    let serp = (
+        $results
+        | get result 
+        | upsert particle {
+            |i| request-file-from-cache $i.particle
+        } 
+        | select particle rank 
+    )
+
+    $serp 
+}
+
 export def `download cid from ipfs` [
     cid
+    --timeout = 300s
 ] {
 
     print $"cid to download ($cid)"
-    let type1 = do -i {(ipfs cat --timeout 120s -l 400 $cid | file - | $in + "" | str replace "/dev/stdin: " "")}
+    let type1 = do -i {ipfs cat --timeout $timeout -l 400 $cid | file - | $in + "" | str replace "/dev/stdin: " ""}
 
-    if (
-        $type1 =~ "(ASCII text)|(Unicode text)"
-        ) {
+    if ( $type1 =~ "(ASCII text)|(Unicode text)" ) {
             print $"found text ($type1) ($cid)"
+
             let result = (
-                ipfs get --progress=false --timeout 120s -o $"($env.HOME)/cy/cache/safe/($cid).txt" $cid 
+                ipfs get --progress=false --timeout $timeout -o $"($env.HOME)/cy/cache/safe/($cid).txt" $cid 
                 | complete
             )
+
             if ($result.exit_code == 0) {
                 rm -f $"($env.HOME)/cy/cache/queue/($cid)" 
             }
+        } else if ( $type1 == "empty" ) {
+            print $"($cid) not found"
         } else {
             print $"found non-text ($cid) ($type1)"
+
             $type1 | save -f $"($env.HOME)/cy/cache/other/($cid).txt"
 
             rm -f $"($env.HOME)/cy/cache/queue/($cid)" 
@@ -889,7 +956,7 @@ export def 'request-file-from-cache' [
     } else {$a1}
 
     let a1 = if ($a1 == null) {
-        let message = $"($cid) is in queue since (datetime_fn)"
+        let message = $"($cid) is in the queue since (datetime_fn --pretty)"
         $message | save $"($env.HOME)/cy/cache/queue/($cid)"
         $message
     } else {
@@ -903,6 +970,10 @@ export def 'request-file-from-cache' [
         | $"($in)\n(ansi grey)($cid)(ansi reset)"
     )
 
+}
+
+export def `watch search folder` [] {
+    watch ~/cy/cache/search { check-queue }
 }
 
 export def 'check-queue' [] {
@@ -919,10 +990,141 @@ export def 'check-queue' [] {
 }
 
 export def `cache clear` [] {
-    backup1 $"($env.HOME)/cy/cache" 
+    backup_fn $"($env.HOME)/cy/cache" 
     make_default_folders_fn
 }
 
+export def-env 'ber' [
+    ...rest
+    --seconds: int = 86400
+    --exec: string
+    --node: string
+] {
+    mut flags_list = []
+
+    if $node != null {
+        $flags_list = $flags_list | append ['--node' $node]
+    }
+
+    let exec = if ($exec == null) {
+        $env.cy.exec
+    } else {
+        $exec
+    }
+
+    let cfolder = $"($env.HOME)/cy/cache/cli_out/"
+    let command = $"($exec)_($rest | str join '_')"
+    let ts1 = (date now | into int)
+    let filename = $"($cfolder)($command)-($ts1).json"
+
+    let $cached_files1 = ls $cfolder
+
+    # print "cached_files"
+
+    let cached_file = (
+        if $cached_files1 != null {
+            # print "$cached_files1 != null"
+
+            $cached_files1
+            | where name =~ $"($command)-"
+            | sort-by modified --reverse
+            | where modified > (date now | into int | $in - $seconds | into datetime)
+            | get -i name.0 
+        } else {
+            # print "null"
+            null
+        }
+    )
+
+    print $cached_file
+
+    let let_flags_list = $flags_list
+
+    let content = (
+        if ($cached_file != null) {
+            # print "cached used"
+            open $cached_file
+        } else  {
+            # print $"request command from cli, saving to ($filename)"
+            let out1 = do -i {^($exec) $rest --output json $let_flags_list | from json} 
+            if $out1 != null {$out1 | save $filename}
+            $out1
+        } 
+    )
+
+    $content
+}
+
+export def 'balances' [
+    ...name: string@'nu-complete keys values'
+] {
+
+    let keys0 = (
+        ^($env.cy.exec) keys list --output json 
+        | from json 
+        | select name address 
+    )
+
+    let keys1 = (
+        if ($name | is-empty) {
+            $keys0
+        } else {
+            $keys0 | where name in $name
+        }
+    )
+
+    let balances = (
+        $keys1
+        | par-each {
+            |i| cyber query bank balances $i.address --output json 
+            | from json 
+            | get balances 
+            | upsert amount {
+                |b| $b.amount 
+                | into int
+            } 
+            | transpose -i -r 
+            | into record
+            | merge $i
+    } 
+)
+
+    let dummy1 = (
+        $balances | columns | prepend "name" | uniq 
+        | reverse | prepend ["address"] | uniq 
+        | reverse | reduce -f {} {|i acc| $acc | merge {$i : 0}})
+
+    let out = ($balances | each {|i| $dummy1 | merge $i} | sort-by name)
+
+    if ($name | is-empty) or (($name | length) > 1) {
+        $out 
+    } else {
+        $out | into record
+    }
+}
+
+export def 'ipfs bootstrap add congress' [] {
+    ipfs bootstrap add '/ip4/135.181.19.86/tcp/4001/p2p/12D3KooWNMcnoQynAY9hyi4JxzSu64BsRGcJ9z7vKghqk8sTrpqY'
+}
+
+export def 'ibc denoms' [] {
+    let bank_total = (
+        cyber query bank total --output json 
+        | from json # here we obtain only the first page of report
+    )
+
+    let denom_trace1 = (
+        $bank_total 
+        | get supply 
+        | where denom =~ "^ibc" 
+        | upsert ibc_hash {|i| $i.denom | str replace "ibc/" ""} 
+        | upsert a1 {|i| cyber query ibc-transfer denom-trace $i.ibc_hash --output json 
+        | from json 
+        | get denom_trace}
+    )
+
+    $denom_trace1.a1 | merge $denom_trace1 | reject ibc_hash a1 | sort-by path --natural
+}
 
 # An ordered list of cy commands
 export def 'help' [
@@ -973,9 +1175,11 @@ def make_default_folders_fn [] {
     mkdir ~/cy/backups/
     mkdir ~/cy/config/
     mkdir ~/cy/cache/
+    mkdir ~/cy/cache/search/
     mkdir ~/cy/cache/other/
     mkdir ~/cy/cache/safe/
     mkdir ~/cy/cache/queue/
+    mkdir ~/cy/cache/cli_out/
 }
 
 # Print string colourfully
@@ -1027,8 +1231,15 @@ def 'if-empty' [
      )
  }
 
-def 'datetime_fn' [] {
-    date now | date format '%Y%m%d-%H%M%S%S'
+def 'datetime_fn' [
+    --pretty (-P)
+] {
+    if $pretty {
+        date now | date format '%Y-%m-%d-%H:%M:%S'
+    } else {
+        date now | date format '%Y%m%d-%H%M%S'
+    }
+    
 }
 
 def 'nu-complete-config-names' [] {
@@ -1041,7 +1252,7 @@ def 'nu-complete-config-names' [] {
     | filter {|x| $x != "default"}
 }
 
-export def 'backup1' [
+export def 'backup_fn' [
     filename
 ] {
     let basename1 = ($filename | path basename)
@@ -1058,140 +1269,16 @@ export def 'backup1' [
     }
 }
 
-# Print string colourfully
-def cecho [
-    ...args
-    --color (-c): string@'nu-complete colors' = 'default'
-    --frame (-f): string
-    --framecolor: string@'nu-complete colors' = 'default'
-    --before (-b): int = 0
-    --after (-a): int = 1
-    --remleadspaces (-r)
-    --indent (-i) = 0
-    --width (-w) = 120
-    --print (-p)
-    --md (-M) # Disable parsing and rendering of markdown tags
-    --mdcolor (-m): string@'nu-complete colors' = 'green'
-] {
-    let text = if ($args == []) {
-        $in
-    } else {
-        $args | str join ' '
-    }
-
-    let text = (
-        if $remleadspaces {
-            $text 
-            | split row "\n"
-            | each {
-                |i| $i 
-                | str replace "^[ \t]+" ""
-            }
-            | str join "\n"
-        } else {
-            text
-        }
-    )
-
-
-    let text = (
-        if $indent > 0 {
-            let indent_spaces = (seq 1 $indent | each {|i| " "} | str join "")
-
-            $text 
-            | split row "\n"
-            | each {
-                |i| [$indent_spaces $i] | str join ""
-            }
-            | str join "\n"
-        } else {
-            $text
-        }
-    )
-
-    let text = (
-        if (not $md) {
-            (mdown $text --mdcolor $mdcolor --defcolor $color )
-        } else {
-            $"(ansi $color)($text)(ansi reset)"
-        }
-    )
-
-    let text = (
-        if $frame != null {
-            let width = (term size | get columns)
-            ( 
-                [
-                    (seq 1 $width | each {|i| $frame} | str join "" | $"(ansi ($framecolor))($in)(ansi reset)" ) 
-                    $text 
-                    (seq 1 $width | each {|i| $frame} | str join "" | $"(ansi ($framecolor))($in)(ansi reset)")
-                ] | str join "\n" 
-            )
-        } else {
-            $text
-        }
-    )
-
-    let output = ([
-        (seq 1 $before | each {|i| "\n"} | str join "")
-        $text
-        (seq 1 $after | each {|i| "\n"} | str join "")
-    ] | str join "")
-
-    if $print {
-        print $output
-    } else {
-        $output
-    }
+def 'nu-complete-git-branches' [] {
+    ['main', 'dev']
 }
 
-def mdown [
-    text
-    --mdcolor (-c) = green
-    --defcolor (-d) = default
-] {
-
-    let t1 =  {
-        '**': $'(ansi reset)(ansi -e {fg: ($mdcolor) attr: b})', 
-        '*': $'(ansi reset)(ansi -e {fg: ($mdcolor) attr: i})', 
-        '_': $'(ansi reset)(ansi -e {fg: ($mdcolor) attr: u})'
-    }
-
-    let t2 = {
-        '**': $'(ansi reset)(ansi -e {fg: ($defcolor)})', 
-        '*': $'(ansi reset)(ansi -e {fg: ($defcolor)})', 
-        '_': $'(ansi reset)(ansi -e {fg: ($defcolor)})'
-    }
-
-    $text
-    | $"(ansi -e {fg: ($defcolor)})($text)(ansi reset)"
-    | split row "\n"
-    | each {
-        |l| $l 
-        | split row " "
-        | each {
-            |w|
-            $w
-            | parse -r "^(?<start>\\*{1,2}|_)?(?<a>.+?)(?<end>\\*{1,2}|_)?$"
-            | upsert fin {
-                |i|  $"($t1 | get -i $i.start)($i.a)($t2 | get -i $i.end)"
-            }
-            | get -i fin 
-            | str join ""
-         } | str join " "
-    } | str join "\n"
+# cyber keys in a form of table
+def "nu-complete keys table" [] {
+    cyber keys list --output json | from json | select name address 
 }
 
-def inspect [
-    callback?: closure
-] {
-    let input = $in
-
-    if $callback == $nothing {
-        print $input
-    } else {
-        do $callback $input
-    }
-
-    $input
+# Helper function to use addresses for completions in --from parameter
+def "nu-complete keys values" [] {
+    (nu-complete keys table).name | zip (nu-complete keys table).address | flatten
 }

@@ -1,15 +1,16 @@
-source /Users/user/cy/cy.nu
+overlay use ~/cy/cy.nu -p -r
 
 # module tests {
     def 'test link texts' [] {
+        print 'test link texts'
         let expect = [
             [from_text, to_text, from, to]; 
             [cyber, bostrom, "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV", "QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb"]
         ]
 
         let result = (
-            tmp clear; 
-            link texts "cyber" "bostrom" | select from_text to_text from to
+            cy tmp clear; 
+            cy link texts "cyber" "bostrom" | select from_text to_text from to
         )
 
         if $result == $expect {
@@ -20,6 +21,7 @@ source /Users/user/cy/cy.nu
     }
 
     def 'test link files' [] {
+        print 'test link files'
         let expect = [
             [from, to]; 
             # [null, "QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb"], 
@@ -31,9 +33,9 @@ source /Users/user/cy/cy.nu
 
         let result = (
             cd /Users/user/apps-files/github/cytests/files;
-            tmp clear ;
+            cy tmp clear ;
             # pin files
-            pin files --link_filenames
+            cy pin files --link_filenames
             | select from to
         )
 
@@ -45,11 +47,12 @@ source /Users/user/cy/cy.nu
     }
 
     def 'test link chuck' [] {
+        print 'test link chuck'
         let expect = 1
 
         let result = (
-            tmp clear ;
-            link chuck | length
+            cy tmp clear ;
+            cy link chuck | length
         )
 
         if $result == $expect {
@@ -60,11 +63,13 @@ source /Users/user/cy/cy.nu
     }
 
     def 'test tmp send tx' [] {
+        print 'test tmp send tx'
         let expect = 0
 
+        cy config activate hot-pussy 
+
         let result = (
-            config activate hot-pussy ;
-            tmp send tx | get code
+            cy tmp send tx | get code
         )
 
         if $result == $expect {
@@ -75,6 +80,7 @@ source /Users/user/cy/cy.nu
     }
 
     def 'test get passport by address' [] {
+        print 'test get passport by address'
             let expect = {data: {owner: "bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8", 
             approvals: [], token_uri: null, extension: {addresses: null, 
             avatar: "QmNprvRpqVsQEqEoTRJfZUB57RHEVSK2KLPsaHSULWb28j", 
@@ -83,7 +89,7 @@ source /Users/user/cy/cy.nu
         }
 
         let result = (
-            passport get by address bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
+            cy passport get by address bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
         )
 
         if $result == $expect {
