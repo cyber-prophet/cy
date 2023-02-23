@@ -500,7 +500,7 @@ export def 'tsv copy' [] {
     $_table | to tsv | pbcopy
 }
 
-# Paste a table from clipboard
+# Paste a table from clipboard to stdin (so it can be piped further)
 export def 'tsv paste' [] {
     pbpaste | from tsv
 }
@@ -937,7 +937,7 @@ def 'download cid from gateway' [
     echo $type1
 }
 
-
+# Check if there is the CID in cache, and if it is not - add it into queue
 export def 'request-file-from-cache' [
     cid
 ] {
@@ -972,10 +972,12 @@ export def 'request-file-from-cache' [
 
 }
 
+# Watch the queue folder, and if there are updates - request files to download
 export def `watch search folder` [] {
     watch ~/cy/cache/search { check-queue }
 }
 
+# Check queue for the new CIDs, and if there are CIDs - safely download the text ones
 export def 'check-queue' [] {
     let files = (ls -s $"($env.HOME)/cy/cache/queue/")
     if ( ($files | length | inspect) > 0 ) {
@@ -989,11 +991,13 @@ export def 'check-queue' [] {
     }
 }
 
+# Clear the cache folder
 export def `cache clear` [] {
     backup_fn $"($env.HOME)/cy/cache" 
     make_default_folders_fn
 }
 
+# A wrapper, to cache CLI requests
 export def-env 'ber' [
     ...rest
     --seconds: int = 86400
@@ -1291,6 +1295,7 @@ export def-env 'ber' [
     $content
 }
 
+# Check the balances of the keys added to the active CLI
 export def 'balances' [
     ...name: string@'nu-complete keys values'
 ] {
@@ -1339,10 +1344,12 @@ export def 'balances' [
     }
 }
 
+# Add cybercongress node to bootstrap nodes
 export def 'ipfs bootstrap add congress' [] {
     ipfs bootstrap add '/ip4/135.181.19.86/tcp/4001/p2p/12D3KooWNMcnoQynAY9hyi4JxzSu64BsRGcJ9z7vKghqk8sTrpqY'
 }
 
+# Check ibc denoms
 export def 'ibc denoms' [] {
     let bank_total = (
         cyber query bank total --output json 
