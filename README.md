@@ -65,7 +65,7 @@ There are 1 cyberlinks in the temp table:
 |cy tmp remove existed|Remove existed cyberlinks from the temp cyberlinks table|
 |cy tmp send tx|Create a tx from the temp cyberlinks table, sign and broadcast it|
 |cy tsv copy|Copy a table from the pipe into clipboard (in tsv format)|
-|cy tsv paste|Paste a table from clipboard|
+|cy tsv paste|Paste a table from clipboard to stdin (so it can be piped further)|
 |cy update cy|Update cy to the latest version|
 |cy passport get by address|Get a passport by providing a neuron's address|
 |cy passport get by nick|Get a passport by providing a neuron's nick|
@@ -74,5 +74,10 @@ There are 1 cyberlinks in the temp table:
 |cy config view|View a saved JSON config file|
 |cy config save|Save the piped in JSON config file|
 |cy config activate|Activate config JSON|
+|cy request-file-from-cache|Check if there is the CID in cache, and if it is not - add it into queue|
+|cy check-queue|Check queue for the new CIDs, and if there are CIDs - safely download the text ones|
+|cy ber|A wrapper, to cache CLI requests|
+|cy balances|Check the balances of the keys added to the active CLI|
+|cy ipfs bootstrap add congress|Add cybercongress node to bootstrap nodes|
+|cy ibc denoms|Check ibc denoms|
 |cy help|An ordered list of cy commands|
-```
