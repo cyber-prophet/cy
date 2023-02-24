@@ -550,21 +550,22 @@ export def 'passport get by nick' [
 ] { 
     let json = ($'{"passport_by_nickname": {"nickname": "($nickname)"}}')
     let pcontract = 'bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel'
+    let params = ['--node' 'https://rpc.bostrom.cybernode.ai:443' '--output' 'json']
     (
-        ^cyber query wasm contract-state smart $pcontract $json 
-        --node https://rpc.bostrom.cybernode.ai:443 --output json 
+        ^cyber query wasm contract-state smart $pcontract $json $params
     ) | from json | get data
 }
 
-# Set a passport's particle for a given nickname
+# Set a passport's particle or data field for a given nickname
 export def 'passport set particle' [
     particle
     nickname?
+    --data
 ] {
     let nickname = (
         if ($nickname | is-empty) {
             if ($env.cy.passport-nick | is-empty) {
-                print "there is no nickname set"
+                print "there is no nickname for passport set. To update the fields we need one."
                 return
             } else {
                 $env.cy.passport-nick
@@ -583,7 +584,14 @@ export def 'passport set particle' [
         }
     )
 
-    let json = $'{"update_particle":{"nickname":"($nickname)","particle":"($particle)"}}'
+    let json = (
+        if $data {
+            $'{"update_data":{"nickname":"($nickname)","data":"($particle)"}}'
+        } else {
+            $'{"update_particle":{"nickname":"($nickname)","particle":"($particle)"}}'
+        }
+    )
+
     let pcontract = 'bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel'
 
     let params = [
