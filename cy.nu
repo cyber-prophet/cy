@@ -174,7 +174,7 @@ export def 'link chuck' [
     if $disable_append {
             $_table
         } else {
-            $_table | tmp append
+            $_table | tmp append --dont_show_out_table
  }
 } 
 
@@ -202,9 +202,28 @@ export def 'link quote' [] {
 
     $quote | cprint -f '='
 
-    link texts 'quote' $quote
-    # link texts 'QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna' $quote
+    # link texts 'quote' $quote
+    link texts 'QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna' $quote
 }
+
+def "nu-complete random sources" [] {
+    ['chucknorris.io' 'forismatic.com'] 
+}
+
+# Make a random cyberlink from diffrent APIs
+export def 'link random' [
+    source?: string@"nu-complete random sources"
+    n = 1
+] {
+    for x in 1..$n {
+        if $source == 'forismatic.com' {
+            link quote
+        } else {
+            link chuck
+        }
+    }
+}
+
 
 # View the temp cyberlinks table
 export def 'tmp view' [
@@ -985,14 +1004,14 @@ export def `download cid from ipfs` [
             if ($result.exit_code == 0) {
                 rm -f $"($env.HOME)/cy/cache/queue/($cid)" 
             }
-        } else if ( $type1 == "empty" ) {
+        } else if ( $type1 =~ "empty" ) {
             print $"($cid) not found"
         } else {
             print $"found non-text ($cid) ($type1)"
 
             $type1 | save -f $"($env.HOME)/cy/cache/other/($cid).txt"
 
-            rm -f $"($env.HOME)/cy/cache/queue/($cid)" 
+            rm -f $"($env.HOME)/cy/cache/queue/($cid)"
         }
 
 }
