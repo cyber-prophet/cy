@@ -343,7 +343,10 @@ export def 'tmp pin col' [
 }
 
 # Check if any of the links in the tmp table exist
-# > cy link-exist QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufA QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufB bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel
+# > let $from = 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufA'
+# > let $to = 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufB'
+# > let $neuron = 'bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel'
+# > cy link-exist $from $to $neuron
 # > false
 def 'link-exist' [
     from
