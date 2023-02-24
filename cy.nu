@@ -1,7 +1,7 @@
 # Cy - the nushell wrapper, interface to cyber family blockchains CLIs (Bostrom, Pussy) and go-ipfs (kubo)
 # Git: https://github.com/cyber-prophet/cy
 #
-# Install/update to the latest version
+# Install/update to the latest stable version
 # > mkdir ~/cy | http get https://raw.githubusercontent.com/cyber-prophet/cy/main/cy.nu | save ~/cy/cy.nu -f
 #
 # Use:
@@ -343,6 +343,8 @@ export def 'tmp pin col' [
 }
 
 # Check if any of the links in the tmp table exist
+# > cy link-exist QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufA QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufB bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel
+# > false
 def 'link-exist' [
     from
     to
