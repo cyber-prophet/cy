@@ -1207,10 +1207,78 @@ export def-env 'ber' [
 ] {
     # mut flags_list = []
 
-    let flags_nu = [$absolutetimeouts, $amino, $ascii, $b64, $commission, $computegpu, $consensuscreate_empty_blocks, $counttotal, $delayed, $device, $dryrun, $fast_sync, $force, $forzeroheight, $generateonly, $grpcenable, $grpconly, $grpcwebenable, $help, $hex, $iavldisablefastnode, $interactive, $interblockcache, $keepaddrbook, $latestheight, $ledger, $listnames, $long, $noadmin, $noautoincrement, $nobackup, $nosort, $offline, $overwrite, $p2ppex, $p2pseed_mode, $p2pupnp, $prove, $recover, $reverse, $rpcunsafe, $searchapi, $signatureonly, $trace, $unarmoredhex, $unsafe, $unsafeentropy, $withtendermint, $xcrisisskipassertinvariants, $yes]
-    let flags_cli = ["--absolute-timeouts", "--amino", "--ascii", "--b64", "--commission", "--compute-gpu", "--consensus.create_empty_blocks", "--count-total", "--delayed", "--device", "--dry-run", "--fast_sync", "--for-zero-height", "--force", "--generate-only", "--grpc-only", "--grpc-web.enable", "--grpc.enable", "--help", "--hex", "--iavl-disable-fastnode", "--inter-block-cache", "--interactive", "--keep-addr-book", "--latest-height", "--ledger", "--list-names", "--long", "--no-admin", "--no-auto-increment", "--no-backup", "--nosort", "--offline", "--overwrite", "--p2p.pex", "--p2p.seed_mode", "--p2p.upnp", "--prove", "--recover", "--reverse", "--rpc.unsafe", "--search-api", "--signature-only", "--trace", "--unarmored-hex", "--unsafe", "--unsafe-entropy", "--with-tendermint", "--x-crisis-skip-assert-invariants", "--yes"]
-    let options_nu = [$abci, $account, $accountnumber, $address, $admin, $algo, $allowedmessages, $allowedvalidators, $amount, $bech, $broadcastmode, $chainid, $cointype, $commissionmaxchangerate, $commissionmaxrate, $commissionrate, $consensuscreate_empty_blocks_interval, $consensusdouble_sign_check_height, $cpuprofile, $db_backend, $db_dir, $denom, $denyvalidators, $deposit, $depositor, $description, $details, $events, $expiration, $feeaccount, $fees, $from, $gas, $gasadjustment, $gasprices, $genesis_hash, $genesistime, $gentxdir, $grpcaddress, $grpcwebaddress, $haltheight, $halttime, $hdpath, $height, $home, $identity, $index, $instantiateeverybody, $instantiatenobody, $instantiateonlyaddress, $invcheckperiod, $ip, $jailallowedaddrs, $keyringbackend, $keyringdir, $label, $limit, $log_format, $log_level, $maxmsgs, $minimumgasprices, $minretainblocks, $minselfdelegation, $moniker, $msgtype, $multisig, $multisigthreshold, $newmoniker, $node, $nodedaemonhome, $nodedirprefix, $nodeid, $note, $offset, $output, $outputdir, $outputdocument, $p2pexternaladdress, $p2pladdr, $p2ppersistent_peers, $p2pprivate_peer_ids, $p2pseeds, $p2punconditional_peer_ids, $packettimeoutheight, $packettimeouttimestamp, $page, $pagekey, $period, $periodlimit, $poolcoindenom, $priv_validator_laddr, $proposal, $proxy_app, $pruning, $pruninginterval, $pruningkeepevery, $pruningkeeprecent, $pubkey, $reserveacc, $rpcgrpc_laddr, $rpcladdr, $rpcpprof_laddr, $runas, $securitycontact, $sequence, $sequences, $signmode, $spendlimit, $startingipaddress, $statesyncsnapshotinterval, $statesyncsnapshotkeeprecent, $status, $timeoutheight, $title, $tracestore, $transport, $type, $unsafeskipupgrades, $upgradeheight, $upgradeinfo, $v, $vestingamount, $vestingendtime, $vestingstarttime, $voter, $wasmmemory_cache_size, $wasmquery_gas_limit, $wasmsimulation_gas_limit, $website]
-    let options_cli = ["--abci", "--account", "--account-number", "--address", "--admin", "--algo", "--allowed-messages", "--allowed-validators", "--amount", "--bech", "--broadcast-mode", "--chain-id", "--coin-type", "--commission-max-change-rate", "--commission-max-rate", "--commission-rate", "--consensus.create_empty_blocks_interval", "--consensus.double_sign_check_height", "--cpu-profile", "--db_backend", "--db_dir", "--denom", "--deny-validators", "--deposit", "--depositor", "--description", "--details", "--events", "--expiration", "--fee-account", "--fees", "--from", "--gas", "--gas-adjustment", "--gas-prices", "--genesis-time", "--genesis_hash", "--gentx-dir", "--grpc-web.address", "--grpc.address", "--halt-height", "--halt-time", "--hd-path", "--height", "--home", "--identity", "--index", "--instantiate-everybody", "--instantiate-nobody", "--instantiate-only-address", "--inv-check-period", "--ip", "--jail-allowed-addrs", "--keyring-backend", "--keyring-dir", "--label", "--limit", "--log_format", "--log_level", "--max-msgs", "--min-retain-blocks", "--min-self-delegation", "--minimum-gas-prices", "--moniker", "--msg-type", "--multisig", "--multisig-threshold", "--new-moniker", "--node", "--node-daemon-home", "--node-dir-prefix", "--node-id", "--note", "--offset", "--output", "--output-dir", "--output-document", "--p2p.external-address", "--p2p.laddr", "--p2p.persistent_peers", "--p2p.private_peer_ids", "--p2p.seeds", "--p2p.unconditional_peer_ids", "--packet-timeout-height", "--packet-timeout-timestamp", "--page", "--page-key", "--period", "--period-limit", "--pool-coin-denom", "--priv_validator_laddr", "--proposal", "--proxy_app", "--pruning", "--pruning-interval", "--pruning-keep-every", "--pruning-keep-recent", "--pubkey", "--reserve-acc", "--rpc.grpc_laddr", "--rpc.laddr", "--rpc.pprof_laddr", "--run-as", "--security-contact", "--sequence", "--sequences", "--sign-mode", "--spend-limit", "--starting-ip-address", "--state-sync.snapshot-interval", "--state-sync.snapshot-keep-recent", "--status", "--timeout-height", "--title", "--trace-store", "--transport", "--type", "--unsafe-skip-upgrades", "--upgrade-height", "--upgrade-info", "--v", "--vesting-amount", "--vesting-end-time", "--vesting-start-time", "--voter", "--wasm.memory_cache_size", "--wasm.query_gas_limit", "--wasm.simulation_gas_limit", "--website"]
+    let flags_nu = [
+        $absolutetimeouts, $amino, $ascii, $b64, $commission, $computegpu, 
+        $consensuscreate_empty_blocks, $counttotal, $delayed, $device, 
+        $dryrun, $fast_sync, $force, $forzeroheight, $generateonly, 
+        $grpcenable, $grpconly, $grpcwebenable, $help, $hex, $iavldisablefastnode, 
+        $interactive, $interblockcache, $keepaddrbook, $latestheight, $ledger, $listnames, 
+        $long, $noadmin, $noautoincrement, $nobackup, $nosort, $offline, $overwrite, 
+        $p2ppex, $p2pseed_mode, $p2pupnp, $prove, $recover, $reverse, $rpcunsafe, 
+        $searchapi, $signatureonly, $trace, $unarmoredhex, $unsafe, $unsafeentropy, 
+        $withtendermint, $xcrisisskipassertinvariants, $yes
+    ]
+    let flags_cli = [
+        "--absolute-timeouts", "--amino", "--ascii", "--b64", "--commission", "--compute-gpu", 
+        "--consensus.create_empty_blocks", "--count-total", "--delayed", "--device", 
+        "--dry-run", "--fast_sync", "--for-zero-height", "--force", "--generate-only", 
+        "--grpc-only", "--grpc-web.enable", "--grpc.enable", "--help", "--hex", "--iavl-disable-fastnode", 
+        "--inter-block-cache", "--interactive", "--keep-addr-book", "--latest-height", "--ledger", "--list-names", 
+        "--long", "--no-admin", "--no-auto-increment", "--no-backup", "--nosort", "--offline", "--overwrite", 
+        "--p2p.pex", "--p2p.seed_mode", "--p2p.upnp", "--prove", "--recover", "--reverse", "--rpc.unsafe", 
+        "--search-api", "--signature-only", "--trace", "--unarmored-hex", "--unsafe", "--unsafe-entropy", 
+        "--with-tendermint", "--x-crisis-skip-assert-invariants", "--yes"
+    ]
+    let options_nu = [
+        $abci, $account, $accountnumber, $address, $admin, $algo, $allowedmessages, 
+        $allowedvalidators, $amount, $bech, $broadcastmode, $chainid, $cointype, 
+        $commissionmaxchangerate, $commissionmaxrate, $commissionrate, 
+        $consensuscreate_empty_blocks_interval, $consensusdouble_sign_check_height, 
+        $cpuprofile, $db_backend, $db_dir, $denom, $denyvalidators, $deposit, $depositor, 
+        $description, $details, $events, $expiration, $feeaccount, $fees, $from, $gas, 
+        $gasadjustment, $gasprices, $genesis_hash, $genesistime, $gentxdir, $grpcaddress, 
+        $grpcwebaddress, $haltheight, $halttime, $hdpath, $height, $home, $identity, $index, 
+        $instantiateeverybody, $instantiatenobody, $instantiateonlyaddress, $invcheckperiod, 
+        $ip, $jailallowedaddrs, $keyringbackend, $keyringdir, $label, $limit, $log_format, 
+        $log_level, $maxmsgs, $minimumgasprices, $minretainblocks, $minselfdelegation, 
+        $moniker, $msgtype, $multisig, $multisigthreshold, $newmoniker, $node, $nodedaemonhome, 
+        $nodedirprefix, $nodeid, $note, $offset, $output, $outputdir, $outputdocument, 
+        $p2pexternaladdress, $p2pladdr, $p2ppersistent_peers, $p2pprivate_peer_ids, $p2pseeds, 
+        $p2punconditional_peer_ids, $packettimeoutheight, $packettimeouttimestamp, $page, 
+        $pagekey, $period, $periodlimit, $poolcoindenom, $priv_validator_laddr, $proposal, 
+        $proxy_app, $pruning, $pruninginterval, $pruningkeepevery, 
+        $pruningkeeprecent, $pubkey, $reserveacc, $rpcgrpc_laddr, $rpcladdr, $rpcpprof_laddr, 
+        $runas, $securitycontact, $sequence, $sequences, $signmode, $spendlimit, $startingipaddress, 
+        $statesyncsnapshotinterval, $statesyncsnapshotkeeprecent, $status, $timeoutheight, $title,
+        $tracestore, $transport, $type, $unsafeskipupgrades, $upgradeheight, $upgradeinfo, $v, 
+        $vestingamount, $vestingendtime, $vestingstarttime, $voter, $wasmmemory_cache_size, 
+        $wasmquery_gas_limit, $wasmsimulation_gas_limit, $website
+    ]
+    let options_cli = [
+        "--abci", "--account", "--account-number", "--address", "--admin", "--algo", "--allowed-messages", 
+        "--allowed-validators", "--amount", "--bech", "--broadcast-mode", "--chain-id", "--coin-type", 
+        "--commission-max-change-rate", "--commission-max-rate", "--commission-rate", 
+        "--consensus.create_empty_blocks_interval", "--consensus.double_sign_check_height", 
+        "--cpu-profile", "--db_backend", "--db_dir", "--denom", "--deny-validators", "--deposit", "--depositor", 
+        "--description", "--details", "--events", "--expiration", "--fee-account", "--fees", "--from", "--gas", 
+        "--gas-adjustment", "--gas-prices", "--genesis-time", "--genesis_hash", "--gentx-dir", 
+        "--grpc-web.address", "--grpc.address", "--halt-height", "--halt-time", "--hd-path", "--height", "--home", "--identity", "--index", 
+        "--instantiate-everybody", "--instantiate-nobody", "--instantiate-only-address", "--inv-check-period", 
+        "--ip", "--jail-allowed-addrs", "--keyring-backend", "--keyring-dir", "--label", "--limit", "--log_format", 
+        "--log_level", "--max-msgs", "--min-retain-blocks", "--min-self-delegation", "--minimum-gas-prices", 
+        "--moniker", "--msg-type", "--multisig", "--multisig-threshold", "--new-moniker", "--node", "--node-daemon-home", 
+        "--node-dir-prefix", "--node-id", "--note", "--offset", "--output", "--output-dir", "--output-document", 
+        "--p2p.external-address", "--p2p.laddr", "--p2p.persistent_peers", "--p2p.private_peer_ids", "--p2p.seeds", 
+        "--p2p.unconditional_peer_ids", "--packet-timeout-height", "--packet-timeout-timestamp", "--page", 
+        "--page-key", "--period", "--period-limit", "--pool-coin-denom", "--priv_validator_laddr", "--proposal", 
+        "--proxy_app", "--pruning", "--pruning-interval", "--pruning-keep-every", 
+        "--pruning-keep-recent", "--pubkey", "--reserve-acc", "--rpc.grpc_laddr", "--rpc.laddr", "--rpc.pprof_laddr", 
+        "--run-as", "--security-contact", "--sequence", "--sequences", "--sign-mode", "--spend-limit", "--starting-ip-address", 
+        "--state-sync.snapshot-interval", "--state-sync.snapshot-keep-recent", "--status", "--timeout-height", "--title", 
+        "--trace-store", "--transport", "--type", "--unsafe-skip-upgrades", "--upgrade-height", "--upgrade-info", "--v", 
+        "--vesting-amount", "--vesting-end-time", "--vesting-start-time", "--voter", "--wasm.memory_cache_size", 
+        "--wasm.query_gas_limit", "--wasm.simulation_gas_limit", "--website"
+    ]
     
     let list_flags_out = (
         $flags_nu 
