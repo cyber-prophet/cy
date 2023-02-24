@@ -558,16 +558,56 @@ export def 'passport get by nick' [
 
 # Set a passport's particle for a given nickname
 export def 'passport set particle' [
-    nickname
     particle
+    nickname?
 ] {
+    let nickname = (
+        if ($nickname | is-empty) {
+            if ($env.cy.passport-nick | is-empty) {
+                print "there is no nickname set"
+                return
+            } else {
+                $env.cy.passport-nick
+            }
+        } else {
+            $nickname
+        }
+    )
+
+    let $particle = (
+        if (is-cid $particle) {
+            $particle
+        } else {
+            print $"($particle) doesn't look like cid"
+            return
+        }
+    )
+
     let json = $'{"update_particle":{"nickname":"($nickname)","particle":"($particle)"}}'
     let pcontract = 'bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel'
-    (
-        ^cyber tx wasm execute $pcontract $json 
-        --from $env.cy.address 
-        --node https://rpc.bostrom.cybernode.ai:443 --output json 
-    ) | from json 
+
+    let params = [
+        '--from' $env.cy.address 
+        '--node' 'https://rpc.bostrom.cybernode.ai:443' 
+        '--output' 'json' 
+        '--yes' 
+        '--broadcast-mode' 'block'
+    ]
+
+    let out = (
+        do -i {
+            ^cyber tx wasm execute $pcontract $json $params
+        } | complete 
+    )
+
+    let results = if $out.exit_code == 0 {
+        $out.stdout | from json | select raw_log code txhash
+    } else {
+        print $"The particle might not be set. Check with (ansi yellow)cy passport get by nick ($nickname)(ansi reset)"
+    }
+
+    $results
+
 }
 
 # Create config JSON to set env variables, to use them as parameters in cyber cli
