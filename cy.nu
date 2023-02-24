@@ -348,12 +348,12 @@ def 'link-exist' [
     to
     neuron
 ] {
-    let out1 = (do -i { 
-        ^($env.cy.exec) query rank is-exist $from $to $neuron --output json --node $env.cy.rpc-address | complete 
-    })
+    let out = (do -i { 
+        ^($env.cy.exec) query rank is-exist $from $to $neuron --output json --node $env.cy.rpc-address 
+    } | complete )
 
-    if $out1.exit_code == 0 {
-        $out1.stdout | from json | get "exist"
+    if $out.exit_code == 0 {
+        $out.stdout | from json | get "exist"
     } else {
         false
     }
@@ -524,7 +524,19 @@ export def 'passport get by address' [
 ] { 
     let json = ($'{"active_passport": {"address": "($address)"}}')
     let pcontract = 'bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel'
-    do -i {^cyber query wasm contract-state smart $pcontract $json --node https://rpc.bostrom.cybernode.ai:443 --output json | from json | get data}
+    let params = ['--node' 'https://rpc.bostrom.cybernode.ai:443' '--output' 'json']
+    let out = ( 
+        do -i {
+            ^cyber query wasm contract-state smart $pcontract $json $params
+        } | complete 
+    )
+
+    if $out.exit_code == 0 {
+        $out.stdout  | from json | get data
+    } else {
+        print $"No passport for ($address) is found"
+        null
+    }
 }
 
 # Get a passport by providing a neuron's nick
@@ -843,12 +855,17 @@ export def 'search4' [
 ] {
     let cid = (pin text $query --only_hash)
     
-    let results = (
+    let out = (
         do -i {
             ^($env.cy.exec) query rank search $cid $page $results_per_page --output json
-        }
-        | from json 
+        } | complete 
     )
+
+    let results = if $out.exit_code == 0 {
+        $out.stdout | from json 
+    } else {
+        null
+    }
 
     if $results == null {
         print $"there is no search results for ($cid)"
