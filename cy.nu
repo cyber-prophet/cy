@@ -615,6 +615,15 @@ export def-env 'config new' [
         | $"($in)+($_exec)" 
     )
 
+    let passport_nick = (
+        passport get by address $address
+        | get extension.nickname -i
+    )
+
+    if (not ($passport_nick | is-empty)) {
+        print $"Passport nick (ansi yellow)($passport_nick)(ansi reset) will be used"
+    }
+
     let chain_id_def = (if ($_exec == 'cyber') {
             'bostrom'
         } else {
@@ -648,6 +657,7 @@ export def-env 'config new' [
         'config-name': $config_name
         'exec': $_exec
         'address': $address
+        'passport-nick': $passport_nick
         'chain-id': $chain_id
         'ipfs-storage': $ipfs_storage
         'rpc-address': $rpc_address
