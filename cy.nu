@@ -523,11 +523,18 @@ export def 'update cy' [
 
 }
 
-# Get a passport by providing a neuron's address
-export def 'passport get by address' [
-    address
+# Get a passport by providing a neuron's address or nick
+export def 'passport get' [
+    address_or_nick
 ] { 
-    let json = ($'{"active_passport": {"address": "($address)"}}')
+    let json = (
+        if (is-neuron $address_or_nick) {
+            $'{"active_passport": {"address": "($address_or_nick)"}}'
+        } else {
+            $'{"passport_by_nickname": {"nickname": "($address_or_nick)"}}'
+        }
+    )
+
     let pcontract = 'bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel'
     let params = ['--node' 'https://rpc.bostrom.cybernode.ai:443' '--output' 'json']
     let out = ( 
@@ -539,28 +546,18 @@ export def 'passport get by address' [
     if $out.exit_code == 0 {
         $out.stdout  | from json | get data
     } else {
-        print $"No passport for ($address) is found"
+        print $"No passport for ($address_or_nick) is found"
         null
     }
 }
 
-# Get a passport by providing a neuron's nick
-export def 'passport get by nick' [
-    nickname
-] { 
-    let json = ($'{"passport_by_nickname": {"nickname": "($nickname)"}}')
-    let pcontract = 'bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel'
-    let params = ['--node' 'https://rpc.bostrom.cybernode.ai:443' '--output' 'json']
-    (
-        ^cyber query wasm contract-state smart $pcontract $json $params
-    ) | from json | get data
-}
 
-# Set a passport's particle or data field for a given nickname
-export def 'passport set particle' [
+# Set a passport's particle, data or avatar field for a given nickname
+export def 'passport set' [
     particle
     nickname?
     --data
+    --avatar
 ] {
     let nickname = (
         if ($nickname | is-empty) {
@@ -587,6 +584,8 @@ export def 'passport set particle' [
     let json = (
         if $data {
             $'{"update_data":{"nickname":"($nickname)","data":"($particle)"}}'
+        } else if $avatar {
+            $'{"update_avatar":{"nickname":"($nickname)","new_avatar":"($particle)"}}'
         } else {
             $'{"update_particle":{"nickname":"($nickname)","particle":"($particle)"}}'
         }
@@ -600,6 +599,7 @@ export def 'passport set particle' [
         '--output' 'json' 
         '--yes' 
         '--broadcast-mode' 'block'
+        '--gas' '23456789'
     ]
 
     let out = (
@@ -611,7 +611,7 @@ export def 'passport set particle' [
     let results = if $out.exit_code == 0 {
         $out.stdout | from json | select raw_log code txhash
     } else {
-        print $"The particle might not be set. Check with (ansi yellow)cy passport get by nick ($nickname)(ansi reset)"
+        print $"The particle might not be set. Check with (ansi yellow)cy passport get ($nickname)(ansi reset)"
     }
 
     $results
@@ -667,7 +667,7 @@ export def-env 'config new' [
     )
 
     let passport_nick = (
-        passport get by address $address
+        passport get $address
         | get extension.nickname -i
     )
 
