@@ -115,9 +115,11 @@ export def 'link texts' [
     let cid_from = (pin text $text_from)
     let cid_to = (pin text $text_to)
     
-    let $out_table = (
-        [['from_text' 'to_text' from to];
-        [$text_from $text_to $cid_from $cid_to]]
+    let out_table = (
+        [
+            ['from_text' 'to_text' 'from' 'to'];
+            [$text_from $text_to $cid_from $cid_to]
+        ]
     )
 
     if $disable_append {
@@ -366,7 +368,7 @@ export def 'tmp pin col' [
 # > let $to = 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufB'
 # > let $neuron = 'bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel'
 # > cy link-exist $from $to $neuron
-# > false
+# : false
 def 'link-exist' [
     from
     to
@@ -997,7 +999,7 @@ export def `download cid from ipfs` [
             print $"found text ($type1) ($cid)"
 
             let result = (
-                ipfs get --progress=false --timeout $timeout -o $"($env.HOME)/cy/cache/safe/($cid).txt" $cid 
+                ipfs get --progress=false --timeout $timeout -o $"($env.HOME)/cy/cache/safe/($cid).md" $cid 
                 | complete
             )
 
@@ -1029,7 +1031,7 @@ def 'download cid from gateway' [
 
     let type1 = ($headers | get -i 'Content-Type')
     if $type1 == 'text/plain; charset=utf-8' {
-        http get $"($gate_url)($cid)" -m 60 | save -f $"($env.HOME)/cy/cache/safe/($cid).txt" 
+        http get $"($gate_url)($cid)" -m 60 | save -f $"($env.HOME)/cy/cache/safe/($cid).md" 
     } else if ($type1 != null) {
         $type1 | save -f $"($env.HOME)/cy/cache/other/($cid).txt"
     }
@@ -1040,30 +1042,24 @@ def 'download cid from gateway' [
 export def 'request-file-from-cache' [
     cid
 ] {
-    let a1 = (
-        do -i {
-            open $"($env.HOME)/cy/cache/safe/($cid).txt"}
-    )
+    let content = (do -i {open $"($env.HOME)/cy/cache/safe/($cid).md"})
 
-    let a1 = if ($a1 == null) {
-        (do -i {
-            open $"($env.HOME)/cy/cache/other/($cid).txt"})
-    } else {$a1}
+    let content = if ($content == null) {
+        do -i {open $"($env.HOME)/cy/cache/other/($cid).txt"}
+    } else {$content}
 
-    let a1 = if ($a1 == null) {
-        (do -i {open $"($env.HOME)/cy/cache/queue/($cid)"})
-    } else {$a1}
+    let content = if ($content == null) {
+        do -i {open $"($env.HOME)/cy/cache/queue/($cid)"}
+    } else {$content}
 
-    let a1 = if ($a1 == null) {
+    let content = if ($content == null) {
         let message = $"($cid) is in the queue since (datetime_fn --pretty)"
         $message | save $"($env.HOME)/cy/cache/queue/($cid)"
         $message
-    } else {
-        $"($a1)"
-    }
+    } else {$content}
 
     (
-        $a1 
+        $content 
         | str substring '0,400'
         | str replace "\n" "↩" --all 
         | $"($in)\n(ansi grey)($cid)(ansi reset)"
@@ -1285,8 +1281,6 @@ export def-env 'ber' [
     --xcrisisskipassertinvariants
     --yes (-y)
 ] {
-    # mut flags_list = []
-
     let flags_nu = [
         $absolutetimeouts, $amino, $ascii, $b64, $commission, $computegpu, 
         $consensuscreate_empty_blocks, $counttotal, $delayed, $device, 
@@ -1413,15 +1407,15 @@ export def-env 'ber' [
     # print $important_options
     let filename = $"($cfolder)($command)-($ts1).json"
 
-    let $cached_files1 = ls $cfolder
+    let $cache_ls = ls $cfolder
 
     # print "cached_files"
     let cached_file = (
-        if $cached_files1 != null {
-            # print "$cached_files1 != null"
+        if $cache_ls != null {
+            # print "$cache_ls != null"
 
             let a1 = (
-                $cached_files1
+                $cache_ls
                 | where name =~ $"($command)"
                 | inspect
             )
@@ -1453,9 +1447,9 @@ export def-env 'ber' [
             print $"request command from cli, saving to ($filename)"
             print $"($exec) ($rest) --output json ($list_flags_out)"
             # let out1 = do -i {^($exec) $rest --output json $list_flags_out | from json} 
-            let out1 = (^($exec) $rest --output json $list_options_out $list_flags_out | from json) 
-            if $out1 != null {$out1 | save $filename}
-            $out1
+            let out = (^($exec) $rest --output json $list_options_out $list_flags_out | from json) 
+            if $out != null {$out | save $filename}
+            $out
         } 
     )
 
@@ -1500,7 +1494,8 @@ export def 'balances' [
     let dummy1 = (
         $balances | columns | prepend "name" | uniq 
         | reverse | prepend ["address"] | uniq 
-        | reverse | reduce -f {} {|i acc| $acc | merge {$i : 0}})
+        | reverse | reduce -f {} {|i acc| $acc | merge {$i : 0}}
+    )
 
     let out = ($balances | each {|i| $dummy1 | merge $i} | sort-by name)
 
@@ -1528,12 +1523,14 @@ export def 'ibc denoms' [] {
         | get supply 
         | where denom =~ "^ibc" 
         | upsert ibc_hash {|i| $i.denom | str replace "ibc/" ""} 
-        | upsert a1 {|i| cyber query ibc-transfer denom-trace $i.ibc_hash --output json 
-        | from json 
-        | get denom_trace}
+        | upsert temp_out {
+            |i| cyber query ibc-transfer denom-trace $i.ibc_hash --output json 
+            | from json 
+            | get denom_trace
+        }
     )
 
-    $denom_trace1.a1 | merge $denom_trace1 | reject ibc_hash a1 | sort-by path --natural
+    $denom_trace1.temp_out | merge $denom_trace1 | reject ibc_hash temp_out | sort-by path --natural
 }
 
 # An ordered list of cy commands
