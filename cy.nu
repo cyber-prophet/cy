@@ -153,9 +153,7 @@ export def 'tweet' [
 }
 
 # Add a random chuck norris cyberlink to the temp table
-export def 'link chuck' [
-    --disable_append (-d)
-] {
+export def 'link chuck' [] {
     # let cid_from = (pin text 'chuck norris')
     let cid_from = 'QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1'
     
@@ -173,11 +171,7 @@ export def 'link chuck' [
         ['chuck norris' $quote $cid_from $cid_to]]
     )
 
-    if $disable_append {
-            $_table
-        } else {
-            $_table | tmp append --dont_show_out_table
- }
+    $_table | tmp append --dont_show_out_table
 } 
 
 # Add a random quote cyberlink to the temp table
@@ -250,7 +244,7 @@ export def 'tmp view' [
 # Append cyberlinks to the temp table
 export def 'tmp append' [
     cyberlinks?             # cyberlinks table
-    --dont_show_out_table   
+    --dont_show_out_table (-d)   
 ] {
     let cyberlinks = if ($cyberlinks | is-empty) {$in} else {$cyberlinks}
 
@@ -1509,6 +1503,9 @@ export def 'balances' [
 # Add cybercongress node to bootstrap nodes
 export def 'ipfs bootstrap add congress' [] {
     ipfs bootstrap add '/ip4/135.181.19.86/tcp/4001/p2p/12D3KooWNMcnoQynAY9hyi4JxzSu64BsRGcJ9z7vKghqk8sTrpqY'
+    print "check if bootstrap node works by executing commands:"
+    print 'ipfs dht findpeer 12D3KooWNMcnoQynAY9hyi4JxzSu64BsRGcJ9z7vKghqk8sTrpqY'
+    print 'ipfs dht findpeer QmUgmRxoLtGERot7Y6G7UyF6fwvnusQZfGR15PuE6pY3aB'
 }
 
 # Check ibc denoms
