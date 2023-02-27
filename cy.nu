@@ -984,31 +984,30 @@ def serp1 [
 export def `download cid from ipfs` [
     cid
     --timeout = 300s
+    --folder = $"($env.HOME)/cy/cache/"
 ] {
+    mkdir $"($folder)/safe/" $"($folder)/other/"
 
     print $"cid to download ($cid)"
-    let type1 = do -i {ipfs cat --timeout $timeout -l 400 $cid | file - | $in + "" | str replace "/dev/stdin: " ""}
+    let type = do -i {ipfs cat --timeout $timeout -l 400 $cid | file - | $in + "" | str replace "/dev/stdin: " ""}
 
-    if ( $type1 =~ "(ASCII text)|(Unicode text)" ) {
-            print $"found text ($type1) ($cid)"
+    if ($type =~ "^empty") {
+        return "not found"
+    } else if ($type =~ "(ASCII text)|(Unicode text)") {
+        let result = (
+            ipfs get --progress=false --timeout $timeout -o $"($folder)/safe/($cid).md" $cid 
+            | complete
+        )
 
-            let result = (
-                ipfs get --progress=false --timeout $timeout -o $"($env.HOME)/cy/cache/safe/($cid).md" $cid 
-                | complete
-            )
-
-            if ($result.exit_code == 0) {
-                rm -f $"($env.HOME)/cy/cache/queue/($cid)" 
-            }
-        } else if ( $type1 =~ "empty" ) {
-            print $"($cid) not found"
+        if ($result.exit_code == 0) {
+            return "text"
         } else {
-            print $"found non-text ($cid) ($type1)"
-
-            $type1 | save -f $"($env.HOME)/cy/cache/other/($cid).txt"
-
-            rm -f $"($env.HOME)/cy/cache/queue/($cid)"
+            return "not found"
         }
+    } else {
+        $type | save -f $"($folder)/other/($cid).txt"
+        return "non-text"
+    }
 
 }
 
@@ -1073,7 +1072,11 @@ export def 'check-queue' [] {
         $files
         | get name -i
         | par-each {
-            |i| download cid from ipfs $i
+            |i| 
+            let status = download cid from ipfs $i
+            if ($status in ['text', 'non-text']) {
+                rm -f $"($env.HOME)/cy/cache/queue/($i)"
+            }
         }
     } else {
             "the queue is empty"
