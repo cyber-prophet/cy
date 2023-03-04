@@ -16,7 +16,6 @@ export-env {
     } catch {
         'file "/config/default.yaml" was not found. Run "cy config new"' | cprint -c green_underline
     }
-    let-env cy_cache = null
 }
 
 # Pin a text particle
@@ -954,19 +953,20 @@ export def 'search4' [
 
     clear; print $"Searching ($env.cy.exec) for ($cid)";
 
-    print (if $pretty {
-        serp1 $results --pretty
-    } else {
-        serp1 $results
-    })
+    # print (if $pretty {
+        serp1 $results --pretty $pretty
+    # } else {
+    #     serp1 $results
+    # })
 
-    watch ~/cy/cache/queue { clear; print $"Searching ($env.cy.exec) for ($cid)"; serp1 $results --pretty }
+    watch ~/cy/cache/queue { clear; print $"Searching ($env.cy.exec) for ($cid)"; serp1 $results --pretty $pretty}
 
 }
 
-def serp1 [
+
+export def serp1 [
     results
-    --pretty
+    --pretty: bool@"nu-complete bool" = false
 ] {
 
     let serp = (
@@ -989,11 +989,11 @@ export def `download cid from ipfs` [
     mkdir $"($folder)/safe/" $"($folder)/other/"
 
     print $"cid to download ($cid)"
-    let type = do -i {ipfs cat --timeout $timeout -l 400 $cid | file - | $in + "" | str replace "/dev/stdin: " ""}
+    let type = do -i {ipfs cat --timeout $timeout -l 400 $cid | file - | $in + "" | str replace "/dev/stdin: " "" | split row "," | get -i 0}
 
     if ($type =~ "^empty") {
         return "not found"
-    } else if ($type =~ "(ASCII text)|(Unicode text)") {
+    } else if ($type =~ "(ASCII text)|(Unicode text)|(very short file)") {
         let result = (
             ipfs get --progress=false --timeout $timeout -o $"($folder)/safe/($cid).md" $cid 
             | complete
@@ -1005,8 +1005,8 @@ export def `download cid from ipfs` [
             return "not found"
         }
     } else {
-        $type | save -f $"($folder)/other/($cid).txt"
-        return "non-text"
+        ("non_text:" + $type) | save -f $"($folder)/other/($cid).md"
+        return "non_text"
     }
 
 }
@@ -1026,7 +1026,7 @@ def 'download cid from gateway' [
     if $type1 == 'text/plain; charset=utf-8' {
         http get $"($gate_url)($cid)" -m 60 | save -f $"($env.HOME)/cy/cache/safe/($cid).md" 
     } else if ($type1 != null) {
-        $type1 | save -f $"($env.HOME)/cy/cache/other/($cid).txt"
+        $type1 | save -f $"($env.HOME)/cy/cache/other/($cid).md"
     }
     echo $type1
 }
@@ -1038,7 +1038,7 @@ export def 'request-file-from-cache' [
     let content = (do -i {open $"($env.HOME)/cy/cache/safe/($cid).md"})
 
     let content = if ($content == null) {
-        do -i {open $"($env.HOME)/cy/cache/other/($cid).txt"}
+        do -i {open $"($env.HOME)/cy/cache/other/($cid).md"}
     } else {$content}
 
     let content = if ($content == null) {
@@ -1659,7 +1659,7 @@ def 'nu-complete-config-names' [] {
     | filter {|x| $x != "default"}
 }
 
-export def 'backup_fn' [
+def 'backup_fn' [
     filename
 ] {
     let basename1 = ($filename | path basename)
@@ -1688,4 +1688,8 @@ def "nu-complete keys table" [] {
 # Helper function to use addresses for completions in --from parameter
 def "nu-complete keys values" [] {
     (nu-complete keys table).name | zip (nu-complete keys table).address | flatten
+}
+
+def "nu-complete bool" [] {
+    [true, false]
 }
