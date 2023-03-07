@@ -19,6 +19,9 @@ export-env {
 }
 
 # Pin a text particle
+# 
+# cy pin text "cyber"
+# QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 export def 'pin text' [
     text_param?: string
     --only_hash
@@ -67,6 +70,7 @@ export def 'pin text' [
 }
 
 # Pin files from the current folder to the local node, output the cyberlinks table
+# cy pin files .
 export def 'pin files' [
     ...files: string                # filenames to add into the local ipfs node
     --link_filenames (-n)
@@ -125,7 +129,7 @@ export def 'link texts' [
         $out_table
     } else {
         $out_table | tmp append
- }
+    }
 }
 
 # Add a tweet
@@ -148,7 +152,7 @@ export def 'tweet' [
         $out_table | tmp send tx
     } else {
         $out_table | tmp append
- }
+    }
 }
 
 # Add a random chuck norris cyberlink to the temp table
@@ -277,7 +281,6 @@ export def 'tmp replace' [
     if (not $dont_show_out_table)  {
         tmp view -q
     }
-    
 }
 
 # Empty the temp cyberlinks table
@@ -353,7 +356,6 @@ export def 'tmp pin col' [
         }
     | rename -c [$column_with_text $new_text_col_name]
     | tmp replace
-
 }
 
 # Check if any of the links in the tmp table exist
@@ -629,7 +631,6 @@ export def 'passport set' [
     }
 
     $results
-
 }
 
 # Create config JSON to set env variables, to use them as parameters in cyber cli
@@ -864,24 +865,6 @@ export def 'search' [
     } else {
         $serp
     }
-
-
-    # let results = (^($env.cy.exec) query rank search $cid 0 3 | from json | get result)
-
-    # print $results
-    
-    # let cat1 = (
-    #     $results.particle 
-    #     |   par-each {
-    #         |i| ipfs cat $i -l 400
-    #     })
-    # let type = ($cat1 | each {|i| $i | file -})
-    
-    # let safety = ($type | each {|i| if ($i | str contains "/dev/stdin: ASCII text") {
-    #     "safe"
-    # } } )
-
-    # $cat1
 }
 
 export def 'search2' [
@@ -960,7 +943,6 @@ export def 'search4' [
     # })
 
     watch ~/cy/cache/queue { clear; print $"Searching ($env.cy.exec) for ($cid)"; serp1 $results --pretty $pretty}
-
 }
 
 
@@ -1005,7 +987,9 @@ export def `download cid from ipfs` [
             return "not found"
         }
     } else {
-        ("non_text:" + $type) | save -f $"($folder)/other/($cid).md"
+        let size_json = (ipfs dag stat $cid --enc json --timeout $timeout | from json )
+        let size_str = $"size:($size_json | get Size -i | default '') blocks:($size_json | get NumBlocks -i | default '')"
+        $"non_text:($type) ($size_str)" | save -f $"($folder)/other/($cid).md"
         return "non_text"
     }
 
@@ -1057,7 +1041,6 @@ export def 'request-file-from-cache' [
         | str replace "\n" "↩" --all 
         | $"($in)\n(ansi grey)($cid)(ansi reset)"
     )
-
 }
 
 # Watch the queue folder, and if there are updates - request files to download
@@ -1570,7 +1553,7 @@ def is-cid [particle: string] {
 }
 
 def is-neuron [particle: string] {
-    ($particle =~ '^bostrom1\w{38}') 
+    ($particle =~ '^bostrom1\w{38}$') 
 }
 
 def is-connected []  {
@@ -1646,7 +1629,6 @@ def 'datetime_fn' [
     } else {
         date now | date format '%Y%m%d-%H%M%S'
     }
-    
 }
 
 def 'nu-complete-config-names' [] {
