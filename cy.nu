@@ -1000,10 +1000,10 @@ export def serp1 [
 
 export def `download cid from ipfs` [
     cid
-    --timeout = 300s
+    --timeout = 100s
     --folder = $"($env.cyfolder)/cache/"
 ] {
-    mkdir $"($folder)/safe/" $"($folder)/other/"
+    mkdir $"($folder)/safe/"
 
     print $"cid to download ($cid)"
     let type = do -i {ipfs cat --timeout $timeout -l 400 $cid | file - | $in + "" | str replace "/dev/stdin: " "" | split row "," | get -i 0}
@@ -1011,20 +1011,25 @@ export def `download cid from ipfs` [
     if ($type =~ "^empty") {
         return "not found"
     } else if ($type =~ "(ASCII text)|(Unicode text)|(very short file)") {
-        let result = (
+        try {
             ipfs get --progress=false --timeout $timeout -o $"($folder)/safe/($cid).md" $cid 
-            | complete
-        )
-
-        if ($result.exit_code == 0) {
             return "text"
-        } else {
+        } catch {
             return "not found"
         }
     } else {
-        let size_json = (ipfs dag stat $cid --enc json --timeout $timeout | from json )
+        let size_json = (
+            try {
+                (ipfs dag stat $cid --enc json --timeout $timeout | from json )
+            } catch {
+                return "not found"
+            }
+        )
+
         let size_str = $"size:($size_json | get Size -i | default '') blocks:($size_json | get NumBlocks -i | default '')"
-        $"non_text:($type) ($size_str)" | save -f $"($folder)/other/($cid).md"
+        
+        $"non_text:($type) ($size_str)" | save -f $"($folder)/safe/($cid).md"
+        
         return "non_text"
     }
 
@@ -1045,7 +1050,7 @@ def 'download cid from gateway' [
     if $type1 == 'text/plain; charset=utf-8' {
         http get $"($gate_url)($cid)" -m 60 | save -f $"($env.cyfolder)/cache/safe/($cid).md" 
     } else if ($type1 != null) {
-        $type1 | save -f $"($env.cyfolder)/cache/other/($cid).md"
+        $type1 | save -f $"($env.cyfolder)/cache/safe/($cid).md"
     }
     echo $type1
 }
@@ -1057,15 +1062,11 @@ export def 'request-file-from-cache' [
     let content = (do -i {open $"($env.cyfolder)/cache/safe/($cid).md"})
 
     let content = if ($content == null) {
-        do -i {open $"($env.cyfolder)/cache/other/($cid).md"}
-    } else {$content}
-
-    let content = if ($content == null) {
         do -i {open $"($env.cyfolder)/cache/queue/($cid)"}
     } else {$content}
 
     let content = if ($content == null) {
-        let message = $"($cid) is in the queue since (datetime_fn --pretty)"
+        let message = $"($cid) is in the queue since (datetime_fn --pretty) "
         $message | save $"($env.cyfolder)/cache/queue/($cid)"
         $message
     } else {$content}
@@ -1084,20 +1085,32 @@ export def `watch search folder` [] {
 }
 
 # Check queue for the new CIDs, and if there are CIDs - safely download the text ones
-export def 'check-queue' [] {
+export def 'check-queue' [
+    attempts = 0
+] {
     let files = (ls -s $"($env.cyfolder)/cache/queue/")
     if ( ($files | length | inspect) > 0 ) {
         $files
+        | where size <= (89 + $attempts | into filesize)
         | get name -i
-        | par-each {
-            |i| 
-            let status = download cid from ipfs $i
-            if ($status in ['text', 'non-text']) {
-                rm -f $"($env.cyfolder)/cache/queue/($i)"
-            }
+        | each {
+            |i| pueue add $"nu -c \"cy download entry from queue ($i)\" --config \"($nu.config-path)\" --env-config \"($nu.env-path)\"" 
         }
     } else {
-            "the queue is empty"
+        "the queue is empty"
+    }
+}
+
+export def 'download entry from queue' [
+    cid
+] {
+    mv $"($env.cyfolder)/cache/queue/($cid)" $"($env.cyfolder)/cache/requested/"
+    let status = download cid from ipfs $cid
+    if ($status in ['text', 'non-text']) {
+        rm -f $"($env.cyfolder)/cache/requested/($cid)"
+    } else {
+        mv $"($env.cyfolder)/cache/requested/($cid)" $"($env.cyfolder)/cache/queue/"
+        "+" | save -a $"($env.cyfolder)/cache/queue/($cid)"
     }
 }
 
@@ -1601,7 +1614,7 @@ def make_default_folders_fn [] {
     mkdir $"($env.cyfolder)/config/"
     mkdir $"($env.cyfolder)/cache/"
     mkdir $"($env.cyfolder)/cache/search/"
-    mkdir $"($env.cyfolder)/cache/other/"
+    mkdir $"($env.cyfolder)/cache/requested/"
     mkdir $"($env.cyfolder)/cache/safe/"
     mkdir $"($env.cyfolder)/cache/queue/"
     mkdir $"($env.cyfolder)/cache/cli_out/"
