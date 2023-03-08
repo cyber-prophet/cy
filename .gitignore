@@ -6,3 +6,4 @@ temp/
 backups/
 *.yaml
 cache/
+*.toml
