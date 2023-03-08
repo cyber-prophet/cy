@@ -89,7 +89,7 @@ overlay use ~/cy/cy.nu -p -r
         }
 
         let result = (
-            cy passport get by address bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
+            cy passport get bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
         )
 
         if $result == $expect {
