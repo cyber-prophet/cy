@@ -11,10 +11,40 @@ export def main [] { help }
 
 export-env { 
     banner
-    let-env cy = try {
-        open $"($env.HOME)/cy/config/default.yaml"
+
+    let config_folder = ("~/.config/cy/" | path expand)
+    let default_cy_folder = ('~/cy' | path expand)
+
+    if not ($config_folder | path exists) {
+        mkdir $config_folder
+    }
+
+    let config_file_path = $"($config_folder)/cy_config.toml"
+    let config1 = try {
+        open $config_file_path
     } catch {
-        'file "/config/default.yaml" was not found. Run "cy config new"' | cprint -c green_underline
+        print "there is no '~/.config/cy/cy_config.toml'. I'll create it."
+
+        let def_path_rec = {'path': $default_cy_folder}
+        try {
+            $def_path_rec | save $config_file_path
+        } catch {
+            open $config_file_path | merge $def_path_rec | save -f $config_file_path 
+        }
+    }
+
+    let-env cyfolder = try {
+        $config1 | get 'path'
+    } catch {
+        $default_cy_folder
+    }
+
+    let-env cy = try {
+        let active_file = ($config1 | get 'default-config')
+        open $"($env.cyfolder)/config/($active_file).toml"
+    } catch {
+        $'Cy config file was not found. Run "cy config new"' | cprint -c green_underline
+        $nothing
     }
 }
 
@@ -228,13 +258,13 @@ export def 'link random' [
 export def 'tmp view' [
     --quiet (-q) # Don't print info
 ] {
-    let tmp_links = open $"($env.HOME)/cy/cyberlinks_temp.csv" 
+    let tmp_links = open $"($env.cyfolder)/cyberlinks_temp.csv" 
 
     let links_count = ($tmp_links | length)
 
     if (not $quiet) {
         if $links_count == 0 {
-            $"The temp cyberlinks table ($"($env.HOME)/cy/cyberlinks_temp.csv") is empty." | cprint -c yellow
+            $"The temp cyberlinks table ($"($env.cyfolder)/cyberlinks_temp.csv") is empty." | cprint -c yellow
             $"You can add cyberlinks to it manually or by using commands like 'cy link texts'" | cprint
         } else {
             $"There are ($links_count) cyberlinks in the temp table:" | cprint -c green_underline
@@ -275,7 +305,7 @@ export def 'tmp replace' [
 
     (
         $cyberlinks 
-        | save $"($env.HOME)/cy/cyberlinks_temp.csv" --force
+        | save $"($env.cyfolder)/cyberlinks_temp.csv" --force
     )
 
     if (not $dont_show_out_table)  {
@@ -285,9 +315,9 @@ export def 'tmp replace' [
 
 # Empty the temp cyberlinks table
 export def 'tmp clear' [] {
-    backup_fn $"($env.HOME)/cy/cyberlinks_temp.csv" 
+    backup_fn $"($env.cyfolder)/cyberlinks_temp.csv" 
 
-    'from,to,from_text,to_text' | save $"($env.HOME)/cy/cyberlinks_temp.csv" --force
+    'from,to,from_text,to_text' | save $"($env.cyfolder)/cyberlinks_temp.csv" --force
     # print "TMP-table is clear now."
 }
 
@@ -431,16 +461,16 @@ def 'tx json create from cybelinks' [] {
     $trans 
     | upsert body.messages.neuron $env.cy.address 
     | upsert body.messages.links $cyberlinks 
-    | save $"($env.HOME)/cy/temp/tx-unsigned.json" --force
+    | save $"($env.cyfolder)/temp/tx-unsigned.json" --force
 }
 
 def 'tx sign and broadcast' [] {
     ( 
-        ^($env.cy.exec) tx sign $"($env.HOME)/cy/temp/tx-unsigned.json" --from $env.cy.address  
+        ^($env.cy.exec) tx sign $"($env.cyfolder)/temp/tx-unsigned.json" --from $env.cy.address  
         --chain-id $env.cy.chain-id 
         --node $env.cy.rpc-address
         # --keyring-backend $env.cy.keyring-backend 
-        --output-document $"($env.HOME)/cy/temp/tx-signed.json" 
+        --output-document $"($env.cyfolder)/temp/tx-signed.json" 
 
         | complete 
         | if ($in.exit_code != 0) {
@@ -449,7 +479,7 @@ def 'tx sign and broadcast' [] {
     )
 
     let broadcast_complete = (
-        ^($env.cy.exec) tx broadcast $"($env.HOME)/cy/temp/tx-signed.json" 
+        ^($env.cy.exec) tx broadcast $"($env.cyfolder)/temp/tx-signed.json" 
         --broadcast-mode block 
         --output json 
         --node $env.cy.rpc-address
@@ -490,12 +520,12 @@ export def 'tmp send tx' [] {
     )
     
     if $_var.code == 0 {
-        open $"($env.HOME)/cy/cyberlinks_archive.csv" 
+        open $"($env.cyfolder)/cyberlinks_archive.csv" 
         | append (
             $cyberlinks
             | upsert neuron $env.cy.address
         ) 
-        | save $"($env.HOME)/cy/cyberlinks_archive.csv" --force
+        | save $"($env.cyfolder)/cyberlinks_archive.csv" --force
 
         if ($in_cyberlinks == null) {
             tmp clear
@@ -533,9 +563,9 @@ export def 'update cy' [
 
     let url = $"https://raw.githubusercontent.com/cyber-prophet/($branch)/dev/cy.nu" 
 
-    mkdir ~/cy 
+    mkdir $env.cyfolder
     | http get $url
-    | save ~/cy/cy.nu -f
+    | save $"($env.cyfolder)/cy.nu -f"
 
 }
 
@@ -639,7 +669,6 @@ export def-env 'config new' [
 ] {
     'This wizzard will walk you through the setup of CY.' | cprint -c green_underline -a 2
     'If you skip entering the value - the default will be used.' | cprint -c yellow_italic
-    let cy_home = ($env.HOME + '/cy/')
 
     'Choose the name of executable (cyber or pussy). ' | cprint --before 1 --after 0
     'Default: cyber' | cprint -c yellow_italic
@@ -737,15 +766,15 @@ export def-env 'config new' [
     $temp_env | config save $config_name 
 
     if (
-        not ($"($env.HOME)/cy/cyberlinks_temp.csv" | path exists)
+        not ($"($env.cyfolder)/cyberlinks_temp.csv" | path exists)
     ) {
-        'from,to' | save $"($env.HOME)/cy/cyberlinks_temp.csv"
+        'from,to' | save $"($env.cyfolder)/cyberlinks_temp.csv"
     }
 
     if (
-        not ($"($env.HOME)/cy/cyberlinks_archive.csv" | path exists)
+        not ($"($env.cyfolder)/cyberlinks_archive.csv" | path exists)
     ) {
-        'from,to,address,timestamp,txhash' | save $"($env.HOME)/cy/cyberlinks_archive.csv"
+        'from,to,address,timestamp,txhash' | save $"($env.cyfolder)/cyberlinks_archive.csv"
     }
 }
 
@@ -755,9 +784,9 @@ export def 'config view' [
 ] {
     if $config_name == null {
         print "current config is:"
-        open $"($env.HOME)/cy/config/default.yaml"
+        $env.cy
     } else {
-        let filename = $"($env.HOME)/cy/config/($config_name).yaml"
+        let filename = $"($env.cyfolder)/config/($config_name).toml"
         open $filename 
     }
 }
@@ -782,7 +811,7 @@ export def-env 'config save' [
     )
     let config_name = (if-empty $config_name -a $dt1)
 
-    mut file_name = $"($env.HOME)/cy/config/($config_name).yaml"
+    mut file_name = $"($env.cyfolder)/config/($config_name).toml"
 
     let in_config = ($in_config | upsert config-name $config_name)
 
@@ -793,7 +822,7 @@ export def-env 'config save' [
             backup_fn $file_name
             $in_config | save $file_name -f
         } else {
-            $file_name = $"($env.HOME)/cy/config/($dt1).yaml"
+            $file_name = $"($env.cyfolder)/config/($dt1).toml"
             $in_config | save $file_name
         }
     } else {
@@ -812,7 +841,7 @@ export def-env 'config activate' [
     config_name?: string@'nu-complete-config-names'
 ] {
     let inconfig = $in
-    let file = (
+    let config1 = (
         if $inconfig == $nothing {
             config view $config_name
         } else {
@@ -820,11 +849,17 @@ export def-env 'config activate' [
         }
     )
 
-    let-env cy = $file
+    let-env cy = $config1
 
     "Config is loaded" | cprint -c green_underline
-    $file | save $"($env.HOME)/cy/config/default.yaml" -f
-    $file
+    # $config1 | save $"($env.cyfolder)/config/default.toml" -f
+    (
+        open ('~/.config/cy/cy_config.toml' | path expand)
+        | upsert 'default-config' ($config1 | get 'config-name')
+        | save ('~/.config/cy/cy_config.toml' | path expand) -f
+    )
+
+    $config1
 }
 
 export def 'search' [
@@ -903,7 +938,7 @@ export def 'search3' [
     
     let serp = (
         ^($env.cy.exec) query rank search $cid $page 10 --output json
-        | save $"~/cy/cache/search/($cid)-(date now|into int).json"
+        | save $"($env.cyfolder)/cache/search/($cid)-(date now|into int).json"
     )
 }
 
@@ -932,7 +967,7 @@ export def 'search4' [
         return
     }
     
-    $results | save $"($env.HOME)/cy/cache/search/($cid)-(date now|into int).json"
+    $results | save $"($env.cyfolder)/cache/search/($cid)-(date now|into int).json"
 
     clear; print $"Searching ($env.cy.exec) for ($cid)";
 
@@ -942,7 +977,7 @@ export def 'search4' [
     #     serp1 $results
     # })
 
-    watch ~/cy/cache/queue { clear; print $"Searching ($env.cy.exec) for ($cid)"; serp1 $results --pretty $pretty}
+    watch $"($env.cyfolder)/cache/queue" { clear; print $"Searching ($env.cy.exec) for ($cid)"; serp1 $results --pretty $pretty}
 }
 
 
@@ -966,7 +1001,7 @@ export def serp1 [
 export def `download cid from ipfs` [
     cid
     --timeout = 300s
-    --folder = $"($env.HOME)/cy/cache/"
+    --folder = $"($env.cyfolder)/cache/"
 ] {
     mkdir $"($folder)/safe/" $"($folder)/other/"
 
@@ -1008,9 +1043,9 @@ def 'download cid from gateway' [
 
     let type1 = ($headers | get -i 'Content-Type')
     if $type1 == 'text/plain; charset=utf-8' {
-        http get $"($gate_url)($cid)" -m 60 | save -f $"($env.HOME)/cy/cache/safe/($cid).md" 
+        http get $"($gate_url)($cid)" -m 60 | save -f $"($env.cyfolder)/cache/safe/($cid).md" 
     } else if ($type1 != null) {
-        $type1 | save -f $"($env.HOME)/cy/cache/other/($cid).md"
+        $type1 | save -f $"($env.cyfolder)/cache/other/($cid).md"
     }
     echo $type1
 }
@@ -1019,19 +1054,19 @@ def 'download cid from gateway' [
 export def 'request-file-from-cache' [
     cid
 ] {
-    let content = (do -i {open $"($env.HOME)/cy/cache/safe/($cid).md"})
+    let content = (do -i {open $"($env.cyfolder)/cache/safe/($cid).md"})
 
     let content = if ($content == null) {
-        do -i {open $"($env.HOME)/cy/cache/other/($cid).md"}
+        do -i {open $"($env.cyfolder)/cache/other/($cid).md"}
     } else {$content}
 
     let content = if ($content == null) {
-        do -i {open $"($env.HOME)/cy/cache/queue/($cid)"}
+        do -i {open $"($env.cyfolder)/cache/queue/($cid)"}
     } else {$content}
 
     let content = if ($content == null) {
         let message = $"($cid) is in the queue since (datetime_fn --pretty)"
-        $message | save $"($env.HOME)/cy/cache/queue/($cid)"
+        $message | save $"($env.cyfolder)/cache/queue/($cid)"
         $message
     } else {$content}
 
@@ -1045,12 +1080,12 @@ export def 'request-file-from-cache' [
 
 # Watch the queue folder, and if there are updates - request files to download
 export def `watch search folder` [] {
-    watch ~/cy/cache/search { check-queue }
+    watch $"($env.cyfolder)/cache/search" { check-queue }
 }
 
 # Check queue for the new CIDs, and if there are CIDs - safely download the text ones
 export def 'check-queue' [] {
-    let files = (ls -s $"($env.HOME)/cy/cache/queue/")
+    let files = (ls -s $"($env.cyfolder)/cache/queue/")
     if ( ($files | length | inspect) > 0 ) {
         $files
         | get name -i
@@ -1058,7 +1093,7 @@ export def 'check-queue' [] {
             |i| 
             let status = download cid from ipfs $i
             if ($status in ['text', 'non-text']) {
-                rm -f $"($env.HOME)/cy/cache/queue/($i)"
+                rm -f $"($env.cyfolder)/cache/queue/($i)"
             }
         }
     } else {
@@ -1068,7 +1103,7 @@ export def 'check-queue' [] {
 
 # Clear the cache folder
 export def `cache clear` [] {
-    backup_fn $"($env.HOME)/cy/cache" 
+    backup_fn $"($env.cyfolder)/cache" 
     make_default_folders_fn
 }
 
@@ -1380,7 +1415,7 @@ export def-env 'ber' [
         } | "+" + $in
     )
 
-    let cfolder = $"($env.HOME)/cy/cache/cli_out/"
+    let cfolder = $"($env.cyfolder)/cache/cli_out/"
     let command = $"($exec)_($rest | str join '_')($important_options)"
     let ts1 = (date now | into int)
 
@@ -1521,7 +1556,7 @@ export def 'help' [
     --to_md (-m) # export table as markdown
 ] {
     let text = (
-        open ~/cy/cy.nu --raw
+        open $"($env.cyfolder)/cy.nu" --raw
         | parse -r "(\n(# )(?<desc>.*?)(?:=?\n)export (def|def.env) '(?<command>.*)')"
         | select command desc 
         | upsert command {|row index| ('cy ' + $row.command)}
@@ -1561,15 +1596,15 @@ def is-connected []  {
 }
 
 def make_default_folders_fn [] {
-    mkdir ~/cy/temp/
-    mkdir ~/cy/backups/
-    mkdir ~/cy/config/
-    mkdir ~/cy/cache/
-    mkdir ~/cy/cache/search/
-    mkdir ~/cy/cache/other/
-    mkdir ~/cy/cache/safe/
-    mkdir ~/cy/cache/queue/
-    mkdir ~/cy/cache/cli_out/
+    mkdir $"($env.cyfolder)/temp/"
+    mkdir $"($env.cyfolder)/backups/"
+    mkdir $"($env.cyfolder)/config/"
+    mkdir $"($env.cyfolder)/cache/"
+    mkdir $"($env.cyfolder)/cache/search/"
+    mkdir $"($env.cyfolder)/cache/other/"
+    mkdir $"($env.cyfolder)/cache/safe/"
+    mkdir $"($env.cyfolder)/cache/queue/"
+    mkdir $"($env.cyfolder)/cache/cli_out/"
 }
 
 # Print string colourfully
@@ -1632,7 +1667,7 @@ def 'datetime_fn' [
 }
 
 def 'nu-complete-config-names' [] {
-    ls '~/cy/config/' -s
+    ls $"($env.cyfolder)/config/" -s
     | sort-by modified -r 
     | get name 
     | parse '{short}.{ext}'  
@@ -1645,7 +1680,7 @@ def 'backup_fn' [
     filename
 ] {
     let basename1 = ($filename | path basename)
-    let path2 = $"($env.HOME)/cy/backups/(datetime_fn)($basename1)"
+    let path2 = $"($env.cyfolder)/backups/(datetime_fn)($basename1)"
 
     if (
         $filename
