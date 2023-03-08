@@ -20,12 +20,16 @@ export-env {
     }
 
     let config_file_path = $"($config_folder)/cy_config.toml"
+
     let config1 = try {
         open $config_file_path
     } catch {
         print "there is no '~/.config/cy/cy_config.toml'. I'll create it."
 
-        let def_path_rec = {'path': $default_cy_folder}
+        let def_path_rec = {
+            'path': $default_cy_folder
+            'ipfs-files-folder': $"($default_cy_folder)/cache/safe/"
+        }
         try {
             $def_path_rec | save $config_file_path
         } catch {
@@ -40,8 +44,8 @@ export-env {
     }
 
     let-env cy = try {
-        let active_file = ($config1 | get 'default-config')
-        open $"($env.cyfolder)/config/($active_file).toml"
+        let active_config = ($config1 | get 'config-name')
+        open $"($env.cyfolder)/config/($active_config).toml" | merge $config1
     } catch {
         $'Cy config file was not found. Run "cy config new"' | cprint -c green_underline
         $nothing
@@ -846,7 +850,7 @@ export def-env 'config activate' [
             config view $config_name
         } else {
             $inconfig 
-        }
+        } | merge (open ('~/.config/cy/cy_config.toml' | path expand))
     )
 
     let-env cy = $config1
@@ -855,7 +859,7 @@ export def-env 'config activate' [
     # $config1 | save $"($env.cyfolder)/config/default.toml" -f
     (
         open ('~/.config/cy/cy_config.toml' | path expand)
-        | upsert 'default-config' ($config1 | get 'config-name')
+        | upsert 'config-name' ($config1 | get 'config-name')
         | save ('~/.config/cy/cy_config.toml' | path expand) -f
     )
 
@@ -1001,10 +1005,8 @@ export def serp1 [
 export def `download cid from ipfs` [
     cid
     --timeout = 100s
-    --folder = $"($env.cyfolder)/cache/"
+    --folder = $"($env.cy.ipfs-files-folder)"
 ] {
-    mkdir $"($folder)/safe/"
-
     print $"cid to download ($cid)"
     let type = do -i {ipfs cat --timeout $timeout -l 400 $cid | file - | $in + "" | str replace "/dev/stdin: " "" | split row "," | get -i 0}
 
@@ -1012,7 +1014,7 @@ export def `download cid from ipfs` [
         return "not found"
     } else if ($type =~ "(ASCII text)|(Unicode text)|(very short file)") {
         try {
-            ipfs get --progress=false --timeout $timeout -o $"($folder)/safe/($cid).md" $cid 
+            ipfs get --progress=false --timeout $timeout -o $"($folder)/($cid).md" $cid 
             return "text"
         } catch {
             return "not found"
@@ -1028,7 +1030,7 @@ export def `download cid from ipfs` [
 
         let size_str = $"size:($size_json | get Size -i | default '') blocks:($size_json | get NumBlocks -i | default '')"
         
-        $"non_text:($type) ($size_str)" | save -f $"($folder)/safe/($cid).md"
+        $"non_text:($type) ($size_str)" | save -f $"($folder)/($cid).md"
         
         return "non_text"
     }
@@ -1048,9 +1050,9 @@ def 'download cid from gateway' [
 
     let type1 = ($headers | get -i 'Content-Type')
     if $type1 == 'text/plain; charset=utf-8' {
-        http get $"($gate_url)($cid)" -m 60 | save -f $"($env.cyfolder)/cache/safe/($cid).md" 
+        http get $"($gate_url)($cid)" -m 60 | save -f $"($env.cy.ipfs-files-folder)/($cid).md" 
     } else if ($type1 != null) {
-        $type1 | save -f $"($env.cyfolder)/cache/safe/($cid).md"
+        $type1 | save -f $"($env.cy.ipfs-files-folder)/($cid).md"
     }
     echo $type1
 }
@@ -1059,7 +1061,7 @@ def 'download cid from gateway' [
 export def 'request-file-from-cache' [
     cid
 ] {
-    let content = (do -i {open $"($env.cyfolder)/cache/safe/($cid).md"})
+    let content = (do -i {open $"($env.cy.ipfs-files-folder)/($cid).md"})
 
     let content = if ($content == null) {
         do -i {open $"($env.cyfolder)/cache/queue/($cid)"}
@@ -1615,7 +1617,7 @@ def make_default_folders_fn [] {
     mkdir $"($env.cyfolder)/cache/"
     mkdir $"($env.cyfolder)/cache/search/"
     mkdir $"($env.cyfolder)/cache/requested/"
-    mkdir $"($env.cyfolder)/cache/safe/"
+    mkdir $"($env.cy.ipfs-files-folder)/"
     mkdir $"($env.cyfolder)/cache/queue/"
     mkdir $"($env.cyfolder)/cache/cli_out/"
 }
