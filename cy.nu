@@ -850,7 +850,7 @@ export def-env 'config activate' [
             config view $config_name
         } else {
             $inconfig 
-        } | merge (open ('~/.config/cy/cy_config.toml' | path expand))
+        } | merge (open ('~/.config/cy/cy_config.toml' | path expand) | reject 'config-name')
     )
 
     let-env cy = $config1
@@ -1063,13 +1063,14 @@ export def 'request-file-from-cache' [
 ] {
     let content = (do -i {open $"($env.cy.ipfs-files-folder)/($cid).md"})
 
-    let content = if ($content == null) {
+    let content = if (($content == null) or ($content in ['timeout'])) {
         do -i {open $"($env.cyfolder)/cache/queue/($cid)"}
     } else {$content}
 
     let content = if ($content == null) {
         let message = $"($cid) is in the queue since (datetime_fn --pretty) "
         $message | save $"($env.cyfolder)/cache/queue/($cid)"
+        pueue add $"nu -c \"cy download entry from queue ($cid)\" --config \"($nu.config-path)\" --env-config \"($nu.env-path)\""
         $message
     } else {$content}
 
@@ -1105,14 +1106,18 @@ export def 'check-queue' [
 
 export def 'download entry from queue' [
     cid
+    --attempts = 0
 ] {
-    mv $"($env.cyfolder)/cache/queue/($cid)" $"($env.cyfolder)/cache/requested/"
-    let status = download cid from ipfs $cid
-    if ($status in ['text', 'non-text']) {
-        rm -f $"($env.cyfolder)/cache/requested/($cid)"
-    } else {
-        mv $"($env.cyfolder)/cache/requested/($cid)" $"($env.cyfolder)/cache/queue/"
-        "+" | save -a $"($env.cyfolder)/cache/queue/($cid)"
+    if ((ls $"($env.cyfolder)/cache/queue/($cid)" | get size.0) <= (89 + $attempts | into filesize)) {
+
+        mv $"($env.cyfolder)/cache/queue/($cid)" $"($env.cyfolder)/cache/requested/"
+        let status = download cid from ipfs $cid
+        if ($status in ['text', 'non-text']) {
+            rm -f $"($env.cyfolder)/cache/requested/($cid)"
+        } else {
+            mv $"($env.cyfolder)/cache/requested/($cid)" $"($env.cyfolder)/cache/queue/"
+            "+" | save -a $"($env.cyfolder)/cache/queue/($cid)"
+        }
     }
 }
 
