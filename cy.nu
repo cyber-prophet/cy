@@ -850,7 +850,10 @@ export def-env 'config activate' [
             config view $config_name
         } else {
             $inconfig 
-        } | merge (open ('~/.config/cy/cy_config.toml' | path expand) | reject 'config-name')
+        } | merge (
+            open ('~/.config/cy/cy_config.toml' | path expand) 
+            | reject 'config-name'
+        )
     )
 
     let-env cy = $config1
