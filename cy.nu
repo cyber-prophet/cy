@@ -1131,6 +1131,252 @@ export def `cache clear` [] {
     make_default_folders_fn
 }
 
+# Check the balances of the keys added to the active CLI
+export def 'balances' [
+    ...name: string@'nu-complete keys values'
+] {
+
+    let keys0 = (
+        ^($env.cy.exec) keys list --output json 
+        | from json 
+        | select name address 
+    )
+
+    let keys1 = (
+        if ($name | is-empty) {
+            $keys0
+        } else {
+            $keys0 | where name in $name
+        }
+    )
+
+    let balances = (
+        $keys1
+        | par-each {
+            |i| cyber query bank balances $i.address --output json 
+            | from json 
+            | get balances 
+            | upsert amount {
+                |b| $b.amount 
+                | into int
+            } 
+            | transpose -i -r 
+            | into record
+            | merge $i
+    } 
+)
+
+    let dummy1 = (
+        $balances | columns | prepend "name" | uniq 
+        | reverse | prepend ["address"] | uniq 
+        | reverse | reduce -f {} {|i acc| $acc | merge {$i : 0}}
+    )
+
+    let out = ($balances | each {|i| $dummy1 | merge $i} | sort-by name)
+
+    if ($name | is-empty) or (($name | length) > 1) {
+        $out 
+    } else {
+        $out | into record
+    }
+}
+
+# Add cybercongress node to bootstrap nodes
+export def 'ipfs bootstrap add congress' [] {
+    ipfs bootstrap add '/ip4/135.181.19.86/tcp/4001/p2p/12D3KooWNMcnoQynAY9hyi4JxzSu64BsRGcJ9z7vKghqk8sTrpqY'
+    print "check if bootstrap node works by executing commands:"
+    print 'ipfs dht findpeer 12D3KooWNMcnoQynAY9hyi4JxzSu64BsRGcJ9z7vKghqk8sTrpqY'
+    print 'ipfs dht findpeer QmUgmRxoLtGERot7Y6G7UyF6fwvnusQZfGR15PuE6pY3aB'
+}
+
+# Check ibc denoms
+export def 'ibc denoms' [] {
+    let bank_total = (
+        cyber query bank total --output json 
+        | from json # here we obtain only the first page of report
+    )
+
+    let denom_trace1 = (
+        $bank_total 
+        | get supply 
+        | where denom =~ "^ibc" 
+        | upsert ibc_hash {|i| $i.denom | str replace "ibc/" ""} 
+        | upsert temp_out {
+            |i| cyber query ibc-transfer denom-trace $i.ibc_hash --output json 
+            | from json 
+            | get denom_trace
+        }
+    )
+
+    $denom_trace1.temp_out | merge $denom_trace1 | reject ibc_hash temp_out | sort-by path --natural
+}
+
+# An ordered list of cy commands
+export def 'help' [
+    --to_md (-m) # export table as markdown
+] {
+    let text = (
+        open $"($env.cyfolder)/cy.nu" --raw
+        | parse -r "(\n(# )(?<desc>.*?)(?:=?\n)export (def|def.env) '(?<command>.*)')"
+        | select command desc 
+        | upsert command {|row index| ('cy ' + $row.command)}
+    )
+    
+    if $to_md {
+        $text | to md 
+    } else {
+        $text | table --width (term size).columns
+    }
+}
+
+def 'banner' [] {
+    print $"
+     ____ _   _    
+    / ___\) | | |   
+   \( \(___| |_| |   
+    \\____)\\__  |   (ansi yellow)cy(ansi reset) nushell module is loaded
+         \(____/    have fun"
+}
+
+def 'banner2' [] {
+    print "(ansi yellow)cy(ansi reset) is loaded"
+}
+
+
+def is-cid [particle: string] {
+    ($particle =~ '^Qm\w{44}$') 
+}
+
+def is-neuron [particle: string] {
+    ($particle =~ '^bostrom1\w{38}$') 
+}
+
+def is-connected []  {
+    (do -i {http get https://duckduckgo.com/} | describe) == 'raw input'
+}
+
+def make_default_folders_fn [] {
+    mkdir $"($env.cyfolder)/temp/"
+    mkdir $"($env.cyfolder)/backups/"
+    mkdir $"($env.cyfolder)/config/"
+    mkdir $"($env.cyfolder)/cache/"
+    mkdir $"($env.cyfolder)/cache/search/"
+    mkdir $"($env.cyfolder)/cache/requested/"
+    mkdir $"($env.cy.ipfs-files-folder)/"
+    mkdir $"($env.cyfolder)/cache/queue/"
+    mkdir $"($env.cyfolder)/cache/cli_out/"
+}
+
+# Print string colourfully
+def cprint [
+    ...args
+    --color (-c): string@'nu-complete colors' = 'default'
+    --frame (-f): string
+    --before (-b): int = 0
+    --after (-a): int = 1
+] {
+    let text = if ($args == []) {
+        $in
+    } else {
+        $args | str join ' '
+    }
+
+    let text = (
+        if $frame != null {
+            let width = (term size | get columns) - 2
+            (
+                (" " | fill -a r -w $width -c $frame) + "\n" +
+                ( $text ) + "\n" +
+                (" " | fill -a r -w $width -c $frame)
+            )
+        } else {
+            $text
+        }
+    )
+
+    seq 1 $before | each {|i| print ""}
+    $text | print $"(ansi $color)($in)(ansi reset)" -n 
+    seq 1 $after | each {|i| print ""}
+}
+
+def 'nu-complete colors' [] {
+    ansi --list | get name | each while {|it| if $it != 'reset' {$it} }
+}
+
+def 'if-empty' [
+    value? 
+    --alternative (-a): any
+] {
+     (
+         if ($value | is-empty) {
+             $alternative
+         } else {
+             $value
+         }
+     )
+ }
+
+def 'datetime_fn' [
+    --pretty (-P)
+] {
+    if $pretty {
+        date now | date format '%Y-%m-%d-%H:%M:%S'
+    } else {
+        date now | date format '%Y%m%d-%H%M%S'
+    }
+}
+
+def 'nu-complete-config-names' [] {
+    ls $"($env.cyfolder)/config/" -s
+    | sort-by modified -r 
+    | get name 
+    | parse '{short}.{ext}'  
+    | where ext == "yaml" 
+    | get short
+    | filter {|x| $x != "default"}
+}
+
+def 'backup_fn' [
+    filename
+] {
+    let basename1 = ($filename | path basename)
+    let path2 = $"($env.cyfolder)/backups/(datetime_fn)($basename1)"
+
+    if (
+        $filename
+        | path exists 
+    ) {
+        ^mv $filename $path2
+        # print $"Previous version of ($filename) is backed up to ($path2)"
+    } else {
+        print $"($filename) does not exist"
+    }
+}
+
+def 'nu-complete-git-branches' [] {
+    ['main', 'dev']
+}
+
+def 'pu-add' [
+    command: string
+] {
+    pueue add $"nu -c \"($command)\" --config \"($nu.config-path)\" --env-config \"($nu.env-path)\""
+}
+
+# cyber keys in a form of table
+def "nu-complete keys table" [] {
+    cyber keys list --output json | from json | select name address 
+}
+
+# Helper function to use addresses for completions in --from parameter
+def "nu-complete keys values" [] {
+    (nu-complete keys table).name | zip (nu-complete keys table).address | flatten
+}
+
+def "nu-complete bool" [] {
+    [true, false]
+}
+
 # A wrapper, to cache CLI requests
 export def-env 'ber' [
     ...rest
@@ -1493,250 +1739,4 @@ export def-env 'ber' [
     )
 
     $content
-}
-
-# Check the balances of the keys added to the active CLI
-export def 'balances' [
-    ...name: string@'nu-complete keys values'
-] {
-
-    let keys0 = (
-        ^($env.cy.exec) keys list --output json 
-        | from json 
-        | select name address 
-    )
-
-    let keys1 = (
-        if ($name | is-empty) {
-            $keys0
-        } else {
-            $keys0 | where name in $name
-        }
-    )
-
-    let balances = (
-        $keys1
-        | par-each {
-            |i| cyber query bank balances $i.address --output json 
-            | from json 
-            | get balances 
-            | upsert amount {
-                |b| $b.amount 
-                | into int
-            } 
-            | transpose -i -r 
-            | into record
-            | merge $i
-    } 
-)
-
-    let dummy1 = (
-        $balances | columns | prepend "name" | uniq 
-        | reverse | prepend ["address"] | uniq 
-        | reverse | reduce -f {} {|i acc| $acc | merge {$i : 0}}
-    )
-
-    let out = ($balances | each {|i| $dummy1 | merge $i} | sort-by name)
-
-    if ($name | is-empty) or (($name | length) > 1) {
-        $out 
-    } else {
-        $out | into record
-    }
-}
-
-# Add cybercongress node to bootstrap nodes
-export def 'ipfs bootstrap add congress' [] {
-    ipfs bootstrap add '/ip4/135.181.19.86/tcp/4001/p2p/12D3KooWNMcnoQynAY9hyi4JxzSu64BsRGcJ9z7vKghqk8sTrpqY'
-    print "check if bootstrap node works by executing commands:"
-    print 'ipfs dht findpeer 12D3KooWNMcnoQynAY9hyi4JxzSu64BsRGcJ9z7vKghqk8sTrpqY'
-    print 'ipfs dht findpeer QmUgmRxoLtGERot7Y6G7UyF6fwvnusQZfGR15PuE6pY3aB'
-}
-
-# Check ibc denoms
-export def 'ibc denoms' [] {
-    let bank_total = (
-        cyber query bank total --output json 
-        | from json # here we obtain only the first page of report
-    )
-
-    let denom_trace1 = (
-        $bank_total 
-        | get supply 
-        | where denom =~ "^ibc" 
-        | upsert ibc_hash {|i| $i.denom | str replace "ibc/" ""} 
-        | upsert temp_out {
-            |i| cyber query ibc-transfer denom-trace $i.ibc_hash --output json 
-            | from json 
-            | get denom_trace
-        }
-    )
-
-    $denom_trace1.temp_out | merge $denom_trace1 | reject ibc_hash temp_out | sort-by path --natural
-}
-
-# An ordered list of cy commands
-export def 'help' [
-    --to_md (-m) # export table as markdown
-] {
-    let text = (
-        open $"($env.cyfolder)/cy.nu" --raw
-        | parse -r "(\n(# )(?<desc>.*?)(?:=?\n)export (def|def.env) '(?<command>.*)')"
-        | select command desc 
-        | upsert command {|row index| ('cy ' + $row.command)}
-    )
-    
-    if $to_md {
-        $text | to md 
-    } else {
-        $text | table --width (term size).columns
-    }
-}
-
-def 'banner' [] {
-    print $"
-     ____ _   _    
-    / ___\) | | |   
-   \( \(___| |_| |   
-    \\____)\\__  |   (ansi yellow)cy(ansi reset) nushell module is loaded
-         \(____/    have fun"
-}
-
-def 'banner2' [] {
-    print "(ansi yellow)cy(ansi reset) is loaded"
-}
-
-
-def is-cid [particle: string] {
-    ($particle =~ '^Qm\w{44}$') 
-}
-
-def is-neuron [particle: string] {
-    ($particle =~ '^bostrom1\w{38}$') 
-}
-
-def is-connected []  {
-    (do -i {http get https://duckduckgo.com/} | describe) == 'raw input'
-}
-
-def make_default_folders_fn [] {
-    mkdir $"($env.cyfolder)/temp/"
-    mkdir $"($env.cyfolder)/backups/"
-    mkdir $"($env.cyfolder)/config/"
-    mkdir $"($env.cyfolder)/cache/"
-    mkdir $"($env.cyfolder)/cache/search/"
-    mkdir $"($env.cyfolder)/cache/requested/"
-    mkdir $"($env.cy.ipfs-files-folder)/"
-    mkdir $"($env.cyfolder)/cache/queue/"
-    mkdir $"($env.cyfolder)/cache/cli_out/"
-}
-
-# Print string colourfully
-def cprint [
-    ...args
-    --color (-c): string@'nu-complete colors' = 'default'
-    --frame (-f): string
-    --before (-b): int = 0
-    --after (-a): int = 1
-] {
-    let text = if ($args == []) {
-        $in
-    } else {
-        $args | str join ' '
-    }
-
-    let text = (
-        if $frame != null {
-            let width = (term size | get columns) - 2
-            (
-                (" " | fill -a r -w $width -c $frame) + "\n" +
-                ( $text ) + "\n" +
-                (" " | fill -a r -w $width -c $frame)
-            )
-        } else {
-            $text
-        }
-    )
-
-    seq 1 $before | each {|i| print ""}
-    $text | print $"(ansi $color)($in)(ansi reset)" -n 
-    seq 1 $after | each {|i| print ""}
-}
-
-def 'nu-complete colors' [] {
-    ansi --list | get name | each while {|it| if $it != 'reset' {$it} }
-}
-
-def 'if-empty' [
-    value? 
-    --alternative (-a): any
-] {
-     (
-         if ($value | is-empty) {
-             $alternative
-         } else {
-             $value
-         }
-     )
- }
-
-def 'datetime_fn' [
-    --pretty (-P)
-] {
-    if $pretty {
-        date now | date format '%Y-%m-%d-%H:%M:%S'
-    } else {
-        date now | date format '%Y%m%d-%H%M%S'
-    }
-}
-
-def 'nu-complete-config-names' [] {
-    ls $"($env.cyfolder)/config/" -s
-    | sort-by modified -r 
-    | get name 
-    | parse '{short}.{ext}'  
-    | where ext == "yaml" 
-    | get short
-    | filter {|x| $x != "default"}
-}
-
-def 'backup_fn' [
-    filename
-] {
-    let basename1 = ($filename | path basename)
-    let path2 = $"($env.cyfolder)/backups/(datetime_fn)($basename1)"
-
-    if (
-        $filename
-        | path exists 
-    ) {
-        ^mv $filename $path2
-        # print $"Previous version of ($filename) is backed up to ($path2)"
-    } else {
-        print $"($filename) does not exist"
-    }
-}
-
-def 'nu-complete-git-branches' [] {
-    ['main', 'dev']
-}
-
-def 'pu-add' [
-    command: string
-] {
-    pueue add $"nu -c \"($command)\" --config \"($nu.config-path)\" --env-config \"($nu.env-path)\""
-}
-
-# cyber keys in a form of table
-def "nu-complete keys table" [] {
-    cyber keys list --output json | from json | select name address 
-}
-
-# Helper function to use addresses for completions in --from parameter
-def "nu-complete keys values" [] {
-    (nu-complete keys table).name | zip (nu-complete keys table).address | flatten
-}
-
-def "nu-complete bool" [] {
-    [true, false]
 }
