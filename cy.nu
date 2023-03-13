@@ -1063,6 +1063,7 @@ def 'download cid from gateway' [
 # Check if there is the CID in cache, and if it is not - add it into queue
 export def 'request-file-from-cache' [
     cid
+    --attempts = 0
 ] {
     let content = (do -i {open $"($env.cy.ipfs-files-folder)/($cid).md"})
 
@@ -1073,7 +1074,7 @@ export def 'request-file-from-cache' [
     let content = if ($content == null) {
         let message = $"($cid) is in the queue since (datetime_fn --pretty) "
         $message | save $"($env.cyfolder)/cache/queue/($cid)"
-        pueue add $"nu -c \"cy download entry from queue ($cid)\" --config \"($nu.config-path)\" --env-config \"($nu.env-path)\""
+        pu-add $"cy download entry from queue ($cid) --attempts ($attempts)"
         $message
     } else {$content}
 
@@ -1100,7 +1101,7 @@ export def 'check-queue' [
         | where size <= (89 + $attempts | into filesize)
         | get name -i
         | each {
-            |i| pueue add $"nu -c \"cy download entry from queue ($i)\" --config \"($nu.config-path)\" --env-config \"($nu.env-path)\"" 
+            |i| pu-add $"cy download entry from queue ($i) --attempts ($attempts)"
         }
     } else {
         "the queue is empty"
@@ -1109,7 +1110,7 @@ export def 'check-queue' [
 
 export def 'download entry from queue' [
     cid
-    --attempts = 0
+    --attempts: int = 0
 ] {
     if ((ls $"($env.cyfolder)/cache/queue/($cid)" | get size.0) <= (89 + $attempts | into filesize)) {
 
@@ -1718,6 +1719,12 @@ def 'backup_fn' [
 
 def 'nu-complete-git-branches' [] {
     ['main', 'dev']
+}
+
+def 'pu-add' [
+    command: string
+] {
+    pueue add $"nu -c \"($command)\" --config \"($nu.config-path)\" --env-config \"($nu.env-path)\""
 }
 
 # cyber keys in a form of table
