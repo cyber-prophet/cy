@@ -331,11 +331,7 @@ export def 'tmp link to' [
     # --non-empty # fill non-empty only
 ] {
     let in_links = $in
-    let links = if ($in_links == null) {
-        tmp view -q
-    } else {
-        $in_links
-    }
+    let links = ($in_links | default (tmp view -q))
 
     let result = (
         $links
@@ -356,11 +352,7 @@ export def 'tmp link from' [
     # --non-empty # fill non-empty only
 ] {
     let in_links = $in
-    let links = if ($in_links == null) {
-        tmp view -q
-    } else {
-        $in_links
-    }
+    let links = ($in_links | default (tmp view -q))
 
     let result = (
         $links
@@ -507,11 +499,7 @@ export def 'tmp send tx' [] {
         error make {msg: 'there is no internet!'}
     }
 
-    let cyberlinks = if $in_cyberlinks == null {
-        tmp view -q
-    } else {
-        $in_cyberlinks
-    }
+    let cyberlinks = ($in_cyberlinks | default (tmp view -q))
 
     let cyberlinks_count = ($cyberlinks | length)
 
@@ -846,11 +834,9 @@ export def-env 'config activate' [
 ] {
     let inconfig = $in
     let config1 = (
-        if $inconfig == $nothing {
-            config view $config_name
-        } else {
-            $inconfig 
-        } | merge (
+        $inconfig 
+        | default (config view $config_name)
+        | merge (
             open ('~/.config/cy/cy_config.toml' | path expand) 
             | reject 'config-name'
         )
@@ -1005,7 +991,7 @@ export def serp1 [
     $serp 
 }
 
-export def `download cid from ipfs` [
+export def `download cid from ipfs safely` [
     cid
     --timeout = 100s
     --folder = $"($env.cy.ipfs-files-folder)"
@@ -1067,16 +1053,14 @@ export def 'request-file-from-cache' [
 ] {
     let content = (do -i {open $"($env.cy.ipfs-files-folder)/($cid).md"})
 
-    let content = if (($content == null) or ($content in ['timeout'])) {
-        do -i {open $"($env.cyfolder)/cache/queue/($cid)"}
-    } else {$content}
-
-    let content = if ($content == null) {
-        let message = $"($cid) is in the queue since (datetime_fn --pretty) "
-        $message | save $"($env.cyfolder)/cache/queue/($cid)"
-        pu-add $"cy download entry from queue ($cid) --attempts ($attempts)"
-        $message
-    } else {$content}
+    let content = (
+        if $content == null {
+            pu-add $"cy queue add and download ($cid)"
+            "downloading"
+        } else {
+            $content
+        }
+    )
 
     (
         $content 
@@ -1088,40 +1072,37 @@ export def 'request-file-from-cache' [
 
 # Watch the queue folder, and if there are updates - request files to download
 export def `watch search folder` [] {
-    watch $"($env.cyfolder)/cache/search" { check-queue }
+    watch $"($env.cyfolder)/cache/search" { queue check }
 }
 
 # Check queue for the new CIDs, and if there are CIDs - safely download the text ones
-export def 'check-queue' [
+export def 'queue check' [
     attempts = 0
 ] {
     let files = (ls -s $"($env.cyfolder)/cache/queue/")
     if ( ($files | length | inspect) > 0 ) {
         $files
-        | where size <= (89 + $attempts | into filesize)
+        | where size <= (1 + $attempts | into filesize)
         | get name -i
         | each {
-            |i| pu-add $"cy download entry from queue ($i) --attempts ($attempts)"
+            |i| pu-add $"cy queue add and download ($i)"
         }
     } else {
         "the queue is empty"
     }
 }
 
-export def 'download entry from queue' [
+export def 'queue add and download' [
     cid
-    --attempts: int = 0
 ] {
-    if ((ls $"($env.cyfolder)/cache/queue/($cid)" | get size.0) <= (89 + $attempts | into filesize)) {
+    "+" | save -a $"($env.cyfolder)/cache/queue/($cid)"
+    mv $"($env.cyfolder)/cache/queue/($cid)" $"($env.cyfolder)/cache/requested/"
 
-        mv $"($env.cyfolder)/cache/queue/($cid)" $"($env.cyfolder)/cache/requested/"
-        let status = download cid from ipfs $cid
-        if ($status in ['text', 'non-text']) {
-            rm -f $"($env.cyfolder)/cache/requested/($cid)"
-        } else {
-            mv $"($env.cyfolder)/cache/requested/($cid)" $"($env.cyfolder)/cache/queue/"
-            "+" | save -a $"($env.cyfolder)/cache/queue/($cid)"
-        }
+    let status = download cid from ipfs safely $cid
+    if ($status in ['text', 'non-text']) {
+        rm $"($env.cyfolder)/cache/requested/($cid)" -f
+    } else {
+        mv $"($env.cyfolder)/cache/requested/($cid)" $"($env.cyfolder)/cache/queue/"
     }
 }
 
@@ -1331,9 +1312,8 @@ def 'nu-complete-config-names' [] {
     | sort-by modified -r 
     | get name 
     | parse '{short}.{ext}'  
-    | where ext == "yaml" 
+    | where ext == "toml" 
     | get short
-    | filter {|x| $x != "default"}
 }
 
 def 'backup_fn' [
@@ -1360,7 +1340,7 @@ def 'nu-complete-git-branches' [] {
 def 'pu-add' [
     command: string
 ] {
-    pueue add $"nu -c \"($command)\" --config \"($nu.config-path)\" --env-config \"($nu.env-path)\""
+    pueue add -p $"nu -c \"($command)\" --config \"($nu.config-path)\" --env-config \"($nu.env-path)\""
 }
 
 # cyber keys in a form of table
@@ -1667,11 +1647,7 @@ export def-env 'ber' [
     )
     # print $list_flags_out
 
-    let exec = if ($exec == null) {
-        $env.cy.exec
-    } else {
-        $exec
-    }
+    let exec = ($exec | default $env.cy.exec)
 
     let important_options = (
         $list_options_out 
