@@ -1100,7 +1100,7 @@ export def 'queue add and download' [
     let status = download cid from ipfs safely $cid
 
     if ($status in ['text', 'non-text']) {
-        rm -f $"($env.cyfolder)/cache/requested/($cid)"
+        rm -f $"($env.cyfolder)/cache/queue/($cid)"
     } 
 }
 
