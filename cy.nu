@@ -790,7 +790,7 @@ export def-env 'config save' [
 ] {
     let in_config = $in
 
-    let dt1 = datetime_fn
+    let dt1 = now_fn
 
     let config_name = (
         if $config_name == null {
@@ -1280,10 +1280,6 @@ def cprint [
     seq 1 $after | each {|i| print ""}
 }
 
-def 'nu-complete colors' [] {
-    ansi --list | get name | each while {|it| if $it != 'reset' {$it} }
-}
-
 def 'if-empty' [
     value? 
     --alternative (-a): any
@@ -1297,7 +1293,7 @@ def 'if-empty' [
      )
  }
 
-def 'datetime_fn' [
+def 'now_fn' [
     --pretty (-P)
 ] {
     if $pretty {
@@ -1307,20 +1303,11 @@ def 'datetime_fn' [
     }
 }
 
-def 'nu-complete-config-names' [] {
-    ls $"($env.cyfolder)/config/" -s
-    | sort-by modified -r 
-    | get name 
-    | parse '{short}.{ext}'  
-    | where ext == "toml" 
-    | get short
-}
-
 def 'backup_fn' [
     filename
 ] {
     let basename1 = ($filename | path basename)
-    let path2 = $"($env.cyfolder)/backups/(datetime_fn)($basename1)"
+    let path2 = $"($env.cyfolder)/backups/(now_fn)($basename1)"
 
     if (
         $filename
@@ -1333,14 +1320,27 @@ def 'backup_fn' [
     }
 }
 
-def 'nu-complete-git-branches' [] {
-    ['main', 'dev']
-}
-
-def 'pu-add' [
+export def 'pu-add' [
     command: string
 ] {
     pueue add -p $"nu -c \"($command)\" --config \"($nu.config-path)\" --env-config \"($nu.env-path)\""
+}
+
+def "nu-complete colors" [] {
+    ansi --list | get name | each while {|it| if $it != 'reset' {$it} }
+}
+
+def "nu-complete-config-names" [] {
+    ls $"($env.cyfolder)/config/" -s
+    | sort-by modified -r 
+    | get name 
+    | parse '{short}.{ext}'  
+    | where ext == "toml" 
+    | get short
+}
+
+def "nu-complete-git-branches" [] {
+    ['main', 'dev']
 }
 
 # cyber keys in a form of table
