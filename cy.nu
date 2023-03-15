@@ -1096,14 +1096,12 @@ export def 'queue add and download' [
     cid
 ] {
     "+" | save -a $"($env.cyfolder)/cache/queue/($cid)"
-    mv $"($env.cyfolder)/cache/queue/($cid)" $"($env.cyfolder)/cache/requested/"
 
     let status = download cid from ipfs safely $cid
+
     if ($status in ['text', 'non-text']) {
-        rm $"($env.cyfolder)/cache/requested/($cid)" -f
-    } else {
-        mv $"($env.cyfolder)/cache/requested/($cid)" $"($env.cyfolder)/cache/queue/"
-    }
+        rm -f $"($env.cyfolder)/cache/requested/($cid)"
+    } 
 }
 
 # Clear the cache folder
@@ -1242,7 +1240,6 @@ def make_default_folders_fn [] {
     mkdir $"($env.cyfolder)/config/"
     mkdir $"($env.cyfolder)/cache/"
     mkdir $"($env.cyfolder)/cache/search/"
-    mkdir $"($env.cyfolder)/cache/requested/"
     mkdir $"($env.cy.ipfs-files-folder)/"
     mkdir $"($env.cyfolder)/cache/queue/"
     mkdir $"($env.cyfolder)/cache/cli_out/"
