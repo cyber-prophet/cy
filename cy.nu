@@ -863,7 +863,7 @@ export def 'search' [
     let cid = if (is-cid $query) {
         $query
     } else {
-        (pin text $query)
+        (pin text $query --only_hash)
     }
     
     let serp = (
@@ -900,23 +900,42 @@ export def 'search2' [
     --pretty (-P)
     --page (-p) = 0
 ] {
-    let cid = pin text $query --only_hash
+    let cid = if (is-cid $query) {
+        print $"searching (request-file-from-cache $query)"
+        $query
+    } else {
+        (pin text $query --only_hash)
+    }
     
     let serp = (
-        ^($env.cy.exec) query rank search $cid $page 10 --output json
+        ^($env.cy.exec) query rank search $cid $page 100 --output json
         | from json 
         | get result 
         | upsert particle {
             |i| request-file-from-cache $i.particle
         } 
-        | select particle rank 
+        | select particle rank
+        | upsert source "search"
         )
 
+    let back = (
+        ^($env.cy.exec) query rank backlinks $cid $page 100 --output json
+        | from json 
+        | get result 
+        | upsert particle {
+            |i| request-file-from-cache $i.particle
+        } 
+        | select particle rank
+        | upsert source "backlinks"
+        )
+
+    let result = ($serp | append $back)
+
     if $pretty {
-        $serp 
+        $result 
         | table --width (term size | get columns)
     } else {
-        $serp
+        $result
     }
 }
 
