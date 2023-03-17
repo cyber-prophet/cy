@@ -904,7 +904,7 @@ export def 'search2' [
         print $"searching (request-file-from-cache $query)"
         $query
     } else {
-        (pin text $query --only_hash)
+        (pin text $query --only_hash | inspect {|i| print $"searching ($i)"})
     }
     
     let serp = (
