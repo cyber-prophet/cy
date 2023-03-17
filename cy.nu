@@ -1012,7 +1012,7 @@ export def serp1 [
 
 export def `download cid from ipfs safely` [
     cid
-    --timeout = 100s
+    --timeout = 300s
     --folder = $"($env.cy.ipfs-files-folder)"
 ] {
     print $"cid to download ($cid)"
@@ -1032,7 +1032,7 @@ export def `download cid from ipfs safely` [
             try {
                 (ipfs dag stat $cid --enc json --timeout $timeout | from json )
             } catch {
-                return "not found"
+                null
             }
         )
 
@@ -1045,24 +1045,30 @@ export def `download cid from ipfs safely` [
 
 }
 
-def 'download cid from gateway' [
+export def 'download cid from gateway safely' [
     cid
     --gate_url: string = 'https://gateway.ipfs.cybernode.ai/ipfs/'
+    --folder: string = $"($env.cy.ipfs-files-folder)"
 ] {
     let headers = (
         curl -s -I -m 60 $"($gate_url)($cid)"
         | lines
+        | skip 1
         | parse "{header}: {value}"
         | transpose -d -r -i
     )
 
     let type1 = ($headers | get -i 'Content-Type')
-    if $type1 == 'text/plain; charset=utf-8' {
-        http get $"($gate_url)($cid)" -m 60 | save -f $"($env.cy.ipfs-files-folder)/($cid).md" 
+    let size1 = ($headers | get -i 'Content-Length')
+    if ($type1 | default "") =~ 'text/plain' {
+        http get $"($gate_url)($cid)" -m 60 | save -f $"($folder)/($cid).md" 
+        return "text"
     } else if ($type1 != null) {
-        $type1 | save -f $"($env.cy.ipfs-files-folder)/($cid).md"
+        $"non_text:($type1) size:($size1)" | save -f $"($folder)/($cid).md"
+        return "non_text"
+    } else {
+        return "not found"
     }
-    echo $type1
 }
 
 # Check if there is the CID in cache, and if it is not - add it into queue
@@ -1116,9 +1122,10 @@ export def 'queue add and download' [
 ] {
     "+" | save -a $"($env.cyfolder)/cache/queue/($cid)"
 
-    let status = download cid from ipfs safely $cid
+    # let status = download cid from ipfs safely $cid
+    let status = download cid from gateway safely $cid
 
-    if ($status in ['text', 'non-text']) {
+    if ($status in ['text', 'non_text']) {
         rm -f $"($env.cyfolder)/cache/queue/($cid)"
     } 
 }
@@ -1669,7 +1676,7 @@ export def-env 'ber' [
         $list_options_out 
         | enumerate 
         | reduce -f "" {
-            |i acc| if ($i.item in ['--page', '--height']) {
+            |i acc| if ($i.item in ['--page', '--height', '--events']) {
                 [$acc $i.item ($list_options_out | get ($i.index + 1))] | str join ""
             } else {
                 $acc
@@ -1678,7 +1685,7 @@ export def-env 'ber' [
     )
 
     let cfolder = $"($env.cyfolder)/cache/cli_out/"
-    let command = $"($exec)_($rest | str join '_')($important_options)"
+    let command = $"($exec)_($rest | str join '_')($important_options | str replace "/" "")"
     let ts1 = (date now | into int)
 
     # print $important_options
@@ -1723,10 +1730,13 @@ export def-env 'ber' [
         } else  {
             print $"request command from cli, saving to ($filename)"
             print $"($exec) ($rest) --output json ($list_flags_out)"
+            # let out = (^($exec) $rest --output json $list_options_out $list_flags_out | from json) 
+            pu-add $"($exec) ($rest | str join ' ') --output json ($list_options_out | str join ' ') ($list_flags_out | str join ' ') | save -r ($filename)" 
             # let out1 = do -i {^($exec) $rest --output json $list_flags_out | from json} 
-            let out = (^($exec) $rest --output json $list_options_out $list_flags_out | from json) 
-            if $out != null {$out | save $filename}
-            $out
+            # let out = (^($exec) $rest --output json $list_options_out $list_flags_out | from json) 
+            # if $out != null {$out | save $filename}
+            # $out
+            
         } 
     )
 
