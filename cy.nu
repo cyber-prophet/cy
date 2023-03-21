@@ -1273,7 +1273,7 @@ def is-cid [particle: string] {
 }
 
 def is-neuron [particle: string] {
-    ($particle =~ '^bostrom1\w{38}$') 
+    ($particle =~ '^bostrom1\w{38}$') or ($particle =~ '^bostrom1\w{58}$')
 }
 
 def is-connected []  {
