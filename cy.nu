@@ -1140,14 +1140,14 @@ export def 'queue check' [
 export def 'queue add and download' [
     cid
 ] {
-    "+" | save -a $"($env.cyfolder)/cache/queue/($cid)"
-
     # let status = download cid from ipfs safely $cid
     let status = download cid from gateway safely $cid
 
     if ($status in ['text', 'non_text']) {
         rm -f $"($env.cyfolder)/cache/queue/($cid)"
-    } 
+    } else {
+        "+" | save -a $"($env.cyfolder)/cache/queue/($cid)"
+    }
 }
 
 # Clear the cache folder
