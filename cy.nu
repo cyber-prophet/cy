@@ -13,7 +13,7 @@ export-env {
     banner
 
     let config_folder = ("~/.config/cy/" | path expand)
-    let default_cy_folder = ('~/cy' | path expand)
+    let default_cy_folder = ('~/cy/' | path expand)
 
     if not ($config_folder | path exists) {
         mkdir $config_folder
@@ -783,7 +783,7 @@ export def 'config view' [
     }
 }
 
-# Save the piped in JSON config file
+# Save the piped in JSON into config file
 export def-env 'config save' [
     config_name?: string@'nu-complete-config-names'
     --inactive # Don't activate current config
@@ -865,6 +865,8 @@ export def 'search' [
     } else {
         (pin text $query --only_hash)
     }
+
+    print $'searching ($env.cy.exec) for ($cid)'
     
     let serp = (
         ^($env.cy.exec) query rank search $cid $page 10 --output json
@@ -904,9 +906,11 @@ export def 'search2' [
         print $"searching (request-file-from-cache $query)"
         $query
     } else {
-        (pin text $query --only_hash | inspect {|i| print $"searching ($i)"})
+        (pin text $query --only_hash | inspect)
     }
-    
+
+    print $'searching ($env.cy.exec) for ($cid)'
+
     let serp = (
         ^($env.cy.exec) query rank search $cid $page 100 --output json
         | from json 
@@ -962,6 +966,8 @@ export def 'search4' [
 ] {
     let cid = (pin text $query --only_hash)
     
+    print $'searching ($env.cy.exec) for ($cid)'
+
     let out = (
         do -i {
             ^($env.cy.exec) query rank search $cid $page $results_per_page --output json
@@ -1095,6 +1101,7 @@ export def 'request-file-from-cache' [
     )
 }
 
+}
 # Watch the queue folder, and if there are updates - request files to download
 export def `watch search folder` [] {
     watch $"($env.cyfolder)/cache/search" { queue check }
