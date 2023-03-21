@@ -1101,7 +1101,20 @@ export def 'request-file-from-cache' [
     )
 }
 
+export def 'download-if-not-in-cache' [
+    cid
+    --force (-f)
+] {
+    let content = (do -i {open $"($env.cy.ipfs-files-folder)/($cid).md"})
+
+    let content = (
+        if ($content == null) or ($content == 'timeout') or $force {
+            pu-add $"cy queue add and download ($cid)"
+            "downloading"
+        }
+    )
 }
+
 # Watch the queue folder, and if there are updates - request files to download
 export def `watch search folder` [] {
     watch $"($env.cyfolder)/cache/search" { queue check }
