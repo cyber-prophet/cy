@@ -171,6 +171,8 @@ export def 'link texts' [
         ]
     )
 
+    print $out_table.0
+
     if $disable_append {
         $out_table
     } else {
@@ -216,8 +218,10 @@ export def 'link chuck' [] {
     let cid_to = (pin text $quote)
     
     let $_table = (
-        [['from_text' 'to_text' from to];
-        ['chuck norris' $quote $cid_from $cid_to]]
+        [
+            ['from_text' 'to_text' from to];
+            ['chuck norris' $quote $cid_from $cid_to]                    
+        ]
     )
 
     $_table | tmp append --dont_show_out_table
@@ -1064,7 +1068,7 @@ export def `download cid from ipfs safely` [
 }
 
 export def 'download cid from gateway safely' [
-    cid
+    cid: string
     --gate_url: string = 'https://gateway.ipfs.cybernode.ai/ipfs/'
     --folder: string = $"($env.cy.ipfs-files-folder)"
 ] {
@@ -1079,7 +1083,7 @@ export def 'download cid from gateway safely' [
     let type1 = ($headers | get -i 'Content-Type')
     let size1 = ($headers | get -i 'Content-Length')
     if ($type1 | default "") =~ 'text/plain' {
-        http get $"($gate_url)($cid)" -m 60 | save -f $"($folder)/($cid).md" 
+        http get $"($gate_url)($cid)" -m 120 | save -f $"($folder)/($cid).md" 
         return "text"
     } else if ($type1 != null) {
         $"non_text:($type1) size:($size1)" | save -f $"($folder)/($cid).md"
@@ -1150,7 +1154,7 @@ export def 'queue check' [
 }
 
 export def 'queue add and download' [
-    cid
+    cid: string
 ] {
     # let status = download cid from ipfs safely $cid
     let status = download cid from gateway safely $cid
@@ -1280,11 +1284,11 @@ def 'banner2' [] {
 }
 
 
-def is-cid [particle: string] {
+export def is-cid [particle: string] {
     ($particle =~ '^Qm\w{44}$') 
 }
 
-def is-neuron [particle: string] {
+export def is-neuron [particle: string] {
     ($particle =~ '^bostrom1\w{38}$') or ($particle =~ '^bostrom1\w{58}$')
 }
 
