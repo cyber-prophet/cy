@@ -103,7 +103,7 @@ export def 'pin text' [
                     $text 
                     | curl --silent -X POST -F file=@- 'https://io.cybernode.ai/add' 
                     | from json 
-                    | get cid./
+                    | get cid
                 } else {
                     $cid
                 }
