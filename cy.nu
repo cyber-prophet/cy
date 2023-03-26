@@ -9,6 +9,18 @@
 
 export def main [] { help }
 
+export def check_requirements [] {
+    ['ipfs', 'bat', 'pueue'] 
+        | each {
+                |i| if ((which ($i) | length) == 0) {
+                  print $'($i) is missing'
+                } else {
+                  print $'($i) is installed'
+                }                            
+        }
+    
+}
+
 export-env { 
     banner
 
