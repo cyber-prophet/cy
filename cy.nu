@@ -871,9 +871,10 @@ export def-env 'config activate' [
     $config1
 }
 
-export def 'search' [
+def 'search-sync' [
     query
     --page (-p) = 0
+    --results_per_page (-r) = 10
 ] {
     let cid = if (is-cid $query) {
         $query
@@ -907,9 +908,10 @@ export def 'search' [
         $serp
 }
 
-export def 'search2' [
+def 'search-with-backlinks' [
     query
     --page (-p) = 0
+    --results_per_page (-r) = 10
 ] {
     let cid = if (is-cid $query) {
         print $"searching (cid cat or download $query)"
@@ -921,7 +923,7 @@ export def 'search2' [
     print $'searching ($env.cy.exec) for ($cid)'
 
     let serp = (
-        ^($env.cy.exec) query rank search $cid $page 100 --output json
+        ^($env.cy.exec) query rank search $cid $page $results_per_page --output json
         | from json 
         | get result 
         | upsert particle {
@@ -932,7 +934,7 @@ export def 'search2' [
         )
 
     let back = (
-        ^($env.cy.exec) query rank backlinks $cid $page 100 --output json
+        ^($env.cy.exec) query rank backlinks $cid $page $results_per_page --output json
         | from json 
         | get result 
         | upsert particle {
@@ -947,7 +949,7 @@ export def 'search2' [
         $result
 }
 
-export def 'search4' [
+def 'search-auto-refresh' [
     query
     --page (-p) = 0
     --results_per_page (-r) = 10
@@ -982,8 +984,28 @@ export def 'search4' [
     watch $"($env.cyfolder)/cache/queue" { clear; print $"Searching ($env.cy.exec) for ($cid)"; serp1 $results}
 }
 
+def "nu-complete search functions" [] {
+    ['search-auto-refresh' 'search-with-backlinks', 'search-sync'] 
+}
 
-export def serp1 [
+export def search [
+    query
+    --page (-p) = 0
+    --results_per_page (-r) = 10
+    --search_type: string@"nu-complete search functions" = 'search-with-backlinks'
+] {
+    if $search_type == 'search-with-backlinks' {
+        search-with-backlinks $query --page $page --results_per_page $results_per_page
+    } else if $search_type == 'search-auto-refresh' {
+        search-auto-refresh $query --page $page --results_per_page $results_per_page
+    } else if $search_type == 'search-sync' {
+        search-sync $query --page $page --results_per_page $results_per_page
+    }
+    
+
+}
+
+def serp1 [
     results
     --pretty: bool@"nu-complete bool" = false
 ] {
