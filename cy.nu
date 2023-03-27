@@ -989,7 +989,7 @@ def "nu-complete search functions" [] {
 }
 
 # Use built in the node search function in cyber or pussy
-export def search [
+export def 'search' [
     query
     --page (-p) = 0
     --results_per_page (-r) = 10
@@ -1054,7 +1054,7 @@ export def 'cid add queue' [
 }
 
 # Download cid from kubo (go-ipfs cli) immediately
-export def `cid download kubo` [
+export def 'cid download kubo' [
     cid: string
     --timeout = 300s
     --folder = $"($env.cy.ipfs-files-folder)"
@@ -1141,7 +1141,7 @@ export def 'cid read or download' [
 }
 
 # Watch the queue folder, and if there are updates - request files to download
-export def `watch search folder` [] {
+export def 'watch search folder' [] {
     watch $"($env.cyfolder)/cache/search" { queue check }
 }
 
@@ -1163,7 +1163,7 @@ export def 'queue check' [
 }
 
 # Clear the cache folder
-export def `cache clear` [] {
+export def 'cache clear' [] {
     backup_fn $"($env.cyfolder)/cache" 
     make_default_folders_fn
 }
