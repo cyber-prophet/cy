@@ -1023,6 +1023,36 @@ def serp1 [
     $serp 
 }
 
+
+# Add cid into queue to download asyncasynchronously
+export def 'cid download async' [
+    cid
+    --force (-f)
+] {
+    let content = (do -i {open $"($env.cy.ipfs-files-folder)/($cid).md"})
+
+    let content = (
+        if ($content == null) or ($content == 'timeout') or $force {
+            pu-add $"cy cid add queue ($cid)"
+            "downloading"
+        }
+    )
+}
+
+# Download cid immediately and mark it in the queue
+export def 'cid add queue' [
+    cid: string
+] {
+    # let status = cid download kubo $cid
+    let status = cid download gateway $cid
+
+    if ($status in ['text', 'non_text']) {
+        rm -f $"($env.cyfolder)/cache/queue/($cid)"
+    } else {
+        "+" | save -a $"($env.cyfolder)/cache/queue/($cid)"
+    }
+}
+
 # Download cid from kubo (go-ipfs cli) immediately
 export def `cid download kubo` [
     cid: string
@@ -1110,21 +1140,6 @@ export def 'cid cat or download' [
     )
 }
 
-
-export def 'cid download async' [
-    cid
-    --force (-f)
-] {
-    let content = (do -i {open $"($env.cy.ipfs-files-folder)/($cid).md"})
-
-    let content = (
-        if ($content == null) or ($content == 'timeout') or $force {
-            pu-add $"cy cid add queue ($cid)"
-            "downloading"
-        }
-    )
-}
-
 # Watch the queue folder, and if there are updates - request files to download
 export def `watch search folder` [] {
     watch $"($env.cyfolder)/cache/search" { queue check }
@@ -1144,20 +1159,6 @@ export def 'queue check' [
         }
     } else {
         "the queue is empty"
-    }
-}
-
-# Add a CID into download queue
-export def 'cid add queue' [
-    cid: string
-] {
-    # let status = cid download kubo $cid
-    let status = cid download gateway $cid
-
-    if ($status in ['text', 'non_text']) {
-        rm -f $"($env.cyfolder)/cache/queue/($cid)"
-    } else {
-        "+" | save -a $"($env.cyfolder)/cache/queue/($cid)"
     }
 }
 
