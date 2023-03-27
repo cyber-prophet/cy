@@ -180,6 +180,20 @@ export def 'link texts' [
     }
 }
 
+# Add a link chain to the temp table
+export def 'link chain' [
+    ...rest
+] {
+    let l1 = ($rest | length)
+    if $l1 < 2 {
+        return $'($l1) particles were submitted. We need 2 or more'
+    }
+
+    let rows = 0..($l1 - 2)
+    $rows | each {|i| link texts ($rest | get $i) ($rest | get ($i + 1))}
+
+}
+
 # Add a tweet
 export def 'tweet' [
     text_to
