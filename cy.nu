@@ -873,7 +873,6 @@ export def-env 'config activate' [
 
 export def 'search' [
     query
-    --pretty (-P)
     --page (-p) = 0
 ] {
     let cid = if (is-cid $query) {
@@ -905,17 +904,11 @@ export def 'search' [
         | select particle rank 
         )
 
-    if $pretty {
-        $serp 
-        | table --width (term size | get columns)
-    } else {
         $serp
-    }
 }
 
 export def 'search2' [
     query
-    --pretty (-P)
     --page (-p) = 0
 ] {
     let cid = if (is-cid $query) {
@@ -951,32 +944,11 @@ export def 'search2' [
 
     let result = ($serp | append $back)
 
-    if $pretty {
-        $result 
-        | table --width (term size | get columns)
-    } else {
         $result
-    }
-}
-
-export def 'search3' [
-    query
-    --pretty (-P)
-    --page (-p) = 0
-] {
-    # watch ~/cy/cache/ --glob=**/*.rs { cargo test }
-
-    let cid = pin text $query --only_hash
-    
-    let serp = (
-        ^($env.cy.exec) query rank search $cid $page 10 --output json
-        | save $"($env.cyfolder)/cache/search/($cid)-(date now|into int).json"
-    )
 }
 
 export def 'search4' [
     query
-    --pretty (-P)
     --page (-p) = 0
     --results_per_page (-r) = 10
 ] {
@@ -1005,13 +977,9 @@ export def 'search4' [
 
     clear; print $"Searching ($env.cy.exec) for ($cid)";
 
-    # print (if $pretty {
-        serp1 $results --pretty $pretty
-    # } else {
-    #     serp1 $results
-    # })
+    serp1 $results 
 
-    watch $"($env.cyfolder)/cache/queue" { clear; print $"Searching ($env.cy.exec) for ($cid)"; serp1 $results --pretty $pretty}
+    watch $"($env.cyfolder)/cache/queue" { clear; print $"Searching ($env.cy.exec) for ($cid)"; serp1 $results}
 }
 
 
