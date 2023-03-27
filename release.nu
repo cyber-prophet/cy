@@ -1,9 +1,10 @@
 let readme = (open ~/cy/README.md | lines)
 
 let lines_to_drop = (
-    $readme 
+    $readme
+    | enumerate 
     | each {
-        |it index| if ($it == "## Commands") {echo $index}
+        |it| if ($it.item == "## Commands") {echo $it.index}
     } 
     | get 0 
     | into int
