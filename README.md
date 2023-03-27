@@ -52,6 +52,7 @@ There are 1 cyberlinks in the temp table:
 |cy pin text|Pin a text particle|
 |cy pin files|Pin files from the current folder to the local node, output the cyberlinks table|
 |cy link texts|Add a 2-texts cyberlink to the temp table|
+|cy link chain|Add a link chain to the temp table|
 |cy tweet|Add a tweet|
 |cy link chuck|Add a random chuck norris cyberlink to the temp table|
 |cy link quote|Add a random quote cyberlink to the temp table|
