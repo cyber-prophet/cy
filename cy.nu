@@ -10,7 +10,7 @@
 export def main [] { help }
 
 export def check_requirements [] {
-    ['ipfs', 'bat', 'pueue'] 
+    ['ipfs', 'bat', 'pueue', 'cyber', 'pussy'] 
         | each {
                 |i| if ((which ($i) | length) == 0) {
                   print $'($i) is missing'
@@ -919,7 +919,7 @@ export def 'search2' [
     --page (-p) = 0
 ] {
     let cid = if (is-cid $query) {
-        print $"searching (request-file-from-cache $query)"
+        print $"searching (cid cat or download $query)"
         $query
     } else {
         (pin text $query --only_hash | inspect)
@@ -932,7 +932,7 @@ export def 'search2' [
         | from json 
         | get result 
         | upsert particle {
-            |i| request-file-from-cache $i.particle
+            |i| cid cat or download $i.particle
         } 
         | select particle rank
         | upsert source "search"
@@ -943,7 +943,7 @@ export def 'search2' [
         | from json 
         | get result 
         | upsert particle {
-            |i| request-file-from-cache $i.particle
+            |i| cid cat or download $i.particle
         } 
         | select particle rank
         | upsert source "backlinks"
@@ -1024,7 +1024,7 @@ export def serp1 [
         $results
         | get result 
         | upsert particle {
-            |i| request-file-from-cache $i.particle
+            |i| cid cat or download $i.particle
         } 
         | select particle rank 
     )
@@ -1032,8 +1032,8 @@ export def serp1 [
     $serp 
 }
 
-export def `download cid from ipfs safely` [
-    cid
+export def `cid download kubo` [
+    cid: string
     --timeout = 300s
     --folder = $"($env.cy.ipfs-files-folder)"
 ] {
@@ -1067,7 +1067,7 @@ export def `download cid from ipfs safely` [
 
 }
 
-export def 'download cid from gateway safely' [
+export def 'cid download gateway' [
     cid: string
     --gate_url: string = 'https://gateway.ipfs.cybernode.ai/ipfs/'
     --folder: string = $"($env.cy.ipfs-files-folder)"
@@ -1094,7 +1094,7 @@ export def 'download cid from gateway safely' [
 }
 
 # Check if there is the CID in cache, and if it is not - add it into queue
-export def 'request-file-from-cache' [
+export def 'cid cat or download' [
     cid
     --attempts = 0
 ] {
@@ -1102,7 +1102,7 @@ export def 'request-file-from-cache' [
 
     let content = (
         if $content == null {
-            pu-add $"cy queue add and download ($cid)"
+            pu-add $"cy cid add queue ($cid)"
             "downloading"
         } else {
             $content
@@ -1117,7 +1117,8 @@ export def 'request-file-from-cache' [
     )
 }
 
-export def 'download-if-not-in-cache' [
+
+export def 'cid download async' [
     cid
     --force (-f)
 ] {
@@ -1125,7 +1126,7 @@ export def 'download-if-not-in-cache' [
 
     let content = (
         if ($content == null) or ($content == 'timeout') or $force {
-            pu-add $"cy queue add and download ($cid)"
+            pu-add $"cy cid add queue ($cid)"
             "downloading"
         }
     )
@@ -1146,18 +1147,19 @@ export def 'queue check' [
         | where size <= (1 + $attempts | into filesize)
         | get name -i
         | each {
-            |i| pu-add $"cy queue add and download ($i)"
+            |i| pu-add $"cy cid add queue ($i)"
         }
     } else {
         "the queue is empty"
     }
 }
 
-export def 'queue add and download' [
+# Add a CID into download queue
+export def 'cid add queue' [
     cid: string
 ] {
-    # let status = download cid from ipfs safely $cid
-    let status = download cid from gateway safely $cid
+    # let status = cid download kubo $cid
+    let status = cid download gateway $cid
 
     if ($status in ['text', 'non_text']) {
         rm -f $"($env.cyfolder)/cache/queue/($cid)"
@@ -1172,7 +1174,7 @@ export def `cache clear` [] {
     make_default_folders_fn
 }
 
-# Check the balances of the keys added to the active CLI
+# Check the balances for the keys added to the active CLI
 export def 'balances' [
     ...name: string@'nu-complete keys values'
 ] {
@@ -1284,11 +1286,11 @@ def 'banner2' [] {
 }
 
 
-export def is-cid [particle: string] {
+def is-cid [particle: string] {
     ($particle =~ '^Qm\w{44}$') 
 }
 
-export def is-neuron [particle: string] {
+def is-neuron [particle: string] {
     ($particle =~ '^bostrom1\w{38}$') or ($particle =~ '^bostrom1\w{58}$')
 }
 
@@ -1300,6 +1302,8 @@ def make_default_folders_fn [] {
     mkdir $"($env.cyfolder)/temp/"
     mkdir $"($env.cyfolder)/backups/"
     mkdir $"($env.cyfolder)/config/"
+    mkdir $"($env.cyfolder)/graph/"
+    mkdir $"($env.cyfolder)/scripts/"
     mkdir $"($env.cyfolder)/cache/"
     mkdir $"($env.cyfolder)/cache/search/"
     mkdir $"($env.cy.ipfs-files-folder)/"
@@ -1379,7 +1383,7 @@ def 'backup_fn' [
     }
 }
 
-export def 'pu-add' [
+def 'pu-add' [
     command: string
 ] {
     pueue add -p $"nu -c \"($command)\" --config \"($nu.config-path)\" --env-config \"($nu.env-path)\""
