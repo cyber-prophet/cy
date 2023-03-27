@@ -988,6 +988,7 @@ def "nu-complete search functions" [] {
     ['search-auto-refresh' 'search-with-backlinks', 'search-sync'] 
 }
 
+# Use built in the node search function in cyber or pussy
 export def search [
     query
     --page (-p) = 0
@@ -1022,6 +1023,7 @@ def serp1 [
     $serp 
 }
 
+# Download cid from kubo (go-ipfs cli) immediately
 export def `cid download kubo` [
     cid: string
     --timeout = 300s
@@ -1057,6 +1059,7 @@ export def `cid download kubo` [
 
 }
 
+# Download cid from gateway immediately
 export def 'cid download gateway' [
     cid: string
     --gate_url: string = 'https://gateway.ipfs.cybernode.ai/ipfs/'
