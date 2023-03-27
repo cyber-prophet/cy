@@ -914,7 +914,7 @@ def 'search-with-backlinks' [
     --results_per_page (-r) = 10
 ] {
     let cid = if (is-cid $query) {
-        print $"searching (cid cat or download $query)"
+        print $"searching (cid read or download $query)"
         $query
     } else {
         (pin text $query --only_hash | inspect)
@@ -927,7 +927,7 @@ def 'search-with-backlinks' [
         | from json 
         | get result 
         | upsert particle {
-            |i| cid cat or download $i.particle
+            |i| cid read or download $i.particle
         } 
         | select particle rank
         | upsert source "search"
@@ -938,7 +938,7 @@ def 'search-with-backlinks' [
         | from json 
         | get result 
         | upsert particle {
-            |i| cid cat or download $i.particle
+            |i| cid read or download $i.particle
         } 
         | select particle rank
         | upsert source "backlinks"
@@ -1015,7 +1015,7 @@ def serp1 [
         $results
         | get result 
         | upsert particle {
-            |i| cid cat or download $i.particle
+            |i| cid read or download $i.particle
         } 
         | select particle rank 
     )
@@ -1116,8 +1116,8 @@ export def 'cid download gateway' [
     }
 }
 
-# Check if there is the CID in cache, and if it is not - add it into queue
-export def 'cid cat or download' [
+# Read CID from cache, and if it is not - add it into queue
+export def 'cid read or download' [
     cid
     --attempts = 0
 ] {
