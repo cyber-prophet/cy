@@ -115,7 +115,7 @@ export def 'pin text' [
     $cid
 }
 
-# Pin files from the current folder to the local node, output the cyberlinks table
+# Pin files from the current folder to the local node and output the cyberlinks table
 # cy pin files .
 export def 'pin files' [
     ...files: string                # filenames to add into the local ipfs node
@@ -155,7 +155,7 @@ export def 'pin files' [
  }
 }
 
-# Add a 2-texts cyberlink to the temp table
+# Add a 2-text cyberlink to the temp table
 export def 'link texts' [
     text_from
     text_to
@@ -273,7 +273,7 @@ def "nu-complete random sources" [] {
     ['chucknorris.io' 'forismatic.com'] 
 }
 
-# Make a random cyberlink from diffrent APIs
+# Make a random cyberlink from different APIs
 export def 'link random' [
     source?: string@"nu-complete random sources"
     n = 1
@@ -397,7 +397,7 @@ export def 'tmp link from' [
     }
 }
 
-# Pin values from a given column to IPFS node and add a column with their CIDs
+# Pin values from a given column to an IPFS node and add a column with their CIDs
 export def 'tmp pin col' [
     --column_with_text: string = 'text' # a column name to take values from to upload to IPFS. Default is 'text
     --column_to_write_cid: string = 'from' # a column name to write CIDs to. Default is 'from'
@@ -436,7 +436,7 @@ def 'link-exist' [
     }
 }
 
-# Remove existed cyberlinks from the temp cyberlinks table
+# Remove existing cyberlinks from the temp cyberlinks table
 export def 'tmp remove existed' [] {
     let links_with_status = (
         tmp view -q 
@@ -565,7 +565,7 @@ export def 'tmp send tx' [] {
     }
 }
 
-# Copy a table from the pipe into clipboard (in tsv format)
+# Copy a table from the pipe into the clipboard (in tsv format)
 export def 'tsv copy' [] {
     let _table = $in
     echo $_table
@@ -573,7 +573,7 @@ export def 'tsv copy' [] {
     $_table | to tsv | pbcopy
 }
 
-# Paste a table from clipboard to stdin (so it can be piped further)
+# Paste a table from the clipboard to stdin (so it can be piped further)
 export def 'tsv paste' [] {
     pbpaste | from tsv
 }
@@ -685,7 +685,7 @@ export def 'passport set' [
     $results
 }
 
-# Create config JSON to set env variables, to use them as parameters in cyber cli
+# Create a config JSON to set env variables, to use them as parameters in cyber cli
 export def-env 'config new' [
     # config_name?: string@'nu-complete-config-names'
 ] {
@@ -813,7 +813,7 @@ export def 'config view' [
     }
 }
 
-# Save the piped in JSON into config file
+# Save the piped-in JSON into config file
 export def-env 'config save' [
     config_name?: string@'nu-complete-config-names'
     --inactive # Don't activate current config
@@ -858,7 +858,7 @@ export def-env 'config save' [
     }
 }
 
-# Activate config JSON
+# Activate the config JSON
 export def-env 'config activate' [
     config_name?: string@'nu-complete-config-names'
 ] {
@@ -1002,7 +1002,7 @@ def "nu-complete search functions" [] {
     ['search-auto-refresh' 'search-with-backlinks', 'search-sync'] 
 }
 
-# Use built in the node search function in cyber or pussy
+# Use the built-in node search function in cyber or pussy
 export def 'search' [
     query
     --page (-p) = 0
@@ -1038,7 +1038,7 @@ def serp1 [
 }
 
 
-# Add cid into queue to download asyncasynchronously
+# Add a cid into queue to download asyncasynchronously
 export def 'cid download async' [
     cid
     --force (-f)
@@ -1067,7 +1067,7 @@ export def 'cid add queue' [
     }
 }
 
-# Download cid from kubo (go-ipfs cli) immediately
+# Download a cid from kubo (go-ipfs cli) immediately
 export def 'cid download kubo' [
     cid: string
     --timeout = 300s
@@ -1103,7 +1103,7 @@ export def 'cid download kubo' [
 
 }
 
-# Download cid from gateway immediately
+# Download a cid from gateway immediately
 export def 'cid download gateway' [
     cid: string
     --gate_url: string = 'https://gateway.ipfs.cybernode.ai/ipfs/'
@@ -1130,7 +1130,7 @@ export def 'cid download gateway' [
     }
 }
 
-# Read CID from cache, and if the CID is absent - add it into the queue
+# Read a CID from the cache, and if the CID is absent - add it into the queue
 export def 'cid read or download' [
     cid
     --attempts = 0
@@ -1154,12 +1154,12 @@ export def 'cid read or download' [
     )
 }
 
-# Watch the queue folder, and if there are updates - request files to download
+# Watch the queue folder, and if there are updates, request files to download
 export def 'watch search folder' [] {
     watch $"($env.cyfolder)/cache/search" { queue check }
 }
 
-# Check queue for the new CIDs, and if there are CIDs - safely download the text ones
+# Check the queue for the new CIDs, and if there are any, safely download the text ones
 export def 'queue check' [
     attempts = 0
 ] {
@@ -1232,7 +1232,7 @@ export def 'balances' [
     }
 }
 
-# Add cybercongress node to bootstrap nodes
+# Add the cybercongress node to bootstrap nodes
 export def 'ipfs bootstrap add congress' [] {
     ipfs bootstrap add '/ip4/135.181.19.86/tcp/4001/p2p/12D3KooWNMcnoQynAY9hyi4JxzSu64BsRGcJ9z7vKghqk8sTrpqY'
     print "check if bootstrap node works by executing commands:"
@@ -1240,7 +1240,7 @@ export def 'ipfs bootstrap add congress' [] {
     print 'ipfs dht findpeer QmUgmRxoLtGERot7Y6G7UyF6fwvnusQZfGR15PuE6pY3aB'
 }
 
-# Check ibc denoms
+# Check IBC denoms
 export def 'ibc denoms' [] {
     let bank_total = (
         cyber query bank total --output json 
@@ -1276,7 +1276,7 @@ export def 'help' [
     if $to_md {
         $text | to md 
     } else {
-        $text | table --width (term size).columns
+        $text 
     }
 }
 
