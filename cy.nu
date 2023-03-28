@@ -10,7 +10,7 @@
 export def main [] { help }
 
 export def check_requirements [] {
-    ['ipfs', 'bat', 'pueue', 'cyber', 'pussy'] 
+    ['ipfs', 'bat', 'curl', 'pueue', 'cyber', 'pussy'] 
         | each {
                 |i| if ((which ($i) | length) == 0) {
                   print $'($i) is missing'
@@ -1130,7 +1130,7 @@ export def 'cid download gateway' [
     }
 }
 
-# Read CID from cache, and if it is not - add it into queue
+# Read CID from cache, and if the CID is absent - add it into the queue
 export def 'cid read or download' [
     cid
     --attempts = 0
