@@ -2,23 +2,40 @@
 
 Cy - a [nushell](https://www.nushell.sh/) wrapper, an interface to the cyber family blockchains CLIs (bostrom, pussy) and IPFS.
 
-## Installation
+## Key features
 
-1. Install [cyber](https://github.com/cybercongress/go-cyber) or/and [pussy](https://github.com/cybercongress/go-cyber)
-2. Install [nushell](https://www.nushell.sh/) app https://www.nushell.sh/ `brew install nushell`
-3. Install [kubo](https://github.com/ipfs/kubo) app (IPFS in Go) https://github.com/ipfs/kubo `brew install ipfs`
-4. Launch nushell by typing `nu` in your terminal app
-5. Execute `mkdir ~/cy | http get https://raw.githubusercontent.com/cyber-prophet/cy/main/cy.nu | save ~/cy/cy.nu -f`
-6. Execute: `overlay use ~/cy/cy.nu as cy -p -r`. For more information on how to use overlays check [nushell's help](https://www.nushell.sh/book/overlays.html)
-7. Go through the wizzard `cy config`
-8. See all the commands in logical order by executing `cy`
-9. See all the commands suggestions by entering `cy` + tab
+- setting diffrent settings for diffrent profiles (rpc endpoints, private keys, networks, etc...)
+- seamlessly uploading and downloading data to cybernode or to local ipfs node
+- creating multiple cyberlinks
+- shortcuts for interactin with passport smart contract
+- cyber search in terminal
+- many more (see list functions below)
+
+## Installation (mac, linux)
+
+There is a video manual on how to install these apps - https://t.me/CyberProphet/24
+
+1. Install [brew](https://brew.sh/)
+2. Install [rustup-init](https://rustup.rs/) (to install cargo, to install nushell with dataframes support) `brew install rustup-init`
+3. Install [cyber](https://github.com/cybercongress/go-cyber) or/and [pussy](https://github.com/cybercongress/go-cyber)
+4. Install [nushell](https://www.nushell.sh/) app https://www.nushell.sh/ `cargo install nu --features=dataframe`
+5. Install [kubo](https://github.com/ipfs/kubo) app (IPFS in Go) https://github.com/ipfs/kubo `brew install ipfs`
+6. Launch nushell by typing `nu` in your terminal app
+7. Execute `mkdir ~/cy | http get https://raw.githubusercontent.com/cyber-prophet/cy/main/cy.nu | save ~/cy/cy.nu -f`
+8. Execute: `overlay use ~/cy/cy.nu as cy -p -r`. For more information on how to use overlays check [nushell's help](https://www.nushell.sh/book/overlays.html)
+9. Go through the wizzard `cy config`
+10. See all the commands in logical order by executing `cy`
+11. See all the commands suggestions by entering `cy` + tab
 
 Optional CLIs that are needed for some `cy` functions:
 
-1. [pueue](https://github.com/Nukesor/pueue) `brew isntall pueue`
-2. [bat](https://github.com/sharkdp/bat) `brew isntall bat`
-3. [Nushell with dataframe support](https://www.nushell.sh/book/installation.html) `cargo install nu --features=dataframe`
+1. [curl](https://curl.se/) `brew install curl`
+2. [pueue](https://github.com/Nukesor/pueue) `brew install pueue`
+3. [bat](https://github.com/sharkdp/bat) `brew install bat`
+
+## Installaition (windows)
+
+Windows supports WSL2. Some time ago I made a video how to use it: https://t.me/CyberProphet/20. It is a bit outdated, though most important steps there are still valid. You are very welcome to check it yourself. If you have problems - ask questions in comments to this video. 
 
 ## Examples
 
