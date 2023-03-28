@@ -2,9 +2,20 @@
 
 Cy - a [nushell](https://www.nushell.sh/) wrapper, an interface to the cyber family blockchains CLIs (bostrom, pussy) and IPFS.
 
-## Installation
+## Key features
 
-1. Install [Brew](https://brew.sh/)
+- setting diffrent settings for diffrent profiles (rpc endpoints, private keys, networks, etc...)
+- seamlessly uploading and downloading data to cybernode or to local ipfs node
+- creating multiple cyberlinks
+- shortcuts for interactin with passport smart contract
+- cyber search in terminal
+- many more (see list functions below)
+
+## Installation (mac, linux)
+
+There is a video manual on how to install these apps - https://t.me/CyberProphet/24
+
+1. Install [brew](https://brew.sh/)
 2. Install [rustup-init](https://rustup.rs/) (to install cargo, to install nushell with dataframes support) `brew install rustup-init`
 3. Install [cyber](https://github.com/cybercongress/go-cyber) or/and [pussy](https://github.com/cybercongress/go-cyber)
 4. Install [nushell](https://www.nushell.sh/) app https://www.nushell.sh/ `cargo install nu --features=dataframe`
@@ -18,8 +29,13 @@ Cy - a [nushell](https://www.nushell.sh/) wrapper, an interface to the cyber fam
 
 Optional CLIs that are needed for some `cy` functions:
 
-1. [pueue](https://github.com/Nukesor/pueue) `brew isntall pueue`
-2. [bat](https://github.com/sharkdp/bat) `brew isntall bat`
+1. [curl](https://curl.se/) `brew install curl`
+2. [pueue](https://github.com/Nukesor/pueue) `brew install pueue`
+3. [bat](https://github.com/sharkdp/bat) `brew install bat`
+
+## Installaition (windows)
+
+Windows supports WSL2. Some time ago I made a video how to use it: https://t.me/CyberProphet/20. It is a bit outdated, though most important steps there are still valid. You are very welcome to check it yourself. If you have problems - ask questions in comments to this video. 
 
 ## Examples
 

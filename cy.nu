@@ -10,7 +10,7 @@
 export def main [] { help }
 
 export def check_requirements [] {
-    ['ipfs', 'bat', 'pueue', 'cyber', 'pussy'] 
+    ['ipfs', 'bat', 'curl', 'pueue', 'cyber', 'pussy'] 
         | each {
                 |i| if ((which ($i) | length) == 0) {
                   print $'($i) is missing'
