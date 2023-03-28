@@ -4,13 +4,22 @@ Cy - a [nushell](https://www.nushell.sh/) wrapper, an interface to the cyber fam
 
 ## Installation
 
-1. Install the kubo app (IPFS in Go) https://github.com/ipfs/kubo `brew install ipfs`
-2. Install the nushell app https://www.nushell.sh/ `brew install nushell`
-3. Launch nushell by typing `nu` in your terminal app
-4. Execute `mkdir ~/cy | http get https://raw.githubusercontent.com/cyber-prophet/cy/main/cy.nu | save ~/cy/cy.nu -f`
-5. Execute: `overlay use ~/cy/cy.nu as cy -p -r`. For more information on how to use overlays check [nushell's help](https://www.nushell.sh/book/overlays.html)
-6. Go through the wizzard `cy config`
-7. See all the commands by entering `cy` + tab
+1. Install [Brew](https://brew.sh/)
+2. Install [rustup-init](https://rustup.rs/) (to install cargo, to install nushell with dataframes support) `brew install rustup-init`
+3. Install [cyber](https://github.com/cybercongress/go-cyber) or/and [pussy](https://github.com/cybercongress/go-cyber)
+4. Install [nushell](https://www.nushell.sh/) app https://www.nushell.sh/ `cargo install nu --features=dataframe`
+5. Install [kubo](https://github.com/ipfs/kubo) app (IPFS in Go) https://github.com/ipfs/kubo `brew install ipfs`
+6. Launch nushell by typing `nu` in your terminal app
+7. Execute `mkdir ~/cy | http get https://raw.githubusercontent.com/cyber-prophet/cy/main/cy.nu | save ~/cy/cy.nu -f`
+8. Execute: `overlay use ~/cy/cy.nu as cy -p -r`. For more information on how to use overlays check [nushell's help](https://www.nushell.sh/book/overlays.html)
+9. Go through the wizzard `cy config`
+10. See all the commands in logical order by executing `cy`
+11. See all the commands suggestions by entering `cy` + tab
+
+Optional CLIs that are needed for some `cy` functions:
+
+1. [pueue](https://github.com/Nukesor/pueue) `brew isntall pueue`
+2. [bat](https://github.com/sharkdp/bat) `brew isntall bat`
 
 ## Examples
 
@@ -80,7 +89,7 @@ There are 1 cyberlinks in the temp table:
 |cy cid add queue|Download cid immediately and mark it in the queue|
 |cy cid download kubo|Download cid from kubo (go-ipfs cli) immediately|
 |cy cid download gateway|Download cid from gateway immediately|
-|cy cid read or download|Read CID from cache, and if it is not - add it into queue|
+|cy cid read or download|Read CID from cache, and if the CID is absent - add it into the queue|
 |cy watch search folder|Watch the queue folder, and if there are updates - request files to download|
 |cy queue check|Check queue for the new CIDs, and if there are CIDs - safely download the text ones|
 |cy cache clear|Clear the cache folder|
