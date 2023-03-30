@@ -72,14 +72,7 @@ export def 'pin text' [
     text_param?: string
     --only_hash
 ] {
-    let text_in = $in
-    
-    let text = (
-        (
-            if ($text_in | is-empty) {$text_param} else {$text_in}
-        ) 
-        | into string # To coerce numbers into strings
-    ) 
+    let text = ($in | default $text_param | into string)
 
     let cid = if (is-cid $text) {
         $text
@@ -313,7 +306,7 @@ export def 'tmp append' [
     cyberlinks?             # cyberlinks table
     --dont_show_out_table (-d)   
 ] {
-    let cyberlinks = if ($cyberlinks | is-empty) {$in} else {$cyberlinks}
+    let cyberlinks = ($in | default $cyberlinks)
 
     let cyberlinks = (
         $cyberlinks 
@@ -335,7 +328,7 @@ export def 'tmp replace' [
     cyberlinks?             # cyberlinks table
     --dont_show_out_table (-d)   
 ] {
-    let cyberlinks = if ($cyberlinks | is-empty) {$in} else {$cyberlinks}
+    let cyberlinks = ($in | default $cyberlinks)
 
     (
         $cyberlinks 
@@ -568,7 +561,7 @@ export def 'tmp send tx' [] {
 # Copy a table from the pipe into the clipboard (in tsv format)
 export def 'tsv copy' [] {
     let _table = $in
-    echo $_table
+    print $_table
 
     $_table | to tsv | pbcopy
 }
