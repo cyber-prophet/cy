@@ -9,6 +9,7 @@
 
 export def main [] { help }
 
+# start with this function
 export def check_requirements [] {
     ['ipfs', 'bat', 'curl', 'pueue', 'cyber', 'pussy'] 
         | each {
@@ -19,6 +20,8 @@ export def check_requirements [] {
                 }                            
         }
     
+    pueued -d
+    do-bash 'ipfs daemon'
 }
 
 export-env { 
@@ -678,6 +681,13 @@ export def 'passport set' [
     $results
 }
 
+export def-env 'load vars' [] {
+    let cyberlinks = (dfr open '/Users/user/Documents/local_files/cyber_files/csv/cyberlinks.csv')
+    let particles = (dfr open '/Users/user/Documents/local_files/cyber_files/parquet_objects/particles.parquet')
+    let neurons = (open '/Users/user/Documents/local_files/cyber_files/dicts/neurons_dict.json' | fill non-exist $in | dfr into-df)
+    let-env cy = ($env.cy | merge {'cyberlinks': $cyberlinks} | merge {'particles': $particles} | merge {'neurons': $neurons})
+}
+
 # Create a config JSON to set env variables, to use them as parameters in cyber cli
 export def-env 'config new' [
     # config_name?: string@'nu-complete-config-names'
@@ -1035,12 +1045,13 @@ def serp1 [
 export def 'cid download async' [
     cid
     --force (-f)
+    --source = 'gateway' # kubo or gateway
 ] {
     let content = (do -i {open $"($env.cy.ipfs-files-folder)/($cid).md"})
 
     let content = (
         if ($content == null) or ($content == 'timeout') or $force {
-            pu-add $"cy cid add queue ($cid)"
+            pu-add $"cy cid add queue ($cid) --source ($source)"
             "downloading"
         }
     )
@@ -1049,9 +1060,16 @@ export def 'cid download async' [
 # Download cid immediately and mark it in the queue
 export def 'cid add queue' [
     cid: string
+    --source = 'gateway'
 ] {
-    # let status = cid download kubo $cid
-    let status = cid download gateway $cid
+    # let status = 
+    let status = (
+        if ($source == 'kubo') {
+            cid download kubo $cid
+        } else {
+            cid download gateway $cid
+        }
+    )
 
     if ($status in ['text', 'non_text']) {
         rm -f $"($env.cyfolder)/cache/queue/($cid)"
@@ -1419,6 +1437,23 @@ def "nu-complete keys values" [] {
 
 def "nu-complete bool" [] {
     [true, false]
+}
+
+def do-async [commands: string] {
+    bash -c $"nu -c '($commands)' &"
+}
+
+def do-bash [commands: string] {
+    bash -c $"'($commands)' &"
+}
+
+def 'fill non-exist' [
+    tbl
+    --value = null
+] {
+    let cols = ($tbl | each {|i| $i | columns} | uniq | reduce --fold {} {|i acc| $acc | merge {$i : $value}})
+    
+    $tbl | each {|i| $cols | merge $i}
 }
 
 # A wrapper, to cache CLI requests
