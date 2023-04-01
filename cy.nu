@@ -25,7 +25,7 @@ export def check_requirements [] {
 }
 
 export-env { 
-    banner
+    # banner2
 
     let config_folder = ("~/.config/cy/" | path expand)
     let default_cy_folder = ('~/cy/' | path expand)
@@ -1247,8 +1247,12 @@ export def 'balances' [
 export def 'ipfs bootstrap add congress' [] {
     ipfs bootstrap add '/ip4/135.181.19.86/tcp/4001/p2p/12D3KooWNMcnoQynAY9hyi4JxzSu64BsRGcJ9z7vKghqk8sTrpqY'
     print "check if bootstrap node works by executing commands:"
-    print 'ipfs dht findpeer 12D3KooWNMcnoQynAY9hyi4JxzSu64BsRGcJ9z7vKghqk8sTrpqY'
-    print 'ipfs dht findpeer QmUgmRxoLtGERot7Y6G7UyF6fwvnusQZfGR15PuE6pY3aB'
+    
+    print 'ipfs routing findpeer 12D3KooWNMcnoQynAY9hyi4JxzSu64BsRGcJ9z7vKghqk8sTrpqY'
+    ipfs routing findpeer 12D3KooWNMcnoQynAY9hyi4JxzSu64BsRGcJ9z7vKghqk8sTrpqY
+    
+    print 'ipfs routing findpeer QmUgmRxoLtGERot7Y6G7UyF6fwvnusQZfGR15PuE6pY3aB'
+    ipfs routing findpeer QmUgmRxoLtGERot7Y6G7UyF6fwvnusQZfGR15PuE6pY3aB
 }
 
 # Check IBC denoms
@@ -1301,7 +1305,7 @@ def 'banner' [] {
 }
 
 def 'banner2' [] {
-    print "(ansi yellow)cy(ansi reset) is loaded"
+    print $"(ansi yellow)cy(ansi reset) is loaded"
 }
 
 
@@ -1449,9 +1453,9 @@ def do-bash [commands: string] {
 
 def 'fill non-exist' [
     tbl
-    --value = null
+    --value_to_replace = null
 ] {
-    let cols = ($tbl | each {|i| $i | columns} | uniq | reduce --fold {} {|i acc| $acc | merge {$i : $value}})
+    let cols = ($tbl | each {|i| $i | columns} | flatten | uniq | reduce --fold {} {|i acc| $acc | merge {$i: $value_to_replace}})
     
     $tbl | each {|i| $cols | merge $i}
 }
