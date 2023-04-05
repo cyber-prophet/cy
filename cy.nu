@@ -1076,7 +1076,7 @@ export def 'cid add queue' [
 }
 
 # Download a cid from kubo (go-ipfs cli) immediately
-export def 'cid download kubo' [
+def 'cid download kubo' [
     cid: string
     --timeout = 300s
     --folder = $"($env.cy.ipfs-files-folder)"
@@ -1112,7 +1112,7 @@ export def 'cid download kubo' [
 }
 
 # Download a cid from gateway immediately
-export def 'cid download gateway' [
+def 'cid download gateway' [
     cid: string
     --gate_url: string = 'https://gateway.ipfs.cybernode.ai/ipfs/'
     --folder: string = $"($env.cy.ipfs-files-folder)"
