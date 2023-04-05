@@ -1175,16 +1175,37 @@ export def 'queue check' [
     attempts = 0
 ] {
     let files = (ls -s $"($env.cyfolder)/cache/queue/")
-    if ( ($files | length | inspect) > 0 ) {
+
+    if (do -i {pueue status} | complete | $in.exit_code != 0) {
+        return "Tasks queue manager it turned off. Launch it with 'brew services start pueue' or 'pueued -d' command"
+    }
+
+    if ( ($files | length) == 0 ) {
+        return 'there are no files in queue'
+    }
+
+    print $"Overall count of files in queue is ($files | length)."
+
+    let filtered_files = (
         $files
+        | sort-by modified -r
         | where size <= (1 + $attempts | into filesize)
+    )
+
+    if ($filtered_files == []) {
+        return $'There are no files, that was attempted to download for less than ($attempts) times.'
+    }
+
+    print $"There are $($filtered_files | length) files that was attempted to be downloaded ($attempts) times already."
+    print $"The latest file was added into the queue ($filtered_files | get modified.0 -i)"
+
+    (
+        $filtered_files 
         | get name -i
         | each {
             |i| pu-add $"cy cid add queue ($i)"
         }
-    } else {
-        "the queue is empty"
-    }
+    )
 }
 
 # Clear the cache folder
