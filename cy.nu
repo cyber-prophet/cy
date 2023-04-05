@@ -19,9 +19,6 @@ export def check_requirements [] {
                   print $'($i) is installed'
                 }                            
         }
-    
-    pueued -d
-    do-bash 'ipfs daemon'
 }
 
 export-env { 
@@ -1143,7 +1140,7 @@ export def 'cid download gateway' [
 
 # Read a CID from the cache, and if the CID is absent - add it into the queue
 export def 'cid read or download' [
-    cid
+    cid: string
     --attempts = 0
 ] {
     let content = (do -i {open $"($env.cy.ipfs-files-folder)/($cid).md"})
