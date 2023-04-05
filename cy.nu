@@ -23,13 +23,10 @@ export def check_requirements [] {
 
 export-env { 
     # banner2
-
     let config_folder = ("~/.config/cy/" | path expand)
     let default_cy_folder = ('~/cy/' | path expand)
 
-    if not ($config_folder | path exists) {
-        mkdir $config_folder
-    }
+    mkdir $config_folder
 
     let config_file_path = $"($config_folder)/cy_config.toml"
 
@@ -38,26 +35,18 @@ export-env {
     } catch {
         print "there is no '~/.config/cy/cy_config.toml'. I'll create it."
 
-        let def_path_rec = {
+        {
             'path': $default_cy_folder
             'ipfs-files-folder': $"($default_cy_folder)/cache/safe/"
-        }
-        try {
-            $def_path_rec | save $config_file_path
-        } catch {
-            open $config_file_path | merge $def_path_rec | save -f $config_file_path 
-        }
+            'ipfs-download-from': 'gateway'
+        } | save $config_file_path
     }
 
-    let-env cyfolder = try {
-        $config1 | get 'path'
-    } catch {
-        $default_cy_folder
-    }
+    let-env cyfolder = ($config1 | get 'path')
 
     let-env cy = try {
         let active_config = ($config1 | get 'config-name')
-        open $"($env.cyfolder)/config/($active_config).toml" | merge $config1
+        $config1 | merge (open $"($env.cyfolder)/config/($active_config).toml") | sort
     } catch {
         $'Cy config file was not found. Run "cy config new"' | cprint -c green_underline
         $nothing
@@ -864,11 +853,10 @@ export def-env 'config activate' [
 ] {
     let inconfig = $in
     let config1 = (
-        $inconfig 
-        | default (config view $config_name)
+        open ('~/.config/cy/cy_config.toml' | path expand) 
         | merge (
-            open ('~/.config/cy/cy_config.toml' | path expand) 
-            | reject 'config-name'
+            $inconfig 
+            | default (config view $config_name)
         )
     )
 
@@ -1040,11 +1028,12 @@ def serp1 [
 
 # Add a cid into queue to download asyncasynchronously
 export def 'cid download async' [
-    cid
+    cid: string
     --force (-f)
-    --source = 'gateway' # kubo or gateway
+    --source: string # kubo or gateway
 ] {
     let content = (do -i {open $"($env.cy.ipfs-files-folder)/($cid).md"})
+    let source = ($source | default $env.cy.ipfs-download-from)
 
     let content = (
         if ($content == null) or ($content == 'timeout') or $force {
@@ -1057,14 +1046,14 @@ export def 'cid download async' [
 # Download cid immediately and mark it in the queue
 export def 'cid add queue' [
     cid: string
-    --source = 'gateway'
+    --source: string # kubo or gateway
 ] {
-    # let status = 
+    let source = ($source | default $env.cy.ipfs-download-from)
     let status = (
-        if ($source == 'kubo') {
-            cid download kubo $cid
-        } else {
+        if ($source == 'gateway') {
             cid download gateway $cid
+        } else {
+            cid download kubo $cid
         }
     )
 
