@@ -30,7 +30,7 @@ export-env {
 
     let config_file_path = $"($config_folder)/cy_config.toml"
 
-    let config1 = try {
+    let config1 = (try {
         open $config_file_path
     } catch {
         print "there is no '~/.config/cy/cy_config.toml'. I'll create it."
@@ -40,19 +40,21 @@ export-env {
             'ipfs-files-folder': $"($default_cy_folder)/cache/safe/"
             'ipfs-download-from': 'gateway'
         } | save $config_file_path
-    }
+    })
 
     let-env cyfolder = ($config1 | get 'path')
 
-    let-env cy = try {
-        let active_config = ($config1 | get 'config-name')
-        $config1 | merge (open $"($env.cyfolder)/config/($active_config).toml") | sort
-    } catch {
-        $'Cy config file was not found. Run "cy config new"' | cprint -c green_underline
-        $nothing
-    }
+    let-env cy = (
+        try {
+            let active_config = ($config1 | get 'config-name')
+            $config1 | merge (open $"($env.cyfolder)/config/($active_config).toml") | sort
+        } catch {
+            $'Cy config file was not found. Run "cy config new"' | cprint -c green_underline
+            $nothing
+        }
+    )
 
-    load vars
+    # load vars
 }
 
 # Pin a text particle
@@ -276,7 +278,7 @@ export def 'link random' [
 export def 'tmp view' [
     --quiet (-q) # Don't print info
 ] {
-    let tmp_links = open $"($env.cyfolder)/cyberlinks_temp.csv" 
+    let tmp_links = (open $"($env.cyfolder)/cyberlinks_temp.csv")
 
     let links_count = ($tmp_links | length)
 
@@ -758,7 +760,7 @@ export def-env 'config new' [
     'Choose the name of executable (cyber or pussy). ' | cprint --before 1 --after 0
     'Default: cyber' | cprint -c yellow_italic
 
-    let _exec = if-empty (input) -a 'cyber'
+    let _exec = (if-empty (input) -a 'cyber')
 
     let addr_table = (
         ^($_exec) keys list --output json 
@@ -785,7 +787,7 @@ export def-env 'config new' [
 
     'Enter the address to send transactions from. ' | cprint --before 1 --after 0
     $'Default: ($address_def)' | cprint -c yellow_italic
-    let address = if-empty (input) -a $address_def
+    let address = (if-empty (input) -a $address_def)
 
     let config_name = (
         $addr_table 
@@ -813,7 +815,7 @@ export def-env 'config new' [
 
     'Enter the chain-id for interacting with the blockchain. ' | cprint --before 1 --after 0
     $'Default: ($chain_id_def)' | cprint -c yellow_italic
-    let chain_id = if-empty (input) -a $chain_id_def
+    let chain_id = (if-empty (input) -a $chain_id_def)
 
 
     let rpc_def = (if ($_exec == 'cyber') {
@@ -825,12 +827,12 @@ export def-env 'config new' [
 
     'Enter the address of RPC api for interacting with the blockchain. ' | cprint --before 1 --after 0
     $'Default: ($rpc_def)' | cprint -c yellow_italic
-    let rpc_address = if-empty (input) -a $rpc_def
+    let rpc_address = (if-empty (input) -a $rpc_def)
 
 
     'Select the ipfs service to use (kubo, cybernode, both). ' | cprint --before 1 --after 0
     'Default: cybernode' | cprint -c yellow_italic
-    let ipfs_storage = if-empty (input) -a 'cybernode'
+    let ipfs_storage = (if-empty (input) -a 'cybernode')
 
 
     let temp_env = {
@@ -1057,7 +1059,7 @@ def 'search-auto-refresh' [
 
     serp1 $results 
 
-    watch $"($env.cyfolder)/cache/queue" { clear; print $"Searching ($env.cy.exec) for ($cid)"; serp1 $results}
+    watch $"($env.cyfolder)/cache/queue" {|| clear; print $"Searching ($env.cy.exec) for ($cid)"; serp1 $results}
 }
 
 def "nu-complete search functions" [] {
@@ -1141,11 +1143,11 @@ export def 'cid add queue' [
 # Download a cid from kubo (go-ipfs cli) immediately
 def 'cid download kubo' [
     cid: string
-    --timeout = 300s
+    --timeout = "300s"
     --folder = $"($env.cy.ipfs-files-folder)"
 ] {
     print $"cid to download ($cid)"
-    let type = do -i {ipfs cat --timeout $timeout -l 400 $cid | file - | $in + "" | str replace "/dev/stdin: " "" | split row "," | get -i 0}
+    let type = (do -i {ipfs cat --timeout $timeout -l 400 $cid | file - | $in + "" | str replace "/dev/stdin: " "" | split row "," | get -i 0})
 
     if ($type =~ "^empty") {
         return "not found"
@@ -1227,7 +1229,7 @@ export def 'cid read or download' [
 
 # Watch the queue folder, and if there are updates, request files to download
 export def 'watch search folder' [] {
-    watch $"($env.cyfolder)/cache/search" { queue check }
+    watch $"($env.cyfolder)/cache/search" {|| queue check }
 }
 
 # Check the queue for the new CIDs, and if there are any, safely download the text ones
@@ -1853,7 +1855,7 @@ export def-env 'ber' [
     # print $important_options
     let filename = $"($cfolder)($command)-($ts1).json"
 
-    let $cache_ls = ls $cfolder
+    let $cache_ls = (ls $cfolder)
 
     # print "cached_files"
     let cached_file = (
