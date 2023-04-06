@@ -51,6 +51,8 @@ export-env {
         $'Cy config file was not found. Run "cy config new"' | cprint -c green_underline
         $nothing
     }
+
+    load vars
 }
 
 # Pin a text particle
@@ -687,9 +689,9 @@ export def-env 'graph download snapshoot' [] {
 }
 
 export def 'graph to-gephi' [
-    cyberlinks?
+    --cyberlinks = $env.cy.cyberlinks
+    --particles = $env.cy.particles
 ] {
-    let cyberlinks = ($cyberlinks | default $env.cy.cyberlinks )
     (
         $cyberlinks
         | dfr into-df 
@@ -698,7 +700,7 @@ export def 'graph to-gephi' [
     )
 
     (
-        $env.cy.particles 
+        $particles 
         | dfr into-lazy 
         | dfr drop content 
         | dfr with-column (
@@ -712,15 +714,38 @@ export def 'graph to-gephi' [
     )
 }
 
-export def 'graph filter' [
-    neuron: string@"nu-complete neurons nicks"
+export def 'graph to-gephi filter' [
+    ...neurons: string@"nu-complete neurons nicks"
     # --cyberlinks?
 ] {
+    let filtered_nrns = (
+        $neurons 
+        | dfr into-df 
+        | dfr join $env.cy.neurons '0' nick 
+        | dfr select neuron 
+        | dfr join $env.cy.cyberlinks neuron neuron
+    )
+
+    let filtered_prtkls = (
+        $filtered_nrns 
+        | dfr into-df 
+        | dfr get particle_from 
+        | dfr rename particle_from particle 
+        | dfr append -c (
+            $filtered_nrns 
+            | dfr into-df 
+            | dfr get particle_to
+            | dfr rename particle_to particle
+            ) 
+        | dfr unique 
+        | dfr join $env.cy.particles particle particle
+    )
+    graph to-gephi --cyberlinks $filtered_nrns --particles $filtered_prtkls
     # let cyberlinks = ($cyberlinks | default $env.cy.cyberlinks )
 }
 
 export def "nu-complete neurons nicks" [] {
-    $env.cy.neurons.nick | dfr into-df | dfr into-nu | select nick
+    $env.cy.neurons.nick | dfr into-df | dfr into-nu | get nick
 }
 
 # Create a config JSON to set env variables, to use them as parameters in cyber cli
