@@ -668,10 +668,59 @@ export def 'passport set' [
 }
 
 export def-env 'load vars' [] {
-    let cyberlinks = (dfr open '/Users/user/Documents/local_files/cyber_files/csv/cyberlinks.csv')
-    let particles = (dfr open '/Users/user/Documents/local_files/cyber_files/parquet_objects/particles.parquet')
-    let neurons = (open '/Users/user/Documents/local_files/cyber_files/dicts/neurons_dict.json' | fill non-exist $in | dfr into-df)
+    let path = $"($env.cyfolder)/graph/"
+    let cyberlinks = (dfr open $"($env.cyfolder)/graph/cyberlinks.csv")
+    let particles = (dfr open $"($env.cyfolder)/graph/particles.parquet")
+    let neurons = (open $"($env.cyfolder)/graph/neurons_dict.json" | fill non-exist $in | dfr into-df)
     let-env cy = ($env.cy | merge {'cyberlinks': $cyberlinks} | merge {'particles': $particles} | merge {'neurons': $neurons})
+}
+
+# Download a snapshot of cybergraph by graphkeeper
+export def-env 'graph download snapshoot' [] {
+    let path = $"($env.cyfolder)/graph/"
+    let data_cid = (passport get graphkeeper | get extension.data -i)
+    ipfs get $"($data_cid)/graph/cyberlinks.csv" -o $path
+    ipfs get $"($data_cid)/graph/particles.parquet" -o $path
+    ipfs get $"($data_cid)/graph/neurons_dict.json" -o $path
+    print $"graph data are downloaded to '($path)' directory"
+    load vars
+}
+
+export def 'graph to-gephi' [
+    cyberlinks?
+] {
+    let cyberlinks = ($cyberlinks | default $env.cy.cyberlinks )
+    (
+        $cyberlinks
+        | dfr into-df 
+        | dfr rename [particle_from particle_to] [source target] 
+        | dfr to-csv $"($env.cyfolder)/gephi/!cyberlinks.csv"
+    )
+
+    (
+        $env.cy.particles 
+        | dfr into-lazy 
+        | dfr drop content 
+        | dfr with-column (
+            (dfr col particle) | dfr as cid
+        ) | dfr rename [particle content_s] [id label] 
+        | dfr collect 
+        | dfr into-nu 
+        | reject index timestamp 
+        | move id label cid --before height 
+        | save $"($env.cyfolder)/gephi/!particles.csv" -f
+    )
+}
+
+export def 'graph filter' [
+    neuron: string@"nu-complete neurons nicks"
+    # --cyberlinks?
+] {
+    # let cyberlinks = ($cyberlinks | default $env.cy.cyberlinks )
+}
+
+export def "nu-complete neurons nicks" [] {
+    $env.cy.neurons.nick | dfr into-df | dfr into-nu | select nick
 }
 
 # Create a config JSON to set env variables, to use them as parameters in cyber cli
@@ -1333,6 +1382,7 @@ def make_default_folders_fn [] {
     mkdir $"($env.cyfolder)/backups/"
     mkdir $"($env.cyfolder)/config/"
     mkdir $"($env.cyfolder)/graph/"
+    mkdir $"($env.cyfolder)/gephi/"
     mkdir $"($env.cyfolder)/scripts/"
     mkdir $"($env.cyfolder)/cache/"
     mkdir $"($env.cyfolder)/cache/search/"
