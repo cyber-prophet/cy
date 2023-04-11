@@ -1107,13 +1107,14 @@ export def 'cid download async' [
     cid: string
     --force (-f)
     --source: string # kubo or gateway
+    --info_only # Don't download the file by write a card with filetype and size
 ] {
     let content = (do -i {open $"($env.cy.ipfs-files-folder)/($cid).md"})
     let source = ($source | default $env.cy.ipfs-download-from)
 
     let content = (
         if ($content == null) or ($content == 'timeout') or $force {
-            pu-add $"cy cid add queue ($cid) --source ($source)"
+            pu-add $"cy cid add queue ($cid) --source ($source) --info_only ($info_only)"
             "downloading"
         }
     )
@@ -1123,13 +1124,14 @@ export def 'cid download async' [
 export def 'cid add queue' [
     cid: string
     --source: string # kubo or gateway
+    --info_only = false # Don't download the file by write a card with filetype and size
 ] {
     let source = ($source | default $env.cy.ipfs-download-from)
     let status = (
         if ($source == 'gateway') {
-            cid download gateway $cid
+            cid download gateway $cid --info_only $info_only
         } else {
-            cid download kubo $cid
+            cid download kubo $cid --info_only $info_only
         }
     )
 
@@ -1145,13 +1147,16 @@ def 'cid download kubo' [
     cid: string
     --timeout = "300s"
     --folder = $"($env.cy.ipfs-files-folder)"
+    --info_only = false # Don't download the file by write a card with filetype and size
 ] {
     print $"cid to download ($cid)"
     let type = (do -i {ipfs cat --timeout $timeout -l 400 $cid | file - | $in + "" | str replace '\n' '' | str replace "/dev/stdin: " "" })
 
     if ($type =~ "^empty") {
         return "not found"
-    } else if ($type =~ "(ASCII text)|(Unicode text, UTF-8)|(very short file)") {
+    } else if (
+        ($type =~ "(ASCII text)|(Unicode text, UTF-8)|(very short file)") and (not $info_only)
+     ) {
         try {
             ipfs get --progress=false --timeout $timeout -o $"($folder)/($cid).md" $cid 
             return "text"
@@ -1181,6 +1186,7 @@ def 'cid download gateway' [
     cid: string
     --gate_url: string = 'https://gateway.ipfs.cybernode.ai/ipfs/'
     --folder: string = $"($env.cy.ipfs-files-folder)"
+    --info_only: bool = false # Don't download the file by write a card with filetype and size
 ] {
     let headers = (
         curl -s -I -m 60 $"($gate_url)($cid)"
@@ -1192,7 +1198,9 @@ def 'cid download gateway' [
 
     let type1 = ($headers | get -i 'Content-Type')
     let size1 = ($headers | get -i 'Content-Length')
-    if ($type1 | default "") == 'text/plain; charset=utf-8' {
+    if (
+        (($type1 | default "") == 'text/plain; charset=utf-8') and (not info_only)
+    ) {
         http get $"($gate_url)($cid)" -m 120 | save -f $"($folder)/($cid).md" 
         return "text"
     } else if ($type1 != []) {
