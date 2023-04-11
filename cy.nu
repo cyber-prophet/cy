@@ -12,13 +12,13 @@ export def main [] { help }
 # start with this function
 export def check_requirements [] {
     ['ipfs', 'bat', 'curl', 'pueue', 'cyber', 'pussy'] 
-        | each {
-                |i| if ((which ($i) | length) == 0) {
-                  print $'($i) is missing'
-                } else {
-                  print $'($i) is installed'
-                }                            
+    | each {
+        |i| if ((which ($i) | length) == 0) {
+            print $'($i) is missing'
+        } else {
+            print $'($i) is installed'
         }
+    }
 }
 
 export-env { 
