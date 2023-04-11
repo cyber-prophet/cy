@@ -672,7 +672,6 @@ export def 'passport set' [
 }
 
 export def-env 'load vars' [] {
-    let path = $"($env.cyfolder)/graph/"
     let cyberlinks = (dfr open $"($env.cyfolder)/graph/cyberlinks.csv")
     let particles = (dfr open $"($env.cyfolder)/graph/particles.parquet")
     let neurons = (open $"($env.cyfolder)/graph/neurons_dict.json" | fill non-exist $in | dfr into-df)
@@ -686,10 +685,11 @@ export def-env 'graph download snapshoot' [] {
     ipfs get $"($data_cid)/graph/cyberlinks.csv" -o $path
     ipfs get $"($data_cid)/graph/particles.parquet" -o $path
     ipfs get $"($data_cid)/graph/neurons_dict.json" -o $path
-    print $"graph data are downloaded to '($path)' directory"
+    print $"The graph data has been downloaded to the '($path)' directory"
     load vars
 }
 
+# Export the entire graph into CSV file for import to Gephi
 export def 'graph to-gephi' [
     --cyberlinks = $env.cy.cyberlinks
     --particles = $env.cy.particles
@@ -716,6 +716,7 @@ export def 'graph to-gephi' [
     )
 }
 
+# Export filtered graph into a CSV file for import to Gephi.
 export def 'graph to-gephi filter' [
     ...neurons: string@"nu-complete neurons nicks"
     # --cyberlinks?
@@ -746,7 +747,7 @@ export def 'graph to-gephi filter' [
     # let cyberlinks = ($cyberlinks | default $env.cy.cyberlinks )
 }
 
-export def "nu-complete neurons nicks" [] {
+def "nu-complete neurons nicks" [] {
     $env.cy.neurons.nick | dfr into-df | dfr into-nu | get nick
 }
 
