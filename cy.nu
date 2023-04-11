@@ -1195,7 +1195,7 @@ def 'cid download gateway' [
     if ($type1 | default "") == 'text/plain; charset=utf-8' {
         http get $"($gate_url)($cid)" -m 120 | save -f $"($folder)/($cid).md" 
         return "text"
-    } else if ($type1 != null) {
+    } else if ($type1 != []) {
         $"non_text:($type1) size:($size1)" | save -f $"($folder)/($cid).md"
         return "non_text"
     } else {
