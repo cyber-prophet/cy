@@ -1147,11 +1147,11 @@ def 'cid download kubo' [
     --folder = $"($env.cy.ipfs-files-folder)"
 ] {
     print $"cid to download ($cid)"
-    let type = (do -i {ipfs cat --timeout $timeout -l 400 $cid | file - | $in + "" | str replace "/dev/stdin: " "" | split row "," | get -i 0})
+    let type = (do -i {ipfs cat --timeout $timeout -l 400 $cid | file - | $in + "" | str replace '\n' '' | str replace "/dev/stdin: " "" })
 
     if ($type =~ "^empty") {
         return "not found"
-    } else if ($type =~ "(ASCII text)|(Unicode text)|(very short file)") {
+    } else if ($type =~ "(ASCII text)|(Unicode text, UTF-8)|(very short file)") {
         try {
             ipfs get --progress=false --timeout $timeout -o $"($folder)/($cid).md" $cid 
             return "text"
@@ -1192,7 +1192,7 @@ def 'cid download gateway' [
 
     let type1 = ($headers | get -i 'Content-Type')
     let size1 = ($headers | get -i 'Content-Length')
-    if ($type1 | default "") =~ 'text/plain' {
+    if ($type1 | default "") == 'text/plain; charset=utf-8' {
         http get $"($gate_url)($cid)" -m 120 | save -f $"($folder)/($cid).md" 
         return "text"
     } else if ($type1 != null) {
