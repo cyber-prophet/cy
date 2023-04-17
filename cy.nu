@@ -1151,12 +1151,12 @@ def 'cid download kubo' [
     --info_only = false # Don't download the file by write a card with filetype and size
 ] {
     print $"cid to download ($cid)"
-    let type = (do -i {ipfs cat --timeout $timeout -l 400 $cid | file - | $in + "" | str replace '\n' '' | str replace "/dev/stdin: " "" })
+    let type = (do -i {ipfs cat --timeout $timeout -l 400 $cid | file - -I | $in + "" | str replace '\n' '' | str replace "/dev/stdin: " "" })
 
     if ($type =~ "^empty") {
         return "not found"
     } else if (
-        ($type =~ "(ASCII text)|(Unicode text, UTF-8)|(very short file)") and (not $info_only)
+        ($type =~ "(text/plain)|(ASCII text)|(Unicode text, UTF-8)|(very short file)") and (not $info_only)
      ) {
         try {
             ipfs get --progress=false --timeout $timeout -o $"($folder)/($cid).md" $cid 
@@ -1173,9 +1173,10 @@ def 'cid download kubo' [
             }
         )
 
-        let size_str = $"size:($size_json | get Size -i | default '') blocks:($size_json | get NumBlocks -i | default '')"
+        # let size_str = $"size:($size_json | get Size -i | default '') blocks:($size_json | get NumBlocks -i | default '')"
         
-        $"non_text:($type) ($size_str)" | save -f $"($folder)/($cid).md"
+        {'File': ($type | split row ";" | get -i 0)} | merge $size_json | sort -r | to toml | save -f $"($folder)/($cid).md"
+        # $"non_text:($type) ($size_str)" | save -f $"($folder)/($cid).md"
         
         return "non_text"
     }
