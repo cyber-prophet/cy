@@ -37,7 +37,7 @@ export-env {
 
         {
             'path': $default_cy_folder
-            'ipfs-files-folder': $"($default_cy_folder)/cache/safe/"
+            'ipfs-files-folder': $"($default_cy_folder)/graph/particles/safe/"
             'ipfs-download-from': 'gateway'
         } | save $config_file_path
     })
@@ -388,8 +388,6 @@ export def 'tmp pin col' [
     --column_with_text: string = 'text' # a column name to take values from to upload to IPFS. Default is 'text
     --column_to_write_cid: string = 'from' # a column name to write CIDs to. Default is 'from'
 ] {
-
-
     let new_text_col_name = ( $column_to_write_cid + '_text' )
 
     tmp view -q 
@@ -683,8 +681,13 @@ export def-env 'graph download snapshoot' [] {
     let path = $"($env.cyfolder)/graph/"
     let data_cid = (passport get graphkeeper | get extension.data -i)
     ipfs get $"($data_cid)/graph/cyberlinks.csv" -o $path
-    ipfs get $"($data_cid)/graph/particles.parquet" -o $path
+    # ipfs get $"($data_cid)/graph/particles.parquet" -o $path
     ipfs get $"($data_cid)/graph/neurons_dict.json" -o $path
+    ipfs get $"($data_cid)/graph/particles.zip" -o $path
+
+    mkdir $"($env.cyfolder)/graph/particles/safe/"
+
+    unzip -j -qq -o $"($env.cyfolder)/graph/particles.zip" -d $"($env.cyfolder)/graph/particles/safe/" 
     print $"The graph data has been downloaded to the '($path)' directory"
     load vars
 }
@@ -1268,7 +1271,7 @@ export def 'queue check' [
         return $'There are no files, that was attempted to download for less than ($attempts) times.'
     }
 
-    print $"There are $($filtered_files | length) files that was attempted to be downloaded ($attempts) times already."
+    print $"There are ($filtered_files | length) files that was attempted to be downloaded ($attempts) times already."
     print $"The latest file was added into the queue ($filtered_files | get modified.0 -i)"
 
     (
@@ -1418,10 +1421,9 @@ def make_default_folders_fn [] {
     mkdir $"($env.cyfolder)/temp/"
     mkdir $"($env.cyfolder)/backups/"
     mkdir $"($env.cyfolder)/config/"
-    mkdir $"($env.cyfolder)/graph/"
+    mkdir $"($env.cyfolder)/graph/particles/safe/"
     mkdir $"($env.cyfolder)/gephi/"
     mkdir $"($env.cyfolder)/scripts/"
-    mkdir $"($env.cyfolder)/cache/"
     mkdir $"($env.cyfolder)/cache/search/"
     mkdir $"($env.cy.ipfs-files-folder)/"
     mkdir $"($env.cyfolder)/cache/queue/"
