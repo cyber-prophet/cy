@@ -1112,16 +1112,15 @@ export def 'cid download async' [
     --force (-f)
     --source: string # kubo or gateway
     --info_only # Don't download the file by write a card with filetype and size
+    --folder: string = $"($env.cy.ipfs-files-folder)"
 ] {
     let content = (do -i {open $"($env.cy.ipfs-files-folder)/($cid).md"})
     let source = ($source | default $env.cy.ipfs-download-from)
 
-    let content = (
-        if ($content == null) or ($content == 'timeout') or $force {
-            pu-add $"cy cid add queue ($cid) --source ($source) --info_only ($info_only)"
-            "downloading"
-        }
-    )
+    if ($content == null) or ($content == 'timeout') or $force {
+        pu-add $"cy cid add queue ($cid) --source ($source) --info_only ($info_only) --folder '($folder)'"
+        print "downloading"
+    }
 }
 
 # Download cid immediately and mark it in the queue
@@ -1129,13 +1128,14 @@ export def 'cid add queue' [
     cid: string
     --source: string # kubo or gateway
     --info_only = false # Don't download the file by write a card with filetype and size
+    --folder: string = $"($env.cy.ipfs-files-folder)"
 ] {
     let source = ($source | default $env.cy.ipfs-download-from)
     let status = (
         if ($source == 'gateway') {
-            cid download gateway $cid --info_only $info_only
+            cid download gateway $cid --info_only $info_only --folder $folder
         } else {
-            cid download kubo $cid --info_only $info_only
+            cid download kubo $cid --info_only $info_only --folder $folder
         }
     )
 
@@ -1150,11 +1150,19 @@ export def 'cid add queue' [
 def 'cid download kubo' [
     cid: string
     --timeout = "300s"
-    --folder = $"($env.cy.ipfs-files-folder)"
+    --folder: string
     --info_only = false # Don't download the file by write a card with filetype and size
 ] {
     print $"cid to download ($cid)"
-    let type = (do -i {ipfs cat --timeout $timeout -l 400 $cid | file - -I | $in + "" | str replace '\n' '' | str replace "/dev/stdin: " "" })
+    let type = (
+        do -i {
+            ipfs cat --timeout $timeout -l 400 $cid 
+            | file - -I 
+            | $in + '' 
+            | str replace '\n' '' 
+            | str replace '/dev/stdin: ' '' 
+        }
+    )
 
     if ($type =~ "^empty") {
         return "not found"
@@ -1168,19 +1176,18 @@ def 'cid download kubo' [
             return "not found"
         }
     } else {
-        let size_json = (
-            try {
-                (ipfs dag stat $cid --enc json --timeout $timeout | from json )
-            } catch {
-                null
-            }
+        (
+            {'MIME type': ($type | split row ";" | get -i 0)} 
+            | merge (
+                do -i {
+                    ipfs dag stat $cid --enc json --timeout $timeout | from json 
+                } 
+                | default {'Size': null}
+            ) 
+            | sort -r 
+            | to toml 
+            | save -f $"($folder)/($cid).md"
         )
-
-        # let size_str = $"size:($size_json | get Size -i | default '') blocks:($size_json | get NumBlocks -i | default '')"
-        
-        {'File': ($type | split row ";" | get -i 0)} | merge $size_json | sort -r | to toml | save -f $"($folder)/($cid).md"
-        # $"non_text:($type) ($size_str)" | save -f $"($folder)/($cid).md"
-        
         return "non_text"
     }
 
@@ -1190,7 +1197,7 @@ def 'cid download kubo' [
 def 'cid download gateway' [
     cid: string
     --gate_url: string = 'https://gateway.ipfs.cybernode.ai/ipfs/'
-    --folder: string = $"($env.cy.ipfs-files-folder)"
+    --folder: string
     --info_only: bool = false # Don't download the file by write a card with filetype and size
 ] {
     let headers = (
@@ -1200,16 +1207,17 @@ def 'cid download gateway' [
         | parse "{header}: {value}"
         | transpose -d -r -i
     )
-
     let type1 = ($headers | get -i 'Content-Type')
-    let size1 = ($headers | get -i 'Content-Length')
+    let size1 = ($headers | get -i 'Content-Length' | into int)
+
     if (
         (($type1 | default "") == 'text/plain; charset=utf-8') and (not info_only)
     ) {
         http get $"($gate_url)($cid)" -m 120 | save -f $"($folder)/($cid).md" 
         return "text"
     } else if ($type1 != []) {
-        $"non_text:($type1) size:($size1)" | save -f $"($folder)/($cid).md"
+        # $"non_text:($type1) size:($size1)" | save -f $"($folder)/($cid).md"
+        {'MIME type': $type1, 'Size': $size1} | sort -r | to toml | save -f $"($folder)/($cid).md"
         return "non_text"
     } else {
         return "not found"
