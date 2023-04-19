@@ -138,7 +138,7 @@ export def 'pin files' [
     } else {
         $out_table 
         | tmp append
- }
+    }
 }
 
 # Add a 2-text cyberlink to the temp table
@@ -822,12 +822,11 @@ export def-env 'config new' [
     let chain_id = (if-empty (input) -a $chain_id_def)
 
 
-    let rpc_def = (if ($_exec == 'cyber') {
+    let rpc_def = if ($_exec == 'cyber') {
         'https://rpc.bostrom.cybernode.ai:443'
     } else {
         'https://rpc.space-pussy.cybernode.ai:443'
     }
-)
 
     'Enter the address of RPC api for interacting with the blockchain. ' | cprint --before 1 --after 0
     $'Default: ($rpc_def)' | cprint -c yellow_italic
@@ -966,7 +965,7 @@ def 'search-sync' [
 
     print $'searching ($env.cy.exec) for ($cid)'
     
-    let serp = (
+    (
         ^($env.cy.exec) query rank search $cid $page 10 --output json
         | from json 
         | get result 
@@ -985,9 +984,7 @@ def 'search-sync' [
             }
         } 
         | select particle rank 
-        )
-
-        $serp
+    )
 }
 
 def 'search-with-backlinks' [
@@ -1013,7 +1010,7 @@ def 'search-with-backlinks' [
         } 
         | select particle rank
         | upsert source "search"
-        )
+    )
 
     let back = (
         ^($env.cy.exec) query rank backlinks $cid $page $results_per_page --output json
@@ -1024,11 +1021,11 @@ def 'search-with-backlinks' [
         } 
         | select particle rank
         | upsert source "backlinks"
-        )
+    )
 
     let result = ($serp | append $back)
 
-        $result
+    $result
 }
 
 def 'search-auto-refresh' [
@@ -1084,8 +1081,6 @@ export def 'search' [
     } else if $search_type == 'search-sync' {
         search-sync $query --page $page --results_per_page $results_per_page
     }
-    
-
 }
 
 def serp1 [
@@ -1329,8 +1324,8 @@ export def 'balances' [
             | transpose -i -r 
             | into record
             | merge $i
-    } 
-)
+        } 
+    )
 
     let dummy1 = (
         $balances | columns | prepend "name" | uniq 
@@ -1902,10 +1897,6 @@ export def-env 'ber' [
             null
         }
     )
-
-    # print $cached_file
-
-    # let let_flags_list = $flags_list
 
     let content = (
         if ($cached_file != null) {
