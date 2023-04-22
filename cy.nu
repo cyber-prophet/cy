@@ -1192,11 +1192,10 @@ def serp1 [
 }
 
 # Obtain cid info
-export def 'cid fill info' [
+export def 'cid get type gateway' [
     cid: string
     --gate_url: string = 'https://gateway.ipfs.cybernode.ai/ipfs/'
-    --folder: string
-    --info_only: bool = false # Don't download the file by write a card with filetype and size
+    --to_csv
 ] {
     let headers = (
         curl -s -I -m 120 $"($gate_url)($cid)"
@@ -1205,20 +1204,24 @@ export def 'cid fill info' [
         | parse "{header}: {value}"
         | transpose -d -r -i
     )
-    let type1 = ($headers | get -i 'Content-Type')
-    let size1 = ($headers | get -i 'Content-Length')
+    let type = ($headers | get -i 'Content-Type')
+    let size = ($headers | get -i 'Content-Length')
 
     if (
         (
-            ($type1 == []) and ($size1 == [])
+            ($type == []) and ($size == [])
         ) or (
-            ($type1 == 'text/html') and ($size1 == "157")
+            ($type == 'text/html') and ($size == "157")
         )
     ) {
         return null
     }
 
-    $"($cid),($gate_url),\"($type1)\",($size1 | into int)\n" | save -a $"($env.cyfolder)/cache/MIME_types.csv"
+    if $to_csv {
+        $"($cid),($gate_url),\"($type)\",($size | into int)\n" | save -a $"($env.cyfolder)/cache/MIME_types.csv"
+    } else {
+        [$type $size]
+    }
 }
 
 # Add a cid into queue to download asyncasynchronously
@@ -1315,24 +1318,18 @@ def 'cid download gateway' [
     --folder: string
     --info_only: bool = false # Don't download the file by write a card with filetype and size
 ] {
-    let headers = (
-        curl -s -I -m 60 $"($gate_url)($cid)"
-        | lines
-        | skip 1
-        | parse "{header}: {value}"
-        | transpose -d -r -i
-    )
-    let type1 = ($headers | get -i 'Content-Type')
-    let size1 = ($headers | get -i 'Content-Length' | into int)
+    let meta = (cid get type gateway $cid)
+    let type = ($meta | get -i 0)
+    let size = ($meta | get -i 1)
 
     if (
-        (($type1 | default "") == 'text/plain; charset=utf-8') and (not $info_only)
+        (($type | default "") == 'text/plain; charset=utf-8') and (not $info_only)
     ) {
         http get $"($gate_url)($cid)" -m 120 | save -f $"($folder)/($cid).md" 
         return "text"
-    } else if ($type1 != []) {
-        # $"non_text:($type1) size:($size1)" | save -f $"($folder)/($cid).md"
-        {'MIME type': $type1, 'Size': $size1} | sort -r | to toml | save -f $"($folder)/($cid).md"
+    } else if ($type != []) {
+        # $"non_text:($type) size:($size)" | save -f $"($folder)/($cid).md"
+        {'MIME type': $type, 'Size': $size} | sort -r | to toml | save -f $"($folder)/($cid).md"
         return "non_text"
     } else {
         return "not found"
