@@ -1100,6 +1100,35 @@ def serp1 [
     $serp 
 }
 
+# Obtain cid info
+export def 'cid fill info' [
+    cid: string
+    --gate_url: string = 'https://gateway.ipfs.cybernode.ai/ipfs/'
+    --folder: string
+    --info_only: bool = false # Don't download the file by write a card with filetype and size
+] {
+    let headers = (
+        curl -s -I -m 120 $"($gate_url)($cid)"
+        | lines
+        | skip 1
+        | parse "{header}: {value}"
+        | transpose -d -r -i
+    )
+    let type1 = ($headers | get -i 'Content-Type')
+    let size1 = ($headers | get -i 'Content-Length')
+
+    if (
+        (
+            ($type1 == []) and ($size1 == [])
+        ) or (
+            ($type1 == 'text/html') and ($size1 == "157")
+        )
+    ) {
+        return null
+    }
+
+    $"($cid),($gate_url),\"($type1)\",($size1 | into int)\n" | save -a $"($env.cyfolder)/cache/MIME_types.csv"
+}
 
 # Add a cid into queue to download asyncasynchronously
 export def 'cid download async' [
