@@ -54,7 +54,7 @@ export-env {
         }
     )
 
-    # load vars
+    # graph load vars
 }
 
 # Pin a text particle
@@ -669,27 +669,118 @@ export def 'passport set' [
     $results
 }
 
-export def-env 'load vars' [] {
+export def-env 'graph load vars' [] {
+    if (not ($"($env.cyfolder)/graph/cyberlinks.csv" | path exists)) {
+        print "There is no cyberlinks.csv. Download it usin 'cy graph download snapshoot'"
+        return 
+    }
     let cyberlinks = (dfr open $"($env.cyfolder)/graph/cyberlinks.csv")
-    let particles = (dfr open $"($env.cyfolder)/graph/particles.parquet")
+    let particles = (if (not ($"($env.cyfolder)/particles.parquet" | path exists)) {
+        (dfr open $"($env.cyfolder)/graph/particles.parquet")
+    } else {
+        print "there is no 'particles.parquet' file. Create one using the command 'cy graph update particles parquet'"
+        null
+    })
     let neurons = (open $"($env.cyfolder)/graph/neurons_dict.json" | fill non-exist $in | dfr into-df)
-    let-env cy = ($env.cy | merge {'cyberlinks': $cyberlinks} | merge {'particles': $particles} | merge {'neurons': $neurons})
+    let-env cy = (
+        $env.cy 
+        | merge {'cyberlinks': $cyberlinks} 
+        | merge {'particles': $particles} 
+        | merge {'neurons': $neurons}
+    )
 }
 
 # Download a snapshot of cybergraph by graphkeeper
-export def-env 'graph download snapshoot' [] {
-    let path = $"($env.cyfolder)/graph/"
-    let data_cid = (passport get graphkeeper | get extension.data -i)
-    ipfs get $"($data_cid)/graph/cyberlinks.csv" -o $path
-    # ipfs get $"($data_cid)/graph/particles.parquet" -o $path
-    ipfs get $"($data_cid)/graph/neurons_dict.json" -o $path
-    ipfs get $"($data_cid)/graph/particles.zip" -o $path
+export def-env 'graph download snapshoot' [
+    --disable_update_parquet (-d)
+] {
+    let path = $"($env.cyfolder)/graph"
+    let cur_data_cid = (passport get graphkeeper | get extension.data -i)
+    let update_info = (open $"($path)/update.toml")
+    let last_data_cid = ($update_info | get -i last_cid)
 
-    mkdir $"($env.cyfolder)/graph/particles/safe/"
+    if ($last_data_cid == $cur_data_cid) {
+        print "no updates found"
+        return
+    }
 
-    unzip -j -qq -o $"($env.cyfolder)/graph/particles.zip" -d $"($env.cyfolder)/graph/particles/safe/" 
+    print "Downloading cyberlinks.csv"
+    ipfs get $"($cur_data_cid)/graph/cyberlinks.csv" -o $path
+    print "Downloading neurons.json"
+    ipfs get $"($cur_data_cid)/graph/neurons_dict.json" -o $path
+    print "Downloading particles zips"
+    ipfs get $"($cur_data_cid)/graph/particles/" -o $"($path)/particles_arch/"
+
+    let archives = (ls $"($path)/particles_arch/*.zip" | get name)
+    let last_archive = (
+        $update_info 
+        | get -i last_archive 
+        | default ($archives | first)
+    )
+
+    (
+        $archives
+        | skip until {|x| $x == $last_archive}
+        | each {|i| unzip -ojq $i -d $"($path)/particles/safe/"; print $"($i) is unzipped"}
+    )
+
+    (
+        open $"($path)/update.toml" 
+        | upsert "last_cid" $cur_data_cid 
+        | upsert "last_archive" ($archives | last)
+        | save $"($path)/update.toml" -f
+    )
+
     print $"The graph data has been downloaded to the '($path)' directory"
-    load vars
+
+    if (not $disable_update_parquet) {
+        print 'Updating particles parquet'
+        graph update particles parquet
+    }
+}
+
+export def-env 'graph update particles parquet' [] {
+    let c = (dfr open $"($env.cyfolder)/graph/cyberlinks.csv" | dfr into-lazy)
+    let t1_particles = (
+        $c | dfr rename particle_from particle | dfr drop particle_to 
+        | dfr append --col ($c | dfr rename particle_to particle | dfr drop particle_from) 
+        | dfr into-lazy | dfr sort-by height | dfr unique --subset [particle] | dfr collect 
+    );
+
+    let t2_ls = (ls $"($env.cyfolder)/graph/particles/safe");
+    let t3_ls_content = (
+        $t2_ls 
+        | get name 
+        | each {
+            |i| open $i 
+            | str substring 0..150 -g 
+            | str trim 
+            | lines 
+            | get -i 0 
+            | default $"!!malformed ($i)"
+        } 
+        | dfr into-df 
+        | dfr rename '0' content_s
+    )
+    let t4_cids = ($t2_ls | get name | each {|i| $i | path basename | str substring 0..46 | into string} | dfr into-df | dfr rename '0' cid)
+    let t5_files_with_content_df = ($t2_ls | dfr into-df | dfr with-column $t3_ls_content | dfr with-column $t4_cids | dfr drop name modified type); 
+    let t6_particles_with_content = ($t1_particles | dfr join $t5_files_with_content_df particle cid --left )
+
+    let m2_mask_null = ($t6_particles_with_content | dfr get content_s | dfr is-null ); 
+
+    let t7_content_filled = (
+        $t6_particles_with_content | dfr with-column (
+            $t6_particles_with_content 
+            | dfr get content_s 
+            | dfr set 'timeout' --mask ($m2_mask_null | dfr into-df) 
+            | dfr rename string content_s
+        )
+    )
+
+    backup_fn $"($env.cyfolder)/graph/particles.parquet"
+    $t7_content_filled | dfr to-parquet $"($env.cyfolder)/graph/particles.parquet"
+    graph load vars
+    # $t6_particles_with_content | dfr to-parquet $"($env.cyfolder)/graph/particles.parquet"
 }
 
 # Export the entire graph into CSV file for import to Gephi
@@ -1235,7 +1326,7 @@ def 'cid download gateway' [
     let size1 = ($headers | get -i 'Content-Length' | into int)
 
     if (
-        (($type1 | default "") == 'text/plain; charset=utf-8') and (not info_only)
+        (($type1 | default "") == 'text/plain; charset=utf-8') and (not $info_only)
     ) {
         http get $"($gate_url)($cid)" -m 120 | save -f $"($folder)/($cid).md" 
         return "text"
@@ -1460,6 +1551,8 @@ def make_default_folders_fn [] {
     mkdir $"($env.cy.ipfs-files-folder)/"
     mkdir $"($env.cyfolder)/cache/queue/"
     mkdir $"($env.cyfolder)/cache/cli_out/"
+    
+    touch $"($env.cyfolder)/graph/update.toml"
 }
 
 # Print string colourfully
