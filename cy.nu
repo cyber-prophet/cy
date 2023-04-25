@@ -67,38 +67,28 @@ export def 'pin text' [
 ] {
     let text = ($in | default $text_param | into string)
 
-    let cid = if (is-cid $text) {
+    if (is-cid $text) {
         $text
+    } else if $only_hash {
+        $text
+        | ipfs add -Q --only-hash
+        | str replace '\n' ''
     } else {
-        if $only_hash {
+        let cid = if (
+            ($env.cy.ipfs-storage == 'kubo') or ($env.cy.ipfs-storage == 'both')
+        ) {
             $text
-            | ipfs add -Q --only-hash
+            | ipfs add -Q 
             | str replace '\n' ''
-        } else {
-            let cid = if (
-                ($env.cy.ipfs-storage == 'kubo') or ($env.cy.ipfs-storage == 'both')
-                ) {
-                    $text
-                    | ipfs add -Q 
-                    | str replace '\n' ''
-                } 
-                
-            let cid = if (
-                ($env.cy.ipfs-storage == 'cybernode') or ($env.cy.ipfs-storage == 'both')
-                ) {
-                    $text 
-                    | curl --silent -X POST -F file=@- 'https://io.cybernode.ai/add' 
-                    | from json 
-                    | get cid
-                } else {
-                    $cid
-                }
-    
-            $cid
-        }
+        } 
+            
+        if (($env.cy.ipfs-storage == 'cybernode') or ($env.cy.ipfs-storage == 'both')) {
+            $text 
+            | curl --silent -X POST -F file=@- 'https://io.cybernode.ai/add' 
+            | from json 
+            | get cid
+        } else { $cid }
     }
-
-    $cid
 }
 
 # Pin files from the current folder to the local node and output the cyberlinks table
