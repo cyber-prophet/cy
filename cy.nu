@@ -733,13 +733,25 @@ export def-env 'graph download snapshoot' [
     }
 }
 
-export def-env 'graph update particles parquet' [] {
-    let c = (dfr open $"($env.cyfolder)/graph/cyberlinks.csv" | dfr into-lazy)
-    let t1_particles = (
+def 'cyberlinks_to_particles' [
+    cyberlinks?
+] {
+    let c = (
+        $cyberlinks 
+        | default (
+            dfr open $"($env.cyfolder)/graph/cyberlinks.csv" 
+        )
+        | dfr into-lazy
+    )
+
+    (
         $c | dfr rename particle_from particle | dfr drop particle_to 
         | dfr append --col ($c | dfr rename particle_to particle | dfr drop particle_from) 
         | dfr into-lazy | dfr sort-by height | dfr unique --subset [particle] | dfr collect 
-    );
+    )
+}
+
+export def-env 'graph update particles parquet' [] {
 
     let t2_ls = (ls $"($env.cyfolder)/graph/particles/safe");
     let t3_ls_content = (
@@ -758,7 +770,11 @@ export def-env 'graph update particles parquet' [] {
     )
     let t4_cids = ($t2_ls | get name | each {|i| $i | path basename | str substring 0..46 | into string} | dfr into-df | dfr rename '0' cid)
     let t5_files_with_content_df = ($t2_ls | dfr into-df | dfr with-column $t3_ls_content | dfr with-column $t4_cids | dfr drop name modified type); 
-    let t6_particles_with_content = ($t1_particles | dfr join $t5_files_with_content_df particle cid --left )
+    let t6_particles_with_content = (
+        cyberlinks_to_particles 
+        | dfr into-df
+        | dfr join $t5_files_with_content_df particle cid --left 
+    )
 
     let m2_mask_null = ($t6_particles_with_content | dfr get content_s | dfr is-null ); 
 
