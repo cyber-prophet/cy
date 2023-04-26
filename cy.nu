@@ -1195,30 +1195,25 @@ export def 'cid get type gateway' [
         curl -s -I -m 120 $"($gate_url)($cid)"
         | lines
         | skip 1
+        | append "dummy: dummy"   # otherwise it returns list in the end
         | parse "{header}: {value}"
         | transpose -d -r -i
     )
     let type = ($headers | get -i 'Content-Type')
     let size = ($headers | get -i 'Content-Length')
+    
+    log_row_csv --cid $cid --source $gate_url --type $type --size $size --status '3.downloaded headers'
 
     if (
-        (
-            ($type == []) and ($size == [])
-        ) or (
-            ($type == 'text/html') and ($size == "157")
-        )
-    ) {
+        (($type == null) or ($size == null)) 
+        or (($type == 'text/html') and (($size == "157") or ($size == 157))
+    )) {
         return null
     }
 
-    if $to_csv {
-        $"($cid),($gate_url),\"($type)\",($size | into int)\n" | save -a $"($env.cyfolder)/cache/MIME_types.csv"
-    } else {
-        [$type $size]
-    }
+    {type: $type size: $size}
 }
 
-# Add a cid into queue to download asyncasynchronously
 export def log_row_csv [
     --cid: string = ''
     --source: string = ''
@@ -1230,6 +1225,7 @@ export def log_row_csv [
     $"($cid),($source),\"($type)\",($size),($status),(history session)\n" | save -a $file
 }
 
+# Add a cid into queue to download asynchronously
 export def 'cid download async' [
     cid: string
     --force (-f)
@@ -1241,13 +1237,13 @@ export def 'cid download async' [
     let source = ($source | default $env.cy.ipfs-download-from)
 
     if ($content == null) or ($content == 'timeout') or $force {
-        pu-add $"cy cid add queue ($cid) --source ($source) --info_only ($info_only) --folder '($folder)'"
+        pu-add $"cy cid download ($cid) --source ($source) --info_only ($info_only) --folder '($folder)'"
         print "downloading"
     }
 }
 
 # Download cid immediately and mark it in the queue
-export def 'cid add queue' [
+export def 'cid download' [
     cid: string
     --source: string # kubo or gateway
     --info_only = false # Don't download the file by write a card with filetype and size
@@ -1261,12 +1257,6 @@ export def 'cid add queue' [
             cid download kubo $cid --info_only $info_only --folder $folder
         }
     )
-
-    if ($status in ['text', 'non_text']) {
-        rm -f $"($env.cyfolder)/cache/queue/($cid)"
-    } else {
-        "+" | save -a $"($env.cyfolder)/cache/queue/($cid)"
-    }
 }
 
 # Download a cid from kubo (go-ipfs cli) immediately
@@ -1317,28 +1307,33 @@ def 'cid download kubo' [
 }
 
 # Download a cid from gateway immediately
-def 'cid download gateway' [
+export def 'cid download gateway' [
     cid: string
     --gate_url: string = 'https://gateway.ipfs.cybernode.ai/ipfs/'
-    --folder: string
+    --folder: string = $"($env.cy.ipfs-files-folder)"
     --info_only: bool = false # Don't download the file by write a card with filetype and size
 ] {
     let meta = (cid get type gateway $cid)
-    let type = ($meta | get -i 0)
-    let size = ($meta | get -i 1)
+    let type = ($meta | get -i type)
+    let size = ($meta | get -i size)
 
     if (
         (($type | default "") == 'text/plain; charset=utf-8') and (not $info_only)
     ) {
         http get $"($gate_url)($cid)" -m 120 | save -f $"($folder)/($cid).md" 
-        return "text"
-    } else if ($type != []) {
-        # $"non_text:($type) size:($size)" | save -f $"($folder)/($cid).md"
+        log_row_csv --cid $cid --source $gate_url --type $type --size $size --status '4.downloaded file'
+    } else if ($type != null) {
         {'MIME type': $type, 'Size': $size} | sort -r | to toml | save -f $"($folder)/($cid).md"
-        return "non_text"
+        log_row_csv --cid $cid --source $gate_url --type $type --size $size --status '4.downloaded info'
     } else {
-        return "not found"
+        log_row_csv --cid $cid --source $gate_url --type $type --size $size --status '5.failed'
     }
+}
+
+export def 'cid queue add' [
+    cid: string
+] {
+    log_row_csv --cid $cid --status '1.queued'
 }
 
 # Read a CID from the cache, and if the CID is absent - add it into the queue
@@ -1350,7 +1345,7 @@ export def 'cid read or download' [
 
     let content = (
         if $content == null {
-            pu-add $"cy cid add queue ($cid)"
+            pu-add $"cy cid download ($cid)"
             "downloading"
         } else {
             $content
@@ -1403,7 +1398,7 @@ export def 'queue check' [
         $filtered_files 
         | get name -i
         | each {
-            |i| pu-add $"cy cid add queue ($i)"
+            |i| pu-add $"cy cid download ($i)"
         }
     )
 }
