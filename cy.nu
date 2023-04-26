@@ -1219,6 +1219,17 @@ export def 'cid get type gateway' [
 }
 
 # Add a cid into queue to download asyncasynchronously
+export def log_row_csv [
+    --cid: string = ''
+    --source: string = ''
+    --type: string = ''
+    --size: string = ''
+    --status: string = ''
+    --file: string = $"($env.cyfolder)/cache/MIME_types.csv"
+] {
+    $"($cid),($source),\"($type)\",($size),($status),(history session)\n" | save -a $file
+}
+
 export def 'cid download async' [
     cid: string
     --force (-f)
