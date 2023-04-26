@@ -33,7 +33,7 @@ export-env {
     let config1 = (try {
         open $config_file_path
     } catch {
-        print "there is no '~/.config/cy/cy_config.toml'. I'll create it."
+        print "Creating '~/.config/cy/cy_config.toml' with default settings."
 
         {
             'path': $default_cy_folder
@@ -46,15 +46,16 @@ export-env {
 
     let-env cy = (
         try {
-            let active_config = ($config1 | get 'config-name')
-            $config1 | merge (open $"($env.cyfolder)/config/($active_config).toml") | sort
+            $config1 
+            | merge (
+                open $"($env.cyfolder)/config/($config1 | get 'config-name').toml"
+            ) 
+            | sort
         } catch {
             $'Cy config file was not found. Run "cy config new"' | cprint -c green_underline
             $nothing
         }
     )
-
-    # graph load vars
 }
 
 # Pin a text particle
@@ -160,14 +161,17 @@ export def 'link texts' [
 export def 'link chain' [
     ...rest
 ] {
-    let l1 = ($rest | length)
-    if $l1 < 2 {
-        return $'($l1) particles were submitted. We need 2 or more'
+    let count = ($rest | length)
+    if $count < 2 {
+        return $'($count) particles were submitted. We need 2 or more'
     }
 
-    let rows = 0..($l1 - 2)
-    $rows | each {|i| link texts ($rest | get $i) ($rest | get ($i + 1))}
-
+    (
+        0..($count - 2) # The number of paris of cids to iterate through
+        | each {
+            |i| link texts ($rest | get $i) ($rest | get ($i + 1))
+        }
+    )
 }
 
 # Add a tweet
@@ -252,7 +256,7 @@ def "nu-complete random sources" [] {
 # Make a random cyberlink from different APIs
 export def 'link random' [
     source?: string@"nu-complete random sources"
-    n = 1
+    n: int = 1 # Number of links to append
 ] {
     for x in 1..$n {
         if $source == 'forismatic.com' {
