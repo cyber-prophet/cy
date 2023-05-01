@@ -746,9 +746,16 @@ def 'cyberlinks_to_particles' [
     )
 
     (
-        $c | dfr rename particle_from particle | dfr drop particle_to
-        | dfr append --col ($c | dfr rename particle_to particle | dfr drop particle_from)
-        | dfr into-lazy | dfr sort-by height | dfr unique --subset [particle] | dfr collect
+        $c 
+        | dfr rename particle_from particle 
+        | dfr drop particle_to
+        | dfr append --col (
+            $c | dfr rename particle_to particle | dfr drop particle_from
+        )
+        | dfr into-lazy 
+        | dfr sort-by height 
+        | dfr unique --subset [particle] 
+        | dfr collect
     )
 }
 
