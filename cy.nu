@@ -198,7 +198,7 @@ export def 'tweet' [
 }
 
 # Add a random chuck norris cyberlink to the temp table
-export def 'link chuck' [] {
+def 'link chuck' [] {
     # let cid_from = (pin text 'chuck norris')
     let cid_from = 'QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1'
 
@@ -222,7 +222,7 @@ export def 'link chuck' [] {
 }
 
 # Add a random quote cyberlink to the temp table
-export def 'link quote' [] {
+def 'link quote' [] {
     let q1 = (
         http get -r https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=json
         | str replace "\\\\" ""
@@ -253,18 +253,20 @@ def "nu-complete random sources" [] {
     ['chucknorris.io' 'forismatic.com']
 }
 
-# Make a random cyberlink from different APIs
+# Make a random cyberlink from different APIs (chucknorris.io, forismatic.com)
 export def 'link random' [
     source?: string@"nu-complete random sources"
     n: int = 1 # Number of links to append
 ] {
+    mut list = $nothing
     for x in 1..$n {
         if $source == 'forismatic.com' {
-            link quote
+            $list = (link quote)
         } else {
-            link chuck
+            $list = (link chuck)
         }
     }
+    $list 
 }
 
 
@@ -1609,7 +1611,7 @@ def cprint [
 
     let text = (
         if $frame != null {
-            let width = (term size | get columns) - 2
+            let width = (term size | get columns | $in - 2 | [$in 1] | math max) # term size gives 0 in tests
             (
                 (" " | fill -a r -w $width -c $frame) + "\n" +
                 ( $text ) + "\n" +
