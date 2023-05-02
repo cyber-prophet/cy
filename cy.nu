@@ -1543,6 +1543,28 @@ export def 'ibc denoms' [] {
     $denom_trace1.temp_out | merge $denom_trace1 | reject ibc_hash temp_out | sort-by path --natural
 }
 
+# Dump the peers connected to the given node to the comma-separated `persistent_peers` list
+export def 'validator generate persistent peers string' [
+    node_address: string = $'($env.cy.rpc-address)'
+] {
+    if $node_address == $env.cy.rpc-address {
+        print $"Nodes list for ($env.cy.rpc-address)\n"
+    }
+
+    let peers = (http get $'($node_address)/net_info' | get result.peers)
+
+    print $"($peers | length) peers found\n"
+
+    $peers
+    | each {|i| $i 
+    | get node_info.id remote_ip node_info.listen_addr} 
+    | each {
+        |i| $'($i.0)@($i.1):($i.2 | split row ":" | last)'
+    } 
+    | str join ',' 
+    | $'persistent_peers = "($in)"'
+}
+
 # An ordered list of cy commands
 export def 'help' [
     --to_md (-m) # export table as markdown
