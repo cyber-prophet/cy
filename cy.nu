@@ -1476,6 +1476,25 @@ export def 'cache clear' [] {
     make_default_folders_fn
 }
 
+export def 'get-balance' [
+    address: string
+] {
+    if not (is-neuron $address) {
+        print $"($address) doesn't look like address"
+        return
+    }
+
+    cyber query bank balances $address --output json
+    | from json
+    | get balances
+    | upsert amount {
+        |b| $b.amount
+        | into int
+    }
+    | transpose -i -r
+    | into record
+}
+
 # Check the balances for the keys added to the active CLI
 export def 'balances' [
     ...name: string@'nu-complete keys values'
@@ -1498,15 +1517,7 @@ export def 'balances' [
     let $balances = (
         $keys1
         | par-each {
-            |i| cyber query bank balances $i.address --output json
-            | from json
-            | get balances
-            | upsert amount {
-                |b| $b.amount
-                | into int
-            }
-            | transpose -i -r
-            | into record
+            |i| get-balance $i.address
             | merge $i
         }
     )
