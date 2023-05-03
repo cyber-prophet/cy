@@ -67,6 +67,11 @@ export def 'pin text' [
     --only_hash
 ] {
     let $text = ($in | default $text_param | into string)
+    let $text = (if ($text | path exists) {
+        open $text
+    } else {
+        $text
+    })
 
     if (is-cid $text) {
         $text
