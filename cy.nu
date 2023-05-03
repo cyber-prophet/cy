@@ -30,7 +30,7 @@ export-env {
 
     let $config_file_path = $"($config_folder)/cy_config.toml"
 
-    let $config1 = (try {
+    let $config = (try {
         open $config_file_path
     } catch {
         print "Creating '~/.config/cy/cy_config.toml' with default settings."
@@ -42,13 +42,13 @@ export-env {
         } | save $config_file_path
     })
 
-    let-env cyfolder = ($config1 | get 'path')
+    let-env cyfolder = ($config | get 'path')
 
     let-env cy = (
         try {
-            $config1
+            $config
             | merge (
-                open $"($env.cyfolder)/config/($config1 | get 'config-name').toml"
+                open $"($env.cyfolder)/config/($config | get 'config-name').toml"
             )
             | sort
         } catch {
@@ -223,22 +223,22 @@ def 'link chuck' [] {
 
 # Add a random quote cyberlink to the temp table
 def 'link quote' [] {
-    let $q1 = (
+    let $json = (
         http get -r https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=json
         | str replace "\\\\" ""
         | from json
     )
 
     let $quoteAuthor = (
-        if $q1.quoteAuthor == "" {
+        if $json.quoteAuthor == "" {
             ""
         } else {
-            "\n\n>> " + $q1.quoteAuthor
+            "\n\n>> " + $json.quoteAuthor
         }
     )
 
     let $quote = (
-        "> " + $q1.quoteText +
+        "> " + $json.quoteText +
         $quoteAuthor +
         "\n\n" + "via [forismatic.com](https://forismatic.com)"
     )
@@ -258,15 +258,15 @@ export def 'link random' [
     source?: string@"nu-complete random sources"
     n: int = 1 # Number of links to append
 ] {
-    mut list = $nothing
+    mut $table = $nothing
     for x in 1..$n {
         if $source == 'forismatic.com' {
-            $list = (link quote)
+            $table = (link quote)
         } else {
-            $list = (link chuck)
+            $table = (link chuck)
         }
     }
-    $list 
+    $table 
 }
 
 
@@ -389,21 +389,21 @@ export def 'tmp pin col' [
     tmp view -q
     | upsert $column_to_write_cid {
         |it| $it | get $column_with_text | pin text
-        }
+    }
     | rename -c [$column_with_text $new_text_col_name]
     | tmp replace
 }
 
 # Check if any of the links in the tmp table exist
-# > let $$from = 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufA'
-# > let $$to = 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufB'
-# > let $$neuron = 'bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel'
+# > let $from = 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufA'
+# > let $to = 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufB'
+# > let $neuron = 'bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel'
 # > cy link-exist $from $to $neuron
 # : false
 def 'link-exist' [
-    from
-    to
-    neuron
+    from: string
+    to: string
+    neuron: string
 ] {
     let $out = (do -i {
         ^($env.cy.exec) query rank is-exist $from $to $neuron --output json --node $env.cy.rpc-address
@@ -572,7 +572,7 @@ export def 'update cy' [
 
 # Get a passport by providing a neuron's address or nick
 export def 'passport get' [
-    address_or_nick
+    address_or_nick: string # Name of passport or neuron's address
 ] {
     let $json = (
         if (is-neuron $address_or_nick) {
@@ -601,7 +601,7 @@ export def 'passport get' [
 
 # Set a passport's particle, data or avatar field for a given nickname
 export def 'passport set' [
-    particle
+    particle: string
     nickname?
     --data
     --avatar
@@ -619,7 +619,7 @@ export def 'passport set' [
         }
     )
 
-    let $$particle = (
+    let $particle = (
         if (is-cid $particle) {
             $particle
         } else {
@@ -1625,7 +1625,7 @@ def make_default_folders_fn [] {
 }
 
 # Print string colourfully
-def cprint [
+def 'cprint' [
     ...args
     --color (-c): string@'nu-complete colors' = 'default'
     --frame (-f): string
