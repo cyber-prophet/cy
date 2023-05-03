@@ -179,6 +179,18 @@ export def 'link chain' [
     )
 }
 
+# Follow a neuron
+export def 'follow' [
+    neuron
+] {
+    if not (is-neuron $neuron) {
+        print $"($neuron) doesn't look like address"
+        return
+    }
+
+    link texts 'QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx' 'bostrom1v5x5vl4c0zjua37ymqjy4267fy9m6x8yvzvkfp'
+}
+
 # Add a tweet
 export def 'tweet' [
     text_to
