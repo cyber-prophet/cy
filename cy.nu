@@ -859,13 +859,12 @@ export def 'graph to-gephi' [
     (
         $particles
         | dfr into-lazy
-        | dfr drop content
         | dfr with-column (
             (dfr col particle) | dfr as cid
         ) | dfr rename [particle content_s] [id label]
         | dfr collect
         | dfr into-nu
-        | reject index timestamp
+        | reject index
         | move id label cid --before height
         | save $"($env.cyfolder)/gephi/!particles.csv" -f
     )
