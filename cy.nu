@@ -915,7 +915,7 @@ export def-env 'config new' [
     'Choose the name of executable (cyber or pussy). ' | cprint --before 1 --after 0
     'Default: cyber' | cprint -c yellow_italic
 
-    let $_exec = (if-empty (input) -a 'cyber')
+    let $_exec = ((input) | if-empty 'cyber')
 
     let $addr_table = (
         ^($_exec) keys list --output json
@@ -942,7 +942,7 @@ export def-env 'config new' [
 
     'Enter the address to send transactions from. ' | cprint --before 1 --after 0
     $'Default: ($address_def)' | cprint -c yellow_italic
-    let $address = (if-empty (input) -a $address_def)
+    let $address = ((input) | if-empty $address_def)
 
     let $config_name = (
         $addr_table
@@ -970,7 +970,7 @@ export def-env 'config new' [
 
     'Enter the chain-id for interacting with the blockchain. ' | cprint --before 1 --after 0
     $'Default: ($chain_id_def)' | cprint -c yellow_italic
-    let $chain_id = (if-empty (input) -a $chain_id_def)
+    let $chain_id = ((input) | if-empty $chain_id_def)
 
 
     let $rpc_def = if ($_exec == 'cyber') {
@@ -981,12 +981,12 @@ export def-env 'config new' [
 
     'Enter the address of RPC api for interacting with the blockchain. ' | cprint --before 1 --after 0
     $'Default: ($rpc_def)' | cprint -c yellow_italic
-    let $rpc_address = (if-empty (input) -a $rpc_def)
+    let $rpc_address = ((input) | if-empty $rpc_def)
 
 
     'Select the ipfs service to use (kubo, cybernode, both). ' | cprint --before 1 --after 0
     'Default: cybernode' | cprint -c yellow_italic
-    let $ipfs_storage = (if-empty (input) -a 'cybernode')
+    let $ipfs_storage = ((input) | if-empty 'cybernode')
 
 
     let $temp_env = {
@@ -1050,7 +1050,7 @@ export def-env 'config save' [
             $config_name
         }
     )
-    let $config_name = (if-empty $config_name -a $dt1)
+    let $config_name = ($config_name | if-empty $dt1)
 
     mut file_name = $"($env.cyfolder)/config/($config_name).toml"
 
@@ -1684,9 +1684,9 @@ def 'cprint' [
 }
 
 def 'if-empty' [
-    value?
-    --alternative (-a): any
+    alternative: any
 ] {
+    let value = $in
      (
          if ($value | is-empty) {
              $alternative
