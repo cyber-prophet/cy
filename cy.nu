@@ -863,6 +863,7 @@ export def 'graph to-gephi' [
             (dfr col particle) | dfr as cid
         ) | dfr rename [particle content_s] [id label]
         | dfr collect
+        | dfr with-column (dfr lit $'(date now | date format "%Y-%m-%d")' | dfr as "timestamp-end")
         | dfr into-nu
         | reject index
         | move id label cid --before height
@@ -1268,14 +1269,14 @@ export def 'cid get type gateway' [
     let $type = ($headers | get -i 'Content-Type')
     let $size = ($headers | get -i 'Content-Length')
 
-    log_row_csv --cid $cid --source $gate_url --type $type --size $size --status '3.downloaded headers'
-
     if (
         (($type == null) or ($size == null))
         or (($type == 'text/html') and (($size == "157") or ($size == 157))
     )) {
         return null
     }
+
+    log_row_csv --cid $cid --source $gate_url --type $type --size $size --status '3.downloaded headers'
 
     {type: $type size: $size}
 }
@@ -1473,6 +1474,14 @@ export def 'queue check' [
 export def 'cache clear' [] {
     backup_fn $"($env.cyfolder)/cache"
     make_default_folders_fn
+}
+
+export def 'query current height' [
+    exec?: string@'nu-complete-executables'
+] {
+    let $exec = ($exec | default $env.cy.exec)
+    # print $'current height for ($exec)'
+    ^($exec) query block | from json | get block.header | select height time chain_id
 }
 
 export def 'get-balance' [
@@ -1744,6 +1753,10 @@ def "nu-complete-config-names" [] {
 
 def "nu-complete-git-branches" [] {
     ['main', 'dev']
+}
+
+def "nu-complete-executables" [] {
+    ['cyber' 'pussy']
 }
 
 # cyber keys in a form of table
