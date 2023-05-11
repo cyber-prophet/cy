@@ -849,9 +849,25 @@ export def 'graph to-gephi' [
     --cyberlinks = $env.cy.cyberlinks
     --particles = $env.cy.particles
 ] {
+
+let $t1_height_index = (
+    $cyberlinks.height 
+    | dfr into-df 
+    | dfr unique 
+    | dfr into-nu 
+    | rename height_index 
+    | dfr into-df
+)
+# let particles = (
+#     $particles
+#     | dfr into-df 
+#     | dfr join --left $t1_height_index height height 
+# )
+
     (
         $cyberlinks
         | dfr into-df
+        | dfr join --left $t1_height_index height height 
         | dfr rename [particle_from particle_to] [source target]
         | dfr to-csv $"($env.cyfolder)/gephi/!cyberlinks.csv"
     )
@@ -859,11 +875,20 @@ export def 'graph to-gephi' [
     (
         $particles
         | dfr into-lazy
+        | dfr join --left $t1_height_index height height 
         | dfr with-column (
             (dfr col particle) | dfr as cid
         ) | dfr rename [particle content_s] [id label]
         | dfr collect
-        | dfr with-column (dfr lit $'(date now | date format "%Y-%m-%d")' | dfr as "timestamp-end")
+        # | dfr with-column (
+        #     dfr concat-str "" [
+        #         (dfr lit "<[") 
+        #         (dfr col timestamp) 
+        #         (dfr lit ($',74525]>'))
+        #         # (dfr lit ($',(date now | date format %Y-%m-%d]>)'))
+        #     ] 
+        #     | dfr as timestamp
+        # ) 
         | dfr into-nu
         | reject index
         | move id label cid --before height
