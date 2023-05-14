@@ -16,12 +16,11 @@ Cy - a [nushell](https://www.nushell.sh/) wrapper, an interface to the cyber fam
 There is a video manual on how to install these apps - https://t.me/CyberProphet/24
 
 1. Install [brew](https://brew.sh/)
-2. Install [rustup-init](https://rustup.rs/) (to install cargo, to install nushell with dataframes support) `brew install rustup-init`
 3. Install [cyber](https://github.com/cybercongress/go-cyber) or/and [pussy](https://github.com/cybercongress/go-cyber)
-4. Install [nushell](https://www.nushell.sh/) app https://www.nushell.sh/ `cargo install nu --features=dataframe`
+4. Install [nushell](https://www.nushell.sh/) app https://www.nushell.sh/ `brew install nushell`
 5. Install [kubo](https://github.com/ipfs/kubo) app (IPFS in Go) https://github.com/ipfs/kubo `brew install ipfs`
 6. Launch nushell by typing `nu` in your terminal app
-7. Execute `mkdir ~/cy | http get https://raw.githubusercontent.com/cyber-prophet/cy/main/cy.nu | save ~/cy/cy.nu -f`
+6. Execute `mkdir ~/cy | http get https://raw.githubusercontent.com/cyber-prophet/cy/dev/cy.nu | save ~/cy/cy.nu -f`
 8. Execute: `overlay use ~/cy/cy.nu as cy -p -r`. For more information on how to use overlays check [nushell's help](https://www.nushell.sh/book/overlays.html)
 9. Go through the wizzard `cy config`
 10. See all the commands in logical order by executing `cy`
