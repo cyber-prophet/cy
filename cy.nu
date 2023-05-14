@@ -1719,7 +1719,7 @@ def make_default_folders_fn [] {
     mkdir $"($env.cyfolder)/gephi/"
     mkdir $"($env.cyfolder)/scripts/"
     mkdir $"($env.cyfolder)/cache/search/"
-    mkdir $"($env.cy.ipfs-files-folder)/"
+    mkdir $"($env.cyfolder)/graph/particles/safe/"
     mkdir $"($env.cyfolder)/cache/queue/"
     mkdir $"($env.cyfolder)/cache/cli_out/"
 
