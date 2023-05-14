@@ -846,18 +846,31 @@ export def-env 'graph update particles parquet' [] {
 
 # Export the entire graph into CSV file for import to Gephi
 export def 'graph to-gephi' [
-    --cyberlinks = $env.cy.cyberlinks
-    --particles = $env.cy.particles
+    --cyberlinks: any
+    --particles: any
 ] {
+    let $cyberlinks = ($cyberlinks | default $env.cy.cyberlinks)
+    let $particles = ($particles | default $env.cy.particles)
 
-let $t1_height_index = (
-    $cyberlinks.height 
-    | dfr into-df 
-    | dfr unique 
-    | dfr into-nu 
-    | rename height_index 
-    | dfr into-df
-)
+    let $t1_height_index = (
+        $cyberlinks.height 
+        | dfr into-df 
+        | dfr unique 
+        | dfr into-nu  # An easy way to get index column
+        | rename height_index 
+    )
+
+    let $height_index_max = (
+        $t1_height_index 
+        | last 
+        | get height_index
+    )
+
+    let $t1_height_index = (
+        $t1_height_index 
+        | dfr into-df
+    )
+
 # let particles = (
 #     $particles
 #     | dfr into-df 
@@ -868,6 +881,22 @@ let $t1_height_index = (
         $cyberlinks
         | dfr into-df
         | dfr join --left $t1_height_index height height 
+        | dfr with-column (
+            dfr concat-str "" [
+                (dfr lit "<[") 
+                (dfr col height_index) 
+                (dfr lit ($',($height_index_max)]>'))
+            ] 
+            | dfr as height_index_interval
+        ) 
+        # | dfr with-column (
+        #     dfr concat-str "" [
+        #         (dfr lit "<[") 
+        #         (dfr col timestamp) 
+        #         (dfr lit ($',(date now | date format "%Y-%m-%d")]>'))
+        #     ] 
+        #     | dfr as timestamp_interval
+        # ) 
         | dfr rename [particle_from particle_to] [source target]
         | dfr to-csv $"($env.cyfolder)/gephi/!cyberlinks.csv"
     )
@@ -880,14 +909,21 @@ let $t1_height_index = (
             (dfr col particle) | dfr as cid
         ) | dfr rename [particle content_s] [id label]
         | dfr collect
+        | dfr with-column (
+            dfr concat-str "" [
+                (dfr lit "<[") 
+                (dfr col height_index) 
+                (dfr lit ($',($height_index_max)]>'))
+            ] 
+            | dfr as height_index_interval
+        ) 
         # | dfr with-column (
         #     dfr concat-str "" [
         #         (dfr lit "<[") 
         #         (dfr col timestamp) 
-        #         (dfr lit ($',74525]>'))
-        #         # (dfr lit ($',(date now | date format %Y-%m-%d]>)'))
+        #         (dfr lit ($',(date now | date format "%Y-%m-%d")]>'))
         #     ] 
-        #     | dfr as timestamp
+        #     | dfr as timestamp_interval
         # ) 
         | dfr into-nu
         | reject index
@@ -1312,8 +1348,9 @@ export def log_row_csv [
     --type: string = ''
     --size: string = ''
     --status: string = ''
-    --file: string = $"($env.cyfolder)/cache/MIME_types.csv"
+    --file: string = 
 ] {
+    let $file = ($file | default $"($env.cyfolder)/cache/MIME_types.csv")
     $"($cid),($source),\"($type)\",($size),($status),(history session)\n" | save -a $file
 }
 
@@ -1323,8 +1360,9 @@ export def 'cid download async' [
     --force (-f)
     --source: string # kubo or gateway
     --info_only # Don't download the file by write a card with filetype and size
-    --folder: string = $"($env.cy.ipfs-files-folder)"
+    --folder: string
 ] {
+    let $folder = ($folder | default $"($env.cy.ipfs-files-folder)")
     let $content = (do -i {open $"($env.cy.ipfs-files-folder)/($cid).md"})
     let $source = ($source | default $env.cy.ipfs-download-from)
 
@@ -1339,8 +1377,9 @@ export def 'cid download' [
     cid: string
     --source: string # kubo or gateway
     --info_only = false # Don't download the file by write a card with filetype and size
-    --folder: string = $"($env.cy.ipfs-files-folder)"
+    --folder: string
 ] {
+    let $folder = ($folder | default $"($env.cy.ipfs-files-folder)")
     let $source = ($source | default $env.cy.ipfs-download-from)
     let $status = (
         if ($source == 'gateway') {
@@ -1402,9 +1441,10 @@ def 'cid download kubo' [
 export def 'cid download gateway' [
     cid: string
     --gate_url: string = 'https://gateway.ipfs.cybernode.ai/ipfs/'
-    --folder: string = $"($env.cy.ipfs-files-folder)"
+    --folder: string
     --info_only: bool = false # Don't download the file by write a card with filetype and size
 ] {
+    let $folder = ($folder | default $"($env.cy.ipfs-files-folder)")
     let $meta = (cid get type gateway $cid)
     let $type = ($meta | get -i type)
     let $size = ($meta | get -i size)
@@ -1606,8 +1646,9 @@ export def 'ibc denoms' [] {
 
 # Dump the peers connected to the given node to the comma-separated `persistent_peers` list
 export def 'validator generate persistent peers string' [
-    node_address: string = $'($env.cy.rpc-address)'
+    node_address: string
 ] {
+    let $node_address = ($node_address | default $'($env.cy.rpc-address)')
     if $node_address == $env.cy.rpc-address {
         print $"Nodes list for ($env.cy.rpc-address)\n"
     }
