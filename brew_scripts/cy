@@ -1,0 +1,3 @@
+#!/bin/sh
+
+wezterm start -- nu -e 'overlay use ~/cy/cy.nu as cy -p -r' &
