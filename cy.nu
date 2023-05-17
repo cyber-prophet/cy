@@ -279,7 +279,7 @@ def "nu-complete random sources" [] {
 # Make a random cyberlink from different APIs (chucknorris.io, forismatic.com)
 export def 'link random' [
     source?: string@"nu-complete random sources"
-    n: int = 1 # Number of links to append
+    -n: int = 1 # Number of links to append
 ] {
     mut $table = $nothing
     for x in 1..$n {
