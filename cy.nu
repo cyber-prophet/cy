@@ -1810,6 +1810,20 @@ def 'pu-add' [
     pueue add -p $"nu -c \"($command)\" --config \"($nu.config-path)\" --env-config \"($nu.env-path)\""
 }
 
+def inspect2 [
+    callback?: closure
+] {
+    let input = $in
+
+    if $callback == $nothing {
+        print $input
+    } else {
+        do $callback $input
+    }
+
+    $input
+}
+
 def "nu-complete colors" [] {
     ansi --list | get name | each while {|it| if $it != 'reset' {$it} }
 }
