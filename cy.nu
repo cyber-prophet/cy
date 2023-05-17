@@ -272,10 +272,6 @@ def 'link quote' [] {
     link texts 'QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna' $quote
 }
 
-def "nu-complete random sources" [] {
-    ['chucknorris.io' 'forismatic.com']
-}
-
 # Make a random cyberlink from different APIs (chucknorris.io, forismatic.com)
 export def 'link random' [
     source?: string@"nu-complete random sources"
@@ -848,6 +844,47 @@ export def-env 'graph update particles parquet' [] {
     # $t6_particles_with_content | dfr to-parquet $"($env.cy.path)/graph/particles.parquet"
 }
 
+
+export def 'graph filter neurons' [
+    ...neurons: string@"nu-complete neurons nicks"
+    # --cyberlinks?
+] {
+    let $filtered_links = (
+        $neurons
+        | dfr into-df
+        | dfr join $env.cy.neurons '0' nick
+        | dfr select neuron
+        | dfr join $env.cy.cyberlinks neuron neuron
+    )
+
+    $filtered_links
+}
+
+# Export filtered graph into a CSV file for import to Gephi.
+def 'graph filter particles' [
+    cyberlinks
+] {
+    let $cyberlinks = ($cyberlinks | dfr into-df)
+
+    let $filtered_prtkls = (
+        $cyberlinks
+        | dfr into-df
+        | dfr get particle_from
+        | dfr rename particle_from particle
+        | dfr append -c (
+            $cyberlinks
+            | dfr into-df
+            | dfr get particle_to
+            | dfr rename particle_to particle
+            )
+        | dfr unique
+        | dfr join $env.cy.particles particle particle
+    )
+
+    $filtered_prtkls
+}
+
+
 # Export the entire graph into CSV file for import to Gephi
 export def 'graph to-gephi' [
     cyberlinks?
@@ -933,49 +970,6 @@ export def 'graph to-gephi' [
         | move id label cid --before height
         | save $"($env.cy.path)/gephi/!particles.csv" -f
     )
-}
-
-export def 'graph filter neurons' [
-    ...neurons: string@"nu-complete neurons nicks"
-    # --cyberlinks?
-] {
-    let $filtered_links = (
-        $neurons
-        | dfr into-df
-        | dfr join $env.cy.neurons '0' nick
-        | dfr select neuron
-        | dfr join $env.cy.cyberlinks neuron neuron
-    )
-
-    $filtered_links
-}
-
-# Export filtered graph into a CSV file for import to Gephi.
-def 'graph filter particles' [
-    cyberlinks
-] {
-    let $cyberlinks = ($cyberlinks | dfr into-df)
-
-    let $filtered_prtkls = (
-        $cyberlinks
-        | dfr into-df
-        | dfr get particle_from
-        | dfr rename particle_from particle
-        | dfr append -c (
-            $cyberlinks
-            | dfr into-df
-            | dfr get particle_to
-            | dfr rename particle_to particle
-            )
-        | dfr unique
-        | dfr join $env.cy.particles particle particle
-    )
-
-    $filtered_prtkls
-}
-
-def "nu-complete neurons nicks" [] {
-    $env.cy.neurons.nick | dfr into-df | dfr into-nu | get nick
 }
 
 # Create a config JSON to set env variables, to use them as parameters in cyber cli
@@ -1287,10 +1281,6 @@ def 'search-auto-refresh' [
     serp1 $results
 
     watch $"($env.cy.path)/cache/queue" {|| clear; print $"Searching ($env.cy.exec) for ($cid)"; serp1 $results}
-}
-
-def "nu-complete search functions" [] {
-    ['search-auto-refresh' 'search-with-backlinks', 'search-sync']
 }
 
 # Use the built-in node search function in cyber or pussy
@@ -1829,6 +1819,18 @@ def inspect2 [
     }
 
     $input
+}
+
+def "nu-complete random sources" [] {
+    ['chucknorris.io' 'forismatic.com']
+}
+
+def "nu-complete search functions" [] {
+    ['search-auto-refresh' 'search-with-backlinks', 'search-sync']
+}
+
+def "nu-complete neurons nicks" [] {
+    $env.cy.neurons.nick | dfr into-df | dfr into-nu | get nick
 }
 
 def "nu-complete colors" [] {
