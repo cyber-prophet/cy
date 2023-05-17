@@ -977,13 +977,8 @@ def "nu-complete neurons nicks" [] {
 export def-env 'config new' [
     # config_name?: string@'nu-complete-config-names'
 ] {
-    'This wizzard will walk you through the setup of CY.' | cprint -c green_underline -a 2
-    'If you skip entering the value - the default will be used.' | cprint -c yellow_italic
-
-    'Choose the name of executable (cyber or pussy). ' | cprint --before 1 --after 0
-    'Default: cyber' | cprint -c yellow_italic
-
-    let $_exec = ((input) | if-empty 'cyber')
+    'Choose the name of executable (cyber or pussy):' | cprint
+    let $_exec = (nu-complete-executables | input list | inspect2)
 
     let $addr_table = (
         ^($_exec) keys list --output json
@@ -992,10 +987,7 @@ export def-env 'config new' [
         | select name address
     )
 
-    if ($addr_table | length) > 0 {
-        'Here are the keys that you have:' | cprint -b 1
-        print $addr_table
-    } else {
+    if ($addr_table | length) == 0 {
         let $error_text = (
             $'There are no addresses in ($_exec). To use CY you need to add one.' +
             $'You can find out how to add one by running the command "($_exec) keys add -h".' +
@@ -1006,11 +998,13 @@ export def-env 'config new' [
     help: $'try "($_exec) keys add -h"'
     }
 
-    let $address_def = ($addr_table | get address.0)
-
-    'Enter the address to send transactions from. ' | cprint --before 1 --after 0
-    $'Default: ($address_def)' | cprint -c yellow_italic
-    let $address = ((input) | if-empty $address_def)
+    'Select the address to send transactions from:' | cprint --before 1
+    let $address = (
+        $addr_table 
+        | input list
+        | get address
+        | inspect2
+    )
 
     let $config_name = (
         $addr_table
@@ -1026,7 +1020,7 @@ export def-env 'config new' [
     )
 
     if (not ($passport_nick | is-empty)) {
-        print $"Passport nick (ansi yellow)($passport_nick)(ansi reset) will be used"
+        $"Passport nick (ansi yellow)($passport_nick)(ansi reset) will be used" | cprint --before 1
     }
 
     let $chain_id_def = (if ($_exec == 'cyber') {
@@ -1036,9 +1030,9 @@ export def-env 'config new' [
         }
     )
 
-    'Enter the chain-id for interacting with the blockchain. ' | cprint --before 1 --after 0
-    $'Default: ($chain_id_def)' | cprint -c yellow_italic
-    let $chain_id = ((input) | if-empty $chain_id_def)
+    # 'Enter the chain-id for interacting with the blockchain. ' | cprint --before 1 --after 0
+    # $'Default: ($chain_id_def)' | cprint -c yellow_italic
+    let $chain_id = ($chain_id_def)
 
 
     let $rpc_def = if ($_exec == 'cyber') {
@@ -1047,14 +1041,24 @@ export def-env 'config new' [
         'https://rpc.space-pussy.cybernode.ai:443'
     }
 
-    'Enter the address of RPC api for interacting with the blockchain. ' | cprint --before 1 --after 0
-    $'Default: ($rpc_def)' | cprint -c yellow_italic
-    let $rpc_address = ((input) | if-empty $rpc_def)
+    'Select the address of RPC api for interacting with the blockchain:' | cprint --before 1
+    let $rpc_address = (
+        [$rpc_def 'other'] 
+        | input list
+        | do {
+            |x| if $x == 'other' {
+                input "enter the RPC address:"
+            } else {$x}
+        } $in
+        | inspect2
+    )
 
-
-    'Select the ipfs service to use (kubo, cybernode, both). ' | cprint --before 1 --after 0
-    'Default: cybernode' | cprint -c yellow_italic
-    let $ipfs_storage = ((input) | if-empty 'cybernode')
+    'Select the ipfs service to store particles:' | cprint --before 1
+    let $ipfs_storage = (
+        [cybernode, kubo, both] 
+        | input list 
+        | inspect2
+    )
 
 
     let $temp_env = {
@@ -1069,8 +1073,6 @@ export def-env 'config new' [
 
 
     make_default_folders_fn
-
-    # ipfs files mkdir -p '/cy/cache'
 
     $temp_env | config save $config_name
 
