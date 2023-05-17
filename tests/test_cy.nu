@@ -20,8 +20,8 @@ export def 'test_link_files' [] {
     use ~/cy/cy.nu 
     let expect = [
         [from, to]; 
-        ["QmPtV5CU9v3u7MY7hMgG3z9kTno8o7JHJD1e6f3NLfZ86k", "QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb"], 
-        ["QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6", "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV"]
+        ["QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb", "QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb"], 
+        ["QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV", "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV"]
     ]
 
     let result = (
@@ -52,6 +52,8 @@ export def 'test_tmp_send_tx' [] {
     let expect = 0
 
     cy config activate hot-pussy 
+    cy tmp clear ;
+    cy link random
 
     let result = (
         cy tmp send tx | get code
@@ -63,6 +65,7 @@ export def 'test_tmp_send_tx' [] {
 export def 'test_get_passport_by_address' [] {
     use ~/cy/cy.nu 
     print 'test get passport by address'
+        cy config activate hacks+cyber
         let expect = {data: {owner: "bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8", 
         approvals: [], token_uri: null, extension: {addresses: null, 
         avatar: "QmNprvRpqVsQEqEoTRJfZUB57RHEVSK2KLPsaHSULWb28j", 
