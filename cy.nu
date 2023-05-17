@@ -917,12 +917,6 @@ export def 'graph to-gephi' [
         | dfr into-df
     )
 
-# let particles = (
-#     $particles
-#     | dfr into-df 
-#     | dfr join --left $t1_height_index height height 
-# )
-
     (
         $cyberlinks
         | dfr into-df
