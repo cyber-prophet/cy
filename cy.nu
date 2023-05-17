@@ -936,12 +936,11 @@ export def 'graph to-gephi' [
     )
 }
 
-# Export filtered graph into a CSV file for import to Gephi.
-export def 'graph to-gephi filter' [
+export def 'graph filter neurons' [
     ...neurons: string@"nu-complete neurons nicks"
     # --cyberlinks?
 ] {
-    let $filtered_nrns = (
+    let $filtered_links = (
         $neurons
         | dfr into-df
         | dfr join $env.cy.neurons '0' nick
@@ -949,13 +948,23 @@ export def 'graph to-gephi filter' [
         | dfr join $env.cy.cyberlinks neuron neuron
     )
 
+    $filtered_links
+}
+
+# Export filtered graph into a CSV file for import to Gephi.
+export def 'graph to-gephi filter' [
+    ...neurons: string@"nu-complete neurons nicks"
+    # --cyberlinks?
+] {
+    let $filtered_links = (graph filter neurons $neurons | dfr into-df)
+
     let $filtered_prtkls = (
-        $filtered_nrns
+        $filtered_links
         | dfr into-df
         | dfr get particle_from
         | dfr rename particle_from particle
         | dfr append -c (
-            $filtered_nrns
+            $filtered_links
             | dfr into-df
             | dfr get particle_to
             | dfr rename particle_to particle
@@ -963,7 +972,7 @@ export def 'graph to-gephi filter' [
         | dfr unique
         | dfr join $env.cy.particles particle particle
     )
-    graph to-gephi --cyberlinks $filtered_nrns --particles $filtered_prtkls
+    graph to-gephi --cyberlinks $filtered_links --particles $filtered_prtkls
     # let $cyberlinks = ($cyberlinks | default $env.cy.cyberlinks )
 }
 
