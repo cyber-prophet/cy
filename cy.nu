@@ -850,11 +850,10 @@ export def-env 'graph update particles parquet' [] {
 
 # Export the entire graph into CSV file for import to Gephi
 export def 'graph to-gephi' [
-    --cyberlinks: any
-    --particles: any
+    cyberlinks?
 ] {
     let $cyberlinks = ($cyberlinks | default $env.cy.cyberlinks)
-    let $particles = ($particles | default $env.cy.particles)
+    let $particles = (graph filter particles $cyberlinks)
 
     let $t1_height_index = (
         $cyberlinks.height 
@@ -952,19 +951,18 @@ export def 'graph filter neurons' [
 }
 
 # Export filtered graph into a CSV file for import to Gephi.
-export def 'graph to-gephi filter' [
-    ...neurons: string@"nu-complete neurons nicks"
-    # --cyberlinks?
+def 'graph filter particles' [
+    cyberlinks
 ] {
-    let $filtered_links = (graph filter neurons $neurons | dfr into-df)
+    let $cyberlinks = ($cyberlinks | dfr into-df)
 
     let $filtered_prtkls = (
-        $filtered_links
+        $cyberlinks
         | dfr into-df
         | dfr get particle_from
         | dfr rename particle_from particle
         | dfr append -c (
-            $filtered_links
+            $cyberlinks
             | dfr into-df
             | dfr get particle_to
             | dfr rename particle_to particle
@@ -972,8 +970,8 @@ export def 'graph to-gephi filter' [
         | dfr unique
         | dfr join $env.cy.particles particle particle
     )
-    graph to-gephi --cyberlinks $filtered_links --particles $filtered_prtkls
-    # let $cyberlinks = ($cyberlinks | default $env.cy.cyberlinks )
+
+    $filtered_prtkls
 }
 
 def "nu-complete neurons nicks" [] {
