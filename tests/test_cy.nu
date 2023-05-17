@@ -1,5 +1,5 @@
 use ~/cy/cy.nu 
-use std assert
+use std 'assert equal'
 
 export def 'test_link_texts' [] {
     use ~/cy/cy.nu 
