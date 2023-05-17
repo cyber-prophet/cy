@@ -847,14 +847,20 @@ export def-env 'graph update particles parquet' [] {
 
 export def 'graph filter neurons' [
     ...neurons: string@"nu-complete neurons nicks"
-    # --cyberlinks?
+    --cyberlinks: any
 ] {
+    let $cyberlinks = (
+        $in 
+        | default $cyberlinks 
+        | default $env.cy.cyberlinks
+    )
+    
     let $filtered_links = (
         $neurons
         | dfr into-df
         | dfr join $env.cy.neurons '0' nick
         | dfr select neuron
-        | dfr join $env.cy.cyberlinks neuron neuron
+        | dfr join $cyberlinks neuron neuron
     )
 
     $filtered_links
@@ -889,7 +895,7 @@ def 'graph filter particles' [
 export def 'graph to-gephi' [
     cyberlinks?
 ] {
-    let $cyberlinks = ($cyberlinks | default $env.cy.cyberlinks)
+    let $cyberlinks = ($in | default $cyberlinks | default $env.cy.cyberlinks)
     let $particles = (graph filter particles $cyberlinks)
 
     let $t1_height_index = (
