@@ -1093,10 +1093,10 @@ export def 'config view' [
 ] {
     if $config_name == null {
         print "current config is:"
-        $env.cy
+        $env.cy | inspect2
     } else {
         let $filename = $"($env.cy.path)/config/($config_name).toml"
-        open $filename
+        open $filename | inspect2
     }
 }
 
