@@ -11,14 +11,22 @@ export def main [] { help }
 
 # start with this function
 export def check_requirements [] {
-    ['ipfs', 'bat', 'curl', 'pueue', 'cyber', 'pussy']
-    | each {
-        |i| if ((which ($i) | length) == 0) {
-            print $'($i) is missing'
+
+    let $intermid = {
+        |x| if ($x | length | $in == 0) {
+            "all needed apps are installed"
         } else {
-            print $'($i) is installed'
+            $x
         }
     }
+
+    ['ipfs', 'bat', 'curl', 'pueue', 'cyber', 'pussy']
+    | par-each {
+        |i| if ((which ($i) | length) == 0) {
+            $'($i) is missing'
+        }
+    }
+    | do $intermid $in
 }
 
 export-env {
