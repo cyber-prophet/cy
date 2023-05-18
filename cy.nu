@@ -686,14 +686,31 @@ export def-env 'graph load vars' [] {
         print "There is no cyberlinks.csv. Download it usin 'cy graph download snapshoot'"
         return
     }
-    let $cyberlinks = (dfr open $"($env.cy.path)/graph/cyberlinks.csv")
+    let $neurons = (
+        open $"($env.cy.path)/graph/neurons_dict.json" 
+        | fill non-exist $in 
+        | dfr into-df
+    )
+    let $cyberlinks = (
+        dfr open $"($env.cy.path)/graph/cyberlinks.csv" 
+        | dfr open $"($env.cy.path)/graph/cyberlinks.csv" 
+        | dfr join --left (
+            $neurons 
+            | dfr select neuron nick
+            ) neuron neuron
+        )
     let $particles = (if (not ($"($env.cy.path)/particles.parquet" | path exists)) {
-        (dfr open $"($env.cy.path)/graph/particles.parquet")
+        (
+            dfr open $"($env.cy.path)/graph/particles.parquet"
+            | dfr join --left (
+                $neurons 
+                | dfr select neuron nick
+                ) neuron neuron
+        )
     } else {
         print "there is no 'particles.parquet' file. Create one using the command 'cy graph update particles parquet'"
         null
     })
-    let $neurons = (open $"($env.cy.path)/graph/neurons_dict.json" | fill non-exist $in | dfr into-df)
     let-env cy = (
         $env.cy
         | merge {'cyberlinks': $cyberlinks}
@@ -971,31 +988,18 @@ export def 'graph to-gephi' [
 
 export def 'graph to-logseq' [
     cyberlinks?
-    --path: string
+    # --path: string
 ] {
-        # let $cyberlinks = ($in | default $cyberlinks | default $env.cy.cyberlinks)
-        # let $particles = (graph filter particles $cyberlinks)
-    
-        # let $t1_height_index = (
-        #     $cyberlinks.height 
-        #     | dfr into-df 
-        #     | dfr unique 
-        #     | dfr into-nu  # An easy way to get index column
-        #     | rename height_index 
-        # )
-    
-        # # $env.cy.cyberlinks | dfr into-df | dfr shape | dfr into-nu | get rows.0 # as alternative
-    
-        # let $height_index_max = (
-        #     $t1_height_index 
-        #     | last 
-        #     | get height_index
-        # )
-    
-        # let $t1_height_index = (
-        #     $t1_height_index 
-        #     | dfr into-df
-        # )
+    let $cyberlinks = ($in | default $cyberlinks | default $env.cy.cyberlinks)
+    let $particles = (graph filter particles $cyberlinks)
+
+    let $path = $"($env.cy.path)/logseq/(date now | date format '%Y-%m-%d_%H-%M-%S')"
+    mkdir $"($path)/pages"
+    mkdir $"($path)/journal"
+
+    $particles | dfr into-nu | each {
+        null
+    }
 }
 
 # Create a config JSON to set env variables, to use them as parameters in cyber cli
