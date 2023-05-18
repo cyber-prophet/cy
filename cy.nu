@@ -997,8 +997,9 @@ export def 'graph to-logseq' [
     mkdir $"($path)/pages"
     mkdir $"($path)/journal"
 
-    $particles | dfr into-nu | each {
-        null
+    $particles | dfr into-nu | each {|p|
+        $"author:: ($p.nick)\n- (cid read or download $p.particle)\n- ---"
+        save $"($path)/pages/($p.content_s).md"
     }
 }
 
