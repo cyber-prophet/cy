@@ -902,19 +902,13 @@ export def 'graph to-gephi' [
         $cyberlinks.height 
         | dfr into-df 
         | dfr unique 
-        | dfr into-nu  # An easy way to get index column
-        | rename height_index 
+        | dfr with-column (
+            dfr arg-where ((dfr col height) != 0) | dfr as height_index
+        )
     )
 
     let $height_index_max = (
-        $t1_height_index 
-        | last 
-        | get height_index
-    )
-
-    let $t1_height_index = (
-        $t1_height_index 
-        | dfr into-df
+        $t1_height_index | dfr shape | dfr into-nu | get rows.0
     )
 
     (
@@ -970,6 +964,35 @@ export def 'graph to-gephi' [
         | move id label cid --before height
         | save $"($env.cy.path)/gephi/!particles.csv" -f
     )
+}
+
+export def 'graph to-logseq' [
+    cyberlinks?
+    --path: string
+] {
+        # let $cyberlinks = ($in | default $cyberlinks | default $env.cy.cyberlinks)
+        # let $particles = (graph filter particles $cyberlinks)
+    
+        # let $t1_height_index = (
+        #     $cyberlinks.height 
+        #     | dfr into-df 
+        #     | dfr unique 
+        #     | dfr into-nu  # An easy way to get index column
+        #     | rename height_index 
+        # )
+    
+        # # $env.cy.cyberlinks | dfr into-df | dfr shape | dfr into-nu | get rows.0 # as alternative
+    
+        # let $height_index_max = (
+        #     $t1_height_index 
+        #     | last 
+        #     | get height_index
+        # )
+    
+        # let $t1_height_index = (
+        #     $t1_height_index 
+        #     | dfr into-df
+        # )
 }
 
 # Create a config JSON to set env variables, to use them as parameters in cyber cli
