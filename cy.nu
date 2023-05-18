@@ -990,15 +990,16 @@ export def 'graph to-logseq' [
     cyberlinks?
     # --path: string
 ] {
-    let $cyberlinks = ($in | default $cyberlinks | default $env.cy.cyberlinks)
-    let $particles = (graph filter particles $cyberlinks)
+    let $cyberlinks = ($in | default $cyberlinks | default $env.cy.cyberlinks | inspect2)
+    let $particles = (graph filter particles $cyberlinks | inspect2)
 
-    let $path = $"($env.cy.path)/logseq/(date now | date format '%Y-%m-%d_%H-%M-%S')"
+    let $path = $"($env.cy.path)/logseq/(date now | date format '%Y-%m-%d_%H-%M-%S')/"
     mkdir $"($path)/pages"
-    mkdir $"($path)/journal"
+    mkdir $"($path)/journals"
 
-    $particles | dfr into-nu | each {|p|
-        $"author:: ($p.nick)\n- (cid read or download $p.particle)\n- ---"
+    $particles | dfr into-df | dfr into-nu | each {|p|
+        print $p.particle
+        $"author:: ($p.nick)\n\n- (cid read or download $p.particle --full)\n- ---" |
         save $"($path)/pages/($p.content_s).md"
     }
 }
