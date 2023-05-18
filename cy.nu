@@ -1505,7 +1505,7 @@ export def 'cid queue add' [
 # Read a CID from the cache, and if the CID is absent - add it into the queue
 export def 'cid read or download' [
     cid: string
-    --attempts = 0
+    --full  # output full text of a particle 
 ] {
     let $content = (do -i {open $"($env.cy.ipfs-files-folder)/($cid).md"})
 
@@ -1519,10 +1519,12 @@ export def 'cid read or download' [
     )
 
     (
-        $content
-        | str substring '0,400'
-        | str replace "\n" "↩" --all
-        | $"($in)\n(ansi grey)($cid)(ansi reset)"
+        $content |
+        if $full {} else {
+            str substring 0..400
+            | str replace "\n" "↩" --all
+            | $"($in)\n(ansi grey)($cid)(ansi reset)"
+        }
     )
 }
 
