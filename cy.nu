@@ -772,6 +772,9 @@ def 'cyberlinks_to_particles' [
         | dfr into-lazy 
         | dfr sort-by height 
         | dfr unique --subset [particle] 
+        | dfr with-column (
+            dfr arg-where ((dfr col height) != 0) | dfr as particle_index
+        )
         | dfr collect
     )
 }
