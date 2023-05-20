@@ -1009,7 +1009,7 @@ export def-env 'config new' [
     # config_name?: string@'nu-complete-config-names'
 ] {
     'Choose the name of executable (cyber or pussy):' | cprint
-    let $_exec = (nu-complete-executables | input list | inspect2)
+    let $_exec = (nu-complete-executables | input list -f | inspect2)
 
     let $addr_table = (
         ^($_exec) keys list --output json
@@ -1032,7 +1032,7 @@ export def-env 'config new' [
     'Select the address to send transactions from:' | cprint --before 1
     let $address = (
         $addr_table 
-        | input list
+        | input list -f
         | get address
         | inspect2
     )
@@ -1075,7 +1075,7 @@ export def-env 'config new' [
     'Select the address of RPC api for interacting with the blockchain:' | cprint --before 1
     let $rpc_address = (
         [$rpc_def 'other'] 
-        | input list
+        | input list -f
         | do {
             |x| if $x == 'other' {
                 input "enter the RPC address:"
@@ -1087,7 +1087,7 @@ export def-env 'config new' [
     'Select the ipfs service to store particles:' | cprint --before 1
     let $ipfs_storage = (
         [cybernode, kubo, both] 
-        | input list 
+        | input list -f 
         | inspect2
     )
 
