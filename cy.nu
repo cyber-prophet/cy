@@ -1123,13 +1123,13 @@ export def-env 'config new' [
 # View a saved JSON config file
 export def 'config view' [
     config_name?: string@'nu-complete-config-names'
+    --dont-print
 ] {
     if $config_name == null {
-        print "current config is:"
-        $env.cy | inspect2
+        $env.cy | if $dont_print {} else {inspect2}
     } else {
         let $filename = $"($env.cy.path)/config/($config_name).toml"
-        open $filename | inspect2
+        open $filename | if $dont_print {} else {inspect2}
     }
 }
 
@@ -1182,26 +1182,23 @@ export def-env 'config save' [
 export def-env 'config activate' [
     config_name?: string@'nu-complete-config-names'
 ] {
-    let $inconfig = $in
-    let $config1 = (
+    let $config = ($in | default (config view $config_name --dont-print))
+    let $config_toml = (
         open ('~/.config/cy/cy_config.toml' | path expand)
-        | merge (
-            $inconfig
-            | default (config view $config_name)
-        )
+        | merge $config 
     )
 
-    let-env cy = $config1
+    let-env cy = $config_toml
 
     "Config is loaded" | cprint -c green_underline
-    # $config1 | save $"($env.cy.path)/config/default.toml" -f
+    # $config_toml | save $"($env.cy.path)/config/default.toml" -f
     (
         open ('~/.config/cy/cy_config.toml' | path expand)
-        | upsert 'config-name' ($config1 | get 'config-name')
+        | upsert 'config-name' ($config_toml | get 'config-name')
         | save ('~/.config/cy/cy_config.toml' | path expand) -f
     )
 
-    $config1
+    $config_toml | inspect2
 }
 
 def 'search-sync' [
@@ -1366,7 +1363,7 @@ export def 'cid get type gateway' [
     let $size = ($headers | get -i 'Content-Length')
 
     if (
-        (($type == null) or ($size == null))
+        ($type == null) or ($size == null)
         or (($type == 'text/html') and (($size == "157") or ($size == 157))
     )) {
         return null
