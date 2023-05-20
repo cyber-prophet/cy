@@ -66,14 +66,15 @@ export-env {
 
 # Pin a text particle
 #
-# cy pin text "cyber"
+# > cy pin text "cyber"
 # QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 export def 'pin text' [
     text_param?: string
     --only_hash
+    --dont_open
 ] {
     let $text = ($in | default $text_param | into string)
-    let $text = (if ($text | path exists) {
+    let $text = (if ($text | path exists) and (not $dont_open) {
         open $text
     } else {
         $text
@@ -104,11 +105,15 @@ export def 'pin text' [
 }
 
 # Pin files from the current folder to the local node and output the cyberlinks table
-# cy pin files .
+#
+# > cy pin files --link_filenames
+#┃                      from                      ┃                       to                       ┃   date_time   ┃
+#┃ QmPtV5CU9v3u7MY7hMgG3z9kTno8o7JHJD1e6f3NLfZ86k ┃ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb ┃ 230520-102337 ┃
+#┃ QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6 ┃ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV ┃ 230520-102337 ┃
 export def 'pin files' [
     ...files: string                # filenames to add into the local ipfs node
     --link_filenames (-n)
-    --disable_append (-d)
+    --disable_append (-D)
 ] {
     let $files = (
         if $files == [] {
@@ -127,7 +132,7 @@ export def 'pin files' [
     let $out_table = (
         if $link_filenames {
             $files
-            | each { |it| pin text $it }
+            | each { |it| pin text $it --dont_open}
             | wrap from
             | merge $cid_table
         } else {
