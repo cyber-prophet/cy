@@ -148,28 +148,24 @@ export def 'pin files' [
     }
 }
 
-# Add a 2-text cyberlink to the temp table
+# Add a 2-texts cyberlink to the temp table
+#
+# > cy link texts 'cyber' 'cyber-prophet' --disable_append | to nuon
+# {from_text: cyber, from: "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV", 
+#  to_text: cyber-prophet, to: "QmXFUupJCSfydJZ85HQHD8tU1L7CZFErbRdMTBxkAmBJaD"}
 export def 'link texts' [
     text_from
     text_to
-    --disable_append (-d)
+    --disable_append (-D)
 ] {
-    let $cid_from = (pin text $text_from)
-    let $cid_to = (pin text $text_to)
 
-    let $out_table = (
-        [
-            ['from_text' 'to_text' 'from' 'to'];
-            [$text_from $text_to $cid_from $cid_to]
-        ]
-    )
-
-    print $out_table.0
-
-    if $disable_append {
-        $out_table
-    } else {
-        $out_table | tmp append
+    {
+        'from_text': $text_from
+        'from': (pin text $text_from)
+        'to_text': $text_to
+        'to': (pin text $text_to)
+    } | if $disable_append {} else {
+        tmp append --dont_show_out_table
     }
 }
 
@@ -332,7 +328,7 @@ export def 'tmp append' [
     (
         tmp view -q
         | append $cyberlinks
-        | tmp replace
+        | if $dont_show_out_table {tmp replace -d} else {tmp replace}
     )
 }
 
