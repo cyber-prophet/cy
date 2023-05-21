@@ -337,16 +337,10 @@ export def 'tmp replace' [
     cyberlinks?             # cyberlinks table
     --dont_show_out_table (-d)
 ] {
-    let $cyberlinks = ($in | default $cyberlinks)
-
-    (
-        $cyberlinks
-        | save $"($env.cy.path)/cyberlinks_temp.csv" --force
-    )
-
-    if (not $dont_show_out_table)  {
-        tmp view -q
-    }
+    $in 
+    | default $cyberlinks
+    | save $"($env.cy.path)/cyberlinks_temp.csv" --force
+    | if (not $dont_show_out_table) { tmp view -q } 
 }
 
 # Empty the temp cyberlinks table
