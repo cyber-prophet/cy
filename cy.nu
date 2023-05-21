@@ -344,43 +344,27 @@ export def 'tmp clear' [] {
 # Add a text particle into the 'to' column of the temp cyberlinks table
 export def 'tmp link to' [
     text: string # a text to upload to ipfs
+    --dont_replace (-D)
     # --non-empty # fill non-empty only
 ] {
-    let $in_links = $in
-    let $links = ($in_links | default (tmp view -q))
-
-    let $result = (
-        $links
-        | upsert to (pin text $text)
-        | upsert to_text $text
-    )
-
-    if ($in_links == null) {
-        $result | tmp replace
-    } else {
-        $result
-    }
+    $in
+    | default (tmp view -q)
+    | upsert to (pin text $text)
+    | upsert to_text $text
+    | if $dont_replace {} else { tmp replace }
 }
 
 # Add a text particle into the 'from' column of the temp cyberlinks table
 export def 'tmp link from' [
     text: string # a text to upload to ipfs
+    --dont_replace (-D)
     # --non-empty # fill non-empty only
 ] {
-    let $in_links = $in
-    let $links = ($in_links | default (tmp view -q))
-
-    let $result = (
-        $links
-        | upsert from (pin text $text)
-        | upsert from_text $text
-    )
-
-    if ($in_links == null) {
-        $result | tmp replace
-    } else {
-        $result
-    }
+    $in
+    | default (tmp view -q)
+    | upsert from (pin text $text)
+    | upsert from_text $text
+    | if $dont_replace {} else { tmp replace }
 }
 
 # Pin values from a given column to an IPFS node and add a column with their CIDs
