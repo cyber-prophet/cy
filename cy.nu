@@ -315,21 +315,11 @@ export def 'tmp append' [
     cyberlinks?             # cyberlinks table
     --dont_show_out_table (-d)
 ] {
-    let $cyberlinks = ($in | default $cyberlinks)
-
-    let $cyberlinks = (
-        $cyberlinks
-        | upsert date_time (
-            date now
-            | date format '%y%m%d-%H%M%S'
-        )
-    )
-
-    (
-        tmp view -q
-        | append $cyberlinks
-        | if $dont_show_out_table {tmp replace -d} else {tmp replace}
-    )
+    $in 
+    | default $cyberlinks
+    | upsert date_time now_fn
+    | prepend (tmp view -q)
+    | if $dont_show_out_table { tmp replace -d } else { tmp replace }
 }
 
 # Replace cyberlinks in the temp table
