@@ -195,7 +195,7 @@ export def 'follow' [
         return
     }
 
-    link texts 'QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx' 'bostrom1v5x5vl4c0zjua37ymqjy4267fy9m6x8yvzvkfp'
+    link texts 'QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx' $neuron
 }
 
 # Add a tweet
