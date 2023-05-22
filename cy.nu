@@ -367,19 +367,62 @@ export def 'tmp link from' [
     | if $dont_replace {} else { tmp replace }
 }
 
-# Pin values from a given column to an IPFS node and add a column with their CIDs
-export def 'tmp pin col' [
-    --column_with_text: string = 'text' # a column name to take values from to upload to IPFS. Default is 'text
-    --column_to_write_cid: string = 'from' # a column name to write CIDs to. Default is 'from'
+# Pin values from column 'text_from' and 'text_to' to an IPFS node and fill according columns with their CIDs
+# > [{from_text: "cyber" to_text: "cyber-prophet"} {from_text: "text"}]
+# ┏━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+# ┃ from_text ┃    to_text    ┃
+# ┣━━━━━━━━━━━╋━━━━━━━━━━━━━━━┫
+# ┃ cyber     ┃ cyber-prophet ┃
+# ┃ text      ┃      ❎       ┃
+# ┗━━━━━━━━━━━┻━━━━━━━━━━━━━━━┛
+# > [{from_text: "cyber" to_text: "cyber-prophet"} {from_text: "text"}] | cy tmp pin columns
+# ┏━━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃ from_text ┃    to_text    ┃                      from                      ┃                 to                 ┃
+# ┣━━━━━━━━━━━╋━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+# ┃ cyber     ┃ cyber-prophet ┃ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV ┃ QmXFUupJCSfydJZ85HQHD8tU1L7CZFErbR ┃
+# ┃           ┃               ┃                                                ┃ dMTBxkAmBJaD                       ┃
+# ┃ text      ┃               ┃ QmY2T5EfgLn8qWCt8eus6VX1gJuAp1nmUSdmoehgMxznAf ┃                                    ┃
+# ┗━━━━━━━━━━━┻━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+export def 'tmp pin columns' [
+    --dont_replace (-D) # Don't replace the tmp cyberlinks table
 ] {
-    let $new_text_col_name = ( $column_to_write_cid + '_text' )
 
-    tmp view -q
-    | upsert $column_to_write_cid {
-        |it| $it | get $column_with_text | pin text
-    }
-    | rename -c [$column_with_text $new_text_col_name]
-    | tmp replace
+    let cyberlinks = (
+        $in
+        | default (tmp view -q)
+        | fill non-exist
+    )
+
+    let dict = (
+        $cyberlinks 
+        | reduce -f [] {|it acc| 
+            $acc 
+            | if $it.from_text != null { append $it.from_text } else {} 
+            | if $it.to_text != null { append $it.to_text } else {}
+        } 
+        | uniq 
+        | par-each {|i| {$i: (pin text $i)}} 
+        | reduce -f {} {|it acc| 
+            $acc 
+            | merge $it
+        }
+    )
+
+    $cyberlinks 
+    | each {|i| $i 
+        | if $i.from_text != null {
+            upsert from (
+                $dict
+                | get -i $i.from_text
+            )
+        } else {} 
+        | if $i.to_text != null {
+            upsert to {
+                $dict
+                | get -i $i.to_text
+            }
+        } else {}
+    } | if $dont_replace {} else { tmp replace }
 }
 
 # Check if any of the links in the tmp table exist
