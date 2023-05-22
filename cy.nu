@@ -1147,40 +1147,32 @@ export def 'config view' [
 
 # Save the piped-in JSON into config file
 export def-env 'config save' [
-    config_name?: string@'nu-complete-config-names'
+    config_name: string@'nu-complete-config-names'
     --inactive # Don't activate current config
 ] {
     let $in_config = $in
 
-    let $dt1 = now_fn
+    let $dt1 = (now_fn)
 
-    let $config_name = (
-        if $config_name == null {
-            "Enter the name of the config file to save. " | cprint --before 1 --after 0
-            $"Default: ($dt1)" | cprint -c yellow_italic
-            input
-        } else {
-            $config_name
-        }
-    )
     let $config_name = ($config_name | if-empty $dt1)
 
-    mut file_name = $"($env.cy.path)/config/($config_name).toml"
+    let $file_name = $"($env.cy.path)/config/($config_name).toml"
 
     let $in_config = ($in_config | upsert config-name $config_name)
 
-    if ($file_name | path exists) {
-        let $prompt1 = (input $"($file_name) exists. Do you want to overwrite it? \(y/n\) ")
+    if not ($file_name | path exists) {
+        $in_config | save $file_name -f
+    } else {
+        $"($file_name) exists. Do you want to overwrite it?" | cprint --before 1
 
-        if $prompt1 == "y" {
-            backup_fn $file_name
+        ['yes' 'no'] 
+        | input list
+        | if $in == "yes" {
+            backup_fn $file_name;
             $in_config | save $file_name -f
         } else {
-            $file_name = $"($env.cy.path)/config/($dt1).toml"
-            $in_config | save $file_name
+            $in_config | save $"($env.cy.path)/config/($dt1).toml" -f
         }
-    } else {
-        $in_config | save $file_name -f
     }
 
     print $"($file_name) is saved"
