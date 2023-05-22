@@ -622,7 +622,7 @@ export def 'passport get' [
     if $out.exit_code == 0 {
         $out.stdout  | from json | get data
     } else {
-        print $"No passport for ($address_or_nick) is found"
+        $"No passport for ($address_or_nick) is found" | cprint --before 1
         null
     }
 }
@@ -712,13 +712,11 @@ export def-env 'graph load vars' [] {
             ) neuron neuron
         )
     let $particles = (if (not ($"($env.cy.path)/particles.parquet" | path exists)) {
-        (
-            dfr open $"($env.cy.path)/graph/particles.parquet"
-            | dfr join --left (
-                $neurons 
-                | dfr select neuron nick
-                ) neuron neuron
-        )
+        dfr open $"($env.cy.path)/graph/particles.parquet"
+        | dfr join --left (
+            $neurons 
+            | dfr select neuron nick
+            ) neuron neuron
     } else {
         print "there is no 'particles.parquet' file. Create one using the command 'cy graph update particles parquet'"
         null
@@ -1020,11 +1018,11 @@ export def 'graph to-logseq' [
 export def-env 'config new' [
     # config_name?: string@'nu-complete-config-names'
 ] {
-    'Choose the name of executable (cyber or pussy):' | cprint
-    let $_exec = (nu-complete-executables | input list -f | inspect2)
+    'Choose the name of executable:' | cprint
+    let $exec = (nu-complete-executables | input list -f | inspect2)
 
     let $addr_table = (
-        ^($_exec) keys list --output json
+        ^($exec) keys list --output json
         | from json
         | flatten
         | select name address
@@ -1032,13 +1030,13 @@ export def-env 'config new' [
 
     if ($addr_table | length) == 0 {
         let $error_text = (
-            $'There are no addresses in ($_exec). To use CY you need to add one.' +
-            $'You can find out how to add one by running the command "($_exec) keys add -h".' +
+            $'There are no addresses in ($exec). To use CY you need to add one.' +
+            $'You can find out how to add one by running the command "($exec) keys add -h".' +
             $'After adding a key - come back and launch this wizzard again'
         )
 
         error make -u {msg: $error_text}
-    help: $'try "($_exec) keys add -h"'
+    help: $'try "($exec) keys add -h"'
     }
 
     'Select the address to send transactions from:' | cprint --before 1
@@ -1054,7 +1052,7 @@ export def-env 'config new' [
         | select address name
         | transpose -r -d
         | get $address
-        | $"($in)+($_exec)"
+        | $"($in)+($exec)"
     )
 
     let $passport_nick = (
@@ -1066,7 +1064,7 @@ export def-env 'config new' [
         $"Passport nick (ansi yellow)($passport_nick)(ansi reset) will be used" | cprint --before 1
     }
 
-    let $chain_id_def = (if ($_exec == 'cyber') {
+    let $chain_id_def = (if ($exec == 'cyber') {
             'bostrom'
         } else {
             'space-pussy'
@@ -1078,7 +1076,7 @@ export def-env 'config new' [
     let $chain_id = ($chain_id_def)
 
 
-    let $rpc_def = if ($_exec == 'cyber') {
+    let $rpc_def = if ($exec == 'cyber') {
         'https://rpc.bostrom.cybernode.ai:443'
     } else {
         'https://rpc.space-pussy.cybernode.ai:443'
@@ -1106,7 +1104,7 @@ export def-env 'config new' [
 
     let $temp_env = {
         'config-name': $config_name
-        'exec': $_exec
+        'exec': $exec
         'address': $address
         'passport-nick': $passport_nick
         'chain-id': $chain_id
@@ -1791,9 +1789,9 @@ def 'cprint' [
         }
     )
 
-    seq 1 $before | each {|i| print ""}
+    print ("\n" * $before) -n
     $text | print $"(ansi $color)($in)(ansi reset)" -n
-    seq 1 $after | each {|i| print ""}
+    print ("\n" * $after) -n
 }
 
 def 'if-empty' [
