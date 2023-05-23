@@ -1,9 +1,6 @@
 # Cy - the nushell wrapper, interface to cyber family blockchains CLIs (Bostrom, Pussy) and go-ipfs (kubo)
 # Git: https://github.com/cyber-prophet/cy
 #
-# Install/update to the latest stable version
-# > mkdir ~/cy | http get https://raw.githubusercontent.com/cyber-prophet/cy/main/cy.nu | save ~/cy/cy.nu -f
-#
 # Use:
 # > overlay use ~/cy/cy.nu -p -r
 
@@ -22,7 +19,7 @@ export def check_requirements [] {
 
     ['ipfs', 'bat', 'curl', 'pueue', 'cyber', 'pussy']
     | par-each {
-        |i| if ((which ($i) | length) == 0) {
+        |i| if (which ($i) | is-empty) {
             $'($i) is missing'
         }
     }
