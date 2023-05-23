@@ -1018,7 +1018,7 @@ export def 'graph to-logseq' [
 export def-env 'config new' [
     # config_name?: string@'nu-complete-config-names'
 ] {
-    'Choose the name of executable:' | cprint
+    'Choose the name of executable:' | cprint -c green
     let $exec = (nu-complete-executables | input list -f | inspect2)
 
     let $addr_table = (
@@ -1039,7 +1039,7 @@ export def-env 'config new' [
     help: $'try "($exec) keys add -h"'
     }
 
-    'Select the address to send transactions from:' | cprint --before 1
+    'Select the address to send transactions from:' | cprint -c green --before 1
     let $address = (
         $addr_table 
         | input list -f
@@ -1061,7 +1061,7 @@ export def-env 'config new' [
     )
 
     if (not ($passport_nick | is-empty)) {
-        $"Passport nick (ansi yellow)($passport_nick)(ansi reset) will be used" | cprint --before 1
+        $"Passport nick (ansi yellow)($passport_nick)(ansi reset) will be used" | cprint -c green --before 1
     }
 
     let $chain_id_def = (if ($exec == 'cyber') {
@@ -1071,8 +1071,8 @@ export def-env 'config new' [
         }
     )
 
-    # 'Enter the chain-id for interacting with the blockchain. ' | cprint --before 1 --after 0
-    # $'Default: ($chain_id_def)' | cprint -c yellow_italic
+    # 'Enter the chain-id for interacting with the blockchain. ' | cprint -c green --before 1 --after 0
+    # $'Default: ($chain_id_def)' | cprint -c green -c yellow_italic
     let $chain_id = ($chain_id_def)
 
 
@@ -1082,7 +1082,7 @@ export def-env 'config new' [
         'https://rpc.space-pussy.cybernode.ai:443'
     }
 
-    'Select the address of RPC api for interacting with the blockchain:' | cprint --before 1
+    'Select the address of RPC api for interacting with the blockchain:' | cprint -c green --before 1
     let $rpc_address = (
         [$rpc_def 'other'] 
         | input list -f
@@ -1094,7 +1094,7 @@ export def-env 'config new' [
         | inspect2
     )
 
-    'Select the ipfs service to store particles:' | cprint --before 1
+    'Select the ipfs service to store particles:' | cprint -c green --before 1
     let $ipfs_storage = (
         [cybernode, kubo, both] 
         | input list -f 
