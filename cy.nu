@@ -1148,32 +1148,27 @@ export def-env 'config save' [
     config_name: string@'nu-complete-config-names'
     --inactive # Don't activate current config
 ] {
-    let $in_config = $in
-
-    let $dt1 = (now_fn)
-
-    let $config_name = ($config_name | if-empty $dt1)
-
+    let $in_config = ($in | upsert config-name $config_name)
     let $file_name = $"($env.cy.path)/config/($config_name).toml"
 
-    let $in_config = ($in_config | upsert config-name $config_name)
-
-    if not ($file_name | path exists) {
-        $in_config | save $file_name -f
-    } else {
-        $"($file_name) exists. Do you want to overwrite it?" | cprint --before 1
-
-        ['yes' 'no'] 
-        | input list
-        | if $in == "yes" {
-            backup_fn $file_name;
-            $in_config | save $file_name -f
+    let $file_name2 = (
+        if not ($file_name | path exists) {
+            $file_name
         } else {
-            $in_config | save $"($env.cy.path)/config/($dt1).toml" -f
-        }
-    }
+            $"($file_name) exists. Do you want to overwrite it?" | cprint -c green --before 1
 
-    print $"($file_name) is saved"
+            ['yes' 'no'] | input list
+            | if $in == "yes" {
+                backup_fn $file_name;
+                $file_name
+            } else {
+                $"($env.cy.path)/config/(now_fn).toml"
+            }
+        }
+    )
+
+    $in_config | save $file_name2 -f
+    print $"($file_name2) is saved"
 
     if (not $inactive) {
         $in_config | config activate
