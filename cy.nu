@@ -917,6 +917,64 @@ def 'graph filter particles' [
     $filtered_prtkls
 }
 
+export def 'graph neurons stats' [] {
+#neuron-stats-works
+    let c = ($env.cy.cyberlinks | dfr into-df); 
+    let p = ($env.cy.particles | dfr into-df ) #repeat_fn 
+
+    let follows = ($p 
+        | dfr filter ((dfr col content_s) == follow) 
+        | dfr select particle 
+        | dfr join --left $c particle particle_from 
+        | dfr group-by neuron 
+        | dfr agg [
+            (dfr col timestamp | dfr count | dfr as "follows")
+        ] 
+        | dfr sort-by follows --reverse [true]
+    )
+
+    let $tweets = ($p 
+        | dfr filter ((dfr col content_s) == tweet) 
+        | dfr select particle 
+        | dfr join --left $c particle particle_from 
+        | dfr group-by neuron 
+        | dfr agg [
+            (dfr col timestamp | dfr count | dfr as "tweets")
+        ] 
+        | dfr sort-by tweets --reverse [true]
+    )
+
+
+    let $followers = (
+        $p 
+        | dfr filter ((dfr col content_s) == follow) 
+        | dfr select particle 
+        | dfr join --left $c particle particle_from 
+        | dfr join $p particle_to particle 
+        | dfr group-by content_s 
+        | dfr agg [
+            (dfr col timestamp | dfr count | dfr as "followers")
+        ] 
+        | dfr sort-by followers --reverse [true]
+    ) 
+
+    (
+        $c 
+        | dfr group-by neuron 
+        | dfr agg [
+            (dfr col timestamp | dfr min | dfr as "ts_min")
+            (dfr col timestamp | dfr max | dfr as "ts_max")
+            (dfr col timestamp | dfr count | dfr as "links_count")
+        ] 
+        | dfr sort-by links_count --reverse [true]  # cygraph neurons activity
+        | dfr join $followers neuron content_s --left
+        | dfr join $follows neuron neuron --left 
+        | dfr join $tweets neuron neuron --left 
+        | dfr join (
+            $env.cy.neurons | dfr into-df | dfr select neuron name karma
+        ) neuron neuron --left
+    ) 
+}
 
 # Export the entire graph into CSV file for import to Gephi
 export def 'graph to-gephi' [
