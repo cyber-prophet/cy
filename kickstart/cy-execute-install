@@ -1,0 +1,18 @@
+#!/bin/sh
+# check if the directory exists
+if [ -d ~/cy4/ ]; then
+  # move into the directory
+  cd ~/cy4/
+  # pull the repository
+  git pull
+else
+  # create the directory
+  mkdir ~/cy4/
+  git clone https://github.com/cyber-prophet/cy ~/cy4/
+fi
+
+nu ~/cy4/kickstart/setup-cy.nu
+
+# output a message to the user
+echo "Done"
+
