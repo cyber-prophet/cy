@@ -805,10 +805,10 @@ def 'cyberlinks_to_particles' [
 
 export def-env 'graph update particles parquet' [] {
 
-    let $t2_ls = (ls $"($env.cy.path)/graph/particles/safe");
+    let $ls_files = (ls $"($env.cy.path)/graph/particles/safe");
 
-    let $t3_ls_content = (
-        $t2_ls
+    let $ls_content = (
+        $ls_files
         | get name
         | each {
             |i| open $i
@@ -822,8 +822,8 @@ export def-env 'graph update particles parquet' [] {
         | dfr rename '0' content_s
     )
 
-    let $t4_cids = (
-        $t2_ls
+    let $downloaded_cids = (
+        $ls_files
         | get name
         | each {
             |i| $i
@@ -835,30 +835,30 @@ export def-env 'graph update particles parquet' [] {
         | dfr rename '0' cid
     )
 
-    let $t5_files_with_content_df = (
-        $t2_ls
+    let $content_df1 = (
+        $ls_files
         | dfr into-df
-        | dfr with-column $t3_ls_content
-        | dfr with-column $t4_cids
+        | dfr with-column $ls_content
+        | dfr with-column $downloaded_cids         
         | dfr drop name modified type
     )
 
-    let $t6_particles_with_content = (
+    let $content_df2 = (
         cyberlinks_to_particles
         | dfr into-df
-        | dfr join $t5_files_with_content_df particle cid --left
+        | dfr join $content_df1 particle cid --left
     )
 
     let $m2_mask_null = (
-        $t6_particles_with_content
+        $content_df2
         | dfr get content_s
         | dfr is-null
     )
 
-    let $t7_content_filled = (
-        $t6_particles_with_content
+    let $final_df = (
+        $content_df2
         | dfr with-column (
-            $t6_particles_with_content
+            $content_df2
             | dfr get content_s
             | dfr set 'timeout' --mask ($m2_mask_null | dfr into-df)
             | dfr rename string content_s
@@ -866,9 +866,9 @@ export def-env 'graph update particles parquet' [] {
     )
 
     backup_fn $"($env.cy.path)/graph/particles.parquet"
-    $t7_content_filled | dfr to-parquet $"($env.cy.path)/graph/particles.parquet" | print $in
+    $final_df | dfr to-parquet $"($env.cy.path)/graph/particles.parquet" | print $in
     graph load vars
-    # $t6_particles_with_content | dfr to-parquet $"($env.cy.path)/graph/particles.parquet"
+    # $content_df2 | dfr to-parquet $"($env.cy.path)/graph/particles.parquet"
 }
 
 
