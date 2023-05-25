@@ -28,7 +28,7 @@
 
 let $cy_folder = '~/cy'
 
-if not 'cy' in $nu.scope.modules.name {
+if (not ('cy' in $nu.scope.modules.name)) {
     $'overlay use "($cy_folder)/cy.nu" -p -r' | save -a $'($nu.config-path)'
 } else {
     'cy should have already been installed.'
