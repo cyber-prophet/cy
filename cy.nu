@@ -114,7 +114,7 @@ export def 'pin files' [
 ] {
     let $files = (
         if $files == [] {
-            ls | where type == file | get name
+            ls | where type == file | get name | where $it != 'desktop.ini'
         } else {
             $files
         }
