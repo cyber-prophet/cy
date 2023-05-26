@@ -103,11 +103,15 @@ export def 'pin text' [
 
 # Pin files from the current folder to the local node and output the cyberlinks table
 #
-# > cy pin files --link_filenames
-#┃                      from                      ┃                       to                       ┃   date_time   ┃
-#┃ QmPtV5CU9v3u7MY7hMgG3z9kTno8o7JHJD1e6f3NLfZ86k ┃ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb ┃ 230520-102337 ┃
-#┃ QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6 ┃ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV ┃ 230520-102337 ┃
-export def 'pin files' [
+# > "cyber" | save cyber.txt; "bostrom" | save bostrom.txt
+# > cy link files --link_filenames
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+# ┃                      from                      ┃                       to                       ┃   date_time   ┃
+# ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━┫
+# ┃ QmPtV5CU9v3u7MY7hMgG3z9kTno8o7JHJD1e6f3NLfZ86k ┃ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb ┃ 20230526-1402 ┃
+# ┃ QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6 ┃ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV ┃ 20230526-1402 ┃
+# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━┛
+export def 'link files' [
     ...files: string                # filenames to add into the local ipfs node
     --link_filenames (-n)
     --disable_append (-D)
@@ -126,22 +130,16 @@ export def 'pin files' [
         | wrap to
     )
 
-    let $out_table = (
-        if $link_filenames {
-            $files
-            | each { |it| pin text $it --dont_open}
-            | wrap from
-            | merge $cid_table
-        } else {
-            $cid_table
-        }
-    )
-
-    if $disable_append {
-        $out_table
+    if $link_filenames {
+        $files
+        | each {|it| pin text $it --dont_open}
+        | wrap from
+        | merge $cid_table
     } else {
-        $out_table
-        | tmp append
+        $cid_table
+    } 
+    | if $disable_append {} else {
+        tmp append
     }
 }
 
