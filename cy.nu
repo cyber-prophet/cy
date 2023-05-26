@@ -314,7 +314,7 @@ export def 'tmp append' [
 ] {
     $in 
     | default $cyberlinks
-    | upsert date_time now_fn
+    | upsert date_time (now_fn)
     | prepend (tmp view -q)
     | if $dont_show_out_table { tmp replace -d } else { tmp replace }
 }
