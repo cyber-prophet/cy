@@ -1811,35 +1811,63 @@ def make_default_folders_fn [] {
 }
 
 # Print string colourfully
-def 'cprint' [
+export def 'cprint' [
     ...args
-    --color (-c): string@'nu-complete colors' = 'default'
+    --color (-c): any = 'default'
+    --highlight_color (-h): any = 'green_bold'
+    --frame_color (-r): any = 'dark_gray'
     --frame (-f): string
     --before (-b): int = 0
     --after (-a): int = 1
 ] {
-    let $text = if ($args == []) {
-        $in
-    } else {
-        $args | str join ' '
+
+    $in 
+    | default ($args | str join ' ')
+    | compactit
+    | colorit
+    | if $frame != null {
+        frameit
+    } else {}
+    | newlineit
+
+    def compactit [] {
+        $in 
+        | str replace -a '\n[\t ]+' ' ' 
+        | str replace -a '[\t ]+' ' ' 
+        | str replace -a '(?m)^[\t ]+' ''
     }
 
-    let $text = (
-        if $frame != null {
-            let $width = (term size | get columns | $in - 2 | [$in 1] | math max) # term size gives 0 in tests
-            (
-                (" " | fill -a r -w $width -c $frame) + "\n" +
-                ( $text ) + "\n" +
-                (" " | fill -a r -w $width -c $frame)
-            )
-        } else {
-            $text
-        }
-    )
+    def colorit [] {
+        $in 
+        | str replace '(^|\s)(\*)(\S)' $'$1(ansi reset)(ansi $highlight_color)$3' --all
+        | str replace '(\S)(\*)(\s|$)' $'$1(ansi reset)(ansi $color)$3' --all
+        | $"(ansi $color)($in)(ansi reset)"
+    }
 
-    print ("\n" * $before) -n
-    $text | print $"(ansi $color)($in)(ansi reset)" -n
-    print ("\n" * $after) -n
+    def frameit [] {
+        let $text = $in
+        let $width = (
+            term size 
+            | get columns 
+            | ($in / ($frame | str length) | math round) 
+            | $in - 1
+            | [$in 1]
+            | math max  # term size gives 0 in tests
+        )
+        let $line = (" " | fill -a r -w $width -c $frame | $"(ansi $frame_color)($in)(ansi reset)")
+
+        (
+            $line + "\n" + $text + "\n" + $line
+        )
+    }
+
+    def newlineit [] {
+        let $text = $in
+
+        print ("\n" * $before) -n
+        print $text -n
+        print ("\n" * $after) -n
+    }
 }
 
 def 'if-empty' [
