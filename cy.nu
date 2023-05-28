@@ -460,8 +460,8 @@ export def 'tmp remove existed' [] {
 
     if $existed_links_count > 0 {
 
-        $"*($existed_links_count) cyberlink\(s\)* was/were already created by ($env.cy.address)" | cprint
-        print $existed_links
+        $"*($existed_links_count) cyberlink\(s\)* was/were already created by *($env.cy.address)*" | cprint
+        print ($existed_links | select from_text from to_text to | each {|i| print $i})
         "So they were removed from the temp table!" | cprint -c red -a 2
 
         $links_with_status | filter {|x| not $x.link_exist} | tmp replace
