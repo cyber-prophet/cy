@@ -55,7 +55,7 @@ export-env {
             )
             | sort
         } catch {
-            $'A config file was not found. Run *"cy config new"*' | cprint
+            print $'A config file was not found. Run *"cy config new"*' 
             $config
         }
     )
@@ -160,7 +160,7 @@ export def 'link texts' [
         'to_text': $text_to
         'to': (pin text $text_to)
     } | if $disable_append {} else {
-        tmp append --dont_show_out_table
+        tmp append --quiet
     }
 }
 
@@ -237,7 +237,7 @@ def 'link chuck' [] {
         ]
     )
 
-    $_table | tmp append --dont_show_out_table
+    $_table | tmp append --quiet
 }
 
 # Add a random quote cyberlink to the temp table
@@ -308,24 +308,24 @@ export def 'tmp view' [
 # Append cyberlinks to the temp table
 export def 'tmp append' [
     cyberlinks?             # cyberlinks table
-    --dont_show_out_table (-d)
+    --quiet (-d)
 ] {
     $in 
     | default $cyberlinks
     | upsert date_time (now_fn)
     | prepend (tmp view -q)
-    | if $dont_show_out_table { tmp replace -d } else { tmp replace }
+    | if $quiet { tmp replace -d } else { tmp replace }
 }
 
 # Replace cyberlinks in the temp table
 export def 'tmp replace' [
     cyberlinks?             # cyberlinks table
-    --dont_show_out_table (-d)
+    --quiet (-d)
 ] {
     $in 
     | default $cyberlinks
     | save $"($env.cy.path)/cyberlinks_temp.csv" --force
-    | if (not $dont_show_out_table) { tmp view -q } 
+    | if (not $quiet) { tmp view -q } 
 }
 
 # Empty the temp cyberlinks table
@@ -1190,14 +1190,15 @@ export def-env 'config new' [
 # View a saved JSON config file
 export def 'config view' [
     config_name?: string@'nu-complete-config-names'
-    --dont-print
+    # --quiet (-q)
 ] {
     if $config_name == null {
-        $env.cy | if $dont_print {} else {inspect2}
+        $env.cy 
     } else {
         let $filename = $"($env.cy.path)/config/($config_name).toml"
-        open $filename | if $dont_print {} else {inspect2}
-    }
+        open $filename 
+    } 
+    # | if $quiet {} else {inspect2}
 }
 
 # Save the piped-in JSON into config file
@@ -1236,7 +1237,7 @@ export def-env 'config save' [
 export def-env 'config activate' [
     config_name?: string@'nu-complete-config-names'
 ] {
-    let $config = ($in | default (config view $config_name --dont-print))
+    let $config = ($in | default (config view $config_name))
     let $config_toml = (
         open ('~/.config/cy/cy_config.toml' | path expand)
         | merge $config 
@@ -1252,7 +1253,7 @@ export def-env 'config activate' [
         | save ('~/.config/cy/cy_config.toml' | path expand) -f
     )
 
-    $config_toml | inspect2
+    $config_toml
 }
 
 def 'search-sync' [
