@@ -55,7 +55,7 @@ export-env {
             )
             | sort
         } catch {
-            print $'A config file was not found. Run (ansi green)"cy config new"(ansi reset)'
+            $'A config file was not found. Run *"cy config new"*' | cprint
             $config
         }
     )
@@ -186,7 +186,7 @@ export def 'follow' [
     neuron
 ] {
     if not (is-neuron $neuron) {
-        print $"($neuron) doesn't look like address"
+        $"*($neuron)* doesn't look like address" | cprint 
         return
     }
 
@@ -295,10 +295,10 @@ export def 'tmp view' [
 
     if (not $quiet) {
         if $links_count == 0 {
-            $"The temp cyberlinks table ($"($env.cy.path)/cyberlinks_temp.csv") is empty." | cprint -c yellow
-            $"You can add cyberlinks to it manually or by using commands like 'cy link texts'" | cprint
+            $"*The temp cyberlinks table ($"($env.cy.path)/cyberlinks_temp.csv*") is empty.
+            You can add cyberlinks to it manually or by using commands like *'cy link texts'*" | cprint
         } else {
-            $"There are ($links_count) cyberlinks in the temp table:" | cprint -c green_underline
+            $"There are *($links_count) cyberlinks* in the temp table:" | cprint
         }
     }
 
@@ -460,7 +460,7 @@ export def 'tmp remove existed' [] {
 
     if $existed_links_count > 0 {
 
-        $"($existed_links_count) cyberlink(s) was/were already created by ($env.cy.address)" | cprint
+        $"*($existed_links_count) cyberlink\(s\)* was/were already created by ($env.cy.address)" | cprint
         print $existed_links
         "So they were removed from the temp table!" | cprint -c red -a 2
 
@@ -617,7 +617,7 @@ export def 'passport get' [
     if $out.exit_code == 0 {
         $out.stdout  | from json | get data
     } else {
-        $"No passport for ($address_or_nick) is found" | cprint --before 1
+        $"No passport for *($address_or_nick)* is found" | cprint --before 1
         null
     }
 }
@@ -682,7 +682,7 @@ export def 'passport set' [
     let $results = if $out.exit_code == 0 {
         $out.stdout | from json | select raw_log code txhash
     } else {
-        print $"The particle might not be set. Check with (ansi yellow)cy passport get ($nickname)(ansi reset)"
+        $"The particle might not be set. Check with *'cy passport get ($nickname)'*" | cprint
     }
 
     $results
@@ -690,7 +690,7 @@ export def 'passport set' [
 
 export def-env 'graph load vars' [] {
     if (not ($"($env.cy.path)/graph/cyberlinks.csv" | path exists)) {
-        print "There is no cyberlinks.csv. Download it usin 'cy graph download snapshoot'"
+        "There is no cyberlinks.csv. Download it usin *'cy graph download snapshoot'*" | cprint
         return
     }
     let $neurons = (
@@ -713,7 +713,8 @@ export def-env 'graph load vars' [] {
             | dfr select neuron nick
             ) neuron neuron
     } else {
-        print "there is no 'particles.parquet' file. Create one using the command 'cy graph update particles parquet'"
+        "there is no 'particles.parquet' file. 
+        Create one using the command *'cy graph update particles parquet'*" | cprint
         null
     })
     let-env cy = (
@@ -755,7 +756,10 @@ export def-env 'graph download snapshoot' [
     (
         $archives
         | skip until {|x| $x == $last_archive}
-        | each {|i| unzip -ojq $i -d $"($path)/particles/safe/"; print $"($i) is unzipped"}
+        | each {
+            |i| unzip -ojq $i -d $"($path)/particles/safe/"; 
+            cprint $"*($i)* is unzipped"
+        }
     )
 
     (
@@ -765,7 +769,7 @@ export def-env 'graph download snapshoot' [
         | save $"($path)/update.toml" -f
     )
 
-    print $"The graph data has been downloaded to the '($path)' directory"
+    $"The graph data has been downloaded to the *'($path)'* directory" | cprint
 
     if (not $disable_update_parquet) {
         print 'Updating particles parquet'
@@ -1083,8 +1087,8 @@ export def-env 'config new' [
 
     if ($addr_table | length) == 0 {
         let $error_text = (
-            $'There are no addresses in ($exec). To use CY you need to add one.' +
-            $'You can find out how to add one by running the command "($exec) keys add -h".' +
+            $'There are no addresses in ($exec). To use CY you need to add one. ' +
+            $'You can find out how to add one by running the command "($exec) keys add -h". ' +
             $'After adding a key - come back and launch this wizzard again'
         )
 
@@ -1114,7 +1118,7 @@ export def-env 'config new' [
     )
 
     if (not ($passport_nick | is-empty)) {
-        $"Passport nick (ansi yellow)($passport_nick)(ansi reset) will be used" | cprint -c green --before 1
+        $"Passport nick *($passport_nick)* will be used" | cprint -c default_italic --before 1
     }
 
     let $chain_id_def = (if ($exec == 'cyber') {
@@ -1240,7 +1244,7 @@ export def-env 'config activate' [
 
     let-env cy = $config_toml
 
-    "Config is loaded" | cprint -c green_underline
+    "Config is loaded" | cprint -c green_underline -b 1
     # $config_toml | save $"($env.cy.path)/config/default.toml" -f
     (
         open ('~/.config/cy/cy_config.toml' | path expand)
@@ -1801,9 +1805,7 @@ def make_default_folders_fn [] {
     mkdir $"($env.cy.path)/config/"
     mkdir $"($env.cy.path)/graph/particles/safe/"
     mkdir $"($env.cy.path)/gephi/"
-    mkdir $"($env.cy.path)/scripts/"
     mkdir $"($env.cy.path)/cache/search/"
-    mkdir $"($env.cy.path)/graph/particles/safe/"
     mkdir $"($env.cy.path)/cache/queue/"
     mkdir $"($env.cy.path)/cache/cli_out/"
 
@@ -1906,7 +1908,7 @@ def 'backup_fn' [
         ^mv $filename $path2
         # print $"Previous version of ($filename) is backed up to ($path2)"
     } else {
-        print $"($filename) does not exist"
+        $"*($filename)* does not exist" | cprint
     }
 }
 
