@@ -435,15 +435,16 @@ def 'link-exist' [
     to: string
     neuron: string
 ] {
-    let $out = (do -i {
-        ^($env.cy.exec) query rank is-exist $from $to $neuron --output json --node $env.cy.rpc-address
-    } | complete )
-
-    if $out.exit_code == 0 {
-        $out.stdout | from json | get "exist"
-    } else {
-        false
-    }
+    (
+        do -i {
+            ^($env.cy.exec) query rank is-exist $from $to $neuron --output json --node $env.cy.rpc-address
+        } | complete 
+        | if $in.exit_code == 0 {
+            get stdout | from json | get "exist"
+        } else {
+            false
+        }
+    )
 }
 
 # Remove existing cyberlinks from the temp cyberlinks table
