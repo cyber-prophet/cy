@@ -1552,7 +1552,7 @@ export def 'cid download gateway' [
 export def 'cid queue add' [
     cid: string
 ] {
-    log_row_csv --cid $cid --status '1.queued'
+    "+" | save -a $"($env.cyfolder)/cache/queue/($cid)"
 }
 
 # Read a CID from the cache, and if the CID is absent - add it into the queue
