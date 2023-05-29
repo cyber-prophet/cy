@@ -1557,25 +1557,15 @@ export def 'cid read or download' [
     cid: string
     --full  # output full text of a particle 
 ] {
-    let $content = (do -i {open $"($env.cy.ipfs-files-folder)/($cid).md"})
-
-    let $content = (
-        if $content == null {
-            pu-add $"cy cid download ($cid)"
-            "downloading"
-        } else {
-            $content
-        }
-    )
-
-    (
-        $content |
-        if $full {} else {
-            str substring 0..400
-            | str replace "\n" "↩" --all
-            | $"($in)\n(ansi grey)($cid)(ansi reset)"
-        }
-    )
+    do -i {open $"($env.cy.ipfs-files-folder)/($cid).md"}
+    | default (
+        pu-add $"cy cid download ($cid)";
+        "downloading"
+    ) | if $full {} else {
+        str substring 0..400
+        | str replace "\n" "↩" --all
+        | $"($in)\n(ansi grey)($cid)(ansi reset)"
+    }
 }
 
 # Watch the queue folder, and if there are updates, request files to download
