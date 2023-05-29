@@ -384,7 +384,7 @@ export def 'tmp pin columns' [
 
     let cyberlinks = (
         $in
-        | default (tmp view -q)
+        | default ( tmp view -q )
         | fill non-exist
     )
 
@@ -392,9 +392,13 @@ export def 'tmp pin columns' [
         $cyberlinks 
         | reduce -f [] {|it acc| 
             $acc 
-            | if $it.from_text != null { append $it.from_text } else {} 
-            | if $it.to_text != null { append $it.to_text } else {}
+            | if $it.from_text? != null { append $it.from_text } else {} 
+            | if $it.to_text? != null { append $it.to_text } else {}
         } 
+        | if $in == [] {
+            "No columns *'from_text'* or *'to_text'* found. Add at least one of them." | cprint ;
+            return
+        } else {}
         | uniq 
         | par-each {|i| {$i: (pin text $i)}} 
         | reduce -f {} {|it acc| 
@@ -405,13 +409,13 @@ export def 'tmp pin columns' [
 
     $cyberlinks 
     | each {|i| $i 
-        | if $i.from_text != null {
+        | if $i.from_text? != null {
             upsert from (
                 $dict
                 | get -i $i.from_text
             )
         } else {} 
-        | if $i.to_text != null {
+        | if $i.to_text? != null {
             upsert to {
                 $dict
                 | get -i $i.to_text
