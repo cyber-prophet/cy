@@ -101,6 +101,44 @@ export def 'pin text' [
     }
 }
 
+# Add a 2-texts cyberlink to the temp table
+#
+# > cy link texts 'cyber' 'cyber-prophet' --disable_append | to nuon
+# {from_text: cyber, from: "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV", 
+#  to_text: cyber-prophet, to: "QmXFUupJCSfydJZ85HQHD8tU1L7CZFErbRdMTBxkAmBJaD"}
+export def 'link texts' [
+    text_from
+    text_to
+    --disable_append (-D)
+] {
+
+    {
+        'from_text': $text_from
+        'from': (pin text $text_from)
+        'to_text': $text_to
+        'to': (pin text $text_to)
+    } | if $disable_append {} else {
+        tmp append --quiet
+    }
+}
+
+# Add a link chain to the temp table
+export def 'link chain' [
+    ...rest
+] {
+    let $count = ($rest | length)
+    if $count < 2 {
+        return $'($count) particles were submitted. We need 2 or more'
+    }
+
+    (
+        0..($count - 2) # The number of paris of cids to iterate through
+        | each {
+            |i| link texts ($rest | get $i) ($rest | get ($i + 1))
+        }
+    )
+}
+
 # Pin files from the current folder to the local node and output the cyberlinks table
 #
 # > "cyber" | save cyber.txt; "bostrom" | save bostrom.txt
@@ -141,44 +179,6 @@ export def 'link files' [
     | if $disable_append {} else {
         tmp append
     }
-}
-
-# Add a 2-texts cyberlink to the temp table
-#
-# > cy link texts 'cyber' 'cyber-prophet' --disable_append | to nuon
-# {from_text: cyber, from: "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV", 
-#  to_text: cyber-prophet, to: "QmXFUupJCSfydJZ85HQHD8tU1L7CZFErbRdMTBxkAmBJaD"}
-export def 'link texts' [
-    text_from
-    text_to
-    --disable_append (-D)
-] {
-
-    {
-        'from_text': $text_from
-        'from': (pin text $text_from)
-        'to_text': $text_to
-        'to': (pin text $text_to)
-    } | if $disable_append {} else {
-        tmp append --quiet
-    }
-}
-
-# Add a link chain to the temp table
-export def 'link chain' [
-    ...rest
-] {
-    let $count = ($rest | length)
-    if $count < 2 {
-        return $'($count) particles were submitted. We need 2 or more'
-    }
-
-    (
-        0..($count - 2) # The number of paris of cids to iterate through
-        | each {
-            |i| link texts ($rest | get $i) ($rest | get ($i + 1))
-        }
-    )
 }
 
 # Follow a neuron
@@ -1441,6 +1441,22 @@ export def log_row_csv [
     $"($cid),($source),\"($type)\",($size),($status),(history session)\n" | save -a $file
 }
 
+# Read a CID from the cache, and if the CID is absent - add it into the queue
+export def 'cid read or download' [
+    cid: string
+    --full  # output full text of a particle 
+] {
+    do -i {open $"($env.cy.ipfs-files-folder)/($cid).md"}
+    | default (
+        pu-add $"cy cid download ($cid)";
+        "downloading"
+    ) | if $full {} else {
+        str substring 0..400
+        | str replace "\n" "↩" --all
+        | $"($in)\n(ansi grey)($cid)(ansi reset)"
+    }
+}
+
 # Add a cid into queue to download asynchronously
 export def 'cid download async' [
     cid: string
@@ -1550,22 +1566,6 @@ export def 'cid queue add' [
     cid: string
 ] {
     "+" | save -a $"($env.cyfolder)/cache/queue/($cid)"
-}
-
-# Read a CID from the cache, and if the CID is absent - add it into the queue
-export def 'cid read or download' [
-    cid: string
-    --full  # output full text of a particle 
-] {
-    do -i {open $"($env.cy.ipfs-files-folder)/($cid).md"}
-    | default (
-        pu-add $"cy cid download ($cid)";
-        "downloading"
-    ) | if $full {} else {
-        str substring 0..400
-        | str replace "\n" "↩" --all
-        | $"($in)\n(ansi grey)($cid)(ansi reset)"
-    }
 }
 
 # Watch the queue folder, and if there are updates, request files to download
