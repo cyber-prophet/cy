@@ -1466,15 +1466,12 @@ export def 'cid download' [
     --info_only = false # Don't download the file by write a card with filetype and size
     --folder: string
 ] {
-    let $folder = ($folder | default $"($env.cy.ipfs-files-folder)")
+    let $folder = ($folder | default $env.cy.ipfs-files-folder)
     let $source = ($source | default $env.cy.ipfs-download-from)
-    let $status = (
-        if ($source == 'gateway') {
-            cid download gateway $cid --info_only $info_only --folder $folder
-        } else {
-            cid download kubo $cid --info_only $info_only --folder $folder
-        }
-    )
+    let $status = match $source {
+        'gateway' => {cid download gateway $cid --info_only $info_only --folder $folder}
+        'kubo' => {cid download kubo $cid --info_only $info_only --folder $folder}
+    }
 }
 
 # Download a cid from kubo (go-ipfs cli) immediately
