@@ -1593,7 +1593,7 @@ export def 'queue check' [
     let $files = (ls -s $"($env.cy.path)/cache/queue/")
 
     if (do -i {pueue status} | complete | $in.exit_code != 0) {
-        return "Tasks queue manager it turned off. Launch it with 'brew services start pueue' or 'pueued -d' command"
+        return "Tasks queue manager is turned off. Launch it with 'brew services start pueue' or 'pueued -d' command"
     }
 
     if ( ($files | length) == 0 ) {
