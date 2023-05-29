@@ -1811,14 +1811,16 @@ export def 'cprint' [
     --after (-a): int = 1
 ] {
 
-    $in 
-    | default ($args | str join ' ')
-    | compactit
-    | colorit
-    | if $frame != null {
-        frameit
-    } else {}
-    | newlineit
+    (
+        $in 
+        | default ($args | str join ' ')
+        | compactit
+        | colorit
+        | if $frame != null {
+            frameit
+        } else {}
+        | newlineit
+    )
 
     def compactit [] {
         $in 
