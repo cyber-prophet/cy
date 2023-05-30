@@ -1,8 +1,8 @@
-overlay use ~/cy/cy.nu -p -r 
+use ~/cy/cy.nu 
 use std 'assert equal'
 
 export def 'test_link_texts' [] {
-    overlay use ~/cy/cy.nu -p -r 
+    use ~/cy/cy.nu 
     let expect = [
         [from_text, to_text, from, to]; 
         [cyber, bostrom, "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV", "QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb"]
@@ -17,7 +17,7 @@ export def 'test_link_texts' [] {
 }
 
 export def 'test_link_files' [] {
-    overlay use ~/cy/cy.nu -p -r 
+    use ~/cy/cy.nu 
     let expect = [
         [from, to]; 
         ["QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb", "QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb"], 
@@ -35,7 +35,7 @@ export def 'test_link_files' [] {
 }
 
 export def 'test_link_random' [] {
-    overlay use ~/cy/cy.nu -p -r 
+    use ~/cy/cy.nu 
     let expect = 1
 
     let result = (
@@ -47,7 +47,7 @@ export def 'test_link_random' [] {
 }
 
 export def 'test_tmp_send_tx' [] {
-    overlay use ~/cy/cy.nu -p -r 
+    use ~/cy/cy.nu 
     print 'test tmp send tx'
     let expect = 0
 
@@ -63,7 +63,7 @@ export def 'test_tmp_send_tx' [] {
 }
 
 export def 'test_get_passport_by_address' [] {
-    overlay use ~/cy/cy.nu -p -r 
+    use ~/cy/cy.nu 
     print 'test get passport by address'
         cy config activate hacks+cyber
         let expect = {data: {owner: "bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8", 
