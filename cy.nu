@@ -1826,7 +1826,7 @@ export def 'cprint' [
         $in 
         | str replace -a '\n[\t ]+' ' ' 
         | str replace -a '[\t ]+' ' ' 
-        | str replace -a '(?m)^[\t ]+' ''
+        | str replace -a '(?m)^[\t ]+' ' '
     }
 
     def colorit [] {
