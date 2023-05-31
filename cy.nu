@@ -901,24 +901,10 @@ export def 'graph-filter-neurons' [
 def 'graph-filter-particles' [
     cyberlinks
 ] {
-    let $cyberlinks = ($cyberlinks | dfr into-df)
-
-    let $filtered_prtkls = (
-        $cyberlinks
-        | dfr into-df
-        | dfr get particle_from
-        | dfr rename particle_from particle
-        | dfr append -c (
-            $cyberlinks
-            | dfr into-df
-            | dfr get particle_to
-            | dfr rename particle_to particle
-            )
-        | dfr unique
-        | dfr join $env.cy.particles particle particle
-    )
-
-    $filtered_prtkls
+    $cyberlinks 
+    | dfr into-df
+    | graph-to-particles --cids_only
+    | dfr join $env.cy.particles particle particle
 }
 
 export def 'graph-neurons-stats' [] {
