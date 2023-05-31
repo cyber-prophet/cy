@@ -778,11 +778,18 @@ export def-env 'graph-download-snapshoot' [
     }
 }
 
-def 'cyberlinks-to-particles' [
+# Output unique list of particles from piped in cyberlinks table
+export def 'graph-to-particles' [
     cyberlinks?
+    --from
+    --to
+    --include_system (-s)
+    --cids_only (-c)
 ] {
     let $c = (
-        $cyberlinks
+        $in 
+        | default $cyberlinks
+        | default $env.cy.cyberlinks
         | default (
             dfr open $"($env.cy.path)/graph/cyberlinks.csv"
         )
@@ -793,15 +800,47 @@ def 'cyberlinks-to-particles' [
         $c 
         | dfr rename particle_from particle 
         | dfr drop particle_to
-        | dfr append --col (
-            $c | dfr rename particle_to particle | dfr drop particle_from
-        )
+        | dfr first 0
+        | if not $to {
+            dfr into-lazy
+            | dfr append --col (
+                | $c 
+                | dfr rename particle_from particle 
+                | dfr drop particle_to
+            )
+        } else {}
+        | if not $from {
+            dfr into-lazy
+            | dfr append --col (
+                $c 
+                | dfr rename particle_to particle 
+                | dfr drop particle_from
+            )
+        } else {}
         | dfr into-lazy 
         | dfr sort-by height 
-        | dfr unique --subset [particle] --maintain-order 
-        | dfr with-column (
-            dfr arg-where ((dfr col height) != 0) | dfr as particle_index
-        )
+        | dfr unique --subset [particle]
+        | if $cids_only {
+            dfr into-lazy
+            | dfr select particle
+        } else {
+            dfr into-lazy
+            | dfr with-column (
+                dfr arg-where ((dfr col height) != 0) | dfr as particle_index
+            )
+        } 
+        | if not $include_system {
+            dfr into-lazy
+            | dfr filter-with (
+                (dfr col particle) 
+                | dfr is-in  [
+                    "QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx", 
+                    "QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx", 
+                    "Qmf89bXkJH9jw4uaLkHmZkxQ51qGKfUPtAMxA8rTwBrmTs" 
+                ] | dfr expr-not
+            ) 
+        } else {}
+        | dfr into-lazy
         | dfr collect
     )
 }
