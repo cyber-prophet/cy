@@ -55,10 +55,12 @@ export-env {
             )
             | sort
         } catch {
-            print $'A config file was not found. Run *"cy config-new"*' 
+            $'A config file was not found. Run *"cy config-new"*' | cprint
             $config
         }
     )
+
+    graph-load-vars
 }
 
 # Pin a text particle
@@ -882,7 +884,7 @@ export def-env 'graph-update-particles-parquet' [] {
     )
 
     let $content_df2 = (
-        cyberlinks-to-particles
+        graph-to-particles
         | dfr into-df
         | dfr join $content_df1 particle cid --left
     )
@@ -905,7 +907,7 @@ export def-env 'graph-update-particles-parquet' [] {
 
     backup-fn $"($env.cy.path)/graph/particles.parquet"
     $final_df | dfr to-parquet $"($env.cy.path)/graph/particles.parquet" | print $in
-    graph load vars--# $content_df2 | dfr to-parquet $"($env.cy.path)/graph/particles.parquet"
+    graph-load-vars
 }
 
 
