@@ -709,10 +709,6 @@ export def-env 'graph-load-vars' [] {
         )
     let $particles = (if (not ($"($env.cy.path)/particles.parquet" | path exists)) {
         dfr open $"($env.cy.path)/graph/particles.parquet"
-        | dfr join --left (
-            $neurons 
-            | dfr select neuron nick
-            ) neuron neuron
     } else {
         "there is no 'particles.parquet' file. 
         Create one using the command *'cy graph-update-particles-parquet'*" | cprint
