@@ -55,7 +55,7 @@ export-env {
             )
             | sort
         } catch {
-            print $'A config file was not found. Run *"cy config ne-"*' 
+            print $'A config file was not found. Run *"cy config-new"*' 
             $config
         }
     )
