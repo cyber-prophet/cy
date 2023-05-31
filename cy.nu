@@ -798,7 +798,7 @@ def 'cyberlinks-to-particles' [
         )
         | dfr into-lazy 
         | dfr sort-by height 
-        | dfr unique --subset [particle] 
+        | dfr unique --subset [particle] --maintain-order 
         | dfr with-column (
             dfr arg-where ((dfr col height) != 0) | dfr as particle_index
         )
@@ -895,61 +895,7 @@ export def 'graph-filter-neurons' [
     $filtered_links
 }
 
-# Output unique list of particles from piped in cyberlinks table
-export def 'graph-particles-unique' [
-    cyberlinks?
-    --from
-    --to
-    --include_system (-s)
-] {
-    let $c = (
-        $in 
-        | default $cyberlinks
-        | default $env.cy.cyberlinks
-        | default (
-            dfr open $"($env.cy.path)/graph/cyberlinks.csv"
-        )
-        | dfr into-df
-    )
 
-    (
-        {particle: a} 
-        | dfr into-df 
-        | dfr filter-with ((dfr col particle) | dfr is-in ['a'] | dfr expr-not) 
-        | if not $to {
-            dfr into-df
-            | dfr append --col (
-                $c 
-                | dfr into-df
-                | dfr rename particle_from particle 
-                | dfr select particle
-            )
-        } else {}
-        | dfr into-df
-        | if not $from {
-            dfr into-df
-            | dfr append --col (
-                $c 
-                | dfr rename particle_to particle 
-                | dfr select particle
-            )
-        } else {}
-        | if not $include_system {
-            dfr into-df
-            | dfr filter-with (
-                (dfr col particle) 
-                | dfr is-in  [
-                    "QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx", 
-                    "QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx", 
-                    "Qmf89bXkJH9jw4uaLkHmZkxQ51qGKfUPtAMxA8rTwBrmTs" 
-                ] | dfr expr-not
-            ) 
-        } else {}
-        | dfr into-df
-        | dfr unique
-        # | dfr into-lazy 
-    )
-}
 
 # Export filtered graph into a CSV file for import to Gephi.
 def 'graph-filter-particles' [
