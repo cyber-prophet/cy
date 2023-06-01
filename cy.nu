@@ -728,9 +728,11 @@ export def-env 'graph-load-vars' [] {
 export def-env 'graph-download-snapshoot' [
     --disable_update_parquet (-d)
 ] {
+    make_default_folders_fn
+    
     let $path = $"($env.cy.path)/graph"
     let $cur_data_cid = (passport-get graphkeeper | get extension.data -i)
-    let $update_info = (open $"($path)/update.toml")
+    let $update_info = (try {open $"($path)/update.toml"} catch {{}})
     let $last_data_cid = ($update_info | get -i last_cid)
 
     if ($last_data_cid == $cur_data_cid) {
@@ -762,7 +764,7 @@ export def-env 'graph-download-snapshoot' [
     )
 
     (
-        open $"($path)/update.toml"
+        try {open $"($path)/update.toml"} catch {{}}
         | upsert "last_cid" $cur_data_cid
         | upsert "last_archive" ($archives | last)
         | save $"($path)/update.toml" -f
@@ -787,7 +789,7 @@ export def 'graph-to-particles' [
     let $c = (
         $in 
         | default $cyberlinks
-        | default $env.cy.cyberlinks
+        | default ($env | get cy.cyberlinks -i)
         | default (
             dfr open $"($env.cy.path)/graph/cyberlinks.csv"
         )
@@ -918,7 +920,7 @@ export def 'graph-filter-neurons' [
     let $cyberlinks = (
         $in 
         | default $cyberlinks 
-        | default $env.cy.cyberlinks
+        | default ($env | get cy.cyberlinks -i)
     )
     
     let $filtered_links = (
@@ -947,7 +949,7 @@ def 'graph-filter-particles' [
 export def 'graph-append-related' [] {
     let $c = $in
 
-    
+
 }
 
 export def 'graph-neurons-stats' [] {
@@ -1013,7 +1015,7 @@ export def 'graph-neurons-stats' [] {
 export def 'graph-to-gephi' [
     cyberlinks?
 ] {
-    let $cyberlinks = ($in | default $cyberlinks | default $env.cy.cyberlinks)
+    let $cyberlinks = ($in | default $cyberlinks | default ($env | get cy.cyberlinks -i))
     let $particles = (graph-filter-particles $cyberlinks)
 
     let $t1_height_index = (
@@ -1088,7 +1090,7 @@ export def 'graph-to-logseq' [
     cyberlinks?
     # --path: string
 ] {
-    let $cyberlinks = ($in | default $cyberlinks | default $env.cy.cyberlinks | inspect2)
+    let $cyberlinks = ($in | default $cyberlinks | default ($env | get cy.cyberlinks -i | inspect2))
     let $particles = (graph-filter-particles $cyberlinks | inspect2)
 
     let $path = $"($env.cy.path)/logseq/(date now | date format '%Y-%m-%d_%H-%M-%S')/"
