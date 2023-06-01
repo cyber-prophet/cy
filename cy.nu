@@ -944,6 +944,12 @@ def 'graph-filter-particles' [
     | dfr join $env.cy.particles particle particle
 }
 
+export def 'graph-append-related' [] {
+    let $c = $in
+
+    
+}
+
 export def 'graph-neurons-stats' [] {
 #neuron-stats-works
     let c = ($env.cy.cyberlinks | dfr into-df); 

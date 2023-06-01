@@ -7,7 +7,7 @@ if wezterm.config_builder then
 end
 
 config.default_prog = { 'nu', '-l' }
-config.font = wezterm.font { family = 'JetBrainsMono Nerd Font' }
+-- config.font = wezterm.font { family = 'JetBrainsMono Nerd Font' }
 config.font_size = 16.0
 config.initial_cols = 120
 config.initial_rows = 120
