@@ -4,21 +4,21 @@ Cy - a [nushell](https://www.nushell.sh/) wrapper, an interface to the cyber fam
 
 ## Key features
 
-- setting diffrent settings for diffrent profiles (rpc endpoints, private keys, networks, etc...)
-- seamlessly uploading and downloading data to cybernode or to local ipfs node
-- creating multiple cyberlinks
-- shortcuts for interactin with passport smart contract
-- cyber search in terminal
-- many more (see list functions below)
+- Setting different settings for different profiles (RPC endpoints, private keys, networks, etc...)
+- Seamlessly uploading and downloading data to cyber node or to a local IPFS node
+- Creating multiple cyber links
+- Shortcuts for interacting with passport smart contract
+- Cyber search in terminal
+- Many more (see list of functions below)
 
-## Installation (mac, linux)
+## Installation (Mac, Linux)
 
-Open terminal app on your computer.
+Open Terminal app on your computer.
 
 1. Install [brew](https://brew.sh/)
-2. Add a custom tap into your homebrew: `brew tap cyber-prophet/homebrew-taps`
-3. Install all the dependencies for running cy: `brew isntall cybundle`. 
-   This command will install the next software on your computer:
+2. Add a custom tap to your Homebrew: `brew tap cyber-prophet/homebrew-taps`
+3. Install all the dependencies for running cy: `brew install cybundle`
+   This command will install the following software on your computer:
    
    1. curl (if needed)
    2. [gum](https://github.com/charmbracelet/gum)
@@ -30,24 +30,23 @@ Open terminal app on your computer.
    8. [pueue](https://github.com/Nukesor/pueue) app
    9. [cybundle script](https://github.com/cyber-prophet/homebrew-taps/blob/main/src/cybundle)
 
-4. To continue installation of configs and executing necessary init steps run: `cybundle`
+4. To continue installation of configs and execute necessary init steps, run: `cybundle`
 
-After installation you can launch `nu` in your terminal with already configured `cy` in it. 
-Or, if your system is Macos or Linux (but not Linux under WSL) - you can launch wezterm app. 
+After installation, you can launch `nu` in your terminal with already configured `cy` in it. 
+Or, if your system is MacOS or Linux (but not Linux under WSL) - you can launch Wezterm app. 
 It should be configured to use `nu` with `cy` from the very start. 
 
-To start using cy follow the instructions on your screen. They should include:
+To start using cy, follow the instructions on your screen. They should include:
 
-1.  Go through the wizzard `cy config new`
-2.  See all the commands in logical order by executing `cy`
-3.  See all the commands suggestions by entering `cy` + tab
-`brew install bat`
+1. Go through the wizard `cy config new`.
+2. See all the commands in logical order by executing `cy`.
+3. See all the commands suggestions by entering `cy` + tab.
 
-## Installaition (windows)
+## Installation (Windows)
 
 Windows supports WSL2. Install it first: https://learn.microsoft.com/en-us/windows/wsl/install. 
-By default it should install Ubuntu on your computer. And when Ubuntu is installed and launched 
-proceed with the steps described in the [section of installation for macos and linux](#installation-mac-linux) 
+By default, it should install Ubuntu on your computer. And when Ubuntu is installed and launched, 
+proceed with the steps described in the [section of installation for MacOS and Linux](#installation-mac-linux) 
 of this manual.
 
 ## Examples
