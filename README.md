@@ -13,28 +13,42 @@ Cy - a [nushell](https://www.nushell.sh/) wrapper, an interface to the cyber fam
 
 ## Installation (mac, linux)
 
-There is a video manual on how to install these apps - https://t.me/CyberProphet/24
+Open terminal app on your computer.
 
 1. Install [brew](https://brew.sh/)
-3. Install [cyber](https://github.com/cybercongress/go-cyber) or/and [pussy](https://github.com/cybercongress/go-cyber)
-4. Install [nushell](https://www.nushell.sh/) app https://www.nushell.sh/ `brew install nushell`
-5. Install [kubo](https://github.com/ipfs/kubo) app (IPFS in Go) https://github.com/ipfs/kubo `brew install ipfs`
-6. Launch nushell by typing `nu` in your terminal app
-6. Execute `mkdir ~/cy | http get https://raw.githubusercontent.com/cyber-prophet/cy/dev/cy.nu | save ~/cy/cy.nu -f`
-8. Execute: `overlay use ~/cy/cy.nu as cy -p -r`. For more information on how to use overlays check [nushell's help](https://www.nushell.sh/book/overlays.html)
-9. Go through the wizzard `cy config`
-10. See all the commands in logical order by executing `cy`
-11. See all the commands suggestions by entering `cy` + tab
+2. Add a custom tap into your homebrew: `brew tap cyber-prophet/homebrew-taps`
+3. Install all the dependencies for running cy: `brew isntall cybundle`. 
+   This command will install the next software on your computer:
+   
+   1. curl (if needed)
+   2. [gum](https://github.com/charmbracelet/gum)
+   3. [cyber](https://github.com/cybercongress/go-cyber) 
+   4. [pussy](https://github.com/greatweb/space-pussy)
+   5. [nushell](https://www.nushell.sh/) app 
+   6. [ipfs - kubo](https://github.com/ipfs/kubo) app 
+   7. [wezterm](https://wezfurlong.org/wezterm/) terminal
+   8. [pueue](https://github.com/Nukesor/pueue) app
+   9. [cybundle script](https://github.com/cyber-prophet/homebrew-taps/blob/main/src/cybundle)
 
-Optional CLIs that are needed for some `cy` functions:
+4. To continue installation of configs and executing necessary init steps run: `cybundle`
 
-1. [curl](https://curl.se/) `brew install curl`
-2. [pueue](https://github.com/Nukesor/pueue) `brew install pueue`
-3. [bat](https://github.com/sharkdp/bat) `brew install bat`
+After installation you can launch `nu` in your terminal with already configured `cy` in it. 
+Or, if your system is Macos or Linux (but not Linux under WSL) - you can launch wezterm app. 
+It should be configured to use `nu` with `cy` from the very start. 
+
+To start using cy follow the instructions on your screen. They should include:
+
+1.  Go through the wizzard `cy config new`
+2.  See all the commands in logical order by executing `cy`
+3.  See all the commands suggestions by entering `cy` + tab
+`brew install bat`
 
 ## Installaition (windows)
 
-Windows supports WSL2. Some time ago I made a video how to use it: https://t.me/CyberProphet/20. It is a bit outdated, though most important steps there are still valid. You are very welcome to check it yourself. If you have problems - ask questions in comments to this video. 
+Windows supports WSL2. Install it first: https://learn.microsoft.com/en-us/windows/wsl/install. 
+By default it should install Ubuntu on your computer. And when Ubuntu is installed and launched 
+proceed with the steps described in the [section of installation for macos and linux](#installation-mac-linux) 
+of this manual.
 
 ## Examples
 
