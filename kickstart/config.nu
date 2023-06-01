@@ -767,3 +767,5 @@ let-env config = {
     }
   ]
 }
+
+overlay use ~/cy/cy.nu -p -r   # This line makes cy availible on the start of nu
