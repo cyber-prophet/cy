@@ -86,43 +86,44 @@ There are 1 cyberlinks in the temp table:
 
 |command|desc|
 |-|-|
-|cy pin text|Pin a text particle|
-|cy pin files|Pin files from the current folder to the local node, output the cyberlinks table|
-|cy link texts|Add a 2-texts cyberlink to the temp table|
-|cy link chain|Add a link chain to the temp table|
+|cy pin-text|Pin a text particle|
+|cy link-texts|Add a 2-texts cyberlink to the temp table|
+|cy link-chain|Add a link chain to the temp table|
+|cy link-files|Pin files from the current folder to the local node and output the cyberlinks table|
+|cy follow|Follow a neuron|
 |cy tweet|Add a tweet|
-|cy link chuck|Add a random chuck norris cyberlink to the temp table|
-|cy link quote|Add a random quote cyberlink to the temp table|
-|cy link random|Make a random cyberlink from diffrent APIs|
-|cy tmp view|View the temp cyberlinks table|
-|cy tmp append|Append cyberlinks to the temp table|
-|cy tmp replace|Replace cyberlinks in the temp table|
-|cy tmp clear|Empty the temp cyberlinks table|
-|cy tmp link to|Add a text particle into the 'to' column of the temp cyberlinks table|
-|cy tmp link from|Add a text particle into the 'from' column of the temp cyberlinks table|
-|cy tmp pin col|Pin values from a given column to IPFS node and add a column with their CIDs|
-|cy tmp remove existed|Remove existed cyberlinks from the temp cyberlinks table|
-|cy tmp send tx|Create a tx from the temp cyberlinks table, sign and broadcast it|
-|cy tsv copy|Copy a table from the pipe into clipboard (in tsv format)|
-|cy tsv paste|Paste a table from clipboard to stdin (so it can be piped further)|
-|cy update cy|Update cy to the latest version|
-|cy passport get|Get a passport by providing a neuron's address or nick|
-|cy passport set|Set a passport's particle, data or avatar field for a given nickname|
-|cy config new|Create config JSON to set env variables, to use them as parameters in cyber cli|
-|cy config view|View a saved JSON config file|
-|cy config save|Save the piped in JSON into config file|
-|cy config activate|Activate config JSON|
-|cy search|Use built in the node search function in cyber or pussy|
-|cy cid download async|Add cid into queue to download asyncasynchronously|
-|cy cid add queue|Download cid immediately and mark it in the queue|
-|cy cid download kubo|Download cid from kubo (go-ipfs cli) immediately|
-|cy cid download gateway|Download cid from gateway immediately|
-|cy cid read or download|Read CID from cache, and if the CID is absent - add it into the queue|
-|cy watch search folder|Watch the queue folder, and if there are updates - request files to download|
-|cy queue check|Check queue for the new CIDs, and if there are CIDs - safely download the text ones|
-|cy cache clear|Clear the cache folder|
+|cy link-random|Make a random cyberlink from different APIs (chucknorris.io, forismatic.com)|
+|cy tmp-append|Append cyberlinks to the temp table|
+|cy tmp-replace|Replace cyberlinks in the temp table|
+|cy tmp-clear|Empty the temp cyberlinks table|
+|cy tmp-link-to|Add a text particle into the 'to' column of the temp cyberlinks table|
+|cy tmp-link-from|Add a text particle into the 'from' column of the temp cyberlinks table|
+|cy tmp-pin-columns|Pin values from column 'text_from' and 'text_to' to an IPFS node and fill according columns with their CIDs|
+|cy tmp-remove-existed|Remove existing cyberlinks from the temp cyberlinks table|
+|cy tmp-send-tx|Create a tx from the temp cyberlinks table, sign and broadcast it|
+|cy tsv-copy|Copy a table from the pipe into the clipboard (in tsv format)|
+|cy tsv-paste|Paste a table from the clipboard to stdin (so it can be piped further)|
+|cy update-cy|Update-cy to the latest version|
+|cy passport-get|Get a passport by providing a neuron's address or nick|
+|cy passport-set|Set a passport's particle, data or avatar field for a given nickname|
+|cy graph-download-snapshoot|Download a snapshot of cybergraph by graphkeeper|
+|cy graph-to-particles|Output unique list of particles from piped in cyberlinks table|
+|cy graph-to-gephi|Export the entire graph into CSV file for import to Gephi|
+|cy config-view|View a saved JSON config file|
+|cy config-save|Save the piped-in JSON into config file|
+|cy config-activate|Activate the config JSON|
+|cy search|Use the built-in node search function in cyber or pussy|
+|cy cid-get-type-gateway|Obtain cid info|
+|cy cid-read-or-download|Read a CID from the cache, and if the CID is absent - add it into the queue|
+|cy cid-download-async|Add a cid into queue to download asynchronously|
+|cy cid-download|Download cid immediately and mark it in the queue|
+|cy cid-download-gateway|Download a cid from gateway immediately|
+|cy watch-search-folder|Watch the queue folder, and if there are updates, request files to download|
+|cy queue-check|Check the queue for the new CIDs, and if there are any, safely download the text ones|
+|cy cache-clear|Clear the cache folder|
 |cy balances|Check the balances for the keys added to the active CLI|
-|cy ipfs bootstrap add congress|Add cybercongress node to bootstrap nodes|
-|cy ibc denoms|Check ibc denoms|
+|cy ipfs-bootstrap-add-congress|Add the cybercongress node to bootstrap nodes|
+|cy ibc-denoms|Check IBC denoms|
+|cy validator-generate-persistent-peers-string|Dump the peers connected to the given node to the comma-separated `persistent_peers` list|
 |cy help|An ordered list of cy commands|
-|cy ber|A wrapper, to cache CLI requests|
+|cy cprint|Print string colourfully|
