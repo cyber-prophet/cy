@@ -39,6 +39,7 @@ export-env {
         'path': $default_cy_folder
         'ipfs-files-folder': $"($default_cy_folder)/graph/particles/safe/"
         'ipfs-download-from': 'gateway'
+        'ipfs-storage': 'cybernode'
     }
 
     if not ($config_file_path | path exists) {
