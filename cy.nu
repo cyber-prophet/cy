@@ -61,6 +61,7 @@ export-env {
         }
     )
 
+    make_default_folders_fn
     graph-load-vars
 }
 
