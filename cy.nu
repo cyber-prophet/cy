@@ -976,8 +976,33 @@ def 'graph-filter-particles' [
 }
 
 export def 'graph-append-related' [] {
-    let $c = $in
+    let $c = ($in | dfr into-lazy | dfr with-column (dfr lit '1' | dfr as 'step'))
 
+    let $to_2 = (
+        $c 
+        | graph-to-particles --cids_only 
+        | dfr into-lazy 
+        | dfr rename particle particle_to 
+        | dfr join $env.cy.cyberlinks particle_to particle_to 
+        | dfr with-column (dfr lit '2to' | dfr as 'step') 
+    )
+
+    let $from_2 = (
+        $c 
+        | graph-to-particles --cids_only 
+        | dfr into-lazy 
+        | dfr rename particle particle_from 
+        | dfr join $env.cy.cyberlinks particle_from particle_from 
+        | dfr with-column (dfr lit '2from' | dfr as 'step') 
+    )
+
+    $c 
+    | dfr append -c $to_2 
+    | dfr append -c $from_2 
+    | dfr into-lazy 
+    | dfr sort-by height 
+    | dfr unique --subset [neuron particle_from particle_to] 
+    | dfr collect
 
 }
 
