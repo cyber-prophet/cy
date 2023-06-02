@@ -154,18 +154,19 @@ export def 'link-chain' [
 
 # Pin files from the current folder to the local node and output the cyberlinks table
 #
+# > mkdir linkfilestest; cd linkfilestest
 # > 'cyber' | save cyber.txt; 'bostrom' | save bostrom.txt
-# > cy link-files --link_filenames
-# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-# ┃                      from                      ┃                       to                       ┃   date_time   ┃
-# ┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━┫
-# ┃ QmPtV5CU9v3u7MY7hMgG3z9kTno8o7JHJD1e6f3NLfZ86k ┃ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb ┃ 20230526-1402 ┃
-# ┃ QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6 ┃ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV ┃ 20230526-1402 ┃
-# ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━┛
+# > cy link-files --link_filenames --yes | to nuon
+# [[from, to]; 
+# ["QmPtV5CU9v3u7MY7hMgG3z9kTno8o7JHJD1e6f3NLfZ86k", "QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb"], 
+# ["QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6", "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV"]]
+# > cd ..; rm -r linkfilestest
 export def 'link-files' [
     ...files: string                # filenames to add into the local ipfs node
     --link_filenames (-n)
     --disable_append (-D)
+    --quiet
+    --yes (-y) # confirm
 ] {
     let $files = (
         if $files == [] {
@@ -175,23 +176,33 @@ export def 'link-files' [
         }
     )
 
+    if ((
+        ['yes' 'no'] 
+        | input list $'There are ($files | length) files to be uploaded, please confirm'
+    ) == 'no' or (not $yes)) {
+        return 'cancel' 
+    }
+
     let $cid_table = (
         $files
         | each {|f| ipfs add $f -Q | str replace '\n' ''}
         | wrap to
     )
 
-    if $link_filenames {
-        $files
-        | each {|it| pin-text $it --dont_open}
-        | wrap from
-        | merge $cid_table
-    } else {
-        $cid_table
-    } 
-    | if $disable_append {} else {
-        tmp-append
-    }
+    let $results = (
+        if $link_filenames {
+            $files
+            | each {|it| pin-text $it --dont_open}
+            | wrap from
+            | merge $cid_table
+        } else {
+            $cid_table
+        } 
+    )
+
+    if not $disable_append { $results | tmp-append --quiet }
+
+    if not $quiet { $results }
 }
 
 # Follow a neuron
