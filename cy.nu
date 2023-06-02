@@ -293,7 +293,13 @@ export def 'link-random' [
 export def 'tmp-view' [
     --quiet (-q) # Don't print info
 ] {
-    let $tmp_links = (open $"($env.cy.path)/cyberlinks_temp.csv")
+    let $tmp_links = (
+        try {
+            open $'($env.cy.path)/cyberlinks_temp.csv'
+        } catch {
+            [[from]; [null]] | first 0 
+        }
+    )
 
     if (not $quiet) {
         let $links_count = ($tmp_links | length)
@@ -312,24 +318,25 @@ export def 'tmp-view' [
 # Append cyberlinks to the temp table
 export def 'tmp-append' [
     cyberlinks?             # cyberlinks table
-    --quiet (-d)
+    --quiet (-q)
 ] {
     $in 
     | default $cyberlinks
     | upsert date_time (now-fn)
     | prepend (tmp-view -q)
-    | if $quiet { tmp-replace -d } else { tmp-replace }
+    | if $quiet { tmp-replace -q } else { tmp-replace }
 }
 
 # Replace cyberlinks in the temp table
 export def 'tmp-replace' [
     cyberlinks?             # cyberlinks table
-    --quiet (-d)
+    --quiet (-q)
 ] {
     $in 
     | default $cyberlinks
-    | save $"($env.cy.path)/cyberlinks_temp.csv" --force
-    | if (not $quiet) { tmp-view -q } 
+    | save $'($env.cy.path)/cyberlinks_temp.csv' --force
+    
+    if (not $quiet) { tmp-view -q } 
 }
 
 # Empty the temp cyberlinks table
