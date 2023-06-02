@@ -132,6 +132,10 @@ export def 'link-texts' [
 }
 
 # Add a link chain to the temp table
+# > cy link-chain "a" "b" "c" | to nuon
+# [[from_text, to_text, from, to]; 
+# [a, b, "QmfDmsHTywy6L9Ne5RXsj5YumDedfBLMvCvmaxjBoe6w4d", "QmQLd9KEkw5eLKfr9VwfthiWbuqa9LXhRchWqD4kRPPWEf"], 
+# [b, c, "QmQLd9KEkw5eLKfr9VwfthiWbuqa9LXhRchWqD4kRPPWEf", "QmS4ejbuxt7JvN3oYyX85yVfsgRHMPrVzgxukXMvToK5td"]]
 export def 'link-chain' [
     ...rest
 ] {
@@ -143,7 +147,7 @@ export def 'link-chain' [
     (
         0..($count - 2) # The number of paris of cids to iterate through
         | each {
-            |i| link-texts ($rest | get $i) ($rest | get ($i + 1))
+            |i| link-texts ($rest | get $i) ($rest | get ($i + 1)) 
         }
     )
 }
