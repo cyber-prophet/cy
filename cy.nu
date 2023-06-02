@@ -114,16 +114,21 @@ export def 'link-texts' [
     text_from
     text_to
     --disable_append (-D)
+    --quiet (-q)
 ] {
 
-    {
+    let $row = {
         'from_text': $text_from
         'to_text': $text_to
         'from': (pin-text $text_from)
         'to': (pin-text $text_to)
-    } | if $disable_append {} else {
-        tmp-append --quiet
+    } 
+    
+    if not $disable_append {
+        $row | tmp-append --quiet
     }
+
+    if not $quiet {$row}
 }
 
 # Add a link chain to the temp table
