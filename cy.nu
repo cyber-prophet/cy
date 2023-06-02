@@ -118,8 +118,8 @@ export def 'link-texts' [
 
     {
         'from_text': $text_from
-        'from': (pin-text $text_from)
         'to_text': $text_to
+        'from': (pin-text $text_from)
         'to': (pin-text $text_to)
     } | if $disable_append {} else {
         tmp-append --quiet
@@ -295,9 +295,9 @@ export def 'tmp-view' [
 ] {
     let $tmp_links = (open $"($env.cy.path)/cyberlinks_temp.csv")
 
-    let $links_count = ($tmp_links | length)
-
     if (not $quiet) {
+        let $links_count = ($tmp_links | length)
+
         if $links_count == 0 {
             $"The temp cyberlinks table *"($env.cy.path)/cyberlinks_temp.csv"* is empty.
             You can add cyberlinks to it manually or by using commands like *'cy link-texts'*" | cprint
