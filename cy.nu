@@ -1069,12 +1069,13 @@ export def 'graph-neurons-stats' [] {
 export def 'graph-to-gephi' [
     cyberlinks?
 ] {
-    let $cyberlinks = ($in | default $cyberlinks | default ($env | get cy.cyberlinks -i))
+    let $cyberlinks = ($in | default $cyberlinks | default ($env | get cy.cyberlinks -i) | dfr into-df)
     let $particles = (graph-filter-particles $cyberlinks)
 
     let $t1_height_index = (
         $cyberlinks.height 
         | dfr into-df 
+        | dfr append -c $particles.height # Particles might be created before they appear in the filtered graph
         | dfr unique 
         | dfr with-column (
             dfr arg-where ((dfr col height) != 0) | dfr as height_index
@@ -1095,7 +1096,7 @@ export def 'graph-to-gephi' [
                 (dfr col height_index) 
                 (dfr lit ($',($height_index_max)]>'))
             ] 
-            | dfr as height_index_interval
+            | dfr as Timeset
         ) 
         # | dfr with-column (
         #     dfr concat-str '' [
@@ -1123,7 +1124,7 @@ export def 'graph-to-gephi' [
                 (dfr col height_index) 
                 (dfr lit ($',($height_index_max)]>'))
             ] 
-            | dfr as height_index_interval
+            | dfr as Timeset
         ) 
         # | dfr with-column (
         #     dfr concat-str "" [
