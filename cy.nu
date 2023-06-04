@@ -727,8 +727,7 @@ export def-env 'graph-load-vars' [] {
     }
     let $neurons = (
         open $'($env.cy.path)/graph/neurons_dict.json' 
-        | fill non-exist $in 
-        | dfr into-df
+        | fill non-exist $in  | dfr into-df
     )
     let $cyberlinks = (
         dfr open $'($env.cy.path)/graph/cyberlinks.csv' 
@@ -822,8 +821,7 @@ export def 'graph-to-particles' [
         | default ($env | get cy.cyberlinks -i)
         | default (
             dfr open $'($env.cy.path)/graph/cyberlinks.csv'
-        )
-        | dfr into-lazy
+        ) | dfr into-lazy
     )
 
     (
@@ -831,41 +829,34 @@ export def 'graph-to-particles' [
         | dfr rename particle_from particle 
         | dfr drop particle_to
         | dfr first 0  # Create dummy dfr to have something to appended to
-        | if not $to {
-            dfr into-lazy
+        | if not $to { dfr into-lazy
             | dfr append --col (
                 | $c 
                 | dfr rename particle_from particle 
                 | dfr drop particle_to
             )
         } else {}
-        | if not $from {
-            dfr into-lazy
+        | if not $from { dfr into-lazy
             | dfr append --col (
                 $c 
                 | dfr rename particle_to particle 
                 | dfr drop particle_from
             )
-        } else {}
-        | dfr into-lazy 
+        } else {} | dfr into-lazy 
         | dfr sort-by height 
         | dfr unique --subset [particle]
-        | if $cids_only {
-            dfr into-lazy
+        | if $cids_only { dfr into-lazy
             | dfr select particle
-        } else {
-            dfr into-lazy
+        } else { dfr into-lazy
             | dfr with-column (
                 dfr arg-where ((dfr col height) != 0) | dfr as particle_index
             )
         } 
-        | if $include_content { # not elegant solution to keep columns from particles and to have particle_index in this function
-            dfr into-lazy
+        | if $include_content { dfr into-lazy # not elegant solution to keep columns from particles and to have particle_index in this function
             | dfr select particle
             | dfr join $env.cy.particles particle particle
         } else {}
-        | if not $include_system {
-            dfr into-lazy
+        | if not $include_system { dfr into-lazy
             | dfr filter-with (
                 (dfr col particle) 
                 | dfr is-in  [
@@ -874,8 +865,7 @@ export def 'graph-to-particles' [
                     'Qmf89bXkJH9jw4uaLkHmZkxQ51qGKfUPtAMxA8rTwBrmTs' 
                 ] | dfr expr-not
             ) 
-        } else {}
-        | dfr into-lazy
+        } else {} | dfr into-lazy
         | dfr collect
     )
 }
@@ -894,8 +884,7 @@ export def-env 'graph-update-particles-parquet' [] {
             | lines
             | get -i 0
             | default $'!!malformed ($i)'
-        }
-        | dfr into-df
+        } | dfr into-df
         | dfr rename '0' content_s
     )
 
@@ -907,22 +896,19 @@ export def-env 'graph-update-particles-parquet' [] {
             | path basename
             | str substring 0..46
             | into string
-        }
-        | dfr into-df
+        } | dfr into-df
         | dfr rename '0' cid
     )
 
     let $content_df1 = (
-        $ls_files
-        | dfr into-df
+        $ls_files | dfr into-df
         | dfr with-column $ls_content
         | dfr with-column $downloaded_cids         
         | dfr drop name modified type
     )
 
     let $content_df2 = (
-        graph-to-particles
-        | dfr into-df
+        graph-to-particles | dfr into-df
         | dfr join $content_df1 particle cid --left
     )
 
@@ -959,8 +945,7 @@ export def 'graph-filter-neurons' [
     )
     
     let $filtered_links = (
-        $neurons
-        | dfr into-df
+        $neurons | dfr into-df
         | dfr join $env.cy.neurons '0' nick
         | dfr select neuron
         | dfr join $cyberlinks neuron neuron
@@ -974,8 +959,7 @@ export def 'graph-append-related' [] {
 
     let $to_2 = (
         $c 
-        | graph-to-particles --cids_only 
-        | dfr into-lazy 
+        | graph-to-particles --cids_only  | dfr into-lazy 
         | dfr rename particle particle_to 
         | dfr join $env.cy.cyberlinks particle_to particle_to 
         | dfr with-column (dfr lit '2to' | dfr as 'step') 
@@ -983,8 +967,7 @@ export def 'graph-append-related' [] {
 
     let $from_2 = (
         $c 
-        | graph-to-particles --cids_only 
-        | dfr into-lazy 
+        | graph-to-particles --cids_only  | dfr into-lazy 
         | dfr rename particle particle_from 
         | dfr join $env.cy.cyberlinks particle_from particle_from 
         | dfr with-column (dfr lit '2from' | dfr as 'step') 
@@ -992,8 +975,7 @@ export def 'graph-append-related' [] {
 
     $c 
     | dfr append -c $to_2 
-    | dfr append -c $from_2 
-    | dfr into-lazy 
+    | dfr append -c $from_2  | dfr into-lazy 
     | dfr sort-by height 
     | dfr unique --subset [neuron particle_from particle_to] 
     | dfr collect
@@ -1002,8 +984,8 @@ export def 'graph-append-related' [] {
 
 export def 'graph-neurons-stats' [] {
 #neuron-stats-works
-    let c = ($env.cy.cyberlinks | dfr into-df); 
-    let p = ($env.cy.particles | dfr into-df ) #repeat_fn 
+    let c = ($env.cy.cyberlinks | dfr into-df)
+    let p = ($env.cy.particles | dfr into-df )
 
     let follows = ($p 
         | dfr filter ((dfr col content_s) == follow) 
@@ -1067,8 +1049,7 @@ export def 'graph-to-gephi' [
     let $particles = (graph-to-particles $cyberlinks --include_system --include_content)
 
     let $t1_height_index = (
-        $cyberlinks.height 
-        | dfr into-df 
+        $cyberlinks.height  | dfr into-df 
         | dfr append -c $particles.height # Particles might be created before they appear in the filtered graph
         | dfr unique 
         | dfr with-column (
@@ -1081,8 +1062,7 @@ export def 'graph-to-gephi' [
     )
 
     (
-        $cyberlinks
-        | dfr into-df
+        $cyberlinks | dfr into-df
         | dfr join --left $t1_height_index height height 
         | dfr with-column (
             dfr concat-str '' [
@@ -1105,8 +1085,7 @@ export def 'graph-to-gephi' [
     )
 
     (
-        $particles
-        | dfr into-lazy
+        $particles | dfr into-lazy
         | dfr join --left $t1_height_index height height 
         | dfr with-column (
             (dfr col particle) | dfr as cid
@@ -1146,7 +1125,9 @@ export def 'graph-to-logseq' [
     mkdir $'($path)/pages'
     mkdir $'($path)/journals'
 
-    $particles | dfr into-df | dfr into-nu | each {|p|
+    $particles | dfr into-df 
+    | dfr into-nu 
+    | each {|p|
         print $p.particle
         $"author:: ($p.nick)\n\n- (cid-read-or-download $p.particle --full)\n- ---" |
         save $'($path)/pages/($p.content_s).md'
