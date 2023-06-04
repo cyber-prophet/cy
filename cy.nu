@@ -1127,10 +1127,20 @@ export def 'graph-to-logseq' [
 
     $particles | dfr into-df 
     | dfr into-nu 
-    | each {|p|
-        print $p.particle
-        $"author:: ($p.nick)\n\n- (cid-read-or-download $p.particle --full)\n- ---" |
-        save $'($path)/pages/($p.content_s).md'
+    | par-each {|p|
+        # print $p.particle
+        $"author:: [[($p.nick)]]\n\n- (
+            do -i {open $'($env.cy.ipfs-files-folder)/($p.particle).md' 
+            | default "timeout"
+        } )\n- --- \n- ## cyberlinks from \n" |
+        save $'($path)/pages/($p.particle).md'
+    }
+
+    $cyberlinks | dfr into-df
+    | dfr into-nu
+    | each {|c| 
+        $"\t- ($c.particle_to) ($c.height) [[($c.nick)]]\n" |
+        save $'($path)/pages/($c.particle_from).md' -a
     }
 }
 
