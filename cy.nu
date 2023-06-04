@@ -969,18 +969,6 @@ export def 'graph-filter-neurons' [
     $filtered_links
 }
 
-
-
-# Export filtered graph into a CSV file for import to Gephi.
-def 'graph-filter-particles' [
-    cyberlinks
-] {
-    $cyberlinks 
-    | dfr into-df
-    | graph-to-particles --cids_only
-    | dfr join $env.cy.particles particle particle
-}
-
 export def 'graph-append-related' [] {
     let $c = ($in | dfr into-lazy | dfr with-column (dfr lit '1' | dfr as 'step'))
 
@@ -1076,7 +1064,7 @@ export def 'graph-to-gephi' [
     cyberlinks?
 ] {
     let $cyberlinks = ($in | default $cyberlinks | default ($env | get cy.cyberlinks -i) | dfr into-df)
-    let $particles = (graph-filter-particles $cyberlinks)
+    let $particles = (graph-to-particles $cyberlinks --include_system --include_content)
 
     let $t1_height_index = (
         $cyberlinks.height 
@@ -1152,7 +1140,7 @@ export def 'graph-to-logseq' [
     # --path: string
 ] {
     let $cyberlinks = ($in | default $cyberlinks | default ($env | get cy.cyberlinks -i | inspect2))
-    let $particles = (graph-filter-particles $cyberlinks | inspect2)
+    let $particles = (graph-to-particles $cyberlinks --include_system --include_content | inspect2)
 
     let $path = $'($env.cy.path)/logseq/(date now | date format "%Y-%m-%d_%H-%M-%S")/'
     mkdir $'($path)/pages'
