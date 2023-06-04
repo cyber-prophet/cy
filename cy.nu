@@ -363,7 +363,7 @@ export def 'tmp-replace' [
 export def 'tmp-clear' [] {
     backup-fn $'($env.cy.path)/cyberlinks_temp.csv'
 
-    'from,to,from_text,to_text' | save $'($env.cy.path)/cyberlinks_temp.csv' --force
+    'from_text,to_text,from,to' | save $'($env.cy.path)/cyberlinks_temp.csv' --force
     # print 'TMP-table is clear now.'
 }
 
@@ -814,6 +814,7 @@ export def 'graph-to-particles' [
     --to
     --include_system (-s)
     --cids_only (-c)
+    --include_content
 ] {
     let $c = (
         $in 
@@ -858,6 +859,11 @@ export def 'graph-to-particles' [
                 dfr arg-where ((dfr col height) != 0) | dfr as particle_index
             )
         } 
+        | if $include_content { # not elegant solution to keep columns from particles and to have particle_index in this function
+            dfr into-lazy
+            | dfr select particle
+            | dfr join $env.cy.particles particle particle
+        } else {}
         | if not $include_system {
             dfr into-lazy
             | dfr filter-with (
