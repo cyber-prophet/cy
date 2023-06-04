@@ -830,7 +830,7 @@ export def 'graph-to-particles' [
         $c 
         | dfr rename particle_from particle 
         | dfr drop particle_to
-        | dfr first 0
+        | dfr first 0  # Create dummy dfr to have something to appended to
         | if not $to {
             dfr into-lazy
             | dfr append --col (
