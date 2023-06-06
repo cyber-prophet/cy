@@ -176,10 +176,12 @@ export def 'link-files' [
         }
     )
 
+    print $'There are ($files | length) files to be uploaded, please confirm'
     if ((
         ['yes' 'no'] 
-        | input list $'There are ($files | length) files to be uploaded, please confirm'
-    ) == 'no' or (not $yes)) {
+        | input list
+        | inspect2
+    ) == 'no' or $yes) {
         return 'cancel' 
     }
 
