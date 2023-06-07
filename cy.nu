@@ -1141,7 +1141,7 @@ export def 'graph-to-logseq' [
     $cyberlinks | dfr into-df
     | dfr into-nu
     | each {|c| 
-        $"\t- ($c.particle_to) ($c.height) [[($c.nick)]]\n" |
+        $"\t- [[($c.particle_to)]] ($c.height) [[($c.nick?)]]\n" |
         save $'($path)/pages/($c.particle_from).md' -a
     }
 }
