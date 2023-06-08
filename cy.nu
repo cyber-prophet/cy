@@ -1345,7 +1345,8 @@ def 'search-sync' [
     print $'searching ($env.cy.exec) for ($cid)'
 
     (
-        ^($env.cy.exec) query rank search $cid $page 10 --output json
+        ^($env.cy.exec) query rank search $cid $page 10 
+        --output json --node $env.cy.rpc-address
         | from json
         | get result
         | upsert particle {
@@ -1381,7 +1382,8 @@ def 'search-with-backlinks' [
     print $'searching ($env.cy.exec) for ($cid)'
 
     let $serp = (
-        ^($env.cy.exec) query rank search $cid $page $results_per_page --output json
+        ^($env.cy.exec) query rank search $cid $page $results_per_page 
+        --output json --node $env.cy.rpc-address
         | from json
         | get result
         | upsert particle {
@@ -1392,7 +1394,8 @@ def 'search-with-backlinks' [
     )
 
     let $back = (
-        ^($env.cy.exec) query rank backlinks $cid $page $results_per_page --output json
+        ^($env.cy.exec) query rank backlinks $cid $page $results_per_page 
+        --output json --node $env.cy.rpc-address
         | from json
         | get result
         | upsert particle {
@@ -1417,9 +1420,10 @@ def 'search-auto-refresh' [
     print $'searching ($env.cy.exec) for ($cid)'
 
     let $out = (
-        do -i {
-            ^($env.cy.exec) query rank search $cid $page $results_per_page --output json
-        } | complete
+        do -i {(
+            ^($env.cy.exec) query rank search $cid $page $results_per_page 
+            --output json --node $env.cy.rpc-address
+        )} | complete
     )
 
     let $results = if $out.exit_code == 0 {
@@ -1633,14 +1637,15 @@ export def 'cid-download-gateway' [
         {'MIME type': $type, 'Size': $size} | sort -r | to toml | save -f $'($folder)/($cid).md'
         log_row_csv --cid $cid --source $gate_url --type $type --size $size --status '4.downloaded info'
     } else {
-        log_row_csv --cid $cid --source $gate_url --type $type --size $size --status '5.failed'
+        cid-queue-add $cid '-g'
     }
 }
 
 export def 'cid-queue-add' [
     cid: string
+    symbol: string = '+'
 ] {
-    '+' | save -a $'($env.cyfolder)/cache/queue/($cid)'
+    $symbol | save -a $'($env.cyfolder)/cache/queue/($cid)'
 }
 
 # Watch the queue folder, and if there are updates, request files to download
@@ -1708,15 +1713,18 @@ export def 'get-balance' [
         return
     }
 
-    cyber query bank balances $address --output json
-    | from json
-    | get balances
-    | upsert amount {
-        |b| $b.amount
-        | into int
-    }
-    | transpose -i -r
-    | into record
+    (
+        ^($env.cy.exec) query bank balances $address 
+        --output json --node $env.cy.rpc-address
+        | from json
+        | get balances
+        | upsert amount {
+            |b| $b.amount
+            | into int
+        }
+        | transpose -i -r
+        | into record
+    )
 }
 
 # Check the balances for the keys added to the active CLI
@@ -1855,7 +1863,12 @@ def is-cid [particle: string] {
 }
 
 def is-neuron [particle: string] {
-    ($particle =~ '^bostrom1\w{38}$') or ($particle =~ '^bostrom1\w{58}$')
+    (
+        ($particle =~ '^bostrom\w{39}$') 
+        or ($particle =~ '^bostrom\w{59}$') 
+        or ($particle =~ '^pussy\w{39}$') 
+        or ($particle =~ '^pussy\w{59}$')
+    )
 }
 
 def is-connected []  {
