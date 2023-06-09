@@ -1,11 +1,17 @@
-# cy
+# Cy
 
-Cy - a [nushell](https://www.nushell.sh/) wrapper, an interface to the cyber family blockchains CLIs (bostrom, pussy) and IPFS.
+Cy - a [nushell](https://www.nushell.sh/) wrapper, a client for the Cyber family blockchains (bostrom, pussy) and IPFS.
+
+## The Goals of Cy:
+
+1. To demonstrate the use cases of cybergraphs and the capabilities of Cyber family blockchains.
+2. To showcase the beauty and power of the Nushell environment and its scripting language.
+3. To aid me in learning cool apps and programming languages.
 
 ## Key features
 
 - Setting different settings for different profiles (RPC endpoints, private keys, networks, etc...)
-- Seamlessly uploading and downloading data to cyber node or to a local IPFS node
+- Seamlessly upload and download data to cyber node or to a local IPFS node
 - Creating multiple cyber links
 - Shortcuts for interacting with passport smart contract
 - Cyber search in terminal
@@ -17,7 +23,7 @@ Open Terminal app on your computer.
 
 1. Install [brew](https://brew.sh/)
 2. Add a custom tap to your Homebrew: `brew tap cyber-prophet/homebrew-taps`
-3. Install all the dependencies for running cy: `brew install cybundle`
+3. Install all the dependencies for running Cy: `brew install cybundle`
    This command will install the following software on your computer:
    
    1. curl (if needed)
@@ -36,7 +42,7 @@ After installation, you can launch `nu` in your terminal with already configured
 Or, if your system is MacOS or Linux (but not Linux under WSL) - you can launch Wezterm app. 
 It should be configured to use `nu` with `cy` from the very start. 
 
-To start using cy, follow the instructions on your screen. They should include:
+To start using Cy, follow the instructions on your screen. They should include:
 
 1. Go through the wizard `cy config new`.
 2. See all the commands in logical order by executing `cy`.
