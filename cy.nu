@@ -1497,8 +1497,8 @@ export def 'cid-get-type-gateway' [
     let $size = ($headers | get -i 'Content-Length')
 
     if (
-        ($type == null) or ($size == null)
-        or (($type == 'text/html') and (($size == '157') or ($size == 157))
+        ($type == null) or ($size == null) or 
+        (($type == 'text/html') and (($size == '157'))
     )) {
         return null
     }
