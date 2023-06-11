@@ -1664,6 +1664,7 @@ export def 'watch-search-folder' [] {
 # Check the queue for the new CIDs, and if there are any, safely download the text ones
 export def 'queue-check' [
     attempts = 0
+    --info
 ] {
     let $files = (ls -s $'($env.cy.path)/cache/queue/')
 
@@ -1690,13 +1691,15 @@ export def 'queue-check' [
     print $'There are ($filtered_files | length) files that was attempted to be downloaded ($attempts) times already.'
     print $'The latest file was added into the queue ($filtered_files | get modified.0 -i)'
 
-    (
-        $filtered_files
-        | get name -i
-        | each {
-            |i| pu-add $'cy cid-download ($i)'
-        }
-    )
+    if not $info {
+        (
+            $filtered_files
+            | get name -i
+            | each {
+                |i| pu-add $'cy cid-download ($i)'
+            } 
+        )
+    }
 }
 
 # Clear the cache folder
@@ -2002,6 +2005,7 @@ def 'pu-add' [
     command: string
 ] {
     pueue add -p $'nu -c "($command)" --config "($nu.config-path)" --env-config "($nu.env-path)"'
+    null
 }
 
 def inspect2 [
