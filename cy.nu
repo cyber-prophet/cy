@@ -1567,6 +1567,12 @@ export def 'cid-download' [
         'gateway' => {cid-download-gateway $cid --info_only $info_only --folder $folder}
         'kubo' => {cid-download-kubo $cid --info_only $info_only --folder $folder}
     }
+
+    if $status in ['text' 'non_text'] {
+        rm --force $'($env.cy.path)/cache/queue/($cid)'
+    } else if $status == 'not found' {
+        cid-queue-add $cid '-'
+    } 
 }
 
 # Download a cid from kubo (go-ipfs cli) immediately
@@ -1632,12 +1638,14 @@ export def 'cid-download-gateway' [
         (($type | default '') == 'text/plain; charset=utf-8') and (not $info_only)
     ) {
         http get $'($gate_url)($cid)' -m 120 | save -f $'($folder)/($cid).md'
-        log_row_csv --cid $cid --source $gate_url --type $type --size $size --status '4.downloaded file'
+        return 'text'
+        # log_row_csv --cid $cid --source $gate_url --type $type --size $size --status '4.downloaded file'
     } else if ($type != null) {
         {'MIME type': $type, 'Size': $size} | sort -r | to toml | save -f $'($folder)/($cid).md'
-        log_row_csv --cid $cid --source $gate_url --type $type --size $size --status '4.downloaded info'
+        return 'non_text'
+        # log_row_csv --cid $cid --source $gate_url --type $type --size $size --status '4.downloaded info'
     } else {
-        cid-queue-add $cid '-g'
+        return 'not found'
     }
 }
 
@@ -1645,7 +1653,7 @@ export def 'cid-queue-add' [
     cid: string
     symbol: string = '+'
 ] {
-    $symbol | save -a $'($env.cyfolder)/cache/queue/($cid)'
+    $symbol | save -a $'($env.cy.path)/cache/queue/($cid)'
 }
 
 # Watch the queue folder, and if there are updates, request files to download
