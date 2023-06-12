@@ -27,32 +27,24 @@ export def check-requirements [] {
 }
 
 export-env {
-    # banner2
-    let $config_folder = ('~/.config/cy/' | path expand)
-    let $default_cy_folder = ('~/cy/' | path expand)
-
-    mkdir $config_folder
-
-    let $config_file_path = $'($config_folder)/cy_config.toml'
-
-    let $default_config = {
-        'path': $default_cy_folder
-        'ipfs-files-folder': $'($default_cy_folder)/graph/particles/safe/'
-        'ipfs-download-from': 'gateway'
-        'ipfs-storage': 'cybernode'
+    banner2
+    if not ('~/.cy_config.toml' | path exists) {
+        {
+            'path': '~/cy/'
+            'ipfs-files-folder': '~/cy/graph/particles/safe/'
+            'ipfs-download-from': 'gateway'
+            'ipfs-storage': 'cybernode'
+        } |
+        save '~/.cy_config.toml'
     }
 
-    if not ($config_file_path | path exists) {
-        $default_config | save $config_file_path
-    }
-
-    let $config = (open $config_file_path)
+    let $config = (open '~/.cy_config.toml')
 
     let-env cy = (
         try {
             $config
             | merge (
-                open $'($config.path)/config/($config | get 'config-name').toml'
+                open $'($config.path)/config/($config.config-name).toml'
             )
             | sort
         } catch {
@@ -1314,7 +1306,7 @@ export def-env 'config-activate' [
 ] {
     let $config = ($in | default (config-view $config_name))
     let $config_toml = (
-        open ('~/.config/cy/cy_config.toml' | path expand)
+        open '~/.cy_config.toml'
         | merge $config 
     )
 
@@ -1323,9 +1315,9 @@ export def-env 'config-activate' [
     'Config is loaded' | cprint -c green_underline -b 1
     # $config_toml | save $'($env.cy.path)/config/default.toml' -f
     (
-        open ('~/.config/cy/cy_config.toml' | path expand)
+        open '~/.cy_config.toml'
         | upsert 'config-name' ($config_toml | get 'config-name')
-        | save ('~/.config/cy/cy_config.toml' | path expand) -f
+        | save '~/.cy_config.toml' -f
     )
 
     $config_toml
@@ -1680,8 +1672,8 @@ export def 'queue-check' [
 
     let $filtered_files = (
         $files
-        | sort-by modified -r
         | where size <= (1 + $attempts | into filesize)
+        | sort-by size
     )
 
     if ($filtered_files == []) {
@@ -1689,7 +1681,7 @@ export def 'queue-check' [
     }
 
     print $'There are ($filtered_files | length) files that was attempted to be downloaded ($attempts) times already.'
-    print $'The latest file was added into the queue ($filtered_files | get modified.0 -i)'
+    print $'The latest file was added into the queue ($filtered_files | where size < 2 | get modified.0 -i)'
 
     if not $info {
         (
@@ -1708,6 +1700,7 @@ export def 'cache-clear' [] {
     make_default_folders_fn
 }
 
+# Get a current height for a network choosen in config
 export def 'query-current-height' [
     exec?: string@'nu-complete-executables'
 ] {
@@ -1716,6 +1709,7 @@ export def 'query-current-height' [
     ^($exec) query block | from json | get block.header | select height time chain_id
 }
 
+# Get a balance for a given account
 export def 'get-balance' [
     address: string
 ] {
@@ -1744,7 +1738,7 @@ export def 'get-balance' [
     )
 }
 
-# Check the balances for the keys added to the active CLI
+# Check balances for the keys added to the active CLI
 export def 'balances' [
     ...name: string@'nu-complete keys values'
 ] {
