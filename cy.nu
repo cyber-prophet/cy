@@ -212,7 +212,7 @@ export def 'follow' [
     neuron
 ] {
     if not (is-neuron $neuron) {
-        $"*($neuron)* doesn't look like address" | cprint 
+        $"*($neuron)* doesn't look like an address" | cprint 
         return
     }
 
@@ -681,7 +681,7 @@ export def 'passport-set' [
         if (is-cid $particle) {
             $particle
         } else {
-            print $"($particle) doesn't look like cid"
+            print $"($particle) doesn't look like a cid"
             return
         }
     )
@@ -1720,9 +1720,15 @@ export def 'get-balance' [
     address: string
 ] {
     if not (is-neuron $address) {
-        print $"($address) doesn't look like address"
-        return
+        $"*($address)* doesn't look like an address" 
+        | cprint 
+        return null
     }
+
+    # let exec = match ($address | str substring 0..4) {
+    #     'pussy' => { 'pussy' },
+    #     'bostr' => { 'cyber' }
+    # }
 
     (
         ^($env.cy.exec) query bank balances $address 
@@ -2552,10 +2558,12 @@ def clip [
         },
         _ => {
             error make --unspanned {
-                msg: $"(ansi red)unknown_operating_system(ansi reset):
+                msg: $"(ansi red)unknown_operating_system(ansi reset)
     '($nu.os-info.name)' is not supported by the ('clip' | pretty-command) command.
 
-    please open a feature request in the [issue tracker](char lparen)https://github.com/nushell/nushell/issues/new/choose(char rparen) to add your operating system to the standard library."
+    please open a feature request in the 
+    [issue tracker](char lparen)https://github.com/nushell/nushell/issues/new/choose(char rparen) 
+    to add your operating system to the standard library."
             }
         },
     }
@@ -2568,4 +2576,16 @@ def clip [
     if (not $no_notify) and ($nu.os-info.name == linux) {
         notify-send "std clip" "saved to clipboard"
     }
+}
+
+def agree [
+    prompt
+    --default-not (-n): bool
+] {
+    let prompt = if ($prompt | str ends-with '!') {
+        $'(ansi red)($prompt)(ansi reset)'
+    } else {
+        $'($prompt)'
+    }
+    ( if $default_not { [no yes] } else { [yes no] } | input list $prompt) in [yes]
 }
