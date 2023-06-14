@@ -864,22 +864,18 @@ export def 'graph-to-particles' [
     )
 }
 
-export def-env 'graph-update-particles-parquet' [] {
+export def-env 'graph-update-particles-parquet' [
+    --full_content
+] {
 
     let $ls_files = (ls $'($env.cy.path)/graph/particles/safe');
 
-    let $ls_content = (
+    let $ls_content_nu = (
         $ls_files
         | get name
         | each {
             |i| open $i
-            | str substring 0..150 -g
-            | str trim
-            | lines
-            | get -i 0
-            | default $'!!malformed ($i)'
-        } | dfr into-df
-        | dfr rename '0' content_s
+        }
     )
 
     let $downloaded_cids = (
@@ -896,8 +892,26 @@ export def-env 'graph-update-particles-parquet' [] {
 
     let $content_df1 = (
         $ls_files | dfr into-df
-        | dfr with-column $ls_content
-        | dfr with-column $downloaded_cids         
+        | dfr with-column (
+            $ls_content_nu
+            | each {
+                |i| $i
+                | str substring 0..150 -g
+                | str trim
+                | lines
+                | get -i 0
+                | default $'!!malformed ($i)'
+            } | dfr into-df
+            | dfr rename '0' content_s
+        )
+        | dfr with-column $downloaded_cids
+        | if $full_content { dfr into-df
+            | dfr with-column (
+                $ls_content_nu
+                | dfr into-df
+                | dfr rename '0' content
+            )
+        } else {} | dfr into-df
         | dfr drop name modified type
     )
 
@@ -1678,10 +1692,11 @@ export def 'queue-check' [
 
     if ($filtered_files == []) {
         return $'There are no files, that was attempted to download for less than ($attempts) times.'
+    } else {
+        print $'There are ($filtered_files | length) files that was attempted to be downloaded ($attempts) times already.'
+        print $'The latest file was added into the queue ($filtered_files | sort-by modified -r | sort-by size | get modified.0 -i)'    
     }
 
-    print $'There are ($filtered_files | length) files that was attempted to be downloaded ($attempts) times already.'
-    print $'The latest file was added into the queue ($filtered_files | where size < 2 | get modified.0 -i)'
 
     if not $info {
         (
