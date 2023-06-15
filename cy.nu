@@ -1574,10 +1574,12 @@ export def 'cid-download' [
         'kubo' => {cid-download-kubo $cid --info_only $info_only --folder $folder}
     }
 
-    if $status in ['text' 'non_text'] {
+    if ($status) in ['text' 'non_text'] {
         rm --force $'($env.cy.path)/cache/queue/($cid)'
+        'downloaded'
     } else if $status == 'not found' {
         cid-queue-add $cid '-'
+        'not found'
     } 
 }
 
@@ -1590,8 +1592,12 @@ def 'cid-download-kubo' [
 ] {
     print $'cid to download ($cid)'
     let $type = (
-        do -i {
-            ipfs cat --timeout $timeout -l 400 $cid
+        do -i {ipfs cat --timeout $timeout -l 400 $cid} 
+        | complete
+        | if $in.exit_code == 1 {
+            'empty'
+        } else {
+            get stdout
             | file - -I
             | $in + ''
             | str replace '\n' ''
@@ -1625,7 +1631,6 @@ def 'cid-download-kubo' [
         )
         return 'non_text'
     }
-
 }
 
 # Download a cid from gateway immediately
