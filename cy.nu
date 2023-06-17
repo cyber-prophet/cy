@@ -991,6 +991,46 @@ export def 'graph-append-related' [] {
 
 }
 
+export def 'graph-update-neurons' [
+    --passport
+    --balance
+    --karma
+    --all (-a)
+    --threads (-t) = 30
+    --dont_save
+    --verbose (-v)
+] {
+    $in 
+    | default $env.cy.cyberlinks 
+    | dfr into-df 
+    | dfr select neuron 
+    | dfr unique 
+    | dfr join $env.cy.neurons neuron neuron --left 
+    | dfr into-nu 
+    | if $passport or $all {
+        par-each -t $threads {|i| 
+            $i | merge (passport-get $i.neuron | get -i extension | default {})
+        }
+    } else {}
+    | if $balance or $all {
+        par-each -t $threads {|i| 
+            $i | merge (balance-get $i.neuron)
+        }
+    } else {}
+    | if $karma or $all {
+        par-each -t $threads {|i| 
+            $i | merge (
+                ^($env.cy.exec) query rank karma $i.neuron -o json 
+                | from json 
+                | upsert karma {|i| $i.karma | into int}
+            )
+        }
+    } else {}
+    | if $dont_save {} else {
+        save -f $'($env.cy.path)/graph/neurons_dict.yaml'
+    }
+}
+
 export def 'graph-neurons-stats' [] {
 #neuron-stats-works
     let c = ($env.cy.cyberlinks | dfr into-df)
