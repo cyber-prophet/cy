@@ -720,8 +720,9 @@ export def-env 'graph-load-vars' [] {
         return
     }
     let $neurons = (
-        open $'($env.cy.path)/graph/neurons_dict.json' 
-        | fill non-exist $in  | dfr into-df
+        open $'($env.cy.path)/graph/neurons_dict.yaml' 
+        | fill non-exist
+        | dfr into-df
     )
     let $cyberlinks = (
         dfr open $'($env.cy.path)/graph/cyberlinks.csv' 
