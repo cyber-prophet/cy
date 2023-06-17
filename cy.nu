@@ -410,7 +410,7 @@ export def 'tmp-pin-columns' [
     let cyberlinks = (
         $in
         | default ( tmp-view -q )
-        | fill non-exist
+        | fill non-exist -v null
     )
 
     let dict = (
@@ -2104,13 +2104,13 @@ def do-bash [commands: string] {
 # [[a, b]; [1, null], [null, 2]]
 def 'fill non-exist' [
     tbl?
-    --value_to_replace = null
+    --value_to_replace (-v): any = ''
 ] {
     let $table = ($in | default $tbl)
     
     let $cols = (
         $table
-        | each {|i| $i | columns} 
+        | par-each {|i| $i | columns} 
         | flatten 
         | uniq 
         | reduce --fold {} {|i acc| 
