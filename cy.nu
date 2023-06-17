@@ -644,7 +644,7 @@ export def 'passport-get' [
         $out.stdout  | from json | get data
     } else {
         $'No passport for *($address_or_nick)* is found' | cprint --before 1
-        null
+        {}
     }
 }
 
@@ -806,8 +806,8 @@ export def 'graph-to-particles' [
     --from
     --to
     --include_system (-s)
-    --cids_only (-c)
     --include_content
+    --cids_only (-c)
 ] {
     let $c = (
         $in 
@@ -916,7 +916,7 @@ export def-env 'graph-update-particles-parquet' [
     )
 
     let $content_df2 = (
-        graph-to-particles | dfr into-df
+        graph-to-particles --include_system | dfr into-df
         | dfr join $content_df1 particle cid --left
     )
 
@@ -1044,7 +1044,7 @@ export def 'graph-neurons-stats' [] {
         | dfr join $follows neuron neuron --left 
         | dfr join $tweets neuron neuron --left 
         | dfr join (
-            $env.cy.neurons | dfr into-df | dfr select neuron name karma
+            $env.cy.neurons | dfr into-df 
         ) neuron neuron --left
     ) 
 }
@@ -1730,7 +1730,7 @@ export def 'query-current-height' [
 }
 
 # Get a balance for a given account
-export def 'get-balance' [
+export def 'balance-get' [
     address: string
 ] {
     if not (is-neuron $address) {
@@ -1780,7 +1780,7 @@ export def 'balances' [
     let $balances = (
         $keys1
         | par-each {
-            |i| get-balance $i.address
+            |i| balance-get $i.address
             | merge $i
         }
     )
@@ -2021,7 +2021,7 @@ def 'backup-fn' [
     }
 }
 
-def 'pu-add' [
+export def 'pu-add' [
     command: string
 ] {
     pueue add -p $'nu -c "($command)" --config "($nu.config-path)" --env-config "($nu.env-path)"'
