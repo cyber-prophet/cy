@@ -216,6 +216,12 @@ export def 'link-files' [
 }
 
 # Follow a neuron
+#
+# > cy follow bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8 | to yaml
+# from_text: QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx
+# to_text: bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8
+# from: QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx
+# to: QmYwEKZimUeniN7CEAfkBRHCn4phJtNoNJxnZXEAhEt3af
 export def 'follow' [
     neuron
 ] {
