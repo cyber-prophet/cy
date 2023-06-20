@@ -2103,8 +2103,8 @@ def 'backup-fn' [
 export def 'pu-add' [
     command: string
 ] {
-    pueue add -p $'nu -c "($command)" --config "($nu.config-path)" --env-config "($nu.env-path)"'
-    null
+    do {pueue add -p $'nu -c "($command)" --config "($nu.config-path)" --env-config "($nu.env-path)"'}
+    | null
 }
 
 def inspect2 [
