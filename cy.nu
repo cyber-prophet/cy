@@ -211,26 +211,24 @@ export def 'follow' [
     link-texts 'QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx' $neuron
 }
 
-# Add a tweet
+# Add a tweet and send it immediately (unless of disable_send flag)
+#
+# > cy tmp-clear; cy tweet 'cyber-prophet is cool' --disable_send | to yaml
+# from_text: QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx
+# to_text: cyber-prophet is cool
+# from: QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx
+# to: QmWm9pmmz66cq41t1vtZWoRz5xmHSmoKCrrgdP9adcpoZK
 export def 'tweet' [
     text_to
-    --disable_send (-d)
+    --disable_send (-D)
 ] {
     # let $cid_from = pin-text 'tweet'
     let $cid_from = 'QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx'
-    let $cid_to = (pin-text $text_to)
-
-    let $out_table = (
-        [
-            ['from_text', 'to_text', from, to];
-            ['tweet', $text_to, $cid_from, $cid_to]
-        ]
-    )
 
     if (not $disable_send) {
-        $out_table | tmp-send-tx
+        link-texts $cid_from $text_to -D | tmp-send-tx
     } else {
-        $out_table | tmp-append
+        link-texts $cid_from $text_to
     }
 }
 
