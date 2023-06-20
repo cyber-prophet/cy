@@ -113,14 +113,16 @@ export def 'pin-text' [
 
 # Add a 2-texts cyberlink to the temp table
 #
-# > cy link-texts 'cyber' 'cyber-prophet' --disable_append | to nuon
-# {from_text: cyber, from: 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV', 
-#  to_text: cyber-prophet, to: 'QmXFUupJCSfydJZ85HQHD8tU1L7CZFErbRdMTBxkAmBJaD'}
+# > cy link-texts 'cyber' 'cyber-prophet' --disable_append | to yaml
+# from_text: cyber
+# to_text: cyber-prophet
+# from: QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
+# to: QmXFUupJCSfydJZ85HQHD8tU1L7CZFErbRdMTBxkAmBJaD
 export def 'link-texts' [
     text_from
     text_to
-    --disable_append (-D)
-    --quiet (-q)
+    --disable_append (-D) # Disable adding the cyberlink into the temp table
+    --quiet (-q) # Don't output the cyberlink record after executing the command
 ] {
 
     let $row = {
