@@ -6,7 +6,7 @@
 
 export def main [] { help }
 
-# start with this function
+# Check if all necessary dependencies are installed
 export def check-requirements [] {
 
     let $intermid = {
@@ -140,6 +140,7 @@ export def 'link-texts' [
 }
 
 # Add a link chain to the temp table
+#
 # > cy link-chain "a" "b" "c" | to nuon
 # [[from_text, to_text, from, to]; 
 # [a, b, "QmfDmsHTywy6L9Ne5RXsj5YumDedfBLMvCvmaxjBoe6w4d", "QmQLd9KEkw5eLKfr9VwfthiWbuqa9LXhRchWqD4kRPPWEf"], 
@@ -735,7 +736,7 @@ export def 'passport-set' [
 }
 
 export def-env 'graph-load-vars' [] {
-    if (not ($'($env.cy.path)/graph/cyberlinks.csv' | path exists)) {
+    if not ($'($env.cy.path)/graph/cyberlinks.csv' | path exists) {
         'There is no cyberlinks.csv. Download it using *"cy graph-download-snapshoot"*' | cprint
         return
     }
@@ -746,12 +747,11 @@ export def-env 'graph-load-vars' [] {
     )
     let $cyberlinks = (
         dfr open $'($env.cy.path)/graph/cyberlinks.csv' 
-        | dfr open $'($env.cy.path)/graph/cyberlinks.csv' 
         | dfr join --left (
             $neurons 
             | dfr select neuron nick
-            ) neuron neuron
-        )
+        ) neuron neuron
+    )
     let $particles = (if (not ($'($env.cy.path)/particles.parquet' | path exists)) {
         dfr open $'($env.cy.path)/graph/particles.parquet'
     } else {
@@ -964,7 +964,7 @@ export def-env 'graph-update-particles-parquet' [
 
 
 export def 'graph-filter-neurons' [
-    ...neurons: string@'nu-complete-neurons-nicks'
+    ...neurons_nicks: string@'nu-complete-neurons-nicks'
     --cyberlinks: any
 ] {
     let $cyberlinks = (
@@ -974,7 +974,7 @@ export def 'graph-filter-neurons' [
     )
     
     let $filtered_links = (
-        $neurons | dfr into-df
+        $neurons_nicks | dfr into-df
         | dfr join $env.cy.neurons '0' nick
         | dfr select neuron
         | dfr join $cyberlinks neuron neuron
@@ -1737,6 +1737,7 @@ export def 'watch-search-folder' [] {
 export def 'queue-check' [
     attempts = 0
     --info
+    --quiet
 ] {
     let $files = (ls -s $'($env.cy.path)/cache/queue/')
 
@@ -1748,7 +1749,9 @@ export def 'queue-check' [
         return 'there are no files in queue'
     }
 
-    print $'Overall count of files in queue is ($files | length).'
+    $'Overall count of files in queue is *($files | length)*' | cprint
+
+    print $'For download will be used ($env.cy.ipfs-download-from)'
 
     let $filtered_files = (
         $files
@@ -1765,13 +1768,11 @@ export def 'queue-check' [
 
 
     if not $info {
-        (
-            $filtered_files
-            | get name -i
-            | each {
-                |i| pu-add $'cy cid-download ($i)'
-            } 
-        )
+        $filtered_files
+        | get name -i
+        | each {
+            |i| pu-add $'cy cid-download ($i)'
+        } 
     }
 }
 
@@ -2680,5 +2681,10 @@ def agree [
     } else {
         $'($prompt)'
     }
-    ( if $default_not { [no yes] } else { [yes no] } | input list $prompt) in [yes]
+    print $prompt
+    
+    if $default_not { [no yes] } else { [yes no] } 
+    | input list 
+    | inspect2 
+    | $in in [yes]
 }
