@@ -1989,10 +1989,28 @@ export def 'cprint' [
         | str replace -a '(?m)^[\t ]+' ' '
     }
 
+
     def colorit [] {
-        $in 
-        | str replace '(^|\s)(\*)(\S)' $'$1(ansi reset)(ansi $highlight_color)$3' --all
-        | str replace '(\S)(\*)(\s|$)' $'$1(ansi reset)(ansi $color)$3' --all
+        let text = ($in | split chars)
+        mut agg = []
+        mut open_tag = true
+
+        for i in $text {
+            if $i == '*' {
+                if $open_tag {
+                    $open_tag = false 
+                    $agg = ($agg | append $'(ansi reset)(ansi $highlight_color)')
+                } else {
+                    $open_tag = true
+                    $agg = ($agg | append $'(ansi reset)(ansi $color)')
+                }
+            } else {
+                $agg = ($agg | append $i)
+            }
+        }
+
+        $agg
+        | str join ''
         | $'(ansi $color)($in)(ansi reset)'
     }
 
