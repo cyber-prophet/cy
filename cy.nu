@@ -61,40 +61,54 @@ export-env {
 #
 # > cy pin-text 'cyber'
 # QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
+# > "cyber" | save -f cyber.txt; cy pin-text 'cyber.txt'
+# QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
+# > "cyber" | save -f cyber.txt; cy pin-text 'cyber.txt' --dont_follow_path
+# QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6
+# > cy pin-text "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV"
+# QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
+# > cy pin-text QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV --dont_detect_cid
+# QmcDUZon6VQLR3gjAvSKnudSVQ2RbGXUtFFV8mR6zHZK8F
 export def 'pin-text' [
     text_param?: string
-    --only_hash
-    --dont_open
+    --only_hash  # calculate hash only, don't pin anywhere
+    --dont_detect_cid  # work with CIDs as regular texts
+    --dont_follow_path # treat existing file paths as reuglar texts
 ] {
-    let $text = ($in | default $text_param | into string)
-    let $text = (if ($text | path exists) and (not $dont_open) {
-        open $text
-    } else {
-        $text
-    })
+    let $text = (
+        $in 
+        | default $text_param 
+        | into string
+        | if ($in | path exists) and (not $dont_follow_path) {
+            open $in
+        } else {}
+    )
 
-    if (is-cid $text) {
-        $text
-    } else if $only_hash {
+    if (is-cid $text) and (not $dont_detect_cid) {
+        return $text
+    } 
+    
+    if $only_hash {
         $text
         | ipfs add -Q --only-hash
         | str replace '\n' ''
-    } else {
-        let $cid = if (
-            ($env.cy.ipfs-storage == 'kubo') or ($env.cy.ipfs-storage == 'both')
-        ) {
+        | return $in
+    }
+
+    let $cid = (
+        if ($env.cy.ipfs-storage == 'kubo') or ($env.cy.ipfs-storage == 'both') {
             $text
             | ipfs add -Q
             | str replace '\n' ''
         }
+    )
 
-        if (($env.cy.ipfs-storage == 'cybernode') or ($env.cy.ipfs-storage == 'both')) {
-            $text
-            | curl --silent -X POST -F file=@- 'https://io.cybernode.ai/add'
-            | from json
-            | get cid
-        } else { $cid }
-    }
+    if ($env.cy.ipfs-storage == 'cybernode') or ($env.cy.ipfs-storage == 'both') {
+        $text
+        | curl --silent -X POST -F file=@- 'https://io.cybernode.ai/add'
+        | from json
+        | get cid
+    } else { $cid }
 }
 
 # Add a 2-texts cyberlink to the temp table
@@ -186,7 +200,7 @@ export def 'link-files' [
     let $results = (
         if $link_filenames {
             $files
-            | each {|it| pin-text $it --dont_open}
+            | each {|it| pin-text $it --dont_follow_path}
             | wrap from
             | merge $cid_table
         } else {
