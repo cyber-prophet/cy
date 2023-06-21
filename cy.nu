@@ -165,54 +165,46 @@ export def 'link-chain' [
 #
 # > mkdir linkfilestest; cd linkfilestest
 # > 'cyber' | save cyber.txt; 'bostrom' | save bostrom.txt
-# > cy link-files --link_filenames --yes | to nuon
-# [[from, to]; 
-# ["QmPtV5CU9v3u7MY7hMgG3z9kTno8o7JHJD1e6f3NLfZ86k", "QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb"], 
-# ["QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6", "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV"]]
+# > cy link-files --link_filenames --yes | to yaml
+# - from: QmPtV5CU9v3u7MY7hMgG3z9kTno8o7JHJD1e6f3NLfZ86k
+#   to: QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb
+# - from: QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6
+#   to: QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 # > cd ..; rm -r linkfilestest
 export def 'link-files' [
-    ...files: string                # filenames to add into the local ipfs node
-    --link_filenames (-n)
-    --disable_append (-D)
-    --quiet
-    --yes (-y) # confirm
+    ...files: string        # filenames to add into the local ipfs node
+    --link_filenames (-n)   # Add filenames as a from link
+    --disable_append (-D)   # Don't append links to the tmp table
+    --quiet                 # Don't output results page
+    --yes (-y)              # Confirm uploading files without request 
 ] {
-    let $files = (
-        if $files == [] {
-            ls | where type == file | get name | where $it != 'desktop.ini'
-        } else {
-            $files
+    let $files_col = (
+        $files 
+        | if $in == [] {
+            ls 
+            | where type == file 
+            | get name 
+            | where $it not-in ['desktop.ini' '.DS_Store']
+        } else { }
+        | wrap from_text
+    )
+
+    $'Confirm uploading ($files_col | length) files?'
+    | if $yes or (agree -n $in) { } else { return }
+
+    let $results = (
+        $files_col
+        | par-each {|f| $f 
+            | upsert to_text $'pinned_file:($f.from_text)'
+            | upsert to (ipfs add $f.from_text -Q | str replace '\n' '')
+            | if ($link_filenames) {
+                upsert from (pin-text $f.from_text --dont_follow_path)
+                | move from --before to
+            } else { reject from_text }
         }
     )
 
-    print $'There are ($files | length) files to be uploaded, please confirm'
-    if ((
-        ['yes' 'no'] 
-        | input list
-        | inspect2
-    ) == 'no' or $yes) {
-        return 'cancel' 
-    }
-
-    let $cid_table = (
-        $files
-        | each {|f| ipfs add $f -Q | str replace '\n' ''}
-        | wrap to
-    )
-
-    let $results = (
-        if $link_filenames {
-            $files
-            | each {|it| pin-text $it --dont_follow_path}
-            | wrap from
-            | merge $cid_table
-        } else {
-            $cid_table
-        } 
-    )
-
     if not $disable_append { $results | tmp-append --quiet }
-
     if not $quiet { $results }
 }
 
