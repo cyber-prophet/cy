@@ -607,7 +607,7 @@ export def 'tmp-send-tx' [] {
         | select cy code txhash
 
     } else if $_var.code == 2 {
-        {'cy': $'Use (ansi yellow)"cy tmp-remove-existed"(ansi reset)' }
+        {'cy': ('Use *"cy tmp-remove-existed"*' | cprint --echo) }
         | merge $_var
     } else {
         $_var
@@ -1984,21 +1984,12 @@ export def 'cprint' [
     --color (-c): any = 'default'
     --highlight_color (-h): any = 'green_bold'
     --frame_color (-r): any = 'dark_gray'
-    --frame (-f): string
-    --before (-b): int = 0
-    --after (-a): int = 1
+    --frame (-f): string        # A symbol (or a string) to frame text
+    --before (-b): int = 0      # A number of new lines before text
+    --after (-a): int = 1       # A number of new lines after text
+    --echo (-e)                 # Echo text string instead of printing
 ] {
-
-    (
-        $in 
-        | default ($args | str join ' ')
-        | compactit
-        | colorit
-        | if $frame != null {
-            frameit
-        } else {}
-        | newlineit
-    )
+    let $in_text = ($in | default ($args | str join ' '))
 
     def compactit [] {
         $in 
@@ -2006,7 +1997,6 @@ export def 'cprint' [
         | str replace -a '[\t ]+' ' ' 
         | str replace -a '(?m)^[\t ]+' ' '
     }
-
 
     def colorit [] {
         let text = ($in | split chars)
@@ -2056,6 +2046,16 @@ export def 'cprint' [
         print $text -n
         print ("\n" * $after) -n
     }
+
+    (
+        $in_text
+        | compactit
+        | colorit
+        | if $frame != null {
+            frameit
+        } else {}
+        | if $echo { } else { newlineit }
+    )
 }
 
 def 'if-empty' [
