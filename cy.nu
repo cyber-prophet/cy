@@ -141,10 +141,15 @@ export def 'link-texts' [
 
 # Add a link chain to the temp table
 #
-# > cy link-chain "a" "b" "c" | to nuon
-# [[from_text, to_text, from, to]; 
-# [a, b, "QmfDmsHTywy6L9Ne5RXsj5YumDedfBLMvCvmaxjBoe6w4d", "QmQLd9KEkw5eLKfr9VwfthiWbuqa9LXhRchWqD4kRPPWEf"], 
-# [b, c, "QmQLd9KEkw5eLKfr9VwfthiWbuqa9LXhRchWqD4kRPPWEf", "QmS4ejbuxt7JvN3oYyX85yVfsgRHMPrVzgxukXMvToK5td"]]
+# > cy link-chain "a" "b" "c" | to yaml
+# - from_text: a
+#   to_text: b
+#   from: QmfDmsHTywy6L9Ne5RXsj5YumDedfBLMvCvmaxjBoe6w4d
+#   to: QmQLd9KEkw5eLKfr9VwfthiWbuqa9LXhRchWqD4kRPPWEf
+# - from_text: b
+#   to_text: c
+#   from: QmQLd9KEkw5eLKfr9VwfthiWbuqa9LXhRchWqD4kRPPWEf
+#   to: QmS4ejbuxt7JvN3oYyX85yVfsgRHMPrVzgxukXMvToK5td
 export def 'link-chain' [
     ...rest
 ] {
@@ -208,7 +213,7 @@ export def 'link-files' [
     if not $quiet { $results }
 }
 
-# Follow a neuron
+# Create a cyberlink with semantic construction to follow a neuron
 #
 # > cy follow bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8 | to yaml
 # from_text: QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx
