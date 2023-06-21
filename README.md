@@ -2,7 +2,12 @@
 
 Cy - a [nushell](https://www.nushell.sh/) wrapper, an interface to the cyber family blockchains CLIs (bostrom, pussy) and IPFS.
 
-## Key features
+## Cyber-family blockchains
+
+Cyber-family blockchains maintain permissionless informational graphs where nodes are CIDs of files in the IPFS network and edges are Cyberlinks (consisting of source, destination, author, height - records) written into the blockchain.Information written into the blockchain is secured to remain in existence as long as the blockchain is operational. The blockchain is designed with economic incentives that motivate validators to sustain the network.
+For further information about Cyber blockchains, please refer to [Bostrom Journal.](https://github.com/cyber-prophet/bostrom-journal/blob/manual/BostromJournal001.md)
+
+## Key features of Cy
 
 - Setting different settings for different profiles (RPC endpoints, private keys, networks, etc...)
 - Seamlessly uploading and downloading data to cyber node or to a local IPFS node
