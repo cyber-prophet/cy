@@ -785,7 +785,7 @@ export def-env 'graph-load-vars' [] {
 
 # Download a snapshot of cybergraph by graphkeeper
 export def-env 'graph-download-snapshoot' [
-    --disable_update_parquet (-d)
+    --disable_update_parquet (-D)   # Don't update the particles parquet file
 ] {
     make_default_folders_fn
     
@@ -840,11 +840,11 @@ export def-env 'graph-download-snapshoot' [
 # Output unique list of particles from piped in cyberlinks table
 export def 'graph-to-particles' [
     cyberlinks?
-    --from
-    --to
-    --include_system (-s)
-    --include_content
-    --cids_only (-c)
+    --from                  # Use only particles from the 'from' column
+    --to                    # Use only particles from the 'to' column
+    --include_system (-s)   # Include tweents, follow and avatar paritlces
+    --include_content       # Include column with particles' content
+    --cids_only (-c)        # Output one column with CIDs only
 ] {
     let $c = (
         $in 
@@ -978,7 +978,7 @@ export def-env 'graph-update-particles-parquet' [
     graph-load-vars
 }
 
-
+# Filter the graph to chosen neurons only
 export def 'graph-filter-neurons' [
     ...neurons_nicks: string@'nu-complete-neurons-nicks'
     --cyberlinks: any
@@ -999,6 +999,7 @@ export def 'graph-filter-neurons' [
     $filtered_links
 }
 
+# Append related cyberlinks to the piped in graph
 export def 'graph-append-related' [] {
     let $c = ($in | dfr into-lazy | dfr with-column (dfr lit '1' | dfr as 'step'))
 
@@ -1788,7 +1789,7 @@ export def 'cache-clear' [] {
     make_default_folders_fn
 }
 
-# Get a current height for a network choosen in config
+# Get a current height for a network chosen in config
 export def 'query-current-height' [
     exec?: string@'nu-complete-executables'
 ] {
@@ -1810,6 +1811,12 @@ export def 'karma-get' [
 }
 
 # Get a balance for a given account
+#
+# > cy balance-get bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8 | to yaml
+# boot: 348358
+# hydrogen: 486000000
+# milliampere: 25008
+# millivolt: 7023
 export def 'balance-get' [
     address: string
 ] {
