@@ -379,29 +379,38 @@ export def 'tmp-clear' [] {
     # print 'TMP-table is clear now.'
 }
 
-# Add a text particle into the 'to' column of the temp cyberlinks table
-export def 'tmp-link-to' [
-    text: string # a text to upload to ipfs
-    --dont_replace (-D)
-    # --non-empty # fill non-empty only
+# Add the same text particle into the 'from' or 'to' column of the temp cyberlinks table
+#
+# > [[from_text, to_text]; ['cyber-prophet' null] ['tweet' 'cy is cool!']] 
+# | cy tmp-pin-columns | cy tmp-link-all 'master' --column 'to' --non_empty | to yaml
+# - from_text: cyber-prophet
+#   to_text: master
+#   from: QmXFUupJCSfydJZ85HQHD8tU1L7CZFErbRdMTBxkAmBJaD
+#   to: QmZbcRTU4fdrMy2YzDKEUAXezF3pRDmFSMXbXYABVe3UhW
+# - from_text: tweet
+#   to_text: cy is cool!
+#   from: QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx
+#   to: QmddL5M8JZiaUDcEHT2LgUnZZGLMTTDEYVKWN1iMLk6PY8
+export def 'tmp-link-all' [
+    text: string            # a text to upload to ipfs
+    --dont_replace (-D)     # don't replace the temp cyberlinks table, just output results
+    --column (-c) = 'from'  # a column to use for values ('from' or 'to'). 'from' is default
+    --non_empty             # fill non-empty only
 ] {
     $in
     | default (tmp-view -q)
-    | upsert to (pin-text $text)
-    | upsert to_text $text
-    | if $dont_replace {} else { tmp-replace }
-}
-
-# Add a text particle into the 'from' column of the temp cyberlinks table
-export def 'tmp-link-from' [
-    text: string # a text to upload to ipfs
-    --dont_replace (-D)
-    # --non-empty # fill non-empty only
-] {
-    $in
-    | default (tmp-view -q)
-    | upsert from (pin-text $text)
-    | upsert from_text $text
+    | if $non_empty {
+        each {|i| 
+            $i 
+            | if ( $in | get $column -i | is-empty ) {
+                upsert $column (pin-text $text)
+                | upsert $'($column)_text' $text
+            } else { }
+        }
+    } else {
+        upsert $column (pin-text $text)
+        | upsert $'($column)_text' $text
+    }
     | if $dont_replace {} else { tmp-replace }
 }
 
