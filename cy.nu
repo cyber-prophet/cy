@@ -415,21 +415,17 @@ export def 'tmp-link-all' [
 }
 
 # Pin values from column 'text_from' and 'text_to' to an IPFS node and fill according columns with their CIDs
-# > [{from_text: 'cyber' to_text: 'cyber-prophet'} {from_text: 'text'}]
-# ┏━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-# ┃ from_text ┃    to_text    ┃
-# ┣━━━━━━━━━━━╋━━━━━━━━━━━━━━━┫
-# ┃ cyber     ┃ cyber-prophet ┃
-# ┃ text      ┃      ❎       ┃
-# ┗━━━━━━━━━━━┻━━━━━━━━━━━━━━━┛
-# > [{from_text: 'cyber' to_text: 'cyber-prophet'} {from_text: 'text'}] | cy tmp-pin-columns
-# ┏━━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-# ┃ from_text ┃    to_text    ┃                      from                      ┃                 to                 ┃
-# ┣━━━━━━━━━━━╋━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
-# ┃ cyber     ┃ cyber-prophet ┃ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV ┃ QmXFUupJCSfydJZ85HQHD8tU1L7CZFErbR ┃
-# ┃           ┃               ┃                                                ┃ dMTBxkAmBJaD                       ┃
-# ┃ text      ┃               ┃ QmY2T5EfgLn8qWCt8eus6VX1gJuAp1nmUSdmoehgMxznAf ┃                                    ┃
-# ┗━━━━━━━━━━━┻━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+#
+# > [{from_text: 'cyber' to_text: 'cyber-prophet'} {from_text: 'tweet' to_text: 'cy is cool!'}] 
+# | cy tmp-pin-columns | to yaml
+# - from_text: cyber
+#   to_text: cyber-prophet
+#   from: QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
+#   to: QmXFUupJCSfydJZ85HQHD8tU1L7CZFErbRdMTBxkAmBJaD
+# - from_text: tweet
+#   to_text: cy is cool!
+#   from: QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx
+#   to: QmddL5M8JZiaUDcEHT2LgUnZZGLMTTDEYVKWN1iMLk6PY8
 export def 'tmp-pin-columns' [
     --dont_replace (-D) # Don't replace the tmp cyberlinks table
 ] {
