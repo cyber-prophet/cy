@@ -1330,18 +1330,6 @@ export def-env 'config-new' [
     make_default_folders_fn
 
     $temp_env | config-save $config_name
-
-    if (
-        not ($'($env.cy.path)/cyberlinks_temp.csv' | path exists)
-    ) {
-        'from,to' | save $'($env.cy.path)/cyberlinks_temp.csv'
-    }
-
-    if (
-        not ($'($env.cy.path)/cyberlinks_archive.csv' | path exists)
-    ) {
-        'from,to,address,timestamp,txhash' | save $'($env.cy.path)/cyberlinks_archive.csv'
-    }
 }
 
 # View a saved JSON config file
@@ -1994,6 +1982,20 @@ def make_default_folders_fn [] {
     mkdir $'($env.cy.path)/cache/cli_out/'
 
     touch $'($env.cy.path)/graph/update.toml'
+
+    if (
+        not ($'($env.cy.path)/cyberlinks_temp.csv' | path exists)
+    ) {
+        'from,to' 
+        | save $'($env.cy.path)/cyberlinks_temp.csv'
+    }
+
+    if (
+        not ($'($env.cy.path)/cyberlinks_archive.csv' | path exists)
+    ) {
+        'from,to,address,timestamp,txhash' 
+        | save $'($env.cy.path)/cyberlinks_archive.csv'
+    }
 }
 
 # Print string colourfully
