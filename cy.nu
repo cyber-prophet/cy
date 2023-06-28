@@ -79,7 +79,7 @@ export def 'pin-text' [
         $in 
         | default $text_param 
         | into string
-        | if ($in | path exists) and (not $dont_follow_path) {
+        | if (not $dont_follow_path) and (try {$in | path exists} catch {false}) {
             open $in
         } else {}
     )
@@ -166,7 +166,7 @@ export def 'link-chain' [
     )
 }
 
-# Pin files from the current folder to the local node and output the cyberlinks table
+# Pin files from the current folder to the local node and append their cyberlinks to the temp table
 #
 # > mkdir linkfilestest; cd linkfilestest
 # > 'cyber' | save cyber.txt; 'bostrom' | save bostrom.txt
@@ -472,7 +472,7 @@ export def 'tmp-pin-columns' [
 # > let $to = 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufB'
 # > let $neuron = 'bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel'
 # > cy link-exist $from $to $neuron
-# : false
+# false
 def 'link-exist' [
     from: string
     to: string
@@ -514,7 +514,7 @@ export def 'tmp-remove-existed' [] {
 
         $links_with_status | filter {|x| not $x.link_exist} | tmp-replace
     } else {
-        'There are no cyberlinks from the tmp table for the current adress exist in the blockchain' | cprint
+        'There are no cyberlinks from the tmp table for the current address that exist in the blockchain' | cprint
     }
 }
 
@@ -552,7 +552,7 @@ def 'tx-sign-and-broadcast' [] {
 
         | complete
         | if ($in.exit_code != 0) {
-            error make {msg: 'Error of signing the transaction!'}
+            error make {msg: 'Error signing the transaction!'}
         }
     )
 
@@ -732,6 +732,7 @@ export def 'passport-set' [
     $results
 }
 
+# Download graph dataframes into the environment
 export def-env 'graph-load-vars' [] {
     if not ($'($env.cy.path)/graph/cyberlinks.csv' | path exists) {
         'There is no cyberlinks.csv. Download it using *"cy graph-download-snapshoot"*' | cprint
