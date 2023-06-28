@@ -644,6 +644,18 @@ export def 'update-cy' [
 }
 
 # Get a passport by providing a neuron's address or nick
+# > cy passport-get cyber-prophet | to yaml
+# owner: bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8
+# approvals: []
+# token_uri: null
+# extension:
+#   addresses:
+#   - label: null
+#     address: cosmos1sgy27lctdrc5egpvc8f02rgzml6hmmvhhagfc3
+#   avatar: Qmdwi54WNiu1phvMA2digYHRzQRHRkS1pKWAnpawjSWUZi
+#   nickname: cyber-prophet
+#   data: null
+#   particle: QmRumrGFrqxayDpySEkhjZS1WEtMyJcfXiqeVsngqig3ak
 export def 'passport-get' [
     address_or_nick: string # Name of passport or neuron's address
 ] {
@@ -675,9 +687,9 @@ export def 'passport-get' [
 # Set a passport's particle, data or avatar field for a given nickname
 export def 'passport-set' [
     particle: string
-    nickname?
-    --data
-    --avatar
+    nickname?   # Provide a passport's nickname. If null - the nick from config will be used.
+    --data      # Set the 'data' field
+    --avatar    # Set the 'avatar' field
 ] {
     let $nickname = (
         if ($nickname | is-empty) {
