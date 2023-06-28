@@ -1794,6 +1794,18 @@ export def 'query-current-height' [
     ^($exec) query block | from json | get block.header | select height time chain_id
 }
 
+# Get a karma metric for a given neuron
+#
+# > cy karma-get bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 | to yaml
+# karma: 852564186396
+export def 'karma-get' [
+    address: string
+] {
+    ^($env.cy.exec) query rank karma $address -o json 
+    | from json 
+    | upsert karma {|i| $i.karma | into int}
+}
+
 # Get a balance for a given account
 export def 'balance-get' [
     address: string
