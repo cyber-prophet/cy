@@ -645,10 +645,7 @@ export def 'update-cy' [
 
 # Get a passport by providing a neuron's address or nick
 # > cy passport-get cyber-prophet | to yaml
-# owner: bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8
-# approvals: []
-# token_uri: null
-# extension:
+# - owner: bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8
 #   addresses:
 #   - label: null
 #     address: cosmos1sgy27lctdrc5egpvc8f02rgzml6hmmvhhagfc3
@@ -676,9 +673,13 @@ export def 'passport-get' [
     )
 
     if $out.exit_code == 0 {
-        $out.stdout  | from json | get data
+        $out.stdout 
+        | from json 
+        | get data 
+        | merge $in.extension 
+        | reject extension approvals token_uri
     } else {
-        $'No passport for *($address_or_nick)* is found' | cprint --before 1
+        $'No passport for *($address_or_nick)* is found' | cprint --before 1 --after 2
         {}
     }
 }
@@ -789,7 +790,7 @@ export def-env 'graph-download-snapshoot' [
     make_default_folders_fn
     
     let $path = $'($env.cy.path)/graph'
-    let $cur_data_cid = (passport-get graphkeeper | get extension.data -i)
+    let $cur_data_cid = (passport-get graphkeeper | get data -i)
     let $update_info = (try {open $'($path)/update.toml'} catch {{}})
     let $last_data_cid = ($update_info | get -i last_cid)
 
@@ -1271,7 +1272,7 @@ export def-env 'config-new' [
 
     let $passport_nick = (
         passport-get $address
-        | get extension.nickname -i
+        | get nickname -i
     )
 
     if (not ($passport_nick | is-empty)) {
