@@ -10,8 +10,7 @@ Cy - a [nushell](https://www.nushell.sh/) wrapper, a client for the Cyber family
 
 ## Cyber-family blockchains
 
-Cyber-family blockchains maintain permissionless informational graphs where nodes are CIDs of files in the IPFS network and edges are Cyberlinks (consisting of source, destination, author, height - records) written into the blockchain.Information written into the blockchain is secured to remain in existence as long as the blockchain is operational. The blockchain is designed with economic incentives that motivate validators to sustain the network.
-For further information about Cyber blockchains, please refer to [Bostrom Journal.](https://github.com/cyber-prophet/bostrom-journal/blob/manual/BostromJournal001.md)
+Bostrom is the name of the consensus computer that maintains a general-purpose, permissionless informational graph where nodes are CIDs of files in the IPFS network, and edges are Cyberlinks (consisting of source, destination, author, height - records) written into the blockchain. The information written into the blockchain is secured to remain in existence as long as the blockchain is operative. The blockchain is designed with economic incentives that motivate validators to sustain the network. For further information about Cyber blockchains, please refer to [Bostrom Journal.](https://github.com/cyber-prophet/bostrom-journal/blob/manual/BostromJournal001.md)
 
 ## Key features of Cy
 
