@@ -1027,14 +1027,15 @@ export def 'graph-append-related' [] {
 
 }
 
+# Update neurons YAML-dictionary
 export def 'graph-update-neurons' [
-    --passport
-    --balance
-    --karma
-    --all (-a)
-    --threads (-t) = 30
-    --dont_save
-    --verbose (-v)
+    --passport              # Update passport data
+    --balance               # Update balances data
+    --karma                 # Update karma
+    --all (-a)              # Update passport, balance, karma
+    --threads (-t) = 30     # Number of threads to use for downloading
+    --dont_save             # Don't update file on disk, just output results
+    --quiet (-q)            # Don't output results table
 ] {
     $in 
     | default $env.cy.cyberlinks 
@@ -1045,7 +1046,7 @@ export def 'graph-update-neurons' [
     | dfr into-nu 
     | if $passport or $all {
         par-each -t $threads {|i| 
-            $i | merge (passport-get $i.neuron | get -i extension | default {})
+            $i | merge (passport-get $i.neuron)
         }
     } else {}
     | if $balance or $all {
@@ -1055,16 +1056,17 @@ export def 'graph-update-neurons' [
     } else {}
     | if $karma or $all {
         par-each -t $threads {|i| 
-            $i | merge (
-                ^($env.cy.exec) query rank karma $i.neuron -o json 
-                | from json 
-                | upsert karma {|i| $i.karma | into int}
-            )
+            $i | merge (karma-get $i.neuron)
         }
     } else {}
+    | upsert update_ts (date now)
     | if $dont_save {} else {
-        save -f $'($env.cy.path)/graph/neurons_dict.yaml'
-    }
+        do {
+            |i| $i 
+            | save -f $'($env.cy.path)/graph/neurons_dict.yaml';
+            $i
+        } $in
+    } | if $quiet { null } else { }
 }
 
 export def 'graph-neurons-stats' [] {
