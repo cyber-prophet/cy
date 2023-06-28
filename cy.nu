@@ -1824,12 +1824,23 @@ export def 'balance-get' [
 }
 
 # Check balances for the keys added to the active CLI
+#
+# > cy balances --test | to yaml
+# - name: bot3f
+#   boot: 654582269
+#   hydrogen: 50
+#   address: bostrom1aypv5wxute0nnhfv44jkhyfkzt7zyrden85tel
 export def 'balances' [
     ...name: string@'nu-complete keys values'
+    --test      # Use keyring-backend test (with no password)
 ] {
 
     let $keys0 = (
-        ^($env.cy.exec) keys list --output json
+        if $test {
+            ^($env.cy.exec) keys list --output json --keyring-backend test
+        } else {
+            ^($env.cy.exec) keys list --output json
+        }
         | from json
         | select name address
     )
