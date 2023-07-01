@@ -2038,9 +2038,10 @@ export def 'cprint' [
 
     def compactit [] {
         $in 
-        | str replace -a '\n[\t ]+' ' ' 
-        | str replace -a '[\t ]+' ' ' 
-        | str replace -a '(?m)^[\t ]+' ' '
+        | str replace -a '(\n[\t ]+(\n[\t ]+)+)' '⏎' 
+        | str replace -a '\n?[\t ]+' ' ' 
+        | str replace -a '⏎' "\n\n" 
+        | str trim
     }
 
     def colorit [] {
@@ -2077,7 +2078,11 @@ export def 'cprint' [
             | [$in 1]
             | math max  # term size gives 0 in tests
         )
-        let $line = (' ' | fill -a r -w $width -c $frame | $'(ansi $frame_color)($in)(ansi reset)')
+        let $line = (
+            ' ' 
+            | fill -a r -w $width -c $frame 
+            | $'(ansi $frame_color)($in)(ansi reset)'
+        )
 
         (
             $line + "\n" + $text + "\n" + $line
