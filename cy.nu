@@ -1750,7 +1750,7 @@ export def 'queue-check' [
 
     $'Overall count of files in queue is *($files | length)*' | cprint
 
-    print $'For download will be used ($env.cy.ipfs-download-from)'
+    cprint $'*($env.cy.ipfs-download-from)* will be used for download'
 
     let $filtered_files = (
         $files
@@ -1761,8 +1761,11 @@ export def 'queue-check' [
     if ($filtered_files == []) {
         return $'There are no files, that was attempted to download for less than ($attempts) times.'
     } else {
-        print $'There are ($filtered_files | length) files that was attempted to be downloaded ($attempts) times already.'
-        print $'The latest file was added into the queue ($filtered_files | sort-by modified -r | sort-by size | get modified.0 -i)'    
+        ($filtered_files | length)
+        | print $'There are ($in) files that was attempted to be downloaded ($attempts) times already.'
+        
+        ($filtered_files | sort-by modified -r | sort-by size | get modified.0 -i)
+        | print $'The latest file was added into the queue ($in)'
     }
 
 
