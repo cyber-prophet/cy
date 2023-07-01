@@ -688,41 +688,30 @@ export def 'passport-get' [
 # Set a passport's particle, data or avatar field for a given nickname
 export def 'passport-set' [
     particle: string
-    nickname?   # Provide a passport's nickname. If null - the nick from config will be used.
-    --data      # Set the 'data' field
-    --avatar    # Set the 'avatar' field
+    nickname?                       # Provide a passport's nickname. If null - the nick from config will be used.
+    --field: string = 'particle'    # A passport's field to set: particle, data, new_avatar
+    --verbose                       # Show the node's response
 ] {
-    let $nickname = (
-        if ($nickname | is-empty) {
-            if ($env.cy.passport-nick | is-empty) {
-                print 'there is no nickname for passport set. To update the fields we need one.'
+    if not (is-cid $particle) {
+        print $"($particle) doesn't look like a cid"
                 return
-            } else {
-                $env.cy.passport-nick
             }
-        } else {
-            $nickname
-        }
-    )
 
-    let $particle = (
-        if (is-cid $particle) {
-            $particle
-        } else {
-            print $"($particle) doesn't look like a cid"
+    if $field not-in ['particle', 'data', 'new_avatar'] {
+        print $'The field must be "particle", "data" or "new_avatar". You provided ($field)'
             return
         }
+
+    let $nick = (
+        $nickname 
+        | default $env.cy.passport-nick? 
+        | if ($in | is-empty) {
+            print 'there is no nickname for passport set. To update the fields we need one.'
+            return
+        } else {}
     )
 
-    let $json = (
-        if $data {
-            $'{"update_data":{"nickname":"($nickname)","data":"($particle)"}}'
-        } else if $avatar {
-            $'{"update_avatar":{"nickname":"($nickname)","new_avatar":"($particle)"}}'
-        } else {
-            $'{"update_particle":{"nickname":"($nickname)","particle":"($particle)"}}'
-        }
-    )
+    let $json = $'{"update_data":{"nickname":"($nick)","($field)":"($particle)"}}'
 
     let $pcontract = 'bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel'
 
@@ -735,19 +724,22 @@ export def 'passport-set' [
         '--gas' '23456789'
     ]
 
-    let $out = (
         do -i {
             ^cyber tx wasm execute $pcontract $json $params
         } | complete
-    )
-
-    let $results = if $out.exit_code == 0 {
-        $out.stdout | from json | select raw_log code txhash
+    | if $in.exit_code == 0 {
+        if $verbose {
+            get stdout 
+            | from json 
+            | upsert raw_log {|i| $i.raw_log | from json} 
+            | select raw_log code txhash
     } else {
-        $'The particle might not be set. Check with *"cy passport-get ($nickname)"*' | cprint
+            $'The *($field)* field for *($nick)* should be successfuly set to *($particle)*' | cprint
     }
-
-    $results
+    } else {
+        $'The particle might not be set. You can check it with the command
+        "*cy passport-get ($nick) | get ($field) | $in == ($particle)*"' | cprint
+    }
 }
 
 # Download graph dataframes into the environment
