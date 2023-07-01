@@ -61,13 +61,17 @@ export-env {
 #
 # > cy pin-text 'cyber'
 # QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
+#
 # > "cyber" | save -f cyber.txt; cy pin-text 'cyber.txt'
 # QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
+#
 # > "cyber" | save -f cyber.txt; cy pin-text 'cyber.txt' --dont_follow_path
 # QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6
-# > cy pin-text "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV"
+#
+# > cy pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV'
 # QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
-# > cy pin-text QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV --dont_detect_cid
+#
+# > cy pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV' --dont_detect_cid
 # QmcDUZon6VQLR3gjAvSKnudSVQ2RbGXUtFFV8mR6zHZK8F
 export def 'pin-text' [
     text_param?: string
@@ -213,7 +217,7 @@ export def 'link-files' [
     if not $quiet { $results }
 }
 
-# Create a cyberlink with semantic construction to follow a neuron
+# Create a cyberlink according to semantic construction of following a neuron
 #
 # > cy follow bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8 | to yaml
 # from_text: QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx
@@ -473,6 +477,7 @@ export def 'tmp-pin-columns' [
 }
 
 # Check if any of the links in the tmp table exist
+#
 # > let $from = 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufA'
 # > let $to = 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufB'
 # > let $neuron = 'bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel'
@@ -575,7 +580,7 @@ def 'tx-sign-and-broadcast' [] {
     )
 }
 
-# Create a tx from the temp cyberlinks table, sign and broadcast it
+# Create a tx from the piped in or temp cyberlinks table, sign and broadcast it
 export def 'tmp-send-tx' [] {
     let $in_cyberlinks = $in
 
@@ -645,14 +650,14 @@ export def 'update-cy' [
 
 # Get a passport by providing a neuron's address or nick
 # > cy passport-get cyber-prophet | to yaml
-# - owner: bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8
-#   addresses:
-#   - label: null
-#     address: cosmos1sgy27lctdrc5egpvc8f02rgzml6hmmvhhagfc3
-#   avatar: Qmdwi54WNiu1phvMA2digYHRzQRHRkS1pKWAnpawjSWUZi
-#   nickname: cyber-prophet
-#   data: null
-#   particle: QmRumrGFrqxayDpySEkhjZS1WEtMyJcfXiqeVsngqig3ak
+# owner: bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8
+# addresses:
+# - label: null
+#   address: cosmos1sgy27lctdrc5egpvc8f02rgzml6hmmvhhagfc3
+# avatar: Qmdwi54WNiu1phvMA2digYHRzQRHRkS1pKWAnpawjSWUZi
+# nickname: cyber-prophet
+# data: null
+# particle: QmRumrGFrqxayDpySEkhjZS1WEtMyJcfXiqeVsngqig3ak
 export def 'passport-get' [
     address_or_nick: string # Name of passport or neuron's address
 ] {
@@ -694,13 +699,13 @@ export def 'passport-set' [
 ] {
     if not (is-cid $particle) {
         print $"($particle) doesn't look like a cid"
-                return
-            }
+        return
+    }
 
     if $field not-in ['particle', 'data', 'new_avatar'] {
         print $'The field must be "particle", "data" or "new_avatar". You provided ($field)'
-            return
-        }
+        return
+    }
 
     let $nick = (
         $nickname 
@@ -724,18 +729,18 @@ export def 'passport-set' [
         '--gas' '23456789'
     ]
 
-        do -i {
-            ^cyber tx wasm execute $pcontract $json $params
-        } | complete
+    do -i {
+        ^cyber tx wasm execute $pcontract $json $params
+    } | complete
     | if $in.exit_code == 0 {
         if $verbose {
             get stdout 
             | from json 
             | upsert raw_log {|i| $i.raw_log | from json} 
             | select raw_log code txhash
-    } else {
+        } else {
             $'The *($field)* field for *($nick)* should be successfuly set to *($particle)*' | cprint
-    }
+        }
     } else {
         $'The particle might not be set. You can check it with the command
         "*cy passport-get ($nick) | get ($field) | $in == ($particle)*"' | cprint
@@ -875,7 +880,8 @@ export def 'graph-to-particles' [
                 dfr arg-where ((dfr col height) != 0) | dfr as particle_index
             )
         } 
-        | if $include_content { dfr into-lazy # not elegant solution to keep columns from particles and to have particle_index in this function
+        # not elegant solution to keep columns from particles and to have particle_index in this function
+        | if $include_content { dfr into-lazy 
             | dfr select particle
             | dfr join $env.cy.particles particle particle
         } else {}
@@ -1311,8 +1317,7 @@ export def-env 'config-new' [
         | inspect2
     )
 
-
-    let $temp_env = {
+    {
         'config-name': $config_name
         'exec': $exec
         'address': $address
@@ -1320,12 +1325,9 @@ export def-env 'config-new' [
         'chain-id': $chain_id
         'ipfs-storage': $ipfs_storage
         'rpc-address': $rpc_address
-    }
-
+    } | config-save $config_name
 
     make_default_folders_fn
-
-    $temp_env | config-save $config_name
 }
 
 # View a saved JSON config file
