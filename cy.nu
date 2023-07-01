@@ -2494,8 +2494,10 @@ export def-env 'ber' [
         '--cpu-profile', '--db_backend', '--db_dir', '--denom', '--deny-validators', '--deposit', '--depositor',
         '--description', '--details', '--events', '--expiration', '--fee-account', '--fees', '--from', '--gas',
         '--gas-adjustment', '--gas-prices', '--genesis-time', '--genesis_hash', '--gentx-dir',
-        '--grpc-web.address', '--grpc.address', '--halt-height', '--halt-time', '--hd-path', '--height', '--home', '--identity', '--index',
-        '--instantiate-everybody', '--instantiate-nobody', '--instantiate-only-address', '--inv-check-period',
+        '--grpc-web.address', '--grpc.address', '--halt-height', '--halt-time', '--hd-path', 
+        '--height', '--home', '--identity', '--index',
+        '--instantiate-everybody', '--instantiate-nobody', '--instantiate-only-address', 
+        '--inv-check-period',
         '--ip', '--jail-allowed-addrs', '--keyring-backend', '--keyring-dir', '--label', '--limit', '--log_format',
         '--log_level', '--max-msgs', '--min-retain-blocks', '--min-self-delegation', '--minimum-gas-prices',
         '--moniker', '--msg-type', '--multisig', '--multisig-threshold', '--new-moniker', '--node', '--node-daemon-home',
@@ -2505,7 +2507,8 @@ export def-env 'ber' [
         '--page-key', '--period', '--period-limit', '--pool-coin-denom', '--priv_validator_laddr', '--proposal',
         '--proxy_app', '--pruning', '--pruning-interval', '--pruning-keep-every',
         '--pruning-keep-recent', '--pubkey', '--reserve-acc', '--rpc.grpc_laddr', '--rpc.laddr', '--rpc.pprof_laddr',
-        '--run-as', '--security-contact', '--sequence', '--sequences', '--sign-mode', '--spend-limit', '--starting-ip-address',
+        '--run-as', '--security-contact', '--sequence', '--sequences', '--sign-mode', 
+        '--spend-limit', '--starting-ip-address',
         '--state-sync.snapshot-interval', '--state-sync.snapshot-keep-recent', '--status', '--timeout-height', '--title',
         '--trace-store', '--transport', '--type', '--unsafe-skip-upgrades', '--upgrade-height', '--upgrade-info', '--v',
         '--vesting-amount', '--vesting-end-time', '--vesting-start-time', '--voter', '--wasm.memory_cache_size',
@@ -2596,7 +2599,16 @@ export def-env 'ber' [
             print $'request command from cli, saving to ($filename)'
             print $'($exec) ($rest) --output json ($list_flags_out)'
             # let $out = (^($exec) $rest --output json $list_options_out $list_flags_out | from json)
-            pu-add $'($exec) ($rest | str join " ") --output json ($list_options_out | str join " ") ($list_flags_out | str join " ") | save -r ($filename)'
+            [
+                $exec 
+                ($rest | str join " ")
+                '--output json'
+                ($list_options_out | str join " ")
+                ($list_flags_out | str join " ")
+                '| save -r' 
+                ($filename)
+            ] | str join ' '
+            | pu-add $in 
             # let $out1 = do -i {^($exec) $rest --output json $list_flags_out | from json}
             # let $out = (^($exec) $rest --output json $list_options_out $list_flags_out | from json)
             # if $out != null {$out | save $filename}
