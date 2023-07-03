@@ -258,26 +258,14 @@ export def 'tweet' [
 
 # Add a random chuck norris cyberlink to the temp table
 def 'link-chuck' [] {
-    # let $cid_from = (pin-text 'chuck norris')
-    let $cid_from = 'QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1'
-
     let $quote = (
-        '> ' + (http get https://api.chucknorris.io/jokes/random).value +
-        "\n\n" + 'via [Chucknorris.io](https://chucknorris.io)'
+        http get https://api.chucknorris.io/jokes/random | get value |
+        $in + "\n\n" + 'via [Chucknorris.io](https://chucknorris.io)'
     )
 
     $quote | cprint -f '='
 
-    let $cid_to = (pin-text $quote)
-
-    let $_table = (
-        [
-            [from_text to_text from to];
-            ['chuck norris' $quote $cid_from $cid_to]
-        ]
-    )
-
-    $_table | tmp-append --quiet
+    link-texts --quiet 'chuck norris' $quote 
 }
 
 # Add a random quote cyberlink to the temp table
