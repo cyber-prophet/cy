@@ -54,7 +54,6 @@ export-env {
     )
 
     make_default_folders_fn
-    graph-load-vars
 }
 
 # Pin a text particle
@@ -760,39 +759,6 @@ export def 'passport-set' [
         $'The particle might not be set. You can check it with the command
         "*cy passport-get ($nick) | get ($field) | $in == ($particle)*"' | cprint
     }
-}
-
-# Download graph dataframes into the environment
-export def-env 'graph-load-vars' [] {
-    if not ($'($env.cy.path)/graph/cyberlinks.csv' | path exists) {
-        'There is no cyberlinks.csv. Download it using *"cy graph-download-snapshoot"*' | cprint
-        return
-    }
-    let $neurons = (
-        neurons-yaml-open --df
-        | dfr into-df
-    )
-    let $cyberlinks = (
-        dfr open $'($env.cy.path)/graph/cyberlinks.csv' 
-        | dfr join --left (
-            $neurons 
-            | dfr select neuron nick
-        ) neuron neuron
-    )
-    let $particles = (
-        if ($'($env.cy.path)/graph/particles.parquet' | path exists) {
-            dfr open $'($env.cy.path)/graph/particles.parquet'
-        } else {
-            'there is no "particles.parquet" file. 
-            Create one using the command *"cy graph-update-particles-parquet"*' | cprint
-        null
-    })
-    let-env cy = (
-        $env.cy
-        | merge {'cyberlinks': $cyberlinks}
-        | merge {'particles': $particles}
-        | merge {'neurons': $neurons}
-    )
 }
 
 # Download a snapshot of cybergraph by graphkeeper
