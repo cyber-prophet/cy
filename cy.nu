@@ -796,7 +796,7 @@ export def-env 'graph-load-vars' [] {
 }
 
 # Download a snapshot of cybergraph by graphkeeper
-export def-env 'graph-download-snapshoot' [
+export def-env 'graph-download-snapshot' [
     --disable_update_parquet (-D)   # Don't update the particles parquet file
 ] {
     make_default_folders_fn
@@ -850,8 +850,27 @@ export def-env 'graph-download-snapshoot' [
 }
 
 # Output unique list of particles from piped in cyberlinks table
+#
+# > cy graph-to-particles --include_content | dfr into-df | dfr into-nu | first 2 | to yaml
+# - index: 0
+#   particle: QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
+#   neuron: bostrom1ymprf45c44rp9k0g2r84w2tjhsq7kalv98rgpt
+#   height: 490
+#   timestamp: 2021-11-05
+#   nick: mrbro_bostrom1ymprf45c44rp9k0g2r84w2tjhsq7kalv98rgpt
+#   particle_index: 0
+#   size: 5
+#   content_s: cyber
+# - index: 1
+#   particle: QmbVugfLG1FoUtkZqZQ9WcwTLe1ivmcE9yMVGvuz3YWjy6
+#   neuron: bostrom1ymprf45c44rp9k0g2r84w2tjhsq7kalv98rgpt
+#   height: 490
+#   timestamp: 2021-11-05
+#   nick: mrbro_bostrom1ymprf45c44rp9k0g2r84w2tjhsq7kalv98rgpt
+#   particle_index: 1
+#   size: 11
+#   content_s: fuckgoogle!
 export def 'graph-to-particles' [
-    cyberlinks?
     --from                  # Use only particles from the 'from' column
     --to                    # Use only particles from the 'to' column
     --include_system (-s)   # Include tweents, follow and avatar paritlces
@@ -859,12 +878,13 @@ export def 'graph-to-particles' [
     --cids_only (-c)        # Output one column with CIDs only
 ] {
     let $c = (
-        $in 
-        | default $cyberlinks
-        | default ($env | get cy.cyberlinks -i)
-        | default (
-            dfr open $'($env.cy.path)/graph/cyberlinks.csv'
-        ) | dfr into-lazy
+        cyberlinks-df-open 
+        | dfr into-lazy
+    )
+
+    let $p = (
+        dfr open $'($env.cy.path)/graph/particles.parquet' 
+        | dfr into-df
     )
 
     (
@@ -898,7 +918,7 @@ export def 'graph-to-particles' [
         # not elegant solution to keep columns from particles and to have particle_index in this function
         | if $include_content { dfr into-lazy 
             | dfr select particle
-            | dfr join $env.cy.particles particle particle
+            | dfr join $p particle particle
         } else {}
         | if not $include_system { dfr into-lazy
             | dfr filter-with (
@@ -914,6 +934,7 @@ export def 'graph-to-particles' [
     )
 }
 
+# Update the 'particles.parquet' file (it inculdes content of text files)
 export def-env 'graph-update-particles-parquet' [
     --full_content
 ] {
@@ -987,40 +1008,39 @@ export def-env 'graph-update-particles-parquet' [
     )
 
     backup-fn $'($env.cy.path)/graph/particles.parquet'
-    $final_df | dfr to-parquet $'($env.cy.path)/graph/particles.parquet' | print $in
-    graph-load-vars
+    
+    $final_df 
+    | dfr to-parquet $'($env.cy.path)/graph/particles.parquet' 
+    | print $in
 }
 
 # Filter the graph to chosen neurons only
 export def 'graph-filter-neurons' [
     ...neurons_nicks: string@'nu-complete-neurons-nicks'
-    --cyberlinks: any
 ] {
-    let $cyberlinks = (
-        $in 
-        | default $cyberlinks 
-        | default ($env | get cy.cyberlinks -i)
-    )
-    
-    let $filtered_links = (
-        $neurons_nicks | dfr into-df
-        | dfr join $env.cy.neurons '0' nick
-        | dfr select neuron
-        | dfr join $cyberlinks neuron neuron
-    )
+    let $cyberlinks = (cyberlinks-df-open)
 
-    $filtered_links
+    $neurons_nicks | dfr into-df
+    | dfr join (
+        neurons-yaml-open --df
+    ) '0' nick
+    | dfr select neuron
+    | dfr join $cyberlinks neuron neuron
 }
 
 # Append related cyberlinks to the piped in graph
 export def 'graph-append-related' [] {
-    let $c = ($in | dfr into-lazy | dfr with-column (dfr lit '1' | dfr as 'step'))
+    let $c = (
+        $in 
+        | dfr into-lazy 
+        | dfr with-column (dfr lit '1' | dfr as 'step')
+    )
 
     let $to_2 = (
         $c 
         | graph-to-particles --cids_only  | dfr into-lazy 
         | dfr rename particle particle_to 
-        | dfr join $env.cy.cyberlinks particle_to particle_to 
+        | dfr join (cyberlinks-df-open --not_in) particle_to particle_to 
         | dfr with-column (dfr lit '2to' | dfr as 'step') 
     )
 
@@ -1028,7 +1048,7 @@ export def 'graph-append-related' [] {
         $c 
         | graph-to-particles --cids_only  | dfr into-lazy 
         | dfr rename particle particle_from 
-        | dfr join $env.cy.cyberlinks particle_from particle_from 
+        | dfr join (cyberlinks-df-open --not_in) particle_from particle_from 
         | dfr with-column (dfr lit '2from' | dfr as 'step') 
     )
 
@@ -1051,12 +1071,12 @@ export def 'graph-update-neurons' [
     --dont_save             # Don't update file on disk, just output results
     --quiet (-q)            # Don't output results table
 ] {
-    $in 
-    | default $env.cy.cyberlinks 
-    | dfr into-df 
+    cyberlinks-df-open | dfr into-df 
     | dfr select neuron 
     | dfr unique 
-    | dfr join $env.cy.neurons neuron neuron --left 
+    | dfr join (
+        neurons-yaml-open --df
+    ) neuron neuron --left 
     | dfr into-nu 
     | if $passport or $all {
         par-each -t $threads {|i| 
@@ -1076,8 +1096,9 @@ export def 'graph-update-neurons' [
     | upsert update_ts (date now)
     | if $dont_save {} else {
         do {
-            |i| $i 
-            | save -f $'($env.cy.path)/graph/neurons_dict.yaml';
+            |i| 
+            backup-fn $'($env.cy.path)/graph/neurons_dict.yaml';
+            $i | save -f $'($env.cy.path)/graph/neurons_dict.yaml';
             $i
         } $in
     } | if $quiet { null } else { }
@@ -1085,8 +1106,11 @@ export def 'graph-update-neurons' [
 
 export def 'graph-neurons-stats' [] {
 #neuron-stats-works
-    let c = ($env.cy.cyberlinks | dfr into-df)
-    let p = ($env.cy.particles | dfr into-df )
+    let c = (cyberlinks-df-open | dfr into-df)
+    let p = (
+        dfr open $'($env.cy.path)/graph/particles.parquet' 
+        | dfr into-df
+    )
 
     let follows = ($p 
         | dfr filter ((dfr col content_s) == follow) 
@@ -1137,17 +1161,18 @@ export def 'graph-neurons-stats' [] {
         | dfr join $follows neuron neuron --left 
         | dfr join $tweets neuron neuron --left 
         | dfr join (
-            $env.cy.neurons | dfr into-df 
+            neurons-yaml-open --df | dfr into-df 
         ) neuron neuron --left
     ) 
 }
 
 # Export the entire graph into CSV file for import to Gephi
-export def 'graph-to-gephi' [
-    cyberlinks?
-] {
-    let $cyberlinks = ($in | default $cyberlinks | default ($env | get cy.cyberlinks -i) | dfr into-df)
-    let $particles = (graph-to-particles $cyberlinks --include_system --include_content)
+export def 'graph-to-gephi' [] {
+    let $cyberlinks = cyberlinks-df-open
+    let $particles = (
+        $cyberlinks
+        | graph-to-particles --include_system --include_content
+    )
 
     let $t1_height_index = (
         $cyberlinks.height  | dfr into-df 
@@ -1216,11 +1241,14 @@ export def 'graph-to-gephi' [
 }
 
 export def 'graph-to-logseq' [
-    cyberlinks?
     # --path: string
 ] {
-    let $cyberlinks = ($in | default $cyberlinks | default ($env | get cy.cyberlinks -i | inspect2))
-    let $particles = (graph-to-particles $cyberlinks --include_system --include_content | inspect2)
+    let $cyberlinks = (cyberlinks-df-open | inspect2)
+    let $particles = (
+        $cyberlinks 
+        | graph-to-particles --include_system --include_content 
+        | inspect2
+    )
 
     let $path = $'($env.cy.path)/logseq/(date now | date format "%Y-%m-%d_%H-%M-%S")/'
     mkdir $'($path)/pages'
@@ -1243,6 +1271,26 @@ export def 'graph-to-logseq' [
         $"\t- [[($c.particle_to)]] ($c.height) [[($c.nick?)]]\n" |
         save $'($path)/pages/($c.particle_from).md' -a
     }
+}
+
+def 'cyberlinks-df-open' [
+    --not_in    # don't catch pipe in
+] {
+    if $not_in {
+        dfr open $'($env.cy.path)/graph/cyberlinks.csv' 
+    } else {
+        $in | default (dfr open $'($env.cy.path)/graph/cyberlinks.csv')
+    }
+}
+
+def 'neurons-yaml-open' [
+    --df        # open as df
+] {
+    open $'($env.cy.path)/graph/neurons_dict.yaml' 
+    | if $df {
+        fill non-exist
+        | dfr into-df
+    } else { }
 }
 
 # Create a config JSON to set env variables, to use them as parameters in cyber cli
@@ -2198,7 +2246,7 @@ def 'nu-complete-search-functions' [] {
 }
 
 def 'nu-complete-neurons-nicks' [] {
-    $env.cy.neurons.nick | dfr into-df | dfr into-nu | get nick
+    neurons-yaml-open | get nick
 }
 
 def 'nu-complete-colors' [] {
