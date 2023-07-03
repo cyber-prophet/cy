@@ -270,30 +270,15 @@ def 'link-chuck' [] {
 
 # Add a random quote cyberlink to the temp table
 def 'link-quote' [] {
-    let $json = (
-        http get -r https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=json
-        | str replace '\\\\' ''
-        | from json
-    )
-
-    let $quoteAuthor = (
-        if $json.quoteAuthor == '' {
-            ''
-        } else {
-            "\n\n>> " + $json.quoteAuthor
-        }
-    )
-
-    let $quote = (
-        '> ' + $json.quoteText +
-        $quoteAuthor +
-        "\n\n" + 'via [forismatic.com](https://forismatic.com)'
+    let quote = (
+        http get -r https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=text
+        | $in + "\n\n" + 'via [forismatic.com](https://forismatic.com)'
     )
 
     $quote | cprint -f '='
 
     # link-texts 'quote' $quote
-    link-texts 'QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna' $quote
+    link-texts --quiet 'quote' $quote
 }
 
 # Make a random cyberlink from different APIs (chucknorris.io, forismatic.com)
