@@ -282,6 +282,20 @@ def 'link-quote' [] {
 }
 
 # Make a random cyberlink from different APIs (chucknorris.io, forismatic.com)
+#
+# > cy link-random
+# ==========================================================
+# Chuck Norris IS Lukes father.
+# 
+# via [Chucknorris.io](https://chucknorris.io)
+# ==========================================================
+#
+# > cy link-random forismatic.com
+# ==========================================================
+# He who knows himself is enlightened.   (Lao Tzu )
+# 
+# via [forismatic.com](https://forismatic.com)
+# ==========================================================
 export def 'link-random' [
     source?: string@'nu-complete-random-sources'
     -n: int = 1 # Number of links to append
@@ -299,6 +313,25 @@ export def 'link-random' [
 
 
 # View the temp cyberlinks table
+#
+# > cy tmp-view | to yaml
+# There are 2 cyberlinks in the temp table:
+# - from_text: chuck norris
+#   to_text: |-
+#     Chuck Norris IS Lukes father.
+# 
+#     via [Chucknorris.io](https://chucknorris.io)
+#   from: QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1
+#   to: QmSLPzbM5NVmXuYCPiLZiePAhUcDCQncYUWDLs7GkLqC7J
+#   date_time: 20230701-134134
+# - from_text: quote
+#   to_text: |-
+#     He who knows himself is enlightened. (Lao Tzu )
+#
+#     via [forismatic.com](https://forismatic.com)
+#   from: QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna
+#   to: QmWoxYsWYuTP4E2xaQHr3gUZZTBC7HdNDVhis1BK9X3qjX
+#   date_time: 20230702-113842
 export def 'tmp-view' [
     --quiet (-q) # Don't print info
 ] {
@@ -324,7 +357,7 @@ export def 'tmp-view' [
     $tmp_links
 }
 
-# Append cyberlinks to the temp table
+# Append piped-in table to the temp cyberlinks table
 export def 'tmp-append' [
     cyberlinks?             # cyberlinks table
     --quiet (-q)
@@ -336,7 +369,7 @@ export def 'tmp-append' [
     | if $quiet { tmp-replace -q } else { tmp-replace }
 }
 
-# Replace cyberlinks in the temp table
+# Replace the temp table with piped-in table
 export def 'tmp-replace' [
     cyberlinks?             # cyberlinks table
     --quiet (-q)
@@ -497,7 +530,7 @@ export def 'tmp-remove-existed' [] {
 
         $links_with_status | filter {|x| not $x.link_exist} | tmp-replace
     } else {
-        'There are no cyberlinks from the tmp table for the current address that exist in the blockchain' | cprint
+        'There are no cyberlinks in the temp table for the current address exist the cybergraph' | cprint
     }
 }
 
@@ -554,6 +587,11 @@ def 'tx-sign-and-broadcast' [] {
 }
 
 # Create a tx from the piped in or temp cyberlinks table, sign and broadcast it
+
+# > cy tmp-send-tx | to yaml
+# cy: 2 cyberlinks should be successfully sent
+# code: 0
+# txhash: 9B37FA56D666C2AA15E36CDC507D3677F9224115482ACF8CAF498A246DEF8EB0
 export def 'tmp-send-tx' [] {
     let $in_cyberlinks = $in
 
@@ -622,6 +660,7 @@ export def 'update-cy' [
 }
 
 # Get a passport by providing a neuron's address or nick
+#
 # > cy passport-get cyber-prophet | to yaml
 # owner: bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8
 # addresses:
@@ -664,6 +703,9 @@ export def 'passport-get' [
 
 
 # Set a passport's particle, data or avatar field for a given nickname
+#
+# > cy passport-set QmZSbGCBAPpqwXHSbUkn4P2RHiL2nRjv7BGFP4vVjcYKHd
+# The particle field for maxim should be successfuly set to QmZSbGCBAPpqwXHSbUkn4P2RHiL2nRjv7BGFP4vVjcYKHd
 export def 'passport-set' [
     particle: string
     nickname?                       # Provide a passport's nickname. If null - the nick from config will be used.
