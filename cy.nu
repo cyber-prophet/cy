@@ -769,8 +769,7 @@ export def-env 'graph-load-vars' [] {
         return
     }
     let $neurons = (
-        open $'($env.cy.path)/graph/neurons_dict.yaml' 
-        | fill non-exist
+        neurons-yaml-open --df
         | dfr into-df
     )
     let $cyberlinks = (
@@ -780,11 +779,12 @@ export def-env 'graph-load-vars' [] {
             | dfr select neuron nick
         ) neuron neuron
     )
-    let $particles = (if (not ($'($env.cy.path)/particles.parquet' | path exists)) {
-        dfr open $'($env.cy.path)/graph/particles.parquet'
-    } else {
-        'there is no "particles.parquet" file. 
-        Create one using the command *"cy graph-update-particles-parquet"*' | cprint
+    let $particles = (
+        if ($'($env.cy.path)/graph/particles.parquet' | path exists) {
+            dfr open $'($env.cy.path)/graph/particles.parquet'
+        } else {
+            'there is no "particles.parquet" file. 
+            Create one using the command *"cy graph-update-particles-parquet"*' | cprint
         null
     })
     let-env cy = (
