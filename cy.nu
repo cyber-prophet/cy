@@ -839,7 +839,7 @@ export def-env 'graph-download-snapshot' [
 export def 'graph-to-particles' [
     --from                  # Use only particles from the 'from' column
     --to                    # Use only particles from the 'to' column
-    --include_system (-s)   # Include tweents, follow and avatar paritlces
+    --include_system (-s)   # Include tweets, follow and avatar paritlces
     --include_content       # Include column with particles' content
     --cids_only (-c)        # Output one column with CIDs only
 ] {
@@ -852,6 +852,11 @@ export def 'graph-to-particles' [
         dfr open $'($env.cy.path)/graph/particles.parquet' 
         | dfr into-df
     )
+
+    if ($to and $from) {
+        print 'you need to use only one of two flags or none flags at all'
+        return
+    }
 
     (
         $c 
