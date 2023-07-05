@@ -1004,17 +1004,39 @@ export def 'graph-append-related' [] {
 
     let $to_2 = (
         $c 
-        | graph-to-particles --cids_only  | dfr into-lazy 
+        | graph-to-particles --cids_only --include_system | dfr into-lazy 
         | dfr rename particle particle_to 
-        | dfr join (cyberlinks-df-open --not_in) particle_to particle_to 
+        | dfr join (
+            cyberlinks-df-open --not_in
+            | dfr into-lazy
+            | dfr filter-with (
+                (dfr col particle_from) 
+                | dfr is-in [
+                    'QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx', 
+                    'QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx', 
+                    'Qmf89bXkJH9jw4uaLkHmZkxQ51qGKfUPtAMxA8rTwBrmTs' 
+                ] | dfr expr-not
+            ) 
+        ) particle_to particle_to 
         | dfr with-column (dfr lit '2to' | dfr as 'step') 
     )
 
     let $from_2 = (
         $c 
-        | graph-to-particles --cids_only  | dfr into-lazy 
+        | graph-to-particles --cids_only --include_system | dfr into-lazy 
         | dfr rename particle particle_from 
-        | dfr join (cyberlinks-df-open --not_in) particle_from particle_from 
+        | dfr join (
+            cyberlinks-df-open --not_in
+            | dfr into-lazy
+            | dfr filter-with (
+                (dfr col particle_from) 
+                | dfr is-in [
+                    'QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx', 
+                    'QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx', 
+                    'Qmf89bXkJH9jw4uaLkHmZkxQ51qGKfUPtAMxA8rTwBrmTs' 
+                ] | dfr expr-not
+            ) 
+        ) particle_from particle_from 
         | dfr with-column (dfr lit '2from' | dfr as 'step') 
     )
 
