@@ -586,7 +586,7 @@ def 'tx-sign-and-broadcast' [] {
 }
 
 # Create a tx from the piped in or temp cyberlinks table, sign and broadcast it
-
+#
 # > cy tmp-send-tx | to yaml
 # cy: 2 cyberlinks should be successfully sent
 # code: 0
@@ -1028,7 +1028,7 @@ export def 'graph-append-related' [] {
 
     let $from_2 = (
         $c 
-        | graph-to-particles --cids_only --include_system | dfr into-lazy 
+        | graph-to-particles --cids_only  | dfr into-lazy 
         | dfr rename particle particle_from 
         | dfr join (
             cyberlinks-df-open --not_in
