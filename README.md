@@ -59,39 +59,6 @@ By default, it should install Ubuntu on your computer. And when Ubuntu is instal
 proceed with the steps described in the [section of installation for MacOS and Linux](#installation-mac-linux) 
 of this manual.
 
-## Examples
-
-```
-❯ cy pin text "bostrom"
-QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb
-
-
-❯ ls
-╭─────────────┬──────┬──────┬────────────╮
-│    name     │ type │ size │  modified  │
-├─────────────┼──────┼──────┼────────────┤
-│ bostrom.txt │ file │  7 B │ 2 days ago │
-│ cyber.txt   │ file │  5 B │ 2 days ago │
-╰─────────────┴──────┴──────┴────────────╯
-
-❯ cy pin files --cyberlink_filenames_to_their_files
-There are 2 cyberlinks in the temp table:
-╭────────────────────────────────────────────────┬────────┬────────────────────────────────────────────────┬─────────────┬─────────────╮
-│                      from                      │ status │                       to                       │  filename   │  date_time  │
-├────────────────────────────────────────────────┼────────┼────────────────────────────────────────────────┼─────────────┼─────────────┤
-│ QmPtV5CU9v3u7MY7hMgG3z9kTno8o7JHJD1e6f3NLfZ86k │ added  │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │ bostrom.txt │ 230112-2353 │
-│ QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6 │ added  │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │ cyber.txt   │ 230112-2353 │
-╰────────────────────────────────────────────────┴────────┴────────────────────────────────────────────────┴─────────────┴─────────────╯
-
-❯ cy link texts "bostrom" "cyber"
-There are 1 cyberlinks in the temp table:
-╭────────────┬─────────┬────────────────────────────────────────────────┬────────────────────────────────────────────────┬─────────────╮
-│ from_text  │ to_text │                      from                      │                       to                       │  date_time  │
-├────────────┼─────────┼────────────────────────────────────────────────┼────────────────────────────────────────────────┼─────────────┤
-│ bostrom    │ cyber   │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │ 230112-2355 │
-╰────────────┴─────────┴────────────────────────────────────────────────┴────────────────────────────────────────────────┴─────────────╯
-```
-
 ## Commands
 
 ### cy pin-text
