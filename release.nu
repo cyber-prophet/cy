@@ -15,7 +15,7 @@ let lines_to_drop = (
 
 $readme 
 | drop ($lines_to_drop) 
-| append (cy help -m) 
+| append (open help_output.md) 
 | save ~/cy/README.md -f -r
 
 print "success!"
