@@ -29,22 +29,22 @@ Open Terminal app on your computer.
 2. Add a custom tap to your Homebrew: `brew tap cyber-prophet/homebrew-taps`
 3. Install all the dependencies for running Cy: `brew install cybundle`
    This command will install the following software on your computer:
-   
+
    1. curl (if needed)
    2. [gum](https://github.com/charmbracelet/gum)
-   3. [cyber](https://github.com/cybercongress/go-cyber) 
+   3. [cyber](https://github.com/cybercongress/go-cyber)
    4. [pussy](https://github.com/greatweb/space-pussy)
-   5. [nushell](https://www.nushell.sh/) app 
-   6. [ipfs - kubo](https://github.com/ipfs/kubo) app 
+   5. [nushell](https://www.nushell.sh/) app
+   6. [ipfs - kubo](https://github.com/ipfs/kubo) app
    7. [wezterm](https://wezfurlong.org/wezterm/) terminal
    8. [pueue](https://github.com/Nukesor/pueue) app
    9. [cybundle script](https://github.com/cyber-prophet/homebrew-taps/blob/main/src/cybundle)
 
 4. To continue installation of configs and execute necessary init steps, run: `cybundle`
 
-After installation, you can launch `nu` in your terminal with already configured `cy` in it. 
-Or, if your system is MacOS or Linux (but not Linux under WSL) - you can launch Wezterm app. 
-It should be configured to use `nu` with `cy` from the very start. 
+After installation, you can launch `nu` in your terminal with already configured `cy` in it.
+Or, if your system is MacOS or Linux (but not Linux under WSL) - you can launch Wezterm app.
+It should be configured to use `nu` with `cy` from the very start.
 
 To start using Cy, follow the instructions on your screen. They should include:
 
@@ -54,9 +54,9 @@ To start using Cy, follow the instructions on your screen. They should include:
 
 ## Installation (Windows)
 
-Windows supports WSL2. Install it first: https://learn.microsoft.com/en-us/windows/wsl/install. 
-By default, it should install Ubuntu on your computer. And when Ubuntu is installed and launched, 
-proceed with the steps described in the [section of installation for MacOS and Linux](#installation-mac-linux) 
+Windows supports WSL2. Install it first: https://learn.microsoft.com/en-us/windows/wsl/install.
+By default, it should install Ubuntu on your computer. And when Ubuntu is installed and launched,
+proceed with the steps described in the [section of installation for MacOS and Linux](#installation-mac-linux)
 of this manual.
 
 ## Commands
