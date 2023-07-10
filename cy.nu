@@ -40,7 +40,7 @@ export-env {
 
     let $config = (open '~/.cy_config.toml')
 
-    let-env cy = (
+    $env.cy = (
         try {
             $config
             | merge (
@@ -1442,7 +1442,7 @@ export def-env 'config-activate' [
         | merge $config 
     )
 
-    let-env cy = $config_toml
+    $env.cy = $config_toml
 
     'Config is loaded' | cprint -c green_underline -b 1
     # $config_toml | save $'($env.cy.path)/config/default.toml' -f
