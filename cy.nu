@@ -48,7 +48,7 @@ export-env {
             )
             | sort
         } catch {
-            $'A config file was not found. Run *"cy config-new"*' | cprint
+            $'A config file was not found. Run *"cy config-new"*' | cprint $in
             $config
         }
     )
@@ -227,7 +227,7 @@ export def 'follow' [
     neuron
 ] {
     if not (is-neuron $neuron) {
-        $"*($neuron)* doesn't look like an address" | cprint 
+        $"*($neuron)* doesn't look like an address" | cprint $in 
         return
     }
 
@@ -262,7 +262,7 @@ def 'link-chuck' [] {
         $in + "\n\n" + 'via [Chucknorris.io](https://chucknorris.io)'
     )
 
-    $quote | cprint -f '='
+    $quote | cprint $in -f '='
 
     link-texts --quiet 'chuck norris' $quote 
 }
@@ -274,7 +274,7 @@ def 'link-quote' [] {
         | $in + "\n\n" + 'via [forismatic.com](https://forismatic.com)'
     )
 
-    $quote | cprint -f '='
+    $quote | cprint $in -f '='
 
     # link-texts 'quote' $quote
     link-texts --quiet 'quote' $quote
@@ -347,9 +347,9 @@ export def 'tmp-view' [
 
         if $links_count == 0 {
             $'The temp cyberlinks table *"($env.cy.path)/cyberlinks_temp.csv"* is empty.
-            You can add cyberlinks to it manually or by using commands like *"cy link-texts"*' | cprint
+            You can add cyberlinks to it manually or by using commands like *"cy link-texts"*' | cprint $in
         } else {
-            $'There are *($links_count) cyberlinks* in the temp table:' | cprint
+            $'There are *($links_count) cyberlinks* in the temp table:' | cprint $in
         }
     }
 
@@ -453,7 +453,7 @@ export def 'tmp-pin-columns' [
             | if $it.to_text? != null { append $it.to_text } else {}
         } 
         | if $in == [] {
-            'No columns *"from_text"* or *"to_text"* found. Add at least one of them.' | cprint ;
+            'No columns *"from_text"* or *"to_text"* found. Add at least one of them.' | cprint $in ;
             return
         } else {}
         | uniq 
@@ -523,13 +523,13 @@ export def 'tmp-remove-existed' [] {
 
     if $existed_links_count > 0 {
 
-        $'*($existed_links_count) cyberlink\(s\)* was/were already created by *($env.cy.address)*' | cprint
+        $'*($existed_links_count) cyberlink\(s\)* was/were already created by *($env.cy.address)*' | cprint $in
         ($existed_links | select from_text from to_text to | each {|i| print $i})
-        'So they were removed from the temp table!' | cprint -c red -a 2
+        'So they were removed from the temp table!' | cprint $in -c red -a 2
 
         $links_with_status | filter {|x| not $x.link_exist} | tmp-replace
     } else {
-        'There are no cyberlinks in the temp table for the current address exist the cybergraph' | cprint
+        'There are no cyberlinks in the temp table for the current address exist the cybergraph' | cprint $in
     }
 }
 
@@ -627,7 +627,7 @@ export def 'tmp-send-tx' [] {
         | select cy code txhash
 
     } else if $_var.code == 2 {
-        {'cy': ('Use *"cy tmp-remove-existed"*' | cprint --echo) }
+        {'cy': ('Use *"cy tmp-remove-existed"*' | cprint $in --echo) }
         | merge $_var
     } else {
         $_var
@@ -695,7 +695,7 @@ export def 'passport-get' [
         | merge $in.extension 
         | reject extension approvals token_uri
     } else {
-        $'No passport for *($address_or_nick)* is found' | cprint --before 1 --after 2
+        $'No passport for *($address_or_nick)* is found' | cprint $in --before 1 --after 2
         {}
     }
 }
@@ -753,11 +753,11 @@ export def 'passport-set' [
             | upsert raw_log {|i| $i.raw_log | from json} 
             | select raw_log code txhash
         } else {
-            $'The *($field)* field for *($nick)* should be successfuly set to *($particle)*' | cprint
+            $'The *($field)* field for *($nick)* should be successfuly set to *($particle)*' | cprint $in
         }
     } else {
         $'The particle might not be set. You can check it with the command
-        "*cy passport-get ($nick) | get ($field) | $in == ($particle)*"' | cprint
+        "*cy passport-get ($nick) | get ($field) | $in == ($particle)*"' | cprint $in
     }
 }
 
@@ -807,7 +807,7 @@ export def-env 'graph-download-snapshot' [
         | save $'($path)/update.toml' -f
     )
 
-    $'The graph data has been downloaded to the *"($path)"* directory' | cprint
+    $'The graph data has been downloaded to the *"($path)"* directory' | cprint $in
 
     if (not $disable_update_parquet) {
         print 'Updating particles parquet'
@@ -1290,7 +1290,7 @@ def 'neurons-yaml-open' [
 export def-env 'config-new' [
     # config_name?: string@'nu-complete-config-names'
 ] {
-    'Choose the name of executable:' | cprint -c green
+    'Choose the name of executable:' | cprint $in -c green
     let $exec = (nu-complete-executables | input list -f | inspect2)
 
     let $addr_table = (
@@ -1311,7 +1311,7 @@ export def-env 'config-new' [
     help: $'try "($exec) keys add -h"'
     }
 
-    'Select the address to send transactions from:' | cprint -c green --before 1
+    'Select the address to send transactions from:' | cprint $in -c green --before 1
     let $address = (
         $addr_table 
         | input list -f
@@ -1333,7 +1333,7 @@ export def-env 'config-new' [
     )
 
     if (not ($passport_nick | is-empty)) {
-        $'Passport nick *($passport_nick)* will be used' | cprint -c default_italic --before 1
+        $'Passport nick *($passport_nick)* will be used' | cprint $in -c default_italic --before 1
     }
 
     let $chain_id_def = (if ($exec == 'cyber') {
@@ -1343,8 +1343,8 @@ export def-env 'config-new' [
         }
     )
 
-    # 'Enter the chain-id for interacting with the blockchain. ' | cprint -c green --before 1 --after 0
-    # $'Default: ($chain_id_def)' | cprint -c green -c yellow_italic
+    # 'Enter the chain-id for interacting with the blockchain. ' | cprint $in -c green --before 1 --after 0
+    # $'Default: ($chain_id_def)' | cprint $in -c green -c yellow_italic
     let $chain_id = ($chain_id_def)
 
 
@@ -1354,7 +1354,7 @@ export def-env 'config-new' [
         'https://rpc.space-pussy.cybernode.ai:443'
     }
 
-    'Select the address of RPC api for interacting with the blockchain:' | cprint -c green --before 1
+    'Select the address of RPC api for interacting with the blockchain:' | cprint $in -c green --before 1
     let $rpc_address = (
         [$rpc_def 'other'] 
         | input list -f
@@ -1366,7 +1366,7 @@ export def-env 'config-new' [
         | inspect2
     )
 
-    'Select the ipfs service to store particles:' | cprint -c green --before 1
+    'Select the ipfs service to store particles:' | cprint $in -c green --before 1
     let $ipfs_storage = (
         [cybernode, kubo, both] 
         | input list -f 
@@ -1412,7 +1412,7 @@ export def-env 'config-save' [
         if not ($file_name | path exists) {
             $file_name
         } else {
-            $'($file_name) exists. Do you want to overwrite it?' | cprint -c green --before 1
+            $'($file_name) exists. Do you want to overwrite it?' | cprint $in -c green --before 1
 
             ['yes' 'no'] | input list
             | if $in == 'yes' {
@@ -1444,7 +1444,7 @@ export def-env 'config-activate' [
 
     $env.cy = $config_toml
 
-    'Config is loaded' | cprint -c green_underline -b 1
+    'Config is loaded' | cprint $in -c green_underline -b 1
     # $config_toml | save $'($env.cy.path)/config/default.toml' -f
     (
         open '~/.cy_config.toml'
@@ -1806,7 +1806,7 @@ export def 'queue-check' [
         return 'there are no files in queue'
     }
 
-    $'Overall count of files in queue is *($files | length)*' | cprint
+    $'Overall count of files in queue is *($files | length)*' | cprint $in
 
     cprint $'*($env.cy.ipfs-download-from)* will be used for download'
 
@@ -1875,7 +1875,7 @@ export def 'balance-get' [
 ] {
     if not (is-neuron $address) {
         $"*($address)* doesn't look like an address" 
-        | cprint 
+        | cprint $in 
         return null
     }
 
@@ -2086,7 +2086,7 @@ def make_default_folders_fn [] {
 
 # Print string colourfully
 export def 'cprint' [
-    ...args
+    ...text_args
     --color (-c): any = 'default'
     --highlight_color (-h): any = 'green_bold'
     --frame_color (-r): any = 'dark_gray'
@@ -2095,8 +2095,6 @@ export def 'cprint' [
     --after (-a): int = 1       # A number of new lines after text
     --echo (-e)                 # Echo text string instead of printing
 ] {
-    let $in_text = ($in | default ($args | str join ' '))
-
     def compactit [] {
         $in 
         | str replace -a '(\n[\t ]+(\n[\t ]+)+)' '⏎' 
@@ -2160,7 +2158,8 @@ export def 'cprint' [
     }
 
     (
-        $in_text
+        $text_args 
+        | str join ' '
         | compactit
         | colorit
         | if $frame != null {
@@ -2206,7 +2205,7 @@ def 'backup-fn' [
         ^mv $filename $path2
         # print $'Previous version of ($filename) is backed up to ($path2)'
     } else {
-        $'*($filename)* does not exist' | cprint
+        $'*($filename)* does not exist' | cprint $in
     }
 }
 
