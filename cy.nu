@@ -262,7 +262,7 @@ def 'link-chuck' [] {
         $in + "\n\n" + 'via [Chucknorris.io](https://chucknorris.io)'
     )
 
-    $quote | cprint $in -f '='
+    cprint -f '=' $quote 
 
     link-texts --quiet 'chuck norris' $quote 
 }
@@ -274,7 +274,7 @@ def 'link-quote' [] {
         | $in + "\n\n" + 'via [forismatic.com](https://forismatic.com)'
     )
 
-    $quote | cprint $in -f '='
+    cprint -f '=' $quote 
 
     # link-texts 'quote' $quote
     link-texts --quiet 'quote' $quote
@@ -525,7 +525,7 @@ export def 'tmp-remove-existed' [] {
 
         cprint $'*($existed_links_count) cyberlink\(s\)* was/were already created by *($env.cy.address)*'
         ($existed_links | select from_text from to_text to | each {|i| print $i})
-        'So they were removed from the temp table!' | cprint $in -c red -a 2
+        cprint -c red -a 2 'So they were removed from the temp table!' 
 
         $links_with_status | filter {|x| not $x.link_exist} | tmp-replace
     } else {
@@ -695,7 +695,7 @@ export def 'passport-get' [
         | merge $in.extension 
         | reject extension approvals token_uri
     } else {
-        $'No passport for *($address_or_nick)* is found' | cprint $in --before 1 --after 2
+        cprint --before 1 --after 2 $'No passport for *($address_or_nick)* is found'
         {}
     }
 }
@@ -1290,7 +1290,7 @@ def 'neurons-yaml-open' [
 export def-env 'config-new' [
     # config_name?: string@'nu-complete-config-names'
 ] {
-    'Choose the name of executable:' | cprint $in -c green
+    cprint -c green 'Choose the name of executable:' 
     let $exec = (nu-complete-executables | input list -f | inspect2)
 
     let $addr_table = (
@@ -1311,7 +1311,8 @@ export def-env 'config-new' [
     help: $'try "($exec) keys add -h"'
     }
 
-    'Select the address to send transactions from:' | cprint $in -c green --before 1
+    cprint -c green --before 1 'Select the address to send transactions from:' 
+
     let $address = (
         $addr_table 
         | input list -f
@@ -1333,7 +1334,7 @@ export def-env 'config-new' [
     )
 
     if (not ($passport_nick | is-empty)) {
-        $'Passport nick *($passport_nick)* will be used' | cprint $in -c default_italic --before 1
+       cprint -c default_italic --before 1 $'Passport nick *($passport_nick)* will be used' 
     }
 
     let $chain_id_def = (if ($exec == 'cyber') {
@@ -1343,8 +1344,6 @@ export def-env 'config-new' [
         }
     )
 
-    # 'Enter the chain-id for interacting with the blockchain. ' | cprint $in -c green --before 1 --after 0
-    # $'Default: ($chain_id_def)' | cprint $in -c green -c yellow_italic
     let $chain_id = ($chain_id_def)
 
 
@@ -1354,7 +1353,7 @@ export def-env 'config-new' [
         'https://rpc.space-pussy.cybernode.ai:443'
     }
 
-    'Select the address of RPC api for interacting with the blockchain:' | cprint $in -c green --before 1
+    cprint -c green --before 1 'Select the address of RPC api for interacting with the blockchain:' 
     let $rpc_address = (
         [$rpc_def 'other'] 
         | input list -f
@@ -1366,7 +1365,8 @@ export def-env 'config-new' [
         | inspect2
     )
 
-    'Select the ipfs service to store particles:' | cprint $in -c green --before 1
+    cprint -c green --before 1 'Select the ipfs service to store particles:' 
+
     let $ipfs_storage = (
         [cybernode, kubo, both] 
         | input list -f 
@@ -1412,7 +1412,7 @@ export def-env 'config-save' [
         if not ($file_name | path exists) {
             $file_name
         } else {
-            $'($file_name) exists. Do you want to overwrite it?' | cprint $in -c green --before 1
+            cprint -c green --before 1 $'($file_name) exists. Do you want to overwrite it?' 
 
             ['yes' 'no'] | input list
             | if $in == 'yes' {
@@ -1444,7 +1444,7 @@ export def-env 'config-activate' [
 
     $env.cy = $config_toml
 
-    'Config is loaded' | cprint $in -c green_underline -b 1
+    cprint -c green_underline -b 1 'Config is loaded' 
     # $config_toml | save $'($env.cy.path)/config/default.toml' -f
     (
         open '~/.cy_config.toml'
