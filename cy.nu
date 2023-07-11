@@ -48,7 +48,7 @@ export-env {
             )
             | sort
         } catch {
-            $'A config file was not found. Run *"cy config-new"*' | cprint $in
+            cprint $'A config file was not found. Run *"cy config-new"*'
             $config
         }
     )
@@ -227,7 +227,7 @@ export def 'follow' [
     neuron
 ] {
     if not (is-neuron $neuron) {
-        $"*($neuron)* doesn't look like an address" | cprint $in 
+        cprint $"*($neuron)* doesn't look like an address" 
         return
     }
 
@@ -346,10 +346,10 @@ export def 'tmp-view' [
         let $links_count = ($tmp_links | length)
 
         if $links_count == 0 {
-            $'The temp cyberlinks table *"($env.cy.path)/cyberlinks_temp.csv"* is empty.
-            You can add cyberlinks to it manually or by using commands like *"cy link-texts"*' | cprint $in
+            cprint $'The temp cyberlinks table *"($env.cy.path)/cyberlinks_temp.csv"* is empty.
+            You can add cyberlinks to it manually or by using commands like *"cy link-texts"*'
         } else {
-            $'There are *($links_count) cyberlinks* in the temp table:' | cprint $in
+            cprint $'There are *($links_count) cyberlinks* in the temp table:'
         }
     }
 
@@ -453,7 +453,7 @@ export def 'tmp-pin-columns' [
             | if $it.to_text? != null { append $it.to_text } else {}
         } 
         | if $in == [] {
-            'No columns *"from_text"* or *"to_text"* found. Add at least one of them.' | cprint $in ;
+            cprint 'No columns *"from_text"* or *"to_text"* found. Add at least one of them.' ;
             return
         } else {}
         | uniq 
@@ -523,13 +523,13 @@ export def 'tmp-remove-existed' [] {
 
     if $existed_links_count > 0 {
 
-        $'*($existed_links_count) cyberlink\(s\)* was/were already created by *($env.cy.address)*' | cprint $in
+        cprint $'*($existed_links_count) cyberlink\(s\)* was/were already created by *($env.cy.address)*'
         ($existed_links | select from_text from to_text to | each {|i| print $i})
         'So they were removed from the temp table!' | cprint $in -c red -a 2
 
         $links_with_status | filter {|x| not $x.link_exist} | tmp-replace
     } else {
-        'There are no cyberlinks in the temp table for the current address exist the cybergraph' | cprint $in
+        cprint 'There are no cyberlinks in the temp table for the current address exist the cybergraph'
     }
 }
 
@@ -753,11 +753,11 @@ export def 'passport-set' [
             | upsert raw_log {|i| $i.raw_log | from json} 
             | select raw_log code txhash
         } else {
-            $'The *($field)* field for *($nick)* should be successfuly set to *($particle)*' | cprint $in
+            cprint $'The *($field)* field for *($nick)* should be successfuly set to *($particle)*'
         }
     } else {
-        $'The particle might not be set. You can check it with the command
-        "*cy passport-get ($nick) | get ($field) | $in == ($particle)*"' | cprint $in
+        cprint $'The particle might not be set. You can check it with the command
+        "*cy passport-get ($nick) | get ($field) | $in == ($particle)*"'
     }
 }
 
@@ -807,7 +807,7 @@ export def-env 'graph-download-snapshot' [
         | save $'($path)/update.toml' -f
     )
 
-    $'The graph data has been downloaded to the *"($path)"* directory' | cprint $in
+    cprint $'The graph data has been downloaded to the *"($path)"* directory'
 
     if (not $disable_update_parquet) {
         print 'Updating particles parquet'
@@ -1806,7 +1806,7 @@ export def 'queue-check' [
         return 'there are no files in queue'
     }
 
-    $'Overall count of files in queue is *($files | length)*' | cprint $in
+    cprint $'Overall count of files in queue is *($files | length)*'
 
     cprint $'*($env.cy.ipfs-download-from)* will be used for download'
 
@@ -1874,8 +1874,7 @@ export def 'balance-get' [
     address: string
 ] {
     if not (is-neuron $address) {
-        $"*($address)* doesn't look like an address" 
-        | cprint $in 
+        cprint $"*($address)* doesn't look like an address"  
         return null
     }
 
@@ -2205,7 +2204,7 @@ def 'backup-fn' [
         ^mv $filename $path2
         # print $'Previous version of ($filename) is backed up to ($path2)'
     } else {
-        $'*($filename)* does not exist' | cprint $in
+        cprint $'*($filename)* does not exist'
     }
 }
 
