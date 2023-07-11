@@ -2101,6 +2101,7 @@ export def 'cprint' [
         $in 
         | str replace -a '(\n[\t ]+(\n[\t ]+)+)' '⏎' 
         | str replace -a '\n?[\t ]+' ' ' 
+        | str replace -a -m '^[\t ]+' '' 
         | str replace -a '⏎' "\n\n" 
         | str trim
     }
