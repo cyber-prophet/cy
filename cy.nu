@@ -2096,11 +2096,12 @@ export def 'cprint' [
 ] {
     def compactit [] {
         $in 
-        | str replace -a '(\n[\t ]+(\n[\t ]+)+)' '⏎' 
-        | str replace -a '\n?[\t ]+' ' ' 
-        | str replace -a -m '^[\t ]+' '' 
+        | str replace -a '(\n[\t ]*(\n[\t ]*)+)' '⏎' 
+        | str replace -a '\n?[\t ]+' ' '    # remove single line breaks used for code formatting
         | str replace -a '⏎' "\n\n" 
-        | str trim
+        | lines
+        | each {|i| $i | str trim}
+        | str join "\n"
     }
 
     def colorit [] {
