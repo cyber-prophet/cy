@@ -1842,7 +1842,12 @@ export def 'cache-clear' [] {
     make_default_folders_fn
 }
 
-# Get a current height for a network chosen in config
+# Get a current height for the active network in config
+#
+# > cy query-current-height | to yaml
+# height: '9010895'
+# time: 2023-07-11T11:37:40.708298734Z
+# chain_id: bostrom
 export def 'query-current-height' [
     exec?: string@'nu-complete-executables'
 ] {
@@ -1963,6 +1968,16 @@ export def 'ipfs-bootstrap-add-congress' [] {
 }
 
 # Check IBC denoms
+#
+# > cy ibc-denoms | first 2 | to yaml
+# - path: transfer/channel-2
+#   base_denom: uosmo
+#   denom: ibc/13B2C536BB057AC79D5616B8EA1B9540EC1F2170718CAFF6F0083C966FFFED0B
+#   amount: '59014043327'
+# - path: transfer/channel-2/transfer/channel-0
+#   base_denom: uatom
+#   denom: ibc/5F78C42BCC76287AE6B3185C6C1455DFFF8D805B1847F94B9B625384B93885C7
+#   amount: '150000'
 export def 'ibc-denoms' [] {
     let $bank_total = (
         cyber query bank total --output json
@@ -1974,10 +1989,12 @@ export def 'ibc-denoms' [] {
         | get supply
         | where denom =~ '^ibc'
         | upsert ibc_hash {|i| $i.denom | str replace 'ibc/' ''}
-        | upsert temp_out {
-            |i| cyber query ibc-transfer denom-trace $i.ibc_hash --output json
-            | from json
-            | get denom_trace
+        | par-each {|i| $i
+            | upsert temp_out {
+                |i| cyber query ibc-transfer denom-trace $i.ibc_hash --output json
+                | from json
+                | get denom_trace
+            }
         }
     )
 
@@ -1985,17 +2002,21 @@ export def 'ibc-denoms' [] {
 }
 
 # Dump the peers connected to the given node to the comma-separated 'persistent_peers' list
+# Nodes list for https://rpc.bostrom.cybernode.ai:443
+# 
+# 70 peers found
+# persistent_peers = "7ad32f1677ffb11254e7e9b65a12da27a4f877d6@195.201.105.229:36656,d0518ce9881a4b0c5872e5e9b7c4ea8d760dad3f@85.10.207.173:26656"
 export def 'validator-generate-persistent-peers-string' [
-    node_address: string
+    node_address?: string
 ] {
     let $node_address = ($node_address | default $'($env.cy.rpc-address)')
     if $node_address == $env.cy.rpc-address {
-        print $"Nodes list for ($env.cy.rpc-address)\n"
+        print $"Nodes list for *($env.cy.rpc-address)*\n"
     }
 
     let $peers = (http get $'($node_address)/net_info' | get result.peers)
 
-    print $'($peers | length) peers found\n'
+    cprint $"*($peers | length)* peers found\n"
 
     $peers
     | each {|i| $i 
