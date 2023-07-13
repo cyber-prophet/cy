@@ -860,14 +860,16 @@ export def 'graph-to-particles' [
 
     (
         $c 
-        | dfr rename particle_from particle 
-        | dfr drop particle_to
+        | dfr rename [particle_from particle_to] [particle init-role]
         | dfr first 0  # Create dummy dfr to have something to appended to
         | if not $to { dfr into-lazy
             | dfr append --col (
                 | $c 
                 | dfr rename particle_from particle 
                 | dfr drop particle_to
+                | dfr with-column [
+                    (dfr lit 'from' | dfr as 'init-role'),
+                ]
             )
         } else {}
         | if not $from { dfr into-lazy
@@ -875,6 +877,9 @@ export def 'graph-to-particles' [
                 $c 
                 | dfr rename particle_to particle 
                 | dfr drop particle_from
+                | dfr with-column [
+                    (dfr lit 'to' | dfr as 'init-role'),
+                ]
             )
         } else {} | dfr into-lazy 
         | dfr sort-by height 
