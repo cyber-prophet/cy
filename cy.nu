@@ -1009,25 +1009,27 @@ export def 'graph-append-related' [] {
 
     let $to_2 = (
         $c 
-        | graph-to-particles --cids_only --include_system | dfr into-lazy 
+        | graph-to-particles --include_system | dfr into-lazy 
+        | dfr select particle link_local_index
         | dfr rename particle particle_to 
         | dfr join (
             cyberlinks-df-open --not_in
             | dfr into-lazy
             | dfr filter-with (
                 (dfr col particle_from) 
-                | dfr is-in (system_cids) | dfr expr-not
+                | dfr is-in (system_cids) 
+                | dfr expr-not
             ) 
         ) particle_to particle_to 
         | dfr with-column [
             (dfr lit '2to' | dfr as 'step') 
-            (dfr arg-where ((dfr col height) != 0) | dfr as link_local_index)
         ]
     )
 
     let $from_2 = (
         $c 
-        | graph-to-particles --cids_only --include_system | dfr into-lazy 
+        | graph-to-particles --include_system | dfr into-lazy 
+        | dfr select particle link_local_index
         | dfr rename particle particle_from 
         | dfr join (
             cyberlinks-df-open --not_in
@@ -1035,13 +1037,11 @@ export def 'graph-append-related' [] {
             | dfr filter-with (
                 (dfr col particle_from) 
                 | dfr is-in (system_cids)
-
                 | dfr expr-not
             ) 
         ) particle_from particle_from 
         | dfr with-column [
             (dfr lit '2from' | dfr as 'step') 
-            (dfr arg-where ((dfr col height) != 0) | dfr as link_local_index)
         ]
     )
 
