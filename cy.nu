@@ -1013,13 +1013,8 @@ export def 'graph-append-related' [] {
         | dfr select particle link_local_index
         | dfr rename particle particle_to 
         | dfr join (
-            cyberlinks-df-open --not_in
+            cyberlinks-df-open --not_in --exclude_system
             | dfr into-lazy
-            | dfr filter-with (
-                (dfr col particle_from) 
-                | dfr is-in (system_cids) 
-                | dfr expr-not
-            ) 
         ) particle_to particle_to 
         | dfr with-column [
             (dfr lit '2to' | dfr as 'step') 
@@ -1032,13 +1027,8 @@ export def 'graph-append-related' [] {
         | dfr select particle link_local_index
         | dfr rename particle particle_from 
         | dfr join (
-            cyberlinks-df-open --not_in
+            cyberlinks-df-open --not_in --exclude_system
             | dfr into-lazy
-            | dfr filter-with (
-                (dfr col particle_from) 
-                | dfr is-in (system_cids)
-                | dfr expr-not
-            ) 
         ) particle_from particle_from 
         | dfr with-column [
             (dfr lit '2from' | dfr as 'step') 
@@ -1268,12 +1258,21 @@ export def 'graph-to-logseq' [
 
 def 'cyberlinks-df-open' [
     --not_in    # don't catch pipe in
+    --exclude_system
 ] {
     if $not_in {
         dfr open $'($env.cy.path)/graph/cyberlinks.csv' 
     } else {
         $in | default (dfr open $'($env.cy.path)/graph/cyberlinks.csv')
-    }
+    } 
+    | if $exclude_system {
+        dfr into-lazy
+        | dfr filter-with (
+            (dfr col particle_from) 
+            | dfr is-in (system_cids) 
+            | dfr expr-not
+        ) 
+    } else { }
 }
 
 def 'neurons-yaml-open' [
