@@ -893,12 +893,9 @@ export def 'graph-to-particles' [
         } else {}
         | if not $include_system { dfr into-lazy
             | dfr filter-with (
-                (dfr col particle) 
-                | dfr is-in  [
-                    'QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx', 
-                    'QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx', 
-                    'Qmf89bXkJH9jw4uaLkHmZkxQ51qGKfUPtAMxA8rTwBrmTs' 
-                ] | dfr expr-not
+                (dfr col particle)
+                | dfr is-in (system_cids)
+                | dfr expr-not
             ) 
         } else {} | dfr into-lazy
         | dfr collect
@@ -1019,11 +1016,7 @@ export def 'graph-append-related' [] {
             | dfr into-lazy
             | dfr filter-with (
                 (dfr col particle_from) 
-                | dfr is-in [
-                    'QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx', 
-                    'QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx', 
-                    'Qmf89bXkJH9jw4uaLkHmZkxQ51qGKfUPtAMxA8rTwBrmTs' 
-                ] | dfr expr-not
+                | dfr is-in (system_cids) | dfr expr-not
             ) 
         ) particle_to particle_to 
         | dfr with-column [
@@ -1041,11 +1034,9 @@ export def 'graph-append-related' [] {
             | dfr into-lazy
             | dfr filter-with (
                 (dfr col particle_from) 
-                | dfr is-in [
-                    'QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx', 
-                    'QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx', 
-                    'Qmf89bXkJH9jw4uaLkHmZkxQ51qGKfUPtAMxA8rTwBrmTs' 
-                ] | dfr expr-not
+                | dfr is-in (system_cids)
+
+                | dfr expr-not
             ) 
         ) particle_from particle_from 
         | dfr with-column [
@@ -2111,6 +2102,14 @@ def make_default_folders_fn [] {
         'from,to,address,timestamp,txhash' 
         | save $'($env.cy.path)/cyberlinks_archive.csv'
     }
+}
+
+def 'system_cids' [] {
+    [
+        'QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx', 
+        'QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx', 
+        'Qmf89bXkJH9jw4uaLkHmZkxQ51qGKfUPtAMxA8rTwBrmTs' 
+    ] 
 }
 
 # Print string colourfully
