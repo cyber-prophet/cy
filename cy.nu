@@ -884,6 +884,13 @@ export def 'graph-to-particles' [
         } else {} | dfr into-lazy 
         | dfr sort-by height 
         | dfr unique --subset [particle]
+        | if not $include_system { dfr into-lazy
+            | dfr filter-with (
+                (dfr col particle)
+                | dfr is-in (system_cids)
+                | dfr expr-not
+            ) 
+        } else {} 
         | if $cids_only { dfr into-lazy
             | dfr select particle
         } else { dfr into-lazy
@@ -895,13 +902,6 @@ export def 'graph-to-particles' [
         | if $include_content { dfr into-lazy 
             | dfr select particle
             | dfr join $p particle particle
-        } else {}
-        | if not $include_system { dfr into-lazy
-            | dfr filter-with (
-                (dfr col particle)
-                | dfr is-in (system_cids)
-                | dfr expr-not
-            ) 
         } else {} | dfr into-lazy
         | dfr collect
     )
