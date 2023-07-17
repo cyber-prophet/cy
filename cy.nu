@@ -1901,35 +1901,26 @@ export def 'balance-get' [
 # Check balances for the keys added to the active CLI
 #
 # > cy balances --test | to yaml
-# - name: bot3f
-#   boot: 654582269
-#   hydrogen: 50
-#   address: bostrom1aypv5wxute0nnhfv44jkhyfkzt7zyrden85tel
+# name: bot3f
+# boot: 654582269
+# hydrogen: 50
+# address: bostrom1aypv5wxute0nnhfv44jkhyfkzt7zyrden85tel
 export def 'balances' [
     ...name: string@'nu-complete keys values'
     --test      # Use keyring-backend test (with no password)
 ] {
-
-    let $keys0 = (
-        if $test {
-            ^($env.cy.exec) keys list --output json --keyring-backend test
-        } else {
-            ^($env.cy.exec) keys list --output json
-        }
+    let $balances = (
+        ^($env.cy.exec) (
+            [keys list --output json]   # Params for CLI
+            | if $test {
+                append [--keyring-backend test]
+            } else { }
+        )
         | from json
         | select name address
-    )
-
-    let $keys1 = (
-        if ($name | is-empty) {
-            $keys0
-        } else {
-            $keys0 | where name in $name
+        | if ($name | is-empty) { } else {
+            where name in $name
         }
-    )
-
-    let $balances = (
-        $keys1
         | par-each {
             |i| balance-get $i.address
             | merge $i
@@ -1942,12 +1933,11 @@ export def 'balances' [
         | reverse | reduce -f {} {|i acc| $acc | merge {$i : 0}}
     )
 
-    let $out = ($balances | each {|i| $dummy1 | merge $i} | sort-by name)
-
-    if ($name | is-empty) or (($name | length) > 1) {
-        $out
-    } else {
-        $out | into record
+    $balances 
+    | each {|i| $dummy1 | merge $i} 
+    | sort-by name
+    | if (($in | length) > 1) { } else {
+        into record
     }
 }
 
