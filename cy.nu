@@ -995,7 +995,7 @@ export def 'graph-filter-neurons' [
 
     $neurons_nicks | dfr into-df
     | dfr join (
-        neurons-yaml-open --df
+        dict-neurons --df
     ) '0' nick
     | dfr select neuron
     | dfr join $cyberlinks neuron neuron
@@ -1063,7 +1063,7 @@ export def 'graph-update-neurons' [
     | dfr select neuron 
     | dfr unique 
     | dfr join (
-        neurons-yaml-open --df
+        dict-neurons --df
     ) neuron neuron --left 
     | dfr into-nu 
     | if $passport or $all {
@@ -1149,7 +1149,7 @@ export def 'graph-neurons-stats' [] {
         | dfr join $follows neuron neuron --left 
         | dfr join $tweets neuron neuron --left 
         | dfr join (
-            neurons-yaml-open --df | dfr into-df 
+            dict-neurons --df | dfr into-df 
         ) neuron neuron --left
     ) 
 }
@@ -1277,16 +1277,6 @@ def 'cyberlinks-df-open' [
             | dfr is-in (system_cids) 
             | dfr expr-not
         ) 
-    } else { }
-}
-
-def 'neurons-yaml-open' [
-    --df        # open as df
-] {
-    open $'($env.cy.path)/graph/neurons_dict.yaml' 
-    | if $df {
-        fill non-exist
-        | dfr into-df
     } else { }
 }
 
@@ -2263,6 +2253,16 @@ def inspect2 [
     $input
 }
 
+def 'dict-neurons' [
+    --df        # output as a dataframe
+] {
+    open $'($env.cy.path)/graph/neurons_dict.yaml' 
+    | if $df {
+        fill non-exist
+        | dfr into-df
+    } else { }
+}
+
 def 'nu-complete-random-sources' [] {
     ['chucknorris.io' 'forismatic.com']
 }
@@ -2272,7 +2272,11 @@ def 'nu-complete-search-functions' [] {
 }
 
 def 'nu-complete-neurons-nicks' [] {
-    neurons-yaml-open | get nick
+    dict-neurons | get nick
+}
+
+def 'nu-complete-neurons-nicknames' [] {
+    dict-neurons | get nickname | where $it != ""
 }
 
 def 'nu-complete-colors' [] {
