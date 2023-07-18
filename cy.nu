@@ -1158,7 +1158,7 @@ export def 'graph-neurons-stats' [] {
 
 # Export the entire graph into CSV file for import to Gephi
 export def 'graph-to-gephi' [] {
-    let $cyberlinks = cyberlinks-df-open
+    let $cyberlinks = (cyberlinks-df-open)
     let $particles = (
         $cyberlinks
         | graph-to-particles --include_system --include_content
@@ -1230,6 +1230,7 @@ export def 'graph-to-gephi' [] {
     )
 }
 
+# Logseq export WIP
 export def 'graph-to-logseq' [
     # --path: string
 ] {
@@ -2245,7 +2246,8 @@ def 'inspect2' [
     $input
 }
 
-def 'dict-neurons' [
+# Output neurons dict
+export def 'dict-neurons' [
     --df        # output as a dataframe
 ] {
     open $'($env.cy.path)/graph/neurons_dict.yaml' 
@@ -2304,14 +2306,6 @@ def 'nu-complete keys values' [] {
 
 def 'nu-complete-bool' [] {
     [true, false]
-}
-
-def do-async [commands: string] {
-    bash -c $'nu -c "($commands)" &'
-}
-
-def do-bash [commands: string] {
-    bash -c $'"($commands)" &'
 }
 
 # > [{a: 1} {b: 2}] | to nuon
