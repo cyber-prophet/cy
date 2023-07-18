@@ -1264,6 +1264,58 @@ export def 'graph-to-logseq' [
     }
 }
 
+# Add content_s and neuron's nicknames columns to piped in or the whole graph df
+# > cy graph-filter-neurons maxim_bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 
+# | cy graph-add-metadata | dfr into-df | dfr into-nu | first 2 | to yaml
+# - index: 0
+#   neuron: bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
+#   particle_from: QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx
+#   particle_to: QmaxuSoSUkgKBGBJkT2Ypk9zWdXor89JEmaeEB66wZUHYo
+#   height: 87794
+#   timestamp: 2021-11-11
+#   content_s_from: tweet
+#   content_s_to: '"MIME type" = "image/svg+xml"'
+#   nick: maxim_bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
+# - index: 1
+#   neuron: bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
+#   particle_from: Qmf89bXkJH9jw4uaLkHmZkxQ51qGKfUPtAMxA8rTwBrmTs
+#   particle_to: QmYnLm5MFGFwcoXo65XpUyCEKX4yV7HbCAZiDZR95aKr4t
+#   height: 88371
+#   timestamp: 2021-11-11
+#   content_s_from: avatar
+#   content_s_to: '"MIME type" = "image/svg+xml"'
+#   nick: maxim_bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
+export def 'graph-add-metadata' [] {
+    let $c = (cyberlinks-df-open | dfr into-df) 
+    let $p = (
+        dfr open $'($env.cy.path)/graph/particles.parquet' 
+        | dfr into-df
+        | dfr select particle content_s
+    )
+
+    let $columns = ($c | dfr columns)
+
+    $c 
+    | if 'particle_from' in $columns { dfr into-df
+        | dfr join --left $p particle_from particle
+        | dfr rename content_s content_s_from
+    } else {}
+    | if 'particle_to' in $columns { dfr into-df
+        | dfr join --left $p particle_to particle
+        | dfr rename content_s content_s_to
+    } else {}
+    | if 'particle' in $columns { dfr into-df
+        | dfr join --left $p particle particle
+    } else {}
+    | if 'neuron' in $columns { dfr into-df
+        | dfr join --left (
+            dict-neurons --df
+            | dfr into-df
+            | dfr select neuron nick
+        ) neuron neuron
+    }
+}
+
 def 'cyberlinks-df-open' [
     --not_in    # don't catch pipe in
     --exclude_system
