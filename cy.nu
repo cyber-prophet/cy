@@ -89,7 +89,7 @@ export def 'pin-text' [
         } else {}
     )
 
-    if (is-cid $text) and (not $dont_detect_cid) {
+    if (not $dont_detect_cid) and (is-cid $text) {
         return $text
     } 
     
@@ -846,7 +846,7 @@ export def 'graph-to-particles' [
     --cids_only (-c)        # Output one column with CIDs only
 ] {
     let $c = (
-        cyberlinks-df-open 
+        graph-links-df 
         | dfr into-lazy
     )
 
@@ -993,7 +993,7 @@ export def-env 'graph-update-particles-parquet' [
 export def 'graph-filter-neurons' [
     ...neurons_nicks: string@'nu-complete-neurons-nicks'
 ] {
-    let $cyberlinks = (cyberlinks-df-open)
+    let $cyberlinks = (graph-links-df)
 
     $neurons_nicks | dfr into-df
     | dfr join (
@@ -1020,7 +1020,7 @@ export def 'graph-append-related' [] {
         | dfr select particle link_local_index
         | dfr rename particle particle_to 
         | dfr join (
-            cyberlinks-df-open --not_in --exclude_system
+            graph-links-df --not_in --exclude_system
             | dfr into-lazy
         ) particle_to particle_to 
         | dfr with-column [
@@ -1034,7 +1034,7 @@ export def 'graph-append-related' [] {
         | dfr select particle link_local_index
         | dfr rename particle particle_from 
         | dfr join (
-            cyberlinks-df-open --not_in --exclude_system
+            graph-links-df --not_in --exclude_system
             | dfr into-lazy
         ) particle_from particle_from 
         | dfr with-column [
@@ -1061,7 +1061,7 @@ export def 'graph-update-neurons' [
     --dont_save             # Don't update file on disk, just output results
     --quiet (-q)            # Don't output results table
 ] {
-    cyberlinks-df-open | dfr into-df 
+    graph-links-df | dfr into-df 
     | dfr select neuron 
     | dfr unique 
     | dfr join (
@@ -1096,7 +1096,7 @@ export def 'graph-update-neurons' [
 
 export def 'graph-neurons-stats' [] {
 #neuron-stats-works
-    let c = (cyberlinks-df-open | dfr into-df)
+    let c = (graph-links-df | dfr into-df)
     let p = (
         dfr open $'($env.cy.path)/graph/particles.parquet' 
         | dfr into-df
@@ -1158,7 +1158,7 @@ export def 'graph-neurons-stats' [] {
 
 # Export the entire graph into CSV file for import to Gephi
 export def 'graph-to-gephi' [] {
-    let $cyberlinks = (cyberlinks-df-open)
+    let $cyberlinks = (graph-links-df)
     let $particles = (
         $cyberlinks
         | graph-to-particles --include_system --include_content
@@ -1234,7 +1234,7 @@ export def 'graph-to-gephi' [] {
 export def 'graph-to-logseq' [
     # --path: string
 ] {
-    let $cyberlinks = (cyberlinks-df-open | inspect2)
+    let $cyberlinks = (graph-links-df | inspect2)
     let $particles = (
         $cyberlinks 
         | graph-to-particles --include_system --include_content 
@@ -1286,7 +1286,7 @@ export def 'graph-to-logseq' [
 #   content_s_to: '"MIME type" = "image/svg+xml"'
 #   nick: maxim_bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
 export def 'graph-add-metadata' [] {
-    let $c = (cyberlinks-df-open | dfr into-df) 
+    let $c = (graph-links-df | dfr into-df) 
     let $p = (
         dfr open $'($env.cy.path)/graph/particles.parquet' 
         | dfr into-df
@@ -1316,7 +1316,7 @@ export def 'graph-add-metadata' [] {
     }
 }
 
-def 'cyberlinks-df-open' [
+export def 'graph-links-df' [
     --not_in    # don't catch pipe in
     --exclude_system
 ] {
