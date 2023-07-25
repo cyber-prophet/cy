@@ -1747,6 +1747,7 @@ export def 'cid-download' [
     } else if $status == 'not found' {
         cid-queue-add $cid '-'
         'not found'
+        error make {msg: $'($cid) is not found'}
     } 
 }
 
