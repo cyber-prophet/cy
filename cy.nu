@@ -863,7 +863,7 @@ export def 'graph-to-particles' [
     (
         $c 
         | dfr rename [particle_from particle_to] [particle init-role]
-        | dfr first 0  # Create dummy dfr to have something to appended to
+        | dfr fetch 0  # Create dummy dfr to have something to appended to
         | if not $to { dfr into-lazy
             | dfr append --col (
                 | $c 
@@ -968,7 +968,7 @@ export def-env 'graph-update-particles-parquet' [
 
     let $m2_mask_null = (
         $content_df2
-        | dfr get content_s
+        | dfr col content_s
         | dfr is-null
     )
 
