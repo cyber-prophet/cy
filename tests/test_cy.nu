@@ -2,7 +2,7 @@ use ~/cy/cy.nu
 use std assert
 
 #[test]
-def test_link_texts-before-each [] {
+def test_link_texts [] {
     use ~/cy/cy.nu 
     let expect = {
         from_text: cyber, 
