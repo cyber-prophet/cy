@@ -771,7 +771,10 @@ export def-env 'graph-download-snapshot' [
     
     let $path = $'($env.cy.path)/graph'
     let $cur_data_cid = (passport-get graphkeeper | get data -i)
-    let $update_info = (try {open $'($path)/update.toml'} catch {{}})
+    let $update_info = (
+        $'($path)/update.toml' 
+        | if ($in | path exists) {open} else {{}}
+    )
     let $last_data_cid = ($update_info | get -i last_cid)
 
     if ($last_data_cid == $cur_data_cid) {
@@ -907,7 +910,7 @@ export def 'graph-to-particles' [
 }
 
 # Update the 'particles.parquet' file (it inculdes content of text files)
-export def-env 'graph-update-particles-parquet' [
+export def 'graph-update-particles-parquet' [
     --full_content
 ] {
 
@@ -929,12 +932,14 @@ export def-env 'graph-update-particles-parquet' [
             | path basename
             | str substring 0..46
             | into string
-        } | dfr into-df
+        } 
+        | dfr into-df
         | dfr rename '0' cid
     )
 
     let $content_df1 = (
-        $ls_files | dfr into-df
+        $ls_files 
+        | dfr into-df
         | dfr with-column (
             $ls_content_nu
             | each {
@@ -944,7 +949,8 @@ export def-env 'graph-update-particles-parquet' [
                 | lines
                 | get -i 0
                 | default $'!!malformed ($i)'
-            } | dfr into-df
+            } 
+            | dfr into-df
             | dfr rename '0' content_s
         )
         | dfr with-column $downloaded_cids
@@ -965,7 +971,7 @@ export def-env 'graph-update-particles-parquet' [
 
     let $m2_mask_null = (
         $content_df2
-        | dfr col content_s
+        | dfr select content_s
         | dfr is-null
     )
 
@@ -992,10 +998,9 @@ export def 'graph-filter-neurons' [
 ] {
     let $cyberlinks = (graph-links-df)
 
-    $neurons_nicks | dfr into-df
-    | dfr join (
-        dict-neurons --df
-    ) '0' nick
+    $neurons_nicks 
+    | dfr into-df
+    | dfr join ( dict-neurons --df ) '0' nick
     | dfr select neuron
     | dfr join $cyberlinks neuron neuron
 }
@@ -1055,15 +1060,13 @@ export def 'graph-update-neurons' [
     --karma                 # Update karma
     --all (-a)              # Update passport, balance, karma
     --threads (-t) = 30     # Number of threads to use for downloading
-    --dont_save             # Don't update file on disk, just output results
+    --dont_save             # Don't update the file on a disk, just output the results
     --quiet (-q)            # Don't output results table
 ] {
     graph-links-df
     | dfr select neuron 
     | dfr unique 
-    | dfr join (
-        dict-neurons --df
-    ) neuron neuron --left 
+    | dfr join --left (dict-neurons --df) neuron neuron
     | dfr into-nu 
     | if $passport or $all {
         par-each -t $threads {|i| 
@@ -1141,11 +1144,11 @@ export def 'graph-neurons-stats' [] {
             (dfr col timestamp | dfr count | dfr as 'links_count')
         ] 
         | dfr sort-by links_count --reverse [true]  # cygraph neurons activity
-        | dfr join $followers neuron content_s --left
-        | dfr join $follows neuron neuron --left 
-        | dfr join $tweets neuron neuron --left 
-    ) 
+        | dfr join --left $followers neuron content_s
+        | dfr join --left $follows neuron neuron
+        | dfr join --left $tweets neuron neuron
         | dfr join --left ( dict-neurons --df ) neuron neuron 
+    )
 }
 
 # Export the entire graph into CSV file for import to Gephi
@@ -1180,14 +1183,6 @@ export def 'graph-to-gephi' [] {
             ] 
             | dfr as Timeset
         ) 
-        # | dfr with-column (
-        #     dfr concat-str '' [
-        #         (dfr lit "<[") 
-        #         (dfr col timestamp) 
-        #         (dfr lit ($',(date now | date format "%Y-%m-%d")]>'))
-        #     ] 
-        #     | dfr as timestamp_interval
-        # ) 
         | dfr rename [particle_from particle_to] [source target]
         | dfr to-csv $'($env.cy.path)/gephi/!cyberlinks.csv'
     )
@@ -1207,14 +1202,6 @@ export def 'graph-to-gephi' [] {
             ] 
             | dfr as Timeset
         ) 
-        # | dfr with-column (
-        #     dfr concat-str "" [
-        #         (dfr lit "<[") 
-        #         (dfr col timestamp) 
-        #         (dfr lit ($',(date now | date format "%Y-%m-%d")]>'))
-        #     ] 
-        #     | dfr as timestamp_interval
-        # ) 
         | dfr into-nu
         | reject index
         | move id label cid --before height
