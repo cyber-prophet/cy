@@ -819,7 +819,7 @@ export def-env 'graph-download-snapshot' [
 
 # Output unique list of particles from piped in cyberlinks table
 #
-# > cy graph-to-particles --include_content | dfr into-df | dfr into-nu | first 2 | to yaml
+# > cy graph-to-particles --include_content | dfr into-nu | first 2 | to yaml
 # - index: 0
 #   particle: QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 #   neuron: bostrom1ymprf45c44rp9k0g2r84w2tjhsq7kalv98rgpt
@@ -850,10 +850,7 @@ export def 'graph-to-particles' [
         | dfr into-lazy
     )
 
-    let $p = (
-        dfr open $'($env.cy.path)/graph/particles.parquet' 
-        | dfr into-df
-    )
+    let $p = (dfr open $'($env.cy.path)/graph/particles.parquet')
 
     if ($to and $from) {
         print 'you need to use only one of two flags or none flags at all'
@@ -951,19 +948,19 @@ export def-env 'graph-update-particles-parquet' [
             | dfr rename '0' content_s
         )
         | dfr with-column $downloaded_cids
-        | if $full_content { dfr into-df
-            | dfr with-column (
+        | if $full_content {
+            dfr with-column (
                 $ls_content_nu
                 | dfr into-df
                 | dfr rename '0' content
             )
-        } else {} | dfr into-df
+        } else {}
         | dfr drop name modified type
     )
 
     let $content_df2 = (
-        graph-to-particles --include_system | dfr into-df
-        | dfr join $content_df1 particle cid --left
+        graph-to-particles --include_system
+        | dfr join --left $content_df1 particle cid
     )
 
     let $m2_mask_null = (
@@ -977,7 +974,7 @@ export def-env 'graph-update-particles-parquet' [
         | dfr with-column (
             $content_df2
             | dfr get content_s
-            | dfr set 'timeout' --mask ($m2_mask_null | dfr into-df)
+            | dfr set 'timeout' --mask $m2_mask_null
             | dfr rename string content_s
         )
     )
@@ -1061,7 +1058,7 @@ export def 'graph-update-neurons' [
     --dont_save             # Don't update file on disk, just output results
     --quiet (-q)            # Don't output results table
 ] {
-    graph-links-df | dfr into-df 
+    graph-links-df
     | dfr select neuron 
     | dfr unique 
     | dfr join (
@@ -1096,11 +1093,8 @@ export def 'graph-update-neurons' [
 
 export def 'graph-neurons-stats' [] {
 #neuron-stats-works
-    let c = (graph-links-df | dfr into-df)
-    let p = (
-        dfr open $'($env.cy.path)/graph/particles.parquet' 
-        | dfr into-df
-    )
+    let c = (graph-links-df)
+    let p = (dfr open $'($env.cy.path)/graph/particles.parquet')
 
     let follows = ($p 
         | dfr filter ((dfr col content_s) == follow) 
@@ -1150,10 +1144,8 @@ export def 'graph-neurons-stats' [] {
         | dfr join $followers neuron content_s --left
         | dfr join $follows neuron neuron --left 
         | dfr join $tweets neuron neuron --left 
-        | dfr join (
-            dict-neurons --df | dfr into-df 
-        ) neuron neuron --left
     ) 
+        | dfr join --left ( dict-neurons --df ) neuron neuron 
 }
 
 # Export the entire graph into CSV file for import to Gephi
@@ -1165,7 +1157,7 @@ export def 'graph-to-gephi' [] {
     )
 
     let $t1_height_index = (
-        $cyberlinks.height  | dfr into-df 
+        $cyberlinks.height
         | dfr append -c $particles.height # Particles might be created before they appear in the filtered graph
         | dfr unique 
         | dfr with-column (
@@ -1178,7 +1170,7 @@ export def 'graph-to-gephi' [] {
     )
 
     (
-        $cyberlinks | dfr into-df
+        $cyberlinks
         | dfr join --left $t1_height_index height height 
         | dfr with-column (
             dfr concat-str '' [
@@ -1245,7 +1237,7 @@ export def 'graph-to-logseq' [
     mkdir $'($path)/pages'
     mkdir $'($path)/journals'
 
-    $particles | dfr into-df 
+    $particles
     | dfr into-nu 
     | par-each {|p|
         # print $p.particle
@@ -1256,7 +1248,7 @@ export def 'graph-to-logseq' [
         save $'($path)/pages/($p.particle).md'
     }
 
-    $cyberlinks | dfr into-df
+    $cyberlinks
     | dfr into-nu
     | each {|c| 
         $"\t- [[($c.particle_to)]] ($c.height) [[($c.nick?)]]\n" |
@@ -1266,7 +1258,7 @@ export def 'graph-to-logseq' [
 
 # Add content_s and neuron's nicknames columns to piped in or the whole graph df
 # > cy graph-filter-neurons maxim_bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 
-# | cy graph-add-metadata | dfr into-df | dfr into-nu | first 2 | to yaml
+# | cy graph-add-metadata | dfr into-nu | first 2 | to yaml
 # - index: 0
 #   neuron: bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
 #   particle_from: QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx
@@ -1286,31 +1278,29 @@ export def 'graph-to-logseq' [
 #   content_s_to: '"MIME type" = "image/svg+xml"'
 #   nick: maxim_bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
 export def 'graph-add-metadata' [] {
-    let $c = (graph-links-df | dfr into-df) 
+    let $c = (graph-links-df) 
     let $p = (
         dfr open $'($env.cy.path)/graph/particles.parquet' 
-        | dfr into-df
         | dfr select particle content_s
     )
 
     let $columns = ($c | dfr columns)
 
     $c 
-    | if 'particle_from' in $columns { dfr into-df
-        | dfr join --left $p particle_from particle
+    | if 'particle_from' in $columns {
+        dfr join --left $p particle_from particle
         | dfr rename content_s content_s_from
     } else {}
-    | if 'particle_to' in $columns { dfr into-df
-        | dfr join --left $p particle_to particle
+    | if 'particle_to' in $columns {
+        dfr join --left $p particle_to particle
         | dfr rename content_s content_s_to
     } else {}
-    | if 'particle' in $columns { dfr into-df
-        | dfr join --left $p particle particle
+    | if 'particle' in $columns {
+        dfr join --left $p particle particle
     } else {}
-    | if 'neuron' in $columns { dfr into-df
-        | dfr join --left (
+    | if 'neuron' in $columns {
+        dfr join --left (
             dict-neurons --df
-            | dfr into-df
             | dfr select neuron nick
         ) neuron neuron
     }
