@@ -914,54 +914,45 @@ export def 'graph-update-particles-parquet' [
     --full_content
 ] {
 
-    let $ls_files = (ls $'($env.cy.path)/graph/particles/safe');
+    let $ls_files = (
+        ls -s $'($env.cy.path)/graph/particles/safe' # I use ls instead of glob as I filesize further
+        | reject modified type
+    );
 
     let $ls_content_nu = (
         $ls_files
         | get name
         | each {
-            |i| open $i
+            |i| open -r $'($env.cy.path)/graph/particles/safe/($i)'
         }
+        | dfr into-df
+        | dfr rename '0' content
     )
 
     let $downloaded_cids = (
         $ls_files
         | get name
-        | each {
-            |i| $i
-            | path basename
-            | str substring 0..46
-            | into string
-        } 
         | dfr into-df
         | dfr rename '0' cid
+        | dfr str-slice 0 -l 46
+    )
+
+    let $short_content = (
+        $ls_content_nu
+        | dfr str-slice 0 -l 150
+        | dfr replace-all -p "\n.*" -r ''
+        | dfr rename content content_s
     )
 
     let $content_df1 = (
         $ls_files 
         | dfr into-df
-        | dfr with-column (
-            $ls_content_nu
-            | each {
-                |i| $i
-                | str substring 0..150 -g
-                | str trim
-                | lines
-                | get -i 0
-                | default $'!!malformed ($i)'
-            } 
-            | dfr into-df
-            | dfr rename '0' content_s
-        )
+        | dfr with-column $short_content
         | dfr with-column $downloaded_cids
         | if $full_content {
-            dfr with-column (
-                $ls_content_nu
-                | dfr into-df
-                | dfr rename '0' content
-            )
+            dfr with-column $ls_content_nu
         } else {}
-        | dfr drop name modified type
+        | dfr drop name
     )
 
     let $content_df2 = (
