@@ -911,53 +911,39 @@ export def 'graph-to-particles' [
 
 # Update the 'particles.parquet' file (it inculdes content of text files)
 export def 'graph-update-particles-parquet' [
-    --full_content
+    --full_content  # include column with full content of particles 
+    --quiet (-q)    # don't print info about the saved parquet file
 ] {
 
     let $ls_files = (
-        ls -s $'($env.cy.path)/graph/particles/safe' # I use ls instead of glob as I filesize further
+        ls -s $'($env.cy.path)/graph/particles/safe' # I use ls instead of glob to have the filesize column
         | reject modified type
-    );
-
-    let $ls_content_nu = (
-        $ls_files
-        | get name
-        | each {
-            |i| open -r $'($env.cy.path)/graph/particles/safe/($i)'
+        | upsert content {
+            |i| open -r $'($env.cy.path)/graph/particles/safe/($i.name)'
         }
         | dfr into-df
-        | dfr rename '0' content
+        | dfr with-column (
+            $in 
+            | dfr select name
+            | dfr str-slice 0 -l 46
+            | dfr rename name particle
+        ) 
+        | dfr with-column (
+            $in
+            | dfr select content
+            | dfr str-slice 0 -l 150
+            | dfr replace-all -p "\n" -r '⏎'
+            | dfr rename content content_s
+        )
+        | if $full_content {} else {
+            dfr drop content
+        }
     )
 
-    let $downloaded_cids = (
-        $ls_files
-        | get name
-        | dfr into-df
-        | dfr rename '0' cid
-        | dfr str-slice 0 -l 46
-    )
-
-    let $short_content = (
-        $ls_content_nu
-        | dfr str-slice 0 -l 150
-        | dfr replace-all -p "\n.*" -r ''
-        | dfr rename content content_s
-    )
-
-    let $content_df1 = (
-        $ls_files 
-        | dfr into-df
-        | dfr with-column $short_content
-        | dfr with-column $downloaded_cids
-        | if $full_content {
-            dfr with-column $ls_content_nu
-        } else {}
-        | dfr drop name
-    )
 
     let $content_df2 = (
         graph-to-particles --include_system
-        | dfr join --left $content_df1 particle cid
+        | dfr join --left $ls_files particle particle
     )
 
     let $m2_mask_null = (
@@ -966,7 +952,9 @@ export def 'graph-update-particles-parquet' [
         | dfr is-null
     )
 
-    let $final_df = (
+    backup-fn $'($env.cy.path)/graph/particles.parquet'
+    
+    (
         $content_df2
         | dfr with-column (
             $content_df2
@@ -974,13 +962,19 @@ export def 'graph-update-particles-parquet' [
             | dfr set 'timeout' --mask $m2_mask_null
             | dfr rename string content_s
         )
+        | dfr with-column ( # short name to make content_s unique
+            $in 
+            | dfr select particle
+            | dfr str-slice 39
+            | dfr rename particle short_cid
+        ) 
+        | dfr with-column (
+            dfr concat-str '|' [(dfr col content_s) (dfr col short_cid)]
+        )
+        | dfr drop short_cid
+        | dfr to-parquet $'($env.cy.path)/graph/particles.parquet' 
+        | print ($in | get 0 -i)
     )
-
-    backup-fn $'($env.cy.path)/graph/particles.parquet'
-    
-    $final_df 
-    | dfr to-parquet $'($env.cy.path)/graph/particles.parquet' 
-    | print $in
 }
 
 # Filter the graph to chosen neurons only
