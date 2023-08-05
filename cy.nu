@@ -1074,6 +1074,7 @@ export def 'dict-neurons-update' [
     | dfr unique 
     | dfr join --left (dict-neurons --df) neuron neuron
     | dfr into-nu 
+    | filter {|i| is-neuron $i.neuron}
     | if $passport or $all {
         par-each -t $threads {|i| 
             $i | merge (passport-get $i.neuron)
@@ -1093,8 +1094,14 @@ export def 'dict-neurons-update' [
     | if $dont_save {} else {
         do {
             |i| 
-            backup-fn $'($env.cy.path)/graph/neurons_dict.yaml';
-            $i | save -f $'($env.cy.path)/graph/neurons_dict.yaml';
+            let $yaml = $'($env.cy.path)/graph/neurons_dict.yaml'
+            backup-fn $yaml;
+            
+            dict-neurons
+            | prepend $i 
+            | uniq-by neuron
+            | save -f $yaml;
+
             $i
         } $in
     } | if $quiet { null } else { }
@@ -2242,7 +2249,7 @@ def 'backup-fn' [
         $filename
         | path exists
     ) {
-        ^mv $filename $path2
+        ^cp $filename $path2
         # print $'Previous version of ($filename) is backed up to ($path2)'
     } else {
         cprint $'*($filename)* does not exist'
