@@ -674,6 +674,26 @@ export def 'update-cy' [
 export def 'passport-get' [
     address_or_nick: string # Name of passport or neuron's address
 ] {
+    def 'dump-passport' [] {
+        let $input = $in
+
+        let $yaml = $'($env.cy.path)/cache/yaml/passport-($address_or_nick).yaml'
+
+        if ($yaml | path exists) {
+            open -r $yaml 
+            | save -a $'($env.cy.path)/cache/yaml/archive/passport-($address_or_nick).yaml'
+        }
+
+        if $input != {} {
+            {ts: (date now)}
+            | merge $input
+            | [$in]
+            | save -f $yaml
+
+            $input
+        }
+    }
+
     let $json = (
         if (is-neuron $address_or_nick) {
             $'{"active_passport": {"address": "($address_or_nick)"}}'
@@ -696,6 +716,7 @@ export def 'passport-get' [
         | get data 
         | merge $in.extension 
         | reject extension approvals token_uri
+        | dump-passport
     } else {
         cprint --before 1 --after 2 $'No passport for *($address_or_nick)* is found'
         {}
@@ -1039,7 +1060,7 @@ export def 'graph-append-related' [] {
 }
 
 # Update neurons YAML-dictionary
-export def 'graph-update-neurons' [
+export def 'dict-neurons-update' [
     --passport              # Update passport data
     --balance               # Update balances data
     --karma                 # Update karma
@@ -2088,6 +2109,7 @@ def make_default_folders_fn [] {
     mkdir $'($env.cy.path)/cache/search/'
     mkdir $'($env.cy.path)/cache/queue/'
     mkdir $'($env.cy.path)/cache/cli_out/'
+    mkdir $'($env.cy.path)/cache/yaml/archive/'
 
     touch $'($env.cy.path)/graph/update.toml'
 
@@ -2199,19 +2221,6 @@ export def 'cprint' [
         | if $echo { } else { newlineit }
     )
 }
-
-def 'if-empty' [
-    alternative: any
-] {
-    let value = $in
-     (
-         if ($value | is-empty) {
-             $alternative
-         } else {
-             $value
-         }
-     )
- }
 
 def 'now-fn' [
     --pretty (-P)
