@@ -4,8 +4,6 @@
 # Use:
 # > overlay use ~/cy/cy.nu -p -r
 
-export use caching-function.nu
-
 export def main [] { help }
 
 # Check if all necessary dependencies are installed
@@ -2058,6 +2056,79 @@ export def 'validator-generate-persistent-peers-string' [
     | $'persistent_peers = "($in)"'
 }
 
+# A wrapper, to cache CLI requests
+export def 'ber' [
+    ...rest
+    --exec: string = ''
+    --cache_validity_duration: duration = 60min # Sets the cache's valid duration. No updates initiated during this period.
+    --cache_stale_refresh: duration = 7day      # Sets stale cache's usable duration. Triggers background update and returns cache results. If exceeded, requests immediate data update.
+    --force_update
+    --quiet
+] {
+    let $executable = if $exec != '' {$exec} else {$env.cy.exec}
+    let $jsonl_path = (
+        $executable
+        | append $rest
+        | str join '_'
+        | str replace -a '[^A-Za-z0-9_А-Яа-я]' '_'
+        | str replace -a '_+' '_'
+        | $'($env.cy.path)/cache/jsonl/($in).jsonl'
+    )
+
+    def 'request-and-save-exec-response' [] {
+        let $cmd = (
+            $rest 
+            | append [
+                '--output' 'json' 
+                '--node' $env.cy.rpc-address 
+                '--chain-id' 'bostrom'
+            ]
+        )
+
+        let $response = (
+            do -i {
+                ^($executable) $cmd 
+            } 
+            | complete
+            | if $in.exit_code == 0 {
+                get stdout
+                | from json 
+                | insert update_time (date now) 
+            }
+        )
+
+        $response
+        | to json -r
+        | $"($in)\n"
+        | save -a -r $jsonl_path; 
+
+        if not $quiet {$response}
+    }
+
+    let $last_data = (
+        if ($jsonl_path | path exists) {
+            ^tail -n 1 $jsonl_path
+            | from json
+            | upsert update_time ($in.update_time | into datetime)
+        } else {
+            {'update_time': (0 | into datetime)}
+        }
+    )
+
+    let $freshness = ((date now) - $last_data.update_time)
+
+    if ($force_update or ($freshness > $cache_stale_refresh)) {
+        request-and-save-exec-response
+    } else {
+        if ($freshness > $cache_validity_duration) {
+            cprint $'Using cache data, updated *($freshness | format duration day) ago*. Update is requested.'
+            pu-add -o 2 $'cy ber --exec ($executable) --force_update --quiet ($rest | str join " ")'
+        };
+
+        $last_data
+    }
+}
+
 # An ordered list of cy commands
 export def 'help' [
     --to_md (-m) # export table as markdown
@@ -2116,7 +2187,7 @@ def make_default_folders_fn [] {
     mkdir $'($env.cy.path)/cache/search/'
     mkdir $'($env.cy.path)/cache/queue/'
     mkdir $'($env.cy.path)/cache/cli_out/'
-    mkdir $'($env.cy.path)/cache/yaml/archive/'
+    mkdir $'($env.cy.path)/cache/jsonl/'
 
     touch $'($env.cy.path)/graph/update.toml'
 
