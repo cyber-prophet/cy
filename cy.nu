@@ -142,6 +142,25 @@ export def 'link-texts' [
     if not $quiet {$row}
 }
 
+#[test]
+def test_link_texts [] {
+    # use ~/cy/cy.nu
+    use std assert equal
+    let expect = {
+        from_text: cyber,
+        to_text: bostrom,
+        from: "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV",
+        to: "QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb"
+    }
+
+    let result = (
+        tmp-clear;
+        link-texts "cyber" "bostrom"
+    )
+
+    equal $expect $result
+}
+
 # Add a link chain to the temp table
 #
 # > cy link-chain "a" "b" "c" | to yaml
