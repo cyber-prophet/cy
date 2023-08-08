@@ -2092,6 +2092,7 @@ export def 'ber' [
     --cache_stale_refresh: duration = 7day      # Sets stale cache's usable duration. Triggers background update and returns cache results. If exceeded, requests immediate data update.
     --force_update
     --quiet
+    --no_default_params                         # Don't use default params (like output, chain-id)
 ] {
     let $executable = if $exec != '' {$exec} else {$env.cy.exec}
     let $jsonl_path = (
@@ -2106,11 +2107,13 @@ export def 'ber' [
     def 'request-and-save-exec-response' [] {
         let $cmd = (
             $rest
-            | append [
-                '--output' 'json'
-                '--node' $env.cy.rpc-address
-                '--chain-id' 'bostrom'
-            ]
+            | if $no_default_params {} else {
+                append [
+                    '--output' 'json'
+                    '--node' $env.cy.rpc-address
+                    '--chain-id' 'bostrom'
+                ]
+            }
         )
 
         let $response = (
@@ -2122,6 +2125,8 @@ export def 'ber' [
                 get stdout
                 | from json
                 | insert update_time (date now)
+            } else {
+                {error: $in, update_time: (date now)}
             }
         )
 
