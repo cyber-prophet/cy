@@ -1514,9 +1514,7 @@ def 'search-sync' [
     print $'searching ($env.cy.exec) for ($cid)'
 
     (
-        ^($env.cy.exec) query rank search $cid $page 10 
-        --output json --node $env.cy.rpc-address
-        | from json
+        ber query rank search $cid $page 10 
         | get result
         | upsert particle {
             |i| let $particle = (
@@ -1527,9 +1525,9 @@ def 'search-sync' [
             | if (
                 $in | str contains '/dev/stdin: ASCII text'
             ) {
-                $"($particle)\n(ansi grey)($i.particle)(ansi reset)"
+                $"($particle | mdcat --columns 100 -)(char nl)(ansi grey)($i.particle)(ansi reset)"
             } else {
-                $"Non-text particle. Is not supported yet.\n(ansi grey)($i.particle)(ansi reset)"
+                $"Non-text particle. Is not supported yet.(char nl)(ansi grey)($i.particle)(ansi reset)"
             }
         }
         | select particle rank
@@ -2340,8 +2338,9 @@ def 'backup-fn' [
 
 export def 'pu-add' [
     command: string
+    --priority (-o): int = 1
 ] {
-    do {pueue add -p $'nu -c "($command)" --config "($nu.config-path)" --env-config "($nu.env-path)"'}
+    do {pueue add -p -o $priority -- $'nu -c "($command)" --config "($nu.config-path)" --env-config "($nu.env-path)"'}
     | null
 }
 
