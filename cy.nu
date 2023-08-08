@@ -1,5 +1,5 @@
-# Cy - the nushell wrapper, interface to cyber family blockchains CLIs (Bostrom, Pussy) and go-ipfs (kubo)
-# Git: https://github.com/cyber-prophet/cy
+# Cy - a tool for interactions wity cybergraphs
+# https://github.com/cyber-prophet/cy
 #
 # Use:
 # > overlay use ~/cy/cy.nu -p -r
@@ -17,7 +17,7 @@ export def check-requirements [] {
         }
     }
 
-    ['ipfs', 'bat', 'curl', 'pueue', 'cyber', 'pussy']
+    ['ipfs', 'bat', 'mdcat', 'curl', 'pueue', 'cyber', 'pussy']
     | par-each {
         |i| if (which ($i) | is-empty) {
             $'($i) is missing'
@@ -154,7 +154,7 @@ export def 'link-texts' [
 #   from: QmQLd9KEkw5eLKfr9VwfthiWbuqa9LXhRchWqD4kRPPWEf
 #   to: QmS4ejbuxt7JvN3oYyX85yVfsgRHMPrVzgxukXMvToK5td
 export def 'link-chain' [
-    ...rest
+    ...rest: string
 ] {
     let $count = ($rest | length)
     if $count < 2 {
@@ -694,9 +694,9 @@ export def 'passport-get' [
 
     let $json = (
         if (is-neuron $address_or_nick) {
-            $'{"active_passport": {"address": "($address_or_nick)"}}'
+            $'{"active_passport":{"address":"($address_or_nick)"}}'
         } else {
-            $'{"passport_by_nickname": {"nickname": "($address_or_nick)"}}'
+            $'{"passport_by_nickname":{"nickname":"($address_or_nick)"}}'
         }
     )
 
@@ -1836,7 +1836,7 @@ export def 'queue-check' [
 ] {
     let $files = (ls -s $'($env.cy.path)/cache/queue/')
 
-    if (do -i {pueue status} | complete | $in.exit_code != 0) {
+    if (do -i {pueue status -g d} | complete | $in.exit_code != 0) {
         return 'Tasks queue manager is turned off. Launch it with "brew services start pueue" or "pueued -d" command'
     }
 
@@ -1891,7 +1891,10 @@ export def 'query-current-height' [
 ] {
     let $exec = ($exec | default $env.cy.exec)
     # print $'current height for ($exec)'
-    ^($exec) query block | from json | get block.header | select height time chain_id
+    ^($exec) query block -n $env.cy.rpc-address
+    | from json
+    | get block.header
+    | select height time chain_id
 }
 
 # Get a karma metric for a given neuron
@@ -2039,12 +2042,12 @@ export def 'validator-generate-persistent-peers-string' [
 ] {
     let $node_address = ($node_address | default $'($env.cy.rpc-address)')
     if $node_address == $env.cy.rpc-address {
-        print $"Nodes list for *($env.cy.rpc-address)*\n"
+        cprint -a 2 $"Nodes list for *($env.cy.rpc-address)*"
     }
 
     let $peers = (http get $'($node_address)/net_info' | get result.peers)
 
-    cprint $"*($peers | length)* peers found\n"
+    cprint -a 2 $"*($peers | length)* peers found"
 
     $peers
     | each {|i| $i 
@@ -2099,7 +2102,7 @@ export def 'ber' [
 
         $response
         | to json -r
-        | $"($in)\n"
+        | $'($in)(char nl)'
         | save -a -r $jsonl_path; 
 
         if not $quiet {$response}
