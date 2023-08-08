@@ -803,6 +803,8 @@ export def-env 'graph-download-snapshot' [
 
     print 'Downloading cyberlinks.csv'
     ipfs get $'($cur_data_cid)/graph/cyberlinks.csv' -o $path
+    print 'Downloading cyberlinks.csv'
+    ipfs get $'($cur_data_cid)/graph/cyberlinks_contracts.csv' -o $path
     print 'Downloading neurons.json'
     ipfs get $'($cur_data_cid)/graph/neurons_dict.json' -o $path
     print 'Downloading particles zips'
@@ -1305,14 +1307,20 @@ export def 'graph-add-metadata' [] {
 }
 
 export def 'graph-links-df' [
-    --not_in    # don't catch pipe in
-    --exclude_system
+    --not_in            # don't catch pipe in
+    --exclude_system    # exclude system particles in from column (tweet, follow, avatar)
+    --include_contracts # include links from contracts (including passport)
 ] {
     if $not_in {
         dfr open $'($env.cy.path)/graph/cyberlinks.csv' 
     } else {
         $in | default (dfr open $'($env.cy.path)/graph/cyberlinks.csv')
     } 
+    | if $include_contracts {
+        dfr append -c (
+            dfr open $'($env.cy.path)/graph/cyberlinks_contracts.csv'
+        )
+    } else {}
     | if $exclude_system {
         dfr into-lazy
         | dfr filter-with (
