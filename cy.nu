@@ -1568,9 +1568,7 @@ def 'search-with-backlinks' [
     print $'searching ($env.cy.exec) for ($cid)'
 
     let $serp = (
-        ^($env.cy.exec) query rank search $cid $page $results_per_page
-        --output json --node $env.cy.rpc-address
-        | from json
+        ber query rank search $cid $page $results_per_page
         | get result
         | upsert particle {
             |i| cid-read-or-download $i.particle
@@ -1580,9 +1578,7 @@ def 'search-with-backlinks' [
     )
 
     let $back = (
-        ^($env.cy.exec) query rank backlinks $cid $page $results_per_page
-        --output json --node $env.cy.rpc-address
-        | from json
+        ber query rank backlinks $cid $page $results_per_page
         | get result
         | upsert particle {
             |i| cid-read-or-download $i.particle
@@ -1929,8 +1925,7 @@ export def 'query-current-height' [
 export def 'karma-get' [
     address: string
 ] {
-    ^($env.cy.exec) query rank karma $address -o json
-    | from json
+    ber query rank karma $address
     | upsert karma {|i| $i.karma | into int}
 }
 
@@ -1955,9 +1950,7 @@ export def 'balance-get' [
     # }
 
     (
-        ^($env.cy.exec) query bank balances $address
-        --output json --node $env.cy.rpc-address
-        | from json
+        ber query bank balances $address
         | get balances
         | upsert amount {
             |b| $b.amount
@@ -2036,8 +2029,7 @@ export def 'ipfs-bootstrap-add-congress' [] {
 #   amount: '150000'
 export def 'ibc-denoms' [] {
     let $bank_total = (
-        cyber query bank total --output json
-        | from json # here we obtain only the first page of report
+        ber query bank total # here we obtain only the first page of report
     )
 
     let $denom_trace1 = (
@@ -2047,8 +2039,7 @@ export def 'ibc-denoms' [] {
         | upsert ibc_hash {|i| $i.denom | str replace 'ibc/' ''}
         | par-each {|i| $i
             | upsert temp_out {
-                |i| cyber query ibc-transfer denom-trace $i.ibc_hash --output json
-                | from json
+                |i| ber query ibc-transfer denom-trace $i.ibc_hash
                 | get denom_trace
             }
         }
