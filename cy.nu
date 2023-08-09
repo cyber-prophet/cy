@@ -873,6 +873,94 @@ export def 'passport-set' [
     }
 }
 
+
+# Output neurons dict
+export def 'dict-neurons' [
+    --df        # output as a dataframe
+] {
+    open $'($env.cy.path)/graph/neurons_dict.yaml'
+    | if $df {
+        fill non-exist
+        | dfr into-df
+    } else { }
+}
+
+# Add neurons to YAML-dictionary WIP
+export def 'dict-neurons-add' [] {
+    let $i = $in
+
+    let $desc = ($i | describe)
+
+    let $candidate = (
+        $i 
+        | if ($desc == 'list<string>') {
+            wrap neuron
+        } else if ($desc == 'dataframe') {
+            dfr into-nu
+        } else {}
+    )
+
+    let $validated_neurons = (
+        if ('neuron' in ($candidate | columns)) {
+            $candidate 
+            | where (is-neuron $it.neuron)
+        } else {
+            error make {msg: 'no neuron column is found'}
+        }
+    )
+
+    dict-neuron 
+    | par-each {|i| $i | merge ($validated_neurons | get -i $i.neuron)}
+}
+
+# Update neurons YAML-dictionary
+export def 'dict-neurons-update' [
+    --passport              # Update passport data
+    --balance               # Update balances data
+    --karma                 # Update karma
+    --all (-a)              # Update passport, balance, karma
+    --threads (-t) = 30     # Number of threads to use for downloading
+    --dont_save             # Don't update the file on a disk, just output the results
+    --quiet (-q)            # Don't output results table
+] {
+    graph-links-df
+    | dfr select neuron
+    | dfr unique
+    | dfr join --left (dict-neurons --df) neuron neuron
+    | dfr into-nu
+    | filter {|i| is-neuron $i.neuron}
+    | if $passport or $all {
+        par-each -t $threads {|i|
+            $i | merge (passport-get $i.neuron)
+        }
+    } else {}
+    | if $balance or $all {
+        par-each -t $threads {|i|
+            $i | merge (balance-get $i.neuron)
+        }
+    } else {}
+    | if $karma or $all {
+        par-each -t $threads {|i|
+            $i | merge (karma-get $i.neuron)
+        }
+    } else {}
+    | upsert update_ts (date now)
+    | if $dont_save {} else {
+        do {
+            |i|
+            let $yaml = $'($env.cy.path)/graph/neurons_dict.yaml'
+            backup-fn $yaml;
+
+            dict-neurons
+            | prepend $i
+            | uniq-by neuron
+            | save -f $yaml;
+
+            $i
+        } $in
+    } | if $quiet { null } else { }
+}
+
 # Download a snapshot of cybergraph by graphkeeper
 export def-env 'graph-download-snapshot' [
     --disable_update_parquet (-D)   # Don't update the particles parquet file
@@ -1148,54 +1236,6 @@ export def 'graph-append-related' [] {
     | dfr unique --subset [neuron particle_from particle_to]
     | dfr collect
 
-}
-
-# Update neurons YAML-dictionary
-export def 'dict-neurons-update' [
-    --passport              # Update passport data
-    --balance               # Update balances data
-    --karma                 # Update karma
-    --all (-a)              # Update passport, balance, karma
-    --threads (-t) = 30     # Number of threads to use for downloading
-    --dont_save             # Don't update the file on a disk, just output the results
-    --quiet (-q)            # Don't output results table
-] {
-    graph-links-df
-    | dfr select neuron
-    | dfr unique
-    | dfr join --left (dict-neurons --df) neuron neuron
-    | dfr into-nu
-    | filter {|i| is-neuron $i.neuron}
-    | if $passport or $all {
-        par-each -t $threads {|i|
-            $i | merge (passport-get $i.neuron)
-        }
-    } else {}
-    | if $balance or $all {
-        par-each -t $threads {|i|
-            $i | merge (balance-get $i.neuron)
-        }
-    } else {}
-    | if $karma or $all {
-        par-each -t $threads {|i|
-            $i | merge (karma-get $i.neuron)
-        }
-    } else {}
-    | upsert update_ts (date now)
-    | if $dont_save {} else {
-        do {
-            |i|
-            let $yaml = $'($env.cy.path)/graph/neurons_dict.yaml'
-            backup-fn $yaml;
-
-            dict-neurons
-            | prepend $i
-            | uniq-by neuron
-            | save -f $yaml;
-
-            $i
-        } $in
-    } | if $quiet { null } else { }
 }
 
 export def 'graph-neurons-stats' [] {
@@ -2443,17 +2483,6 @@ def 'inspect2' [
     }
 
     $input
-}
-
-# Output neurons dict
-export def 'dict-neurons' [
-    --df        # output as a dataframe
-] {
-    open $'($env.cy.path)/graph/neurons_dict.yaml'
-    | if $df {
-        fill non-exist
-        | dfr into-df
-    } else { }
 }
 
 def 'nu-complete-random-sources' [] {
