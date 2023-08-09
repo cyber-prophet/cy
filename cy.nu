@@ -211,6 +211,10 @@ export def 'link-files' [
     --quiet                 # Don't output results page
     --yes (-y)              # Confirm uploading files without request
 ] {
+    if (ps | where name =~ ipfs | length | $in == 0) {
+        error make {msg: "ipfs service isn't running. Try 'brew services start ipfs'" }
+    }
+    
     let $files_col = (
         $files
         | if $in == [] {
