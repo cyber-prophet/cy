@@ -1462,6 +1462,11 @@ export def 'graph-links-df' [
     } else { }
 }
 
+export def 'graph-particles-df' [] {
+    let $p = (dfr open $'($env.cy.path)/graph/particles.parquet')
+    $p
+}
+
 # Create a config JSON to set env variables, to use them as parameters in cyber cli
 export def-env 'config-new' [
     # config_name?: string@'nu-complete-config-names'
