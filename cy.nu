@@ -245,6 +245,31 @@ export def 'link-files' [
     if not $quiet { $results }
 }
 
+#[test]
+def test-link-files [] {
+    use std assert equal
+
+    mkdir linkfilestest; cd linkfilestest
+    'cyber' | save -f cyber.txt; 'bostrom' | save -f bostrom.txt
+
+    let expect = [
+        [from_text, to_text, from, to]; 
+        [bostrom.txt, "pinned_file:bostrom.txt", 
+        "QmPtV5CU9v3u7MY7hMgG3z9kTno8o7JHJD1e6f3NLfZ86k", "QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb"],
+        [cyber.txt, "pinned_file:cyber.txt", 
+        "QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6", "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV"]
+    ]
+
+    let result = (
+        link-files --link_filenames --yes
+    )
+
+    cd ..; rm -r linkfilestest 
+
+    equal $expect $result
+}
+
+
 # Create a cyberlink according to semantic construction of following a neuron
 #
 # > cy follow bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8 | to yaml
@@ -261,6 +286,24 @@ export def 'follow' [
     }
 
     link-texts 'QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx' $neuron
+}
+
+#[test]
+def test-follow [] {
+    use std assert equal
+
+    let expect = {
+        from_text: "QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx", 
+        to_text: "bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8", 
+        from: "QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx", 
+        to: "QmYwEKZimUeniN7CEAfkBRHCn4phJtNoNJxnZXEAhEt3af"
+    }
+
+    let result = (
+        follow bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8
+    )
+
+    equal $expect $result
 }
 
 # Add a tweet and send it immediately (unless of disable_send flag)
@@ -282,6 +325,25 @@ export def 'tweet' [
     } else {
         link-texts $cid_from $text_to
     }
+}
+
+#[test]
+def test-tweet [] {
+    use std assert equal
+
+    let expect = {
+        from_text: "QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx", 
+        to_text: "cyber-prophet is cool", 
+        from: "QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx",
+        to: "QmWm9pmmz66cq41t1vtZWoRz5xmHSmoKCrrgdP9adcpoZK"
+    }
+
+    let result = (
+        tmp-clear;
+        tweet 'cyber-prophet is cool' --disable_send;
+    )
+
+    equal $expect $result
 }
 
 # Add a random chuck norris cyberlink to the temp table
