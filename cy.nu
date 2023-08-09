@@ -4,6 +4,8 @@
 # Use:
 # > overlay use ~/cy/cy.nu -p -r
 
+# use std assert equal
+
 export def main [] { help }
 
 # Check if all necessary dependencies are installed
@@ -193,9 +195,13 @@ export def 'link-chain' [
 # > mkdir linkfilestest; cd linkfilestest
 # > 'cyber' | save cyber.txt; 'bostrom' | save bostrom.txt
 # > cy link-files --link_filenames --yes | to yaml
-# - from: QmPtV5CU9v3u7MY7hMgG3z9kTno8o7JHJD1e6f3NLfZ86k
+# - from_text: bostrom.txt
+#   to_text: pinned_file:bostrom.txt
+#   from: QmPtV5CU9v3u7MY7hMgG3z9kTno8o7JHJD1e6f3NLfZ86k
 #   to: QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb
-# - from: QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6
+# - from_text: cyber.txt
+#   to_text: pinned_file:cyber.txt
+#   from: QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6
 #   to: QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 # > cd ..; rm -r linkfilestest
 export def 'link-files' [
@@ -318,17 +324,17 @@ export def 'link-random' [
     source?: string@'nu-complete-random-sources'
     -n: int = 1 # Number of links to append
 ] {
-    mut $table = $nothing
-    for x in 1..$n {
+    1..$n 
+    | each {|i|
         if $source == 'forismatic.com' {
-            $table = (link-quote)
+            link-quote
         } else {
-            $table = (link-chuck)
+            link-chuck
         }
-    }
-    $table
-}
+    };
 
+    null
+}
 
 # View the temp cyberlinks table
 #
