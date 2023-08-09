@@ -1437,6 +1437,15 @@ export def 'graph-add-metadata' [] {
     }
 }
 
+# Output full graph, or pass piped in graph
+#
+# > cy graph-links-df | dfr into-nu | first 1 | to yaml
+# - index: 0
+#   particle_from: QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
+#   particle_to: QmbVugfLG1FoUtkZqZQ9WcwTLe1ivmcE9yMVGvuz3YWjy6
+#   neuron: bostrom1ymprf45c44rp9k0g2r84w2tjhsq7kalv98rgpt
+#   height: 490
+#   timestamp: 2021-11-05
 export def 'graph-links-df' [
     --not_in            # don't catch pipe in
     --exclude_system    # exclude system particles in from column (tweet, follow, avatar)
