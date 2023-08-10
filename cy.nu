@@ -425,17 +425,11 @@ export def 'link-random' [
 export def 'tmp-view' [
     --quiet (-q) # Don't print info
 ] {
-    let $dummy = ([[from]; [null]] | first 0)
-
     let $tmp_links = (
-        if (tmp-links-location-env) {
-            $env.cy.tmp_links? | default $dummy
-        } else {
-            try {
-                open $'($env.cy.path)/cyberlinks_temp.csv'
-            } catch {
-                $dummy
-            }
+        try {
+            open $'($env.cy.path)/cyberlinks_temp.csv'
+        } catch {
+            [[from]; [null]] | first 0
         }
     )
 
@@ -453,19 +447,8 @@ export def 'tmp-view' [
     $tmp_links
 }
 
-# Read the tmp-links table from the environment or from the csv file
-export def-env 'tmp-links-location-set' [
-    bool: bool
-] {
-    $env.cy.use_tmp_links_env = $bool
-}
-
-def 'tmp-links-location-env' [] {
-    $env.cy.use_tmp_links_env? | default false
-}
-
 # Append piped-in table to the temp cyberlinks table
-export def-env 'tmp-append' [
+export def 'tmp-append' [
     cyberlinks?             # cyberlinks table
     --quiet (-q)
 ] {
@@ -477,17 +460,13 @@ export def-env 'tmp-append' [
 }
 
 # Replace the temp table with piped-in table
-export def-env 'tmp-replace' [
+export def 'tmp-replace' [
     cyberlinks?             # cyberlinks table
     --quiet (-q)
 ] {
-    let $cl = ($in | default $cyberlinks)
-
-    if not (tmp-links-location-env) {
-        $cl | save $'($env.cy.path)/cyberlinks_temp.csv' --force
-    }
-
-    $env.cy.tmp_links = if (tmp-links-location-env) {$cl}
+    $in
+    | default $cyberlinks
+    | save $'($env.cy.path)/cyberlinks_temp.csv' --force
 
     if (not $quiet) { tmp-view -q }
 }
