@@ -402,6 +402,17 @@ export def 'link-random' [
     null
 }
 
+# Set the custom name for tmp-links csv table
+export def-env 'tmp-links-name-set' [
+    name: string
+] {
+    $env.cy.tmp_links_name = $name
+}
+
+def 'tmp-links-name' [] {
+    $env.cy.tmp_links_name? | default 'temp'
+}
+
 # View the temp cyberlinks table
 #
 # > cy tmp-view | to yaml
@@ -427,7 +438,7 @@ export def 'tmp-view' [
 ] {
     let $tmp_links = (
         try {
-            open $'($env.cy.path)/cyberlinks_temp.csv'
+            open $'($env.cy.path)/cyberlinks_(tmp-links-name).csv'
         } catch {
             [[from]; [null]] | first 0
         }
@@ -437,7 +448,7 @@ export def 'tmp-view' [
         let $links_count = ($tmp_links | length)
 
         if $links_count == 0 {
-            cprint $'The temp cyberlinks table *"($env.cy.path)/cyberlinks_temp.csv"* is empty.
+            cprint $'The temp cyberlinks table *"($env.cy.path)/cyberlinks_(tmp-links-name).csv"* is empty.
             You can add cyberlinks to it manually or by using commands like *"cy link-texts"*'
         } else {
             cprint $'There are *($links_count) cyberlinks* in the temp table:'
@@ -466,16 +477,16 @@ export def 'tmp-replace' [
 ] {
     $in
     | default $cyberlinks
-    | save $'($env.cy.path)/cyberlinks_temp.csv' --force
+    | save $'($env.cy.path)/cyberlinks_(tmp-links-name).csv' --force
 
     if (not $quiet) { tmp-view -q }
 }
 
 # Empty the temp cyberlinks table
 export def 'tmp-clear' [] {
-    backup-fn $'($env.cy.path)/cyberlinks_temp.csv'
+    backup-fn $'($env.cy.path)/cyberlinks_(tmp-links-name).csv'
 
-    'from_text,to_text,from,to' | save $'($env.cy.path)/cyberlinks_temp.csv' --force
+    'from_text,to_text,from,to' | save $'($env.cy.path)/cyberlinks_(tmp-links-name).csv' --force
     # print 'TMP-table is clear now.'
 }
 
@@ -2342,10 +2353,10 @@ def make_default_folders_fn [] {
     touch $'($env.cy.path)/graph/update.toml'
 
     if (
-        not ($'($env.cy.path)/cyberlinks_temp.csv' | path exists)
+        not ($'($env.cy.path)/cyberlinks_(tmp-links-name).csv' | path exists)
     ) {
         'from,to'
-        | save $'($env.cy.path)/cyberlinks_temp.csv'
+        | save $'($env.cy.path)/cyberlinks_(tmp-links-name).csv'
     }
 
     if (
