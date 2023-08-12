@@ -1250,13 +1250,12 @@ export def 'graph-append-related' [] {
 }
 
 export def 'graph-neurons-stats' [] {
-#neuron-stats-works
     let c = (graph-links-df)
     let p = (dfr open $'($env.cy.path)/graph/particles.parquet')
 
-    let follows = ($p
-        | dfr filter ((dfr col content_s) == follow)
-        | dfr select particle
+    let follows = (
+        [['particle'];['QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx']] # follow
+        | dfr into-df
         | dfr join --left $c particle particle_from
         | dfr group-by neuron
         | dfr agg [
@@ -1265,29 +1264,29 @@ export def 'graph-neurons-stats' [] {
         | dfr sort-by follows --reverse [true]
     )
 
-    let $tweets = ($p
-        | dfr filter ((dfr col content_s) == tweet)
-        | dfr select particle
+    let $followers = (
+        [['particle'];['QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx']] # follow
+        | dfr into-df
+        | dfr join --left $c particle particle_from
+        | dfr join $p particle_to particle
+        | dfr with-column (
+            $in | dfr select content_s | dfr replace -p '\|.*' -r ''
+        )
+        | dfr group-by content_s
+        | dfr agg [
+            (dfr col timestamp | dfr count | dfr as 'followers')
+        ]
+        | dfr rename content_s neuron
+    )
+
+    let $tweets = (
+        [['particle'];['QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx']] # tweet
+        | dfr into-df
         | dfr join --left $c particle particle_from
         | dfr group-by neuron
         | dfr agg [
             (dfr col timestamp | dfr count | dfr as 'tweets')
         ]
-        | dfr sort-by tweets --reverse [true]
-    )
-
-
-    let $followers = (
-        $p
-        | dfr filter ((dfr col content_s) == follow)
-        | dfr select particle
-        | dfr join --left $c particle particle_from
-        | dfr join $p particle_to particle
-        | dfr group-by content_s
-        | dfr agg [
-            (dfr col timestamp | dfr count | dfr as 'followers')
-        ]
-        | dfr sort-by followers --reverse [true]
     )
 
     (
@@ -1299,7 +1298,7 @@ export def 'graph-neurons-stats' [] {
             (dfr col timestamp | dfr count | dfr as 'links_count')
         ]
         | dfr sort-by links_count --reverse [true]  # cygraph neurons activity
-        | dfr join --left $followers neuron content_s
+        | dfr join --left $followers neuron neuron
         | dfr join --left $follows neuron neuron
         | dfr join --left $tweets neuron neuron
         | dfr join --left ( dict-neurons --df ) neuron neuron
