@@ -2095,21 +2095,16 @@ export def 'balance-get' [
         return null
     }
 
-    # let exec = match ($address | str substring 0..4) {
-    #     'pussy' => { 'pussy' },
-    #     'bostr' => { 'cyber' }
-    # }
-
-    (
-        ber query bank balances $address
-        | get balances
+    ber query bank balances $address
+    | if ($in == null) {{}} else {
+        get balances
         | upsert amount {
             |b| $b.amount
             | into int
         }
         | transpose -i -r
         | into record
-    )
+    }
 }
 
 # Check balances for the keys added to the active CLI
