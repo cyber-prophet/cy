@@ -773,6 +773,7 @@ export def 'update-cy' [
 # particle: QmRumrGFrqxayDpySEkhjZS1WEtMyJcfXiqeVsngqig3ak
 export def 'passport-get' [
     address_or_nick: string # Name of passport or neuron's address
+    --quiet
 ] {
     def 'dump-passport' [] {
         let $input = $in
@@ -818,7 +819,9 @@ export def 'passport-get' [
         | reject extension approvals token_uri
         | dump-passport
     } else {
-        cprint --before 1 --after 2 $'No passport for *($address_or_nick)* is found'
+        if not $quiet {
+            cprint --before 1 --after 2 $'No passport for *($address_or_nick)* is found'
+        }
         {}
     }
 }
