@@ -2249,10 +2249,12 @@ export def 'ber' [
     --no_default_params                         # Don't use default params (like output, chain-id)
 ] {
     let $executable = if $exec != '' {$exec} else {$env.cy.exec}
+    let $flatten_rest = ($rest | flatten) # to recieve params as a list from passport-get
     let $jsonl_path = (
         $executable
-        | append $rest
+        | append ($flatten_rest)
         | str join '_'
+        | str replace '--node.*' ''
         | str replace -a '[^A-Za-z0-9_А-Яа-я]' '_'
         | str replace -a '_+' '_'
         | $'($env.cy.path)/cache/jsonl/($in).jsonl'
@@ -2260,12 +2262,12 @@ export def 'ber' [
 
     def 'request-and-save-exec-response' [] {
         let $cmd = (
-            $rest
+            $flatten_rest
             | if $no_default_params {} else {
                 append [
-                    '--output' 'json'
                     '--node' $env.cy.rpc-address
-                    '--chain-id' 'bostrom'
+                    '--chain-id' $env.cy.chain-id
+                    '--output' 'json'
                 ]
             }
         )
@@ -2304,12 +2306,16 @@ export def 'ber' [
 
     let $freshness = ((date now) - $last_data.update_time)
 
-    if ($force_update or ($freshness > $cache_stale_refresh)) {
+    if (
+        $force_update or 
+        ($env.cy.ber_force_update? | default false) or 
+        ($freshness > $cache_stale_refresh)
+    ) {
         request-and-save-exec-response
     } else {
         if ($freshness > $cache_validity_duration) {
             cprint $'Using cache data, updated *($freshness | format duration day) ago*. Update is requested.'
-            pu-add -o 2 $'cy ber --exec ($executable) --force_update --quiet ($rest | str join " ")'
+            pu-add -o 2 $'cy ber --exec ($executable) --force_update --quiet ($flatten_rest | str join " ")'
         };
 
         $last_data
