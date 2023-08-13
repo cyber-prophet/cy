@@ -409,6 +409,13 @@ export def-env 'tmp-links-name-set' [
     $env.cy.tmp_links_name = $name
 }
 
+# Set the custom name for tmp-links csv table
+export def-env 'ber-force-update-set' [
+    value: bool
+] {
+    $env.cy.ber_force_update = $value
+}
+
 def 'tmp-links-name' [] {
     $env.cy.tmp_links_name? | default 'temp'
 }
