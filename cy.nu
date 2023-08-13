@@ -933,19 +933,30 @@ export def 'dict-neurons-update' [
     --balance               # Update balances data
     --karma                 # Update karma
     --all (-a)              # Update passport, balance, karma
+    --all_neurons           # Update info about all neurons
     --threads (-t) = 30     # Number of threads to use for downloading
     --dont_save             # Don't update the file on a disk, just output the results
     --quiet (-q)            # Don't output results table
 ] {
-    graph-links-df
-    | dfr select neuron
-    | dfr unique
-    | dfr join --left (dict-neurons --df) neuron neuron
-    | dfr into-nu
+    if $all_neurons {
+        dict-neurons
+    } else {
+        graph-links-df
+        | dfr select neuron
+        | dfr unique
+        | dfr join --left (dict-neurons --df) neuron neuron
+        | dfr into-nu
+        | reject index
+    }
     | filter {|i| is-neuron $i.neuron}
     | if $passport or $all {
         par-each -t $threads {|i|
-            $i | merge (passport-get $i.neuron)
+            $i | merge (passport-get $i.neuron --quiet)
+            | upsert nick {
+                |b| $b.nickname? 
+                | default ''
+                | $in + $'_($b.neuron)'
+            }
         }
     } else {}
     | if $balance or $all {
@@ -972,7 +983,8 @@ export def 'dict-neurons-update' [
 
             $i
         } $in
-    } | if $quiet { null } else { }
+    } 
+    | if $quiet { null } else { }
 }
 
 # Download a snapshot of cybergraph by graphkeeper
