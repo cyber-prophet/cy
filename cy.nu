@@ -1433,28 +1433,38 @@ export def 'graph-to-logseq' [
 #   content_s_from: avatar
 #   content_s_to: '"MIME type" = "image/svg+xml"'
 #   nick: maxim_bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
-export def 'graph-add-metadata' [] {
+export def 'graph-add-metadata' [
+    --full_content
+    --include_text_only
+] {
     let $c = (graph-links-df)
     let $p = (
         dfr open $'($env.cy.path)/graph/particles.parquet'
-        | dfr select particle content_s
+        | if $full_content {
+            dfr select particle content_s content
+        } else {
+            dfr select particle content_s
+        }
+        | if $include_text_only {
+            dfr filter-with (($in | dfr select content_s) =~ '"MIME|^timeout' | dfr not)
+        } else { }
     )
 
-    let $columns = ($c | dfr columns)
+    let $c_columns = ($c | dfr columns)
 
     $c
-    | if 'particle_from' in $columns {
+    | if 'particle_from' in $c_columns {
         dfr join --left $p particle_from particle
         | dfr rename content_s content_s_from
     } else {}
-    | if 'particle_to' in $columns {
+    | if 'particle_to' in $c_columns {
         dfr join --left $p particle_to particle
         | dfr rename content_s content_s_to
     } else {}
-    | if 'particle' in $columns {
+    | if 'particle' in $c_columns {
         dfr join --left $p particle particle
     } else {}
-    | if 'neuron' in $columns {
+    | if 'neuron' in $c_columns {
         dfr join --left (
             dict-neurons --df
             | dfr select neuron nick
