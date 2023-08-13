@@ -782,26 +782,6 @@ export def 'passport-get' [
     address_or_nick: string # Name of passport or neuron's address
     --quiet
 ] {
-    def 'dump-passport' [] {
-        let $input = $in
-
-        let $yaml = $'($env.cy.path)/cache/yaml/passport-($address_or_nick).yaml'
-
-        if ($yaml | path exists) {
-            open -r $yaml
-            | save -a $'($env.cy.path)/cache/yaml/archive/passport-($address_or_nick).yaml'
-        }
-
-        if $input != {} {
-            {ts: (date now)}
-            | merge $input
-            | [$in]
-            | save -f $yaml
-
-            $input
-        }
-    }
-
     let $json = (
         if (is-neuron $address_or_nick) {
             $'{"active_passport":{"address":"($address_or_nick)"}}'
@@ -812,19 +792,14 @@ export def 'passport-get' [
 
     let $pcontract = 'bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel'
     let $params = ['--node' 'https://rpc.bostrom.cybernode.ai:443' '--output' 'json']
-    let $out = (
-        do -i {
-            ^cyber query wasm contract-state smart $pcontract $json $params
-        } | complete
-    )
+    let $out = ber --exec 'cyber' --no_default_params query wasm contract-state smart $pcontract $json $params
 
-    if $out.exit_code == 0 {
-        $out.stdout
-        | from json
+
+    if $out.error? == null {
+        $out
         | get data
         | merge $in.extension
         | reject extension approvals token_uri
-        | dump-passport
     } else {
         if not $quiet {
             cprint --before 1 --after 2 $'No passport for *($address_or_nick)* is found'
