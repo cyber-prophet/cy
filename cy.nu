@@ -1070,9 +1070,9 @@ export def 'graph-to-particles' [
         $c
         | dfr rename [particle_from particle_to] [particle init-role]
         | dfr fetch 0  # Create dummy dfr to have something to appended to
-        | if not $to { dfr into-lazy
-            | dfr append --col (
-                | $c
+        | if not $to {
+            dfr append --col (
+                $c
                 | dfr rename particle_from particle
                 | dfr drop particle_to
                 | dfr with-column [
@@ -1080,8 +1080,8 @@ export def 'graph-to-particles' [
                 ]
             )
         } else {}
-        | if not $from { dfr into-lazy
-            | dfr append --col (
+        | if not $from {
+            dfr append --col (
                 $c
                 | dfr rename particle_to particle
                 | dfr drop particle_from
@@ -1089,28 +1089,29 @@ export def 'graph-to-particles' [
                     (dfr lit 'to' | dfr as 'init-role'),
                 ]
             )
-        } else {} | dfr into-lazy
+        } else {} 
+        | dfr into-lazy
         | dfr sort-by height
         | dfr unique --subset [particle]
-        | if not $include_system { dfr into-lazy
-            | dfr filter-with (
+        | if not $include_system {
+            dfr filter-with (
                 (dfr col particle)
                 | dfr is-in (system_cids)
                 | dfr expr-not
             )
         } else {}
-        | if $cids_only { dfr into-lazy
-            | dfr select particle
-        } else { dfr into-lazy
-            | dfr with-column (
+        | if $cids_only {
+            dfr select particle
+        } else {
+            dfr with-column (
                 dfr arg-where ((dfr col height) != 0) | dfr as particle_index
             )
         }
         # not elegant solution to keep columns from particles and to have particle_index in this function
-        | if $include_content { dfr into-lazy
-            | dfr select particle
+        | if $include_content {
+            dfr select particle
             | dfr join $p particle particle
-        } else {} | dfr into-lazy
+        } else {}
         | dfr collect
     )
 }
