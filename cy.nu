@@ -1212,47 +1212,40 @@ export def 'graph-append-related' [] {
     let $c = (
         $links_in
         | dfr into-lazy
-        | dfr with-column [
-            (dfr lit $step | dfr as 'step'),
-            (dfr arg-where ((dfr col height) != 0) | dfr as link_local_index)
-        ]
+        | if 'link_local_index' in $columns_in {} else {
+            dfr with-column [
+                (dfr arg-where ((dfr col height) != 0) | dfr as link_local_index)
+            ]
+        }
+        | if 'step' in $columns_in {} else {
+            dfr with-column (dfr lit $step | dfr as 'step')
+        } 
     )
 
-    let $to_2 = (
+    def append_related [
+        from_or_to: string
+        --step: int
+    ] {
         $c
         | graph-to-particles --include_system 
         | dfr into-lazy
         | dfr select particle link_local_index
-        | dfr rename particle particle_to
+        | dfr rename particle $'particle_($from_or_to)'
         | dfr join (
             graph-links-df --not_in --exclude_system
             | dfr into-lazy
-        ) particle_to particle_to
+        ) $'particle_($from_or_to)' $'particle_($from_or_to)'
         | dfr with-column [
-            (dfr lit ($step + 1) | dfr as 'step')
+            (dfr lit $step | dfr as 'step')
         ]
-    )
-
-    let $from_2 = (
-        $c
-        | graph-to-particles --include_system 
-        | dfr into-lazy
-        | dfr select particle link_local_index
-        | dfr rename particle particle_from
-        | dfr join (
-            graph-links-df --not_in --exclude_system
-            | dfr into-lazy
-        ) particle_from particle_from
-        | dfr with-column [
-            (dfr lit ($step + 1) | dfr as 'step')
-        ]
-    )
+    }
 
     $c
-    | dfr append -c $to_2
-    | dfr append -c $from_2  | dfr into-lazy
+    | dfr append -c (append_related from --step ($step + 1))
+    | dfr append -c (append_related to --step ($step + 2))
+    | dfr into-lazy
     | dfr sort-by [link_local_index step height]
-    | dfr unique --subset [neuron particle_from particle_to]
+    | dfr unique --subset [particle_from particle_to]
     | dfr collect
 
 }
