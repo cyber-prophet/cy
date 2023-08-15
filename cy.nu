@@ -1439,24 +1439,31 @@ export def 'graph-add-metadata' [
 
     let $c_columns = ($c | dfr columns)
 
-    $c
-    | if 'particle_from' in $c_columns {
-        dfr join --left $p particle_from particle
-        | dfr rename content_s content_s_from
-    } else {}
-    | if 'particle_to' in $c_columns {
-        dfr join --left $p particle_to particle
-        | dfr rename content_s content_s_to
-    } else {}
-    | if 'particle' in $c_columns {
-        dfr join --left $p particle particle
-    } else {}
-    | if 'neuron' in $c_columns {
-        dfr join --left (
-            dict-neurons --df
-            | dfr select neuron nick
-        ) neuron neuron
-    }
+    let $c_out = (
+        $c
+        | if 'particle_to' in $c_columns {
+            dfr join --left $p particle_to particle
+            | dfr rename content_s content_s_to
+        } else {}
+        | if 'particle_from' in $c_columns {
+            dfr join --left $p particle_from particle
+            | dfr rename content_s content_s_from
+        } else {}
+        | if 'particle' in $c_columns {
+            dfr join --left $p particle particle
+        } else {}
+        | if 'neuron' in $c_columns {
+            dfr join --left (
+                dict-neurons --df
+                | dfr select neuron nick
+            ) neuron neuron
+        }
+    )
+
+    let $columns_order_target = ($c_out | dfr columns | reverse)
+
+    $c_out 
+    | dfr select $columns_order_target
 }
 
 # Output full graph, or pass piped in graph
