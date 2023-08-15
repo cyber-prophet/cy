@@ -1200,18 +1200,30 @@ export def 'graph-filter-neurons' [
 
 # Append related cyberlinks to the piped in graph
 export def 'graph-append-related' [] {
+    let $links_in = $in
+
+    let $columns_in = ($links_in | dfr columns)
+    let $step = (
+        if 'step' in $columns_in {
+            $links_in.step | dfr max | dfr into-nu | get 0.step
+        } else {
+            0
+        }
+    )
+
     let $c = (
-        $in
+        $links_in
         | dfr into-lazy
         | dfr with-column [
-            (dfr lit '1' | dfr as 'step'),
+            (dfr lit $step | dfr as 'step'),
             (dfr arg-where ((dfr col height) != 0) | dfr as link_local_index)
         ]
     )
 
     let $to_2 = (
         $c
-        | graph-to-particles --include_system | dfr into-lazy
+        | graph-to-particles --include_system 
+        | dfr into-lazy
         | dfr select particle link_local_index
         | dfr rename particle particle_to
         | dfr join (
@@ -1219,13 +1231,14 @@ export def 'graph-append-related' [] {
             | dfr into-lazy
         ) particle_to particle_to
         | dfr with-column [
-            (dfr lit '2to' | dfr as 'step')
+            (dfr lit ($step + 1) | dfr as 'step')
         ]
     )
 
     let $from_2 = (
         $c
-        | graph-to-particles --include_system | dfr into-lazy
+        | graph-to-particles --include_system 
+        | dfr into-lazy
         | dfr select particle link_local_index
         | dfr rename particle particle_from
         | dfr join (
@@ -1233,14 +1246,14 @@ export def 'graph-append-related' [] {
             | dfr into-lazy
         ) particle_from particle_from
         | dfr with-column [
-            (dfr lit '2from' | dfr as 'step')
+            (dfr lit ($step + 1) | dfr as 'step')
         ]
     )
 
     $c
     | dfr append -c $to_2
     | dfr append -c $from_2  | dfr into-lazy
-    | dfr sort-by height
+    | dfr sort-by [link_local_index step height]
     | dfr unique --subset [neuron particle_from particle_to]
     | dfr collect
 
