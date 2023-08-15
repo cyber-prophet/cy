@@ -745,8 +745,7 @@ export def 'tmp-send-tx' [] {
 
 # Copy a table from the pipe into the clipboard (in tsv format)
 export def 'tsv-copy' [] {
-    let $_table = $in
-    $_table | to tsv | clip --no-notify --silent
+    $in | to tsv | clip --no-notify --silent
 }
 
 # Paste a table from the clipboard to stdin (so it can be piped further)
@@ -1064,8 +1063,7 @@ export def 'graph-to-particles' [
     let $p = (dfr open $'($env.cy.path)/graph/particles.parquet')
 
     if ($to and $from) {
-        print 'you need to use only one of two flags or none flags at all'
-        return
+        error make {msg: 'you need to use only 'to', 'from' or none flags at all, none both of them'}
     }
 
     (
@@ -1201,7 +1199,6 @@ export def 'graph-filter-neurons' [
 # Append related cyberlinks to the piped in graph
 export def 'graph-append-related' [] {
     let $links_in = $in
-
     let $columns_in = ($links_in | dfr columns)
     let $step = (
         if 'step' in $columns_in {
@@ -1259,6 +1256,7 @@ export def 'graph-append-related' [] {
 
 }
 
+# Output neurons stats based on piped in or the whole graph
 export def 'graph-neurons-stats' [] {
     let c = (graph-links-df)
     let p = (dfr open $'($env.cy.path)/graph/particles.parquet')
@@ -1303,9 +1301,9 @@ export def 'graph-neurons-stats' [] {
         $c
         | dfr group-by neuron
         | dfr agg [
-            (dfr col timestamp | dfr min | dfr as 'ts_min')
-            (dfr col timestamp | dfr max | dfr as 'ts_max')
-            (dfr col timestamp | dfr count | dfr as 'links_count')
+            (dfr col timestamp | dfr count  | dfr as 'links_count')
+            (dfr col timestamp | dfr min | dfr as 'first_link')
+            (dfr col timestamp | dfr max | dfr as 'last_link')
         ]
         | dfr sort-by links_count --reverse [true]  # cygraph neurons activity
         | dfr join --left $followers neuron neuron
@@ -1510,6 +1508,8 @@ export def 'graph-particles-df' [] {
 export def-env 'config-new' [
     # config_name?: string@'nu-complete-config-names'
 ] {
+    print (check-requirements)
+
     cprint -c green 'Choose the name of executable:'
     let $exec = (nu-complete-executables | input list -f | inspect2)
 
@@ -1522,13 +1522,12 @@ export def-env 'config-new' [
 
     if ($addr_table | length) == 0 {
         let $error_text = (
-            $'There are no addresses in ($exec). To use CY you need to add one. ' +
-            $'You can find out how to add one by running the command "($exec) keys add -h". ' +
-            $'After adding a key - come back and launch this wizzard again'
+            cprint --echo $'There are no addresses in the keyring of *($exec)*. To use Cy, you need to add one.
+            You can find out how to add the key by running the command "*($exec) keys add -h*".
+            After adding the key, come back and launch this wizard again.'
         )
 
         error make -u {msg: $error_text}
-    help: $'try "($exec) keys add -h"'
     }
 
     cprint -c green --before 1 'Select the address to send transactions from:'
@@ -2217,8 +2216,10 @@ export def 'validator-generate-persistent-peers-string' [
     cprint -a 2 $"*($peers | length)* peers found"
 
     $peers
-    | each {|i| $i
-    | get node_info.id remote_ip node_info.listen_addr}
+    | each {
+        |i| $i
+        | get node_info.id remote_ip node_info.listen_addr
+    }
     | each {
         |i| $'($i.0)@($i.1):($i.2 | split row ":" | last)'
     }
