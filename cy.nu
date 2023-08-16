@@ -1122,7 +1122,7 @@ export def 'graph-update-particles-parquet' [
     --quiet (-q)    # don't print info about the saved parquet file
 ] {
 
-    let $ls_files = (
+    let $downloaded_particles = (
         ls -s $'($env.cy.path)/graph/particles/safe' # I use ls instead of glob to have the filesize column
         | reject modified type
         | upsert content {
@@ -1133,8 +1133,8 @@ export def 'graph-update-particles-parquet' [
             $in
             | dfr select name
             | dfr str-slice 0 -l 46
-            | dfr rename name particle
         )
+        | dfr rename name particle
         | dfr with-column (
             $in
             | dfr select content
@@ -1147,14 +1147,13 @@ export def 'graph-update-particles-parquet' [
         }
     )
 
-
-    let $content_df2 = (
+    let $all_particles_with_content = (
         graph-to-particles --include_system
-        | dfr join --left $ls_files particle particle
+        | dfr join --left $downloaded_particles particle particle
     )
 
-    let $m2_mask_null = (
-        $content_df2
+    let $mask_null = (
+        $all_particles_with_content
         | dfr select content_s
         | dfr is-null
     )
@@ -1162,11 +1161,11 @@ export def 'graph-update-particles-parquet' [
     backup-fn $'($env.cy.path)/graph/particles.parquet'
 
     (
-        $content_df2
+        $all_particles_with_content
         | dfr with-column (
-            $content_df2
-            | dfr get content_s
-            | dfr set 'timeout' --mask $m2_mask_null
+            $in
+            | dfr select content_s
+            | dfr set 'timeout' --mask $mask_null
             | dfr rename string content_s
         )
         | dfr with-column ( # short name to make content_s unique
