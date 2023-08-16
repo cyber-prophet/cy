@@ -1181,13 +1181,11 @@ export def 'graph-update-particles-parquet' [
 export def 'graph-filter-neurons' [
     ...neurons_nicks: string@'nu-complete-neurons-nicks'
 ] {
-    let $cyberlinks = (graph-links-df)
-
     $neurons_nicks
     | dfr into-df
     | dfr join ( dict-neurons --df ) '0' nick
     | dfr select neuron
-    | dfr join $cyberlinks neuron neuron
+    | dfr join ( graph-links-df ) neuron neuron
 }
 
 # Append related cyberlinks to the piped in graph
