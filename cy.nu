@@ -1139,14 +1139,12 @@ export def 'graph-update-particles-parquet' [
         }
         | dfr into-df
         | dfr with-column (
-            $in
-            | dfr select name
+            $in.name
             | dfr str-slice 0 -l 46
         )
         | dfr rename name particle
         | dfr with-column (
-            $in
-            | dfr select content
+            $in.content
             | dfr str-slice 0 -l 150
             | dfr replace-all -p "\n" -r '⏎'
             | dfr rename content content_s
@@ -1156,31 +1154,18 @@ export def 'graph-update-particles-parquet' [
         }
     )
 
-    let $all_particles_with_content = (
-        graph-to-particles --include_system
-        | dfr join --left $downloaded_particles particle particle
-    )
-
-    let $mask_null = (
-        $all_particles_with_content
-        | dfr select content_s
-        | dfr is-null
-    )
-
     backup-fn $'($env.cy.path)/graph/particles.parquet'
 
     (
-        $all_particles_with_content
+        graph-to-particles --include_system
+        | dfr join --left $downloaded_particles particle particle
         | dfr with-column (
-            $in
-            | dfr select content_s
-            | dfr set 'timeout' --mask $mask_null
-            | dfr rename string content_s
+            $in.content_s
+            | dfr fill-null timeout
         )
         | dfr with-column ( # short name to make content_s unique
-            $in
-            | dfr select particle
-            | dfr str-slice 39
+            $in.particle
+            | dfr str-slice 39 # last 7 symbols of 46-symbol cid
             | dfr rename particle short_cid
         )
         | dfr with-column (
