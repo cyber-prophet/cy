@@ -1029,7 +1029,7 @@ export def-env 'graph-download-snapshot' [
 
 # Output unique list of particles from piped in cyberlinks table
 #
-# > cy graph-to-particles --include_content | dfr into-nu | first 2 | to yaml
+# > cy graph-to-particles --include_global | dfr into-nu | first 2 | to yaml
 # - index: 0
 #   particle: QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 #   neuron: bostrom1ymprf45c44rp9k0g2r84w2tjhsq7kalv98rgpt
@@ -1052,8 +1052,11 @@ export def 'graph-to-particles' [
     --from                  # Use only particles from the 'from' column
     --to                    # Use only particles from the 'to' column
     --include_system (-s)   # Include tweets, follow and avatar paritlces
-    --include_content       # Include column with particles' content
+    --include_global        # Include column with particles' content
+    --include_index         # Include local 'particle_index' column
+    --is_first_neuron       # Check if 'neuron' and 'neuron_global' columns are equal
     --cids_only (-c)        # Output one column with CIDs only
+    --init_role             # Output if particle originally was in 'from' or 'to' column
 ] {
     let $c = (
         graph-links-df
@@ -1103,15 +1106,21 @@ export def 'graph-to-particles' [
         | if $cids_only {
             dfr select particle
         } else {
-            dfr with-column (
-                dfr arg-where ((dfr col height) != 0) | dfr as particle_index
-            )
+            if $include_index {
+                dfr with-column (
+                    dfr arg-where ((dfr col height) != 0) | dfr as particle_index
+                )
+            } else {}
+            | if $include_global or $is_first_neuron {
+                dfr join $p particle particle -s '_global'
+                | if $is_first_neuron {
+                    dfr with-column (($in.neuron) == ($in.neuron_global)) --name 'is_first_neuron'
+                } else {}
+            } else {}
+            | if $init_role { } else {
+                dfr drop 'init-role'
+            }
         }
-        # not elegant solution to keep columns from particles and to have particle_index in this function
-        | if $include_content {
-            dfr select particle
-            | dfr join $p particle particle
-        } else {}
         | dfr collect
     )
 }
@@ -1311,7 +1320,7 @@ export def 'graph-to-gephi' [] {
     let $cyberlinks = (graph-links-df)
     let $particles = (
         $cyberlinks
-        | graph-to-particles --include_system --include_content
+        | graph-to-particles --include_system --include_global
     )
 
     let $t1_height_index = (
@@ -1371,7 +1380,7 @@ export def 'graph-to-logseq' [
     let $cyberlinks = (graph-links-df | inspect2)
     let $particles = (
         $cyberlinks
-        | graph-to-particles --include_system --include_content
+        | graph-to-particles --include_system --include_global
         | inspect2
     )
 
