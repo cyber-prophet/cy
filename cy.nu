@@ -1055,6 +1055,7 @@ export def 'graph-to-particles' [
     --include_global        # Include column with global particles' df (that includes content)
     --include_index         # Include local 'particle_index' column
     --is_first_neuron       # Check if 'neuron' and 'neuron_global' columns are equal
+    --only_first_neuron (-o)
     --cids_only (-c)        # Output one column with CIDs only
     --init_role             # Output if particle originally was in 'from' or 'to' column
 ] {
@@ -1200,7 +1201,9 @@ export def 'graph-filter-neurons' [
 }
 
 # Append related cyberlinks to the piped in graph
-export def 'graph-append-related' [] {
+export def 'graph-append-related' [
+    --only_first_neuron (-o)
+] {
     let $links_in = $in
     let $columns_in = ($links_in | dfr columns)
     let $step = (
@@ -1230,6 +1233,9 @@ export def 'graph-append-related' [] {
     ] {
         $c
         | graph-to-particles --include_system 
+        | if $only_first_neuron {
+            particles-only-first-neuron
+        } else {}
         | dfr into-lazy
         | dfr select particle link_local_index
         | dfr rename particle $'particle_($from_or_to)'
