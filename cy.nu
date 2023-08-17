@@ -467,7 +467,7 @@ export def 'tmp-view' [
 
 # Append piped-in table to the temp cyberlinks table
 export def 'tmp-append' [
-    cyberlinks?             # cyberlinks table
+    cyberlinks?: table          # cyberlinks table
     --quiet (-q)
 ] {
     $in
@@ -479,7 +479,7 @@ export def 'tmp-append' [
 
 # Replace the temp table with piped-in table
 export def 'tmp-replace' [
-    cyberlinks?             # cyberlinks table
+    cyberlinks?: table          # cyberlinks table
     --quiet (-q)
 ] {
     $in
@@ -512,7 +512,7 @@ export def 'tmp-clear' [] {
 export def 'tmp-link-all' [
     text: string            # a text to upload to ipfs
     --dont_replace (-D)     # don't replace the temp cyberlinks table, just output results
-    --column (-c) = 'from'  # a column to use for values ('from' or 'to'). 'from' is default
+    --column (-c): string = 'from'  # a column to use for values ('from' or 'to'). 'from' is default
     --non_empty             # fill non-empty only
 ] {
     $in
@@ -548,14 +548,14 @@ export def 'tmp-pin-columns' [
     --dont_replace (-D) # Don't replace the tmp cyberlinks table
 ] {
 
-    let cyberlinks = (
+    let $c = (
         $in
         | default ( tmp-view -q )
         | fill non-exist -v null
     )
 
     let dict = (
-        $cyberlinks
+        $c
         | reduce -f [] {|it acc|
             $acc
             | if $it.from_text? != null { append $it.from_text } else {}
@@ -573,7 +573,7 @@ export def 'tmp-pin-columns' [
         }
     )
 
-    $cyberlinks
+    $c
     | each {|i| $i
         | if $i.from_text? != null {
             upsert from (
@@ -644,7 +644,7 @@ export def 'tmp-remove-existed' [] {
 
 # Create a custom unsigned cyberlinks transaction
 def 'tx-json-create-from-cybelinks' [] {
-    let $cyberlinks = (
+    let $c = (
         $in
         | select from to
         | uniq
@@ -663,7 +663,7 @@ def 'tx-json-create-from-cybelinks' [] {
 
     $trans
     | upsert body.messages.neuron $env.cy.address
-    | upsert body.messages.links $cyberlinks
+    | upsert body.messages.links $c
     | save $'($env.cy.path)/temp/tx-unsigned.json' --force
 }
 
@@ -707,11 +707,11 @@ export def 'tmp-send-tx' [] {
         error make {msg: 'there is no internet!'}
     }
 
-    let $cyberlinks = ($in_cyberlinks | default (tmp-view -q))
+    let $c = ($in_cyberlinks | default (tmp-view -q))
 
-    let $cyberlinks_count = ($cyberlinks | length)
+    let $c_count = ($c | length)
 
-    $cyberlinks | tx-json-create-from-cybelinks
+    $c | tx-json-create-from-cybelinks
 
     let $_var = (
         tx-sign-and-broadcast
@@ -722,7 +722,7 @@ export def 'tmp-send-tx' [] {
     if $_var.code == 0 {
         open $'($env.cy.path)/cyberlinks_archive.csv'
         | append (
-            $cyberlinks
+            $c
             | upsert neuron $env.cy.address
         )
         | save $'($env.cy.path)/cyberlinks_archive.csv' --force
@@ -731,7 +731,7 @@ export def 'tmp-send-tx' [] {
             tmp-clear
         }
 
-        {'cy': $'($cyberlinks_count) cyberlinks should be successfully sent'}
+        {'cy': $'($c_count) cyberlinks should be successfully sent'}
         | merge $_var
         | select cy code txhash
 
@@ -1052,7 +1052,7 @@ export def 'graph-to-particles' [
     --from                  # Use only particles from the 'from' column
     --to                    # Use only particles from the 'to' column
     --include_system (-s)   # Include tweets, follow and avatar paritlces
-    --include_global        # Include column with particles' content
+    --include_global        # Include column with global particles' df (that includes content)
     --include_index         # Include local 'particle_index' column
     --is_first_neuron       # Check if 'neuron' and 'neuron_global' columns are equal
     --cids_only (-c)        # Output one column with CIDs only
@@ -1063,7 +1063,7 @@ export def 'graph-to-particles' [
         | dfr into-lazy
     )
 
-    let $p = (dfr open $'($env.cy.path)/graph/particles.parquet')
+    let $p = (graph-particles-df)
 
     if ($to and $from) {
         error make {msg: 'you need to use only 'to', 'from' or none flags at all, none both of them'}
@@ -1244,7 +1244,7 @@ export def 'graph-append-related' [] {
 # Output neurons stats based on piped in or the whole graph
 export def 'graph-neurons-stats' [] {
     let c = (graph-links-df)
-    let p = (dfr open $'($env.cy.path)/graph/particles.parquet')
+    let p = (graph-particles-df)
 
     let follows = (
         [['particle'];['QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx']] # follow
@@ -1300,14 +1300,14 @@ export def 'graph-neurons-stats' [] {
 
 # Export the entire graph into CSV file for import to Gephi
 export def 'graph-to-gephi' [] {
-    let $cyberlinks = (graph-links-df)
+    let $c = (graph-links-df)
     let $particles = (
-        $cyberlinks
+        $c
         | graph-to-particles --include_system --include_global
     )
 
     let $t1_height_index = (
-        $cyberlinks.height
+        $c.height
         | dfr append -c $particles.height # Particles might be created before they appear in the filtered graph
         | dfr unique
         | dfr with-column (
@@ -1320,7 +1320,7 @@ export def 'graph-to-gephi' [] {
     )
 
     (
-        $cyberlinks
+        $c
         | dfr join --left $t1_height_index height height
         | dfr with-column (
             dfr concat-str '' [
@@ -1360,9 +1360,9 @@ export def 'graph-to-gephi' [] {
 export def 'graph-to-logseq' [
     # --path: string
 ] {
-    let $cyberlinks = (graph-links-df | inspect2)
+    let $c = (graph-links-df | inspect2)
     let $particles = (
-        $cyberlinks
+        $c
         | graph-to-particles --include_system --include_global
         | inspect2
     )
@@ -1382,7 +1382,7 @@ export def 'graph-to-logseq' [
         save $'($path)/pages/($p.particle).md'
     }
 
-    $cyberlinks
+    $c
     | dfr into-nu
     | each {|c|
         $"\t- [[($c.particle_to)]] ($c.height) [[($c.nick?)]]\n" |
@@ -1417,7 +1417,7 @@ export def 'graph-add-metadata' [
 ] {
     let $c = (graph-links-df)
     let $p = (
-        dfr open $'($env.cy.path)/graph/particles.parquet'
+        graph-particles-df
         | if $full_content {
             dfr select particle content_s content
         } else {
