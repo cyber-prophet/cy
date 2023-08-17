@@ -1194,9 +1194,9 @@ export def 'graph-append-related' [] {
     let $columns_in = ($links_in | dfr columns)
     let $step = (
         if 'step' in $columns_in {
-            $links_in.step | dfr max | dfr into-nu | get 0.step
+            $links_in.step | dfr max | dfr into-nu | get 0.step | ($in // 2) + 1 | ($in * 2) - 1
         } else {
-            0
+            1
         }
     )
 
@@ -1209,7 +1209,7 @@ export def 'graph-append-related' [] {
             ]
         }
         | if 'step' in $columns_in {} else {
-            dfr with-column (dfr lit $step | dfr as 'step')
+            dfr with-column (dfr lit ($step - 1) | dfr as 'step')
         } 
     )
 
@@ -1232,13 +1232,12 @@ export def 'graph-append-related' [] {
     }
 
     $c
-    | dfr append -c (append_related from --step ($step + 1))
-    | dfr append -c (append_related to --step ($step + 2))
+    | dfr append -c (append_related from --step ($step))
+    | dfr append -c (append_related to --step ($step + 1))
     | dfr into-lazy
     | dfr sort-by [link_local_index step height]
     | dfr unique --subset [particle_from particle_to]
     | dfr collect
-
 }
 
 # Output neurons stats based on piped in or the whole graph
