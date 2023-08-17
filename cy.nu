@@ -1125,6 +1125,17 @@ export def 'graph-to-particles' [
     )
 }
 
+export def particles-only-first-neuron [
+] {
+    dfr join -s '_global' (
+        graph-particles-df 
+        | dfr select particle neuron
+    ) particle particle
+    | dfr with-column (($in.neuron) == ($in.neuron_global)) --name 'is_first_neuron'
+    | dfr filter-with $in.is_first_neuron
+    | dfr drop neuron_global is_first_neuron
+}
+
 # Update the 'particles.parquet' file (it inculdes content of text files)
 export def 'graph-update-particles-parquet' [
     --full_content  # include column with full content of particles
