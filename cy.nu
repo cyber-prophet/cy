@@ -1112,11 +1112,8 @@ export def 'graph-to-particles' [
                     dfr arg-where ((dfr col height) != 0) | dfr as particle_index
                 )
             } else {}
-            | if $include_global or $is_first_neuron {
+            | if $include_global {
                 dfr join $p particle particle -s '_global'
-                | if $is_first_neuron {
-                    dfr with-column (($in.neuron) == ($in.neuron_global)) --name 'is_first_neuron'
-                } else {}
             } else {}
             | if $init_role { } else {
                 dfr drop 'init-role'
