@@ -117,6 +117,75 @@ export def 'pin-text' [
     } else { $cid }
 }
 
+#[test]
+def test_pin_text_1 [] {
+    # use ~/cy/cy.nu
+    use std assert equal
+    let expect = 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV'
+
+    let result = (
+        pin-text 'cyber'
+    )
+
+    equal $expect $result
+}
+
+#[test]
+def test_pin_text_file_path [] {
+    # use ~/cy/cy.nu
+    use std assert equal
+    let file_name = (random chars | $in + '.txt')
+    let expect = 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV'
+
+    let result = (
+        "cyber" | save -f $file_name; pin-text $file_name
+    )
+
+    rm $file_name
+    equal $expect $result
+}
+
+#[test]
+def test_pin_text_dont_follow_path [] {
+    # use ~/cy/cy.nu
+    use std assert equal
+    let expect = 'QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6'
+
+    let result = (
+        "cyber" | save -f cyber.txt; pin-text 'cyber.txt' --dont_follow_path
+    )
+
+    rm 'cyber.txt'
+    equal $expect $result
+}
+
+#[test]
+def test_pin_text_cid [] {
+    # use ~/cy/cy.nu
+    use std assert equal
+    let expect = 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV'
+
+    let result = (
+        pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV'
+    )
+
+    equal $expect $result
+}
+
+#[test]
+def test_pin_text_cid_dont_detect_cid [] {
+    # use ~/cy/cy.nu
+    use std assert equal
+    let expect = 'QmcDUZon6VQLR3gjAvSKnudSVQ2RbGXUtFFV8mR6zHZK8F'
+
+    let result = (
+        pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV' --dont_detect_cid
+    )
+
+    equal $expect $result
+}
+
+
 # Add a 2-texts cyberlink to the temp table
 #
 # > cy link-texts 'cyber' 'cyber-prophet' --disable_append | to yaml
@@ -1527,6 +1596,7 @@ export def-env 'config-new' [
         | from json
         | flatten
         | select name address
+        | upsert keyring main
     )
 
     if ($addr_table | length) == 0 {
