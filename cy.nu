@@ -458,7 +458,7 @@ def 'tmp-links-name' [] {
 #     via [Chucknorris.io](https://chucknorris.io)
 #   from: QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1
 #   to: QmSLPzbM5NVmXuYCPiLZiePAhUcDCQncYUWDLs7GkLqC7J
-#   date_time: 20230701-134134
+#   timestamp: 20230701-134134
 # - from_text: quote
 #   to_text: |-
 #     He who knows himself is enlightened. (Lao Tzu )
@@ -466,14 +466,16 @@ def 'tmp-links-name' [] {
 #     via [forismatic.com](https://forismatic.com)
 #   from: QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna
 #   to: QmWoxYsWYuTP4E2xaQHr3gUZZTBC7HdNDVhis1BK9X3qjX
-#   date_time: 20230702-113842
+#   timestamp: 20230702-113842
 export def 'tmp-view' [
     --quiet (-q) # Don't print info
+    --no_timestamp
 ] {
     let $tmp_links = (
         $'($env.cy.path)/cyberlinks_(tmp-links-name).csv'
         | try {
             open
+            | if $no_timestamp { reject timestamp } else {}
         } catch {
             [[from]; [null]] | first 0
         }
@@ -500,7 +502,7 @@ export def 'tmp-append' [
 ] {
     $in
     | default $cyberlinks
-    | upsert date_time (now-fn)
+    | upsert timestamp (now-fn)
     | prepend (tmp-view -q)
     | if $quiet { tmp-replace -q } else { tmp-replace }
 }
@@ -521,7 +523,7 @@ export def 'tmp-replace' [
 export def 'tmp-clear' [] {
     backup-fn $'($env.cy.path)/cyberlinks_(tmp-links-name).csv'
 
-    'from_text,to_text,from,to'
+    'from_text,to_text,from,to,timestamp'
     | save $'($env.cy.path)/cyberlinks_(tmp-links-name).csv' --force
     # print 'TMP-table is clear now.'
 }
