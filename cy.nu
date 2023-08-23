@@ -2252,9 +2252,9 @@ export def 'ber' [
         $executable
         | append ($flatten_rest)
         | str join '_'
-        | str replace '--node.*' ''
-        | str replace -a '[^A-Za-z0-9_А-Яа-я]' '_'
-        | str replace -a '_+' '_'
+        | str replace -r '--node.*' ''
+        | str replace -r -a '[^A-Za-z0-9_А-Яа-я]' '_'
+        | str replace -r -a '_+' '_'
         | $'($env.cy.path)/cache/jsonl/($in).jsonl'
     )
 
@@ -2418,8 +2418,8 @@ export def 'cprint' [
 ] {
     def compactit [] {
         $in
-        | str replace -a '(\n[\t ]*(\n[\t ]*)+)' '⏎'
-        | str replace -a '\n?[\t ]+' ' '    # remove single line breaks used for code formatting
+        | str replace -r -a '(\n[\t ]*(\n[\t ]*)+)' '⏎'
+        | str replace -r -a '\n?[\t ]+' ' '    # remove single line breaks used for code formatting
         | str replace -a '⏎' "\n\n"
         | lines
         | each {|i| $i | str trim}
