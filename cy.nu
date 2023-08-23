@@ -84,7 +84,9 @@ export def 'pin-text' [
         $in
         | default $text_param
         | into string
-        | if (not $dont_follow_path) and (try {path exists} catch {false}) {
+        | if (
+            (not $dont_follow_path) and (path-exists-safe $in)
+        ) {
             open
         } else {}
     )
@@ -2693,6 +2695,12 @@ def 'fill non-exist' [
     )
 
     $table | each {|i| $cols | merge $i}
+}
+
+def 'path-exists-safe' [
+    path_to_check
+] {
+    try {($'($path_to_check)' | path exists)} catch {false}
 }
 
 
