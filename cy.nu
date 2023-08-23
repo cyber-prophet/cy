@@ -2391,6 +2391,28 @@ export def 'ber' [
     }
 }
 
+# query neuron addrsss by his nick
+export def 'qnbn' [
+    ...nicks: string@'nu-complete-neurons-nicks'
+    --df
+] {
+    let neurons = (
+        cy dict-neurons
+        | select nick neuron
+        | where nick in $nicks
+        | select neuron
+    )
+
+    $neurons
+    | if $df {
+        dfr into-df
+    } else {
+        if ($in | length | $in == 1) {
+            get neuron.0
+        } else {}
+    }
+}
+
 # An ordered list of cy commands
 export def 'help' [
     --to_md (-m) # export table as markdown
