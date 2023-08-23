@@ -30,18 +30,17 @@ export def check-requirements [] {
 
 export-env {
     banner2
+    let $tested_versions = ['0.84.0']
 
-    if not ('~/.cy_config.toml' | path exists) {
-        {
-            'path': '~/cy/'
-            'ipfs-files-folder': '~/cy/graph/particles/safe/'
-            'ipfs-download-from': 'gateway'
-            'ipfs-storage': 'cybernode'
-        } |
-        save '~/.cy_config.toml'
+    version
+    | get version
+    | if $in not-in $tested_versions {
+        cprint $'This version of Cy was tested on ($tested_versions), and you have ($in).
+        We suggest you to use one of the tested versions. If you installed *nushell*
+        using brew, you can update it with the command *brew upgrade nushell*'
     }
 
-    let $config = (open '~/.cy_config.toml')
+    let $config = (open_cy_config_toml)
 
     $env.cy = (
         try {
@@ -51,7 +50,7 @@ export-env {
             )
             | sort
         } catch {
-            cprint $'A config file was not found. Run *"cy config-new"*'
+            cprint $'A config file was not found. Run *cy config-new*'
             $config
         }
     )
@@ -2437,6 +2436,20 @@ def is-neuron [particle: string] {
 
 def is-connected []  {
     (do -i {http get https://duckduckgo.com/} | describe) == 'raw input'
+}
+
+def open_cy_config_toml [] {
+    if not ('~/.cy_config.toml' | path exists) {
+        {
+            'path': '~/cy/'
+            'ipfs-files-folder': '~/cy/graph/particles/safe/'
+            'ipfs-download-from': 'gateway'
+            'ipfs-storage': 'cybernode'
+        } |
+        save '~/.cy_config.toml'
+    }
+
+    open '~/.cy_config.toml'
 }
 
 def make_default_folders_fn [] {
