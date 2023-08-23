@@ -632,8 +632,8 @@ export def 'tmp-pin-columns' [
         $c
         | reduce -f [] {|it acc|
             $acc
-            | if $it.from_text? != null { append $it.from_text } else {}
-            | if $it.to_text? != null { append $it.to_text } else {}
+            | if $it.from_text? not-in [null ''] { append $it.from_text } else {}
+            | if $it.to_text? not-in [null ''] { append $it.to_text } else {}
         }
         | if $in == [] {
             cprint 'No columns *"from_text"* or *"to_text"* found. Add at least one of them.' ;
