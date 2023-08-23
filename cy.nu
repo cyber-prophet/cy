@@ -30,6 +30,7 @@ export def check-requirements [] {
 
 export-env {
     banner2
+
     if not ('~/.cy_config.toml' | path exists) {
         {
             'path': '~/cy/'
@@ -84,8 +85,8 @@ export def 'pin-text' [
         $in
         | default $text_param
         | into string
-        | if (not $dont_follow_path) and (try {$in | path exists} catch {false}) {
-            open $in
+        | if (not $dont_follow_path) and (try {path exists} catch {false}) {
+            open
         } else {}
     )
 
@@ -444,8 +445,9 @@ export def 'tmp-view' [
     --quiet (-q) # Don't print info
 ] {
     let $tmp_links = (
-        try {
-            open $'($env.cy.path)/cyberlinks_(tmp-links-name).csv'
+        $'($env.cy.path)/cyberlinks_(tmp-links-name).csv'
+        | try {
+            open
         } catch {
             [[from]; [null]] | first 0
         }
@@ -493,7 +495,8 @@ export def 'tmp-replace' [
 export def 'tmp-clear' [] {
     backup-fn $'($env.cy.path)/cyberlinks_(tmp-links-name).csv'
 
-    'from_text,to_text,from,to' | save $'($env.cy.path)/cyberlinks_(tmp-links-name).csv' --force
+    'from_text,to_text,from,to' 
+    | save $'($env.cy.path)/cyberlinks_(tmp-links-name).csv' --force
     # print 'TMP-table is clear now.'
 }
 
@@ -2491,9 +2494,9 @@ def 'now-fn' [
     --pretty (-P)
 ] {
     if $pretty {
-        date now | date format '%Y-%m-%d-%H:%M:%S'
+        date now | format date '%Y-%m-%d-%H:%M:%S'
     } else {
-        date now | date format '%Y%m%d-%H%M%S'
+        date now | format date '%Y%m%d-%H%M%S'
     }
 }
 
@@ -2550,10 +2553,6 @@ def 'nu-complete-neurons-nicks' [] {
 
 def 'nu-complete-neurons-nicknames' [] {
     dict-neurons | get nickname | where $it != ""
-}
-
-def 'nu-complete-colors' [] {
-    ansi --list | get name | each while {|it| if $it != 'reset' {$it} }
 }
 
 def 'nu-complete-config-names' [] {
