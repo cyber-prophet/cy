@@ -215,7 +215,7 @@ export def 'link-files' [
     if (ps | where name =~ ipfs | length | $in == 0) {
         error make {msg: "ipfs service isn't running. Try 'brew services start ipfs'" }
     }
-    
+
     let $files_col = (
         $files
         | if $in == [] {
@@ -254,10 +254,10 @@ def test-link-files [] {
     'cyber' | save -f cyber.txt; 'bostrom' | save -f bostrom.txt
 
     let expect = [
-        [from_text, to_text, from, to]; 
-        [bostrom.txt, "pinned_file:bostrom.txt", 
+        [from_text, to_text, from, to];
+        [bostrom.txt, "pinned_file:bostrom.txt",
         "QmPtV5CU9v3u7MY7hMgG3z9kTno8o7JHJD1e6f3NLfZ86k", "QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb"],
-        [cyber.txt, "pinned_file:cyber.txt", 
+        [cyber.txt, "pinned_file:cyber.txt",
         "QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6", "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV"]
     ]
 
@@ -265,7 +265,7 @@ def test-link-files [] {
         link-files --link_filenames --yes
     )
 
-    cd ..; rm -r linkfilestest 
+    cd ..; rm -r linkfilestest
 
     equal $expect $result
 }
@@ -294,9 +294,9 @@ def test-follow [] {
     use std assert equal
 
     let expect = {
-        from_text: "QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx", 
-        to_text: "bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8", 
-        from: "QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx", 
+        from_text: "QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx",
+        to_text: "bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8",
+        from: "QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx",
         to: "QmYwEKZimUeniN7CEAfkBRHCn4phJtNoNJxnZXEAhEt3af"
     }
 
@@ -333,8 +333,8 @@ def test-tweet [] {
     use std assert equal
 
     let expect = {
-        from_text: "QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx", 
-        to_text: "cyber-prophet is cool", 
+        from_text: "QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx",
+        to_text: "cyber-prophet is cool",
         from: "QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx",
         to: "QmWm9pmmz66cq41t1vtZWoRz5xmHSmoKCrrgdP9adcpoZK"
     }
@@ -350,8 +350,9 @@ def test-tweet [] {
 # Add a random chuck norris cyberlink to the temp table
 def 'link-chuck' [] {
     let $quote = (
-        http get https://api.chucknorris.io/jokes/random | get value |
-        $in + "\n\n" + 'via [Chucknorris.io](https://chucknorris.io)'
+        http get https://api.chucknorris.io/jokes/random
+        | get value
+        | $in + "\n\n" + 'via [Chucknorris.io](https://chucknorris.io)'
     )
 
     cprint -f '=' $quote
@@ -391,7 +392,7 @@ export def 'link-random' [
     source?: string@'nu-complete-random-sources'
     -n: int = 1 # Number of links to append
 ] {
-    1..$n 
+    1..$n
     | each {|i|
         if $source == 'forismatic.com' {
             link-quote
@@ -495,7 +496,7 @@ export def 'tmp-replace' [
 export def 'tmp-clear' [] {
     backup-fn $'($env.cy.path)/cyberlinks_(tmp-links-name).csv'
 
-    'from_text,to_text,from,to' 
+    'from_text,to_text,from,to'
     | save $'($env.cy.path)/cyberlinks_(tmp-links-name).csv' --force
     # print 'TMP-table is clear now.'
 }
@@ -890,7 +891,7 @@ export def 'dict-neurons-add' [] {
     let $desc = ($i | describe)
 
     let $candidate = (
-        $i 
+        $i
         | if ($desc == 'list<string>') {
             wrap neuron
         } else if ($desc == 'dataframe') {
@@ -900,14 +901,14 @@ export def 'dict-neurons-add' [] {
 
     let $validated_neurons = (
         if ('neuron' in ($candidate | columns)) {
-            $candidate 
+            $candidate
             | where (is-neuron $it.neuron)
         } else {
             error make {msg: 'no neuron column is found'}
         }
     )
 
-    dict-neuron 
+    dict-neuron
     | par-each {|i| $i | merge ($validated_neurons | get -i $i.neuron)}
 }
 
@@ -937,7 +938,7 @@ export def 'dict-neurons-update' [
         par-each -t $threads {|i|
             $i | merge (passport-get $i.neuron --quiet)
             | upsert nick {
-                |b| $b.nickname? 
+                |b| $b.nickname?
                 | default ''
                 | $in + $'_($b.neuron)'
             }
@@ -967,7 +968,7 @@ export def 'dict-neurons-update' [
 
             $i
         } $in
-    } 
+    }
     | if $quiet { null } else { }
 }
 
@@ -1096,7 +1097,7 @@ export def 'graph-to-particles' [
                     (dfr lit 'to' | dfr as 'init-role'),
                 ]
             )
-        } else {} 
+        } else {}
         | dfr into-lazy
         | dfr sort-by height
         | dfr unique --subset [particle]
@@ -1129,7 +1130,7 @@ export def 'graph-to-particles' [
 export def particles-only-first-neuron [
 ] {
     dfr join -s '_global' (
-        graph-particles-df 
+        graph-particles-df
         | dfr select particle neuron
     ) particle particle
     | dfr with-column (($in.neuron) == ($in.neuron_global)) --name 'is_first_neuron'
@@ -1224,7 +1225,7 @@ export def 'graph-append-related' [
         }
         | if 'step' in $columns_in {} else {
             dfr with-column (dfr lit ($step - 1) | dfr as 'step')
-        } 
+        }
     )
 
     def append_related [
@@ -1232,7 +1233,7 @@ export def 'graph-append-related' [
         --step: int
     ] {
         $c
-        | graph-to-particles --include_system 
+        | graph-to-particles --include_system
         | if $only_first_neuron {
             particles-only-first-neuron
         } else {}
@@ -1469,7 +1470,7 @@ export def 'graph-add-metadata' [
 
     let $columns_order_target = ($c_out | dfr columns | reverse)
 
-    $c_out 
+    $c_out
     | dfr select $columns_order_target
 }
 
@@ -2304,8 +2305,8 @@ export def 'ber' [
     let $freshness = ((date now) - $last_data.update_time)
 
     if (
-        $force_update or 
-        ($env.cy.ber_force_update? | default false) or 
+        $force_update or
+        ($env.cy.ber_force_update? | default false) or
         ($freshness > $cache_stale_refresh)
     ) {
         request-and-save-exec-response
