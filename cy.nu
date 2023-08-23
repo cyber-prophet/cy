@@ -528,6 +528,45 @@ export def 'tmp-clear' [] {
     # print 'TMP-table is clear now.'
 }
 
+#[test]
+def test-tmps [] {
+    use std assert equal
+    let $temp_name = (random chars)
+    tmp-links-name-set ($temp_name)
+    link-texts 'cyber' 'bostrom'
+
+    [[from_text, to_text]; ['cyber-prophet' '🤘'] ['tweet' 'cy is cool!']]
+    | tmp-append
+
+    tmp-pin-columns;
+    equal (
+        tmp-view --no_timestamp
+    ) [
+        [from_text, to_text, from, to];
+        [cyber, bostrom, "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV", "QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb"],
+        [cyber-prophet, 🤘, "QmXFUupJCSfydJZ85HQHD8tU1L7CZFErbRdMTBxkAmBJaD", "QmQKvsh8pp6qFk31ch6RydBFeEHi82TjsRP8FEPYQ3jDow"],
+        [tweet, "cy is cool!", "QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx", "QmddL5M8JZiaUDcEHT2LgUnZZGLMTTDEYVKWN1iMLk6PY8"]
+    ]
+
+    tmp-link-all 'cy testing script'
+    equal (
+        tmp-view --no_timestamp
+    ) [
+        [from_text, to_text, from, to];
+        ["cy testing script", bostrom, "QmdMy9SGd3StRUXoEX4BZQvGsgW6ejn4gMCT727GypSeZx", "QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb"],
+        ["cy testing script", 🤘, "QmdMy9SGd3StRUXoEX4BZQvGsgW6ejn4gMCT727GypSeZx", "QmQKvsh8pp6qFk31ch6RydBFeEHi82TjsRP8FEPYQ3jDow"],
+        ["cy testing script", "cy is cool!", "QmdMy9SGd3StRUXoEX4BZQvGsgW6ejn4gMCT727GypSeZx", "QmddL5M8JZiaUDcEHT2LgUnZZGLMTTDEYVKWN1iMLk6PY8"]
+    ]
+
+    config-activate cy-testing1+cyber
+
+    link-random -n 3
+    link-random forismatic.com -n 3
+    tmp-remove-existed
+
+    equal (tmp-send-tx | get code) 0
+}
+
 # Add the same text particle into the 'from' or 'to' column of the temp cyberlinks table
 #
 # > [[from_text, to_text]; ['cyber-prophet' null] ['tweet' 'cy is cool!']]
