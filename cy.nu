@@ -19,7 +19,7 @@ export def check-requirements [] {
         }
     }
 
-    ['ipfs', 'bat', 'mdcat', 'curl', 'pueue', 'cyber', 'pussy']
+    ['ipfs', 'bat', 'mdcat', 'rich', 'curl', 'pueue', 'cyber', 'pussy']
     | par-each {
         |i| if (which ($i) | is-empty) {
             $'($i) is missing'
@@ -1478,8 +1478,8 @@ export def 'graph-to-txt-feed' [] {
     | graph-append-related --only_first_neuron
     | graph-to-particles
     | particles-only-first-neuron
-    | graph-add-metadata --full_content --include_text_only
-    | dfr filter-with ($in.content_s | dfr is-null | dfr not)
+    | graph-add-metadata --full_content
+    # | dfr filter-with ($in.content_s | dfr is-null | dfr not)
     | dfr sort-by [link_local_index step height]
     | dfr drop content_s neuron
     | dfr into-nu
@@ -2523,12 +2523,13 @@ def 'system_cids' [] {
     ]
 }
 
-def echo_particle_txt [i] {
-    $'⚛️ ($i.timestamp), ($i.nick)(char nl)($i.content)(char nl)($i.particle)(char nl)(char nl)'
-    | fold -s -w 80
-    | lines
-    | each {|b| $'("    " * ($i.step | into int))($b)'}
-    | str join (char nl)
+def 'echo_particle_txt' [i] {
+    if $i.content == null {
+        $'⭕️ ($i.timestamp), ($i.nick) - timeout - ($i.particle)(char nl)(char nl)'
+    } else {
+        $'🟢 ($i.timestamp), ($i.nick)(char nl)($i.content)(char nl)($i.particle)(char nl)(char nl)'
+    }
+    | rich -w 80 - -d $'0,0,0,($i.step | into int | $in * 4)'
 }
 
 # Print string colourfully
