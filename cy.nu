@@ -617,7 +617,6 @@ export def 'tmp-link-all' [
 export def 'tmp-pin-columns' [
     --dont_replace (-D) # Don't replace the tmp cyberlinks table
 ] {
-
     let $c = (
         $in
         | default ( tmp-view -q )
@@ -1471,6 +1470,22 @@ export def 'graph-to-logseq' [
         $"\t- [[($c.particle_to)]] ($c.height) [[($c.nick?)]]\n" |
         save $'($path)/pages/($c.particle_from).md' -a
     }
+}
+
+# Output particles into txt formated feed
+export def 'graph-to-txt-feed' [] {
+    $in
+    | graph-append-related --only_first_neuron
+    | graph-to-particles
+    | particles-only-first-neuron
+    | graph-add-metadata --full_content --include_text_only
+    | dfr filter-with ($in.content_s | dfr is-null | dfr not)
+    | dfr sort-by [link_local_index step height]
+    | dfr drop content_s neuron
+    | dfr into-nu
+    | reject index
+    | each {|i| echo_particle_txt $i}
+    | str join (char nl)
 }
 
 # Add content_s and neuron's nicknames columns to piped in or the whole graph df
@@ -2508,6 +2523,14 @@ def 'system_cids' [] {
     ]
 }
 
+def echo_particle_txt [i] {
+    $'⚛️ ($i.timestamp), ($i.nick)(char nl)($i.content)(char nl)($i.particle)(char nl)(char nl)'
+    | fold -s -w 80
+    | lines
+    | each {|b| $'("    " * ($i.step | into int))($b)'}
+    | str join (char nl)
+}
+
 # Print string colourfully
 export def 'cprint' [
     ...text_args
@@ -2720,6 +2743,7 @@ def 'path-exists-safe' [
 ] {
     try {($'($path_to_check)' | path exists)} catch {false}
 }
+
 
 
 # https://github.com/nushell/nushell/blob/main/crates/nu-std/lib/mod.nu
