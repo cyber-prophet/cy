@@ -1093,7 +1093,7 @@ export def-env 'graph-download-snapshot' [
 
     if (not $disable_update_parquet) {
         print 'Updating particles parquet'
-        graph-update-particles-parquet
+        graph-update-particles-parquet --full_content
     }
 }
 
