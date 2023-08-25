@@ -1135,7 +1135,6 @@ export def 'graph-to-particles' [
     # --init_role             # Output if particle originally was in 'from' or 'to' column
 ] {
     let $c = ( graph-links-df | dfr into-lazy )
-    let $c_columns = ($c | dfr columns)
 
     if ($to and $from) {
         error make {msg: 'you need to use only 'to', 'from' or none flags at all, none both of them'}
@@ -1148,24 +1147,15 @@ export def 'graph-to-particles' [
         $c
         | dfr rename $'particle_(if $to {'to'} else {'from'})' particle
         | dfr drop $'particle_(if $to {'from'} else {'to'})'
-        | if ('link_local_index' in $c_columns) {
-            dfr with-column (
-                dfr concat-str '-' [(dfr col link_local_index) (dfr lit (if $to {'to'} else {'from'}))]
-            )
-        } else {
-            dfr with-column (
-                (dfr lit (if $to {'0.to'} else {'0.from'}) | dfr as 'link_local_index')
-            )
-        }
+        | dfr with-column [
+            (dfr lit (if $to {'to'} else {'from'}) | dfr as 'init-role'),
+        ]
     }
 
     (
         $c
         | dfr rename particle_from particle
-        | dfr drop particle_to
-        | dfr with-column (
-            (dfr lit 'dummy' | dfr as 'link_local_index')
-        )
+        | dfr drop  particle_to
         | dfr fetch 0  # Create dummy dfr to have something to appended to
         | if not $to {
             dfr append --col (
@@ -1294,14 +1284,13 @@ export def 'graph-append-related' [
             dfr with-column [
                 (dfr arg-where ((dfr col height) != 0) | dfr as link_local_index)
             ]
-            # | dfr with-column [
-            #     ($in.link_local_index - 10000000)
-            # ]
-            | dfr with-column [
-                (dfr concat-str '.' [(dfr col link_local_index) (dfr lit '')] | dfr as link_local_index)
-            ]
         }
-        | inspect
+        | if 'step' in $columns_in {} else {
+            dfr with-column (dfr lit ($step - 1) | dfr as 'step')
+        }
+        | if 'init-role' in $columns_in {} else {
+            dfr with-column (dfr lit 'base' | dfr as 'init-role')
+        }
     )
 
     def append_related [
@@ -1314,19 +1303,22 @@ export def 'graph-append-related' [
             particles-only-first-neuron
         } else {}
         | dfr into-lazy
-        | dfr select particle link_local_index
+        | dfr select particle link_local_index init-role
         | dfr rename particle $'particle_($from_or_to)'
         | dfr join (
             graph-links-df --not_in --exclude_system
             | dfr into-lazy
         ) $'particle_($from_or_to)' $'particle_($from_or_to)'
+        | dfr with-column [
+            (dfr lit $step | dfr as 'step')
+        ]
     }
 
     $c
     | dfr append -c (append_related from --step ($step))
     | dfr append -c (append_related to --step ($step + 1))
     | dfr into-lazy
-    | dfr sort-by [link_local_index height]
+    | dfr sort-by [link_local_index step height]
     | dfr unique --subset [particle_from particle_to]
     | dfr collect
 }
