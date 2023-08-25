@@ -1096,6 +1096,12 @@ export def-env 'graph-download-snapshot' [
     }
 }
 
+def 'gp-filter-system' [
+    column = 'particle'
+] {
+    dfr filter-with ( (dfr col $column) | dfr is-in (system_cids) | dfr expr-not )
+}
+
 # Output unique list of particles from piped in cyberlinks table
 #
 # > cy graph-to-particles --include_global | dfr into-nu | first 2 | to yaml
@@ -1126,52 +1132,46 @@ export def 'graph-to-particles' [
     --is_first_neuron       # Check if 'neuron' and 'neuron_global' columns are equal
     --only_first_neuron (-o)
     --cids_only (-c)        # Output one column with CIDs only
-    --init_role             # Output if particle originally was in 'from' or 'to' column
+    # --init_role             # Output if particle originally was in 'from' or 'to' column
 ] {
-    let $c = (
-        graph-links-df
-        | dfr into-lazy
-    )
-
-    let $p = (graph-particles-df)
+    let $c = ( graph-links-df | dfr into-lazy )
 
     if ($to and $from) {
         error make {msg: 'you need to use only 'to', 'from' or none flags at all, none both of them'}
     }
 
+    def graph-to-particles-keep-column [
+        c
+        --to
+    ] {
+        $c
+        | dfr rename $'particle_(if $to {'to'} else {'from'})' particle
+        | dfr drop $'particle_(if $to {'from'} else {'to'})'
+        | dfr with-column [
+            (dfr lit (if $to {'to'} else {'from'}) | dfr as 'init-role'),
+        ]
+    }
+
     (
         $c
-        | dfr rename [particle_from particle_to] [particle init-role]
+        | dfr rename particle_from particle
+        | dfr drop  particle_to
         | dfr fetch 0  # Create dummy dfr to have something to appended to
         | if not $to {
             dfr append --col (
-                $c
-                | dfr rename particle_from particle
-                | dfr drop particle_to
-                | dfr with-column [
-                    (dfr lit 'from' | dfr as 'init-role'),
-                ]
+                graph-to-particles-keep-column $c
             )
         } else {}
         | if not $from {
             dfr append --col (
-                $c
-                | dfr rename particle_to particle
-                | dfr drop particle_from
-                | dfr with-column [
-                    (dfr lit 'to' | dfr as 'init-role'),
-                ]
+                graph-to-particles-keep-column --to $c
             )
         } else {}
         | dfr into-lazy
-        | dfr sort-by height
+        | dfr sort-by [link_local_index height]
         | dfr unique --subset [particle]
         | if not $include_system {
-            dfr filter-with (
-                (dfr col particle)
-                | dfr is-in (system_cids)
-                | dfr expr-not
-            )
+            gp-filter-system
         } else {}
         | if $cids_only {
             dfr select particle
@@ -1182,11 +1182,8 @@ export def 'graph-to-particles' [
                 )
             } else {}
             | if $include_global {
-                dfr join $p particle particle -s '_global'
+                dfr join (graph-particles-df) particle particle -s '_global'
             } else {}
-            | if $init_role { } else {
-                dfr drop 'init-role'
-            }
         }
         | dfr collect
     )
@@ -1291,6 +1288,9 @@ export def 'graph-append-related' [
         | if 'step' in $columns_in {} else {
             dfr with-column (dfr lit ($step - 1) | dfr as 'step')
         }
+        | if 'init-role' in $columns_in {} else {
+            dfr with-column (dfr lit 'base' | dfr as 'init-role')
+        }
     )
 
     def append_related [
@@ -1303,7 +1303,7 @@ export def 'graph-append-related' [
             particles-only-first-neuron
         } else {}
         | dfr into-lazy
-        | dfr select particle link_local_index
+        | dfr select particle link_local_index init-role
         | dfr rename particle $'particle_($from_or_to)'
         | dfr join (
             graph-links-df --not_in --exclude_system
@@ -1581,11 +1581,7 @@ export def 'graph-links-df' [
     } else {}
     | if $exclude_system {
         dfr into-lazy
-        | dfr filter-with (
-            (dfr col particle_from)
-            | dfr is-in (system_cids)
-            | dfr expr-not
-        )
+        | gp-filter-system particle_from
     } else { }
 }
 
