@@ -2537,13 +2537,21 @@ def 'system_cids' [] {
     ]
 }
 
-def 'echo_particle_txt' [i] {
+# echo particle for publishing
+export def 'echo_particle_txt' [
+    i
+    --markdown (-m)
+] {
     if $i.content == null {
-        $'⭕️ ($i.timestamp), ($i.nick) - timeout - ($i.particle)(char nl)(char nl)'
+        $'⭕️ ($i.timestamp), ($i.nick) - timeout - ($i.particle)'
     } else {
-        $'🟢 ($i.timestamp), ($i.nick)(char nl)($i.content)(char nl)($i.particle)(char nl)(char nl)'
+        $'🟢 ($i.timestamp), ($i.nick)(char nl)($i.content)(char nl)($i.particle)'
     }
-    | rich -w 80 - -d $'0,0,0,($i.step | into int | $in * 4)'
+    | if $markdown {
+        rich -m -w 80 - -d $'0,0,1,($i.step | into int | $in * 4)'
+    } else {
+        rich -w 80 - -d $'0,0,1,($i.step | into int | $in * 4)'
+    }
 }
 
 # Print string colourfully
