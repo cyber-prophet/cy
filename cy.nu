@@ -1162,7 +1162,7 @@ export def 'graph-to-particles' [
     let $dummy = (
         $c
         | dfr rename particle_from particle
-        | dfr drop  particle_to
+        | dfr drop particle_to
         | dfr with-column (dfr lit 'a' | dfr as 'init-role')
         | dfr fetch 0  # Create dummy dfr to have something to appended to
     )
@@ -1298,14 +1298,15 @@ export def 'graph-append-related' [
         | dfr into-lazy
         | if 'link_local_index' in $columns_in {} else {
             dfr with-column [
-                (dfr arg-where ((dfr col height) != 0) | dfr as link_local_index)
+                (dfr arg-where ((dfr col height) != 0) | $in + 100_000_000 | dfr as link_local_index),
             ]
-        }
-        | if 'step' in $columns_in {} else {
-            dfr with-column (dfr lit '' | dfr as 'step')
+            | dfr with-column (dfr concat-str '-' [(dfr col link_local_index) (dfr lit base)])
         }
         | if 'init-role' in $columns_in {} else {
             dfr with-column (dfr lit 'base' | dfr as 'init-role')
+        }
+        | if 'step' in $columns_in {} else {
+            dfr with-column (dfr lit 0 | dfr as 'step')
         }
     )
 
@@ -1326,7 +1327,8 @@ export def 'graph-append-related' [
             | dfr into-lazy
         ) $'particle_($from_or_to)' $'particle_($from_or_to)'
         | dfr with-column [
-            (dfr concat-str '-' [(dfr col step) (dfr col 'init-role') (dfr lit ($from_or_to))])
+            (dfr concat-str '-' [(dfr col 'link_local_index') (dfr col 'init-role') (dfr lit ($from_or_to))]),
+            (dfr lit $step | dfr as step)
         ]
     }
 
@@ -1334,7 +1336,7 @@ export def 'graph-append-related' [
     | dfr append -c (append_related from --step ($step))
     | dfr append -c (append_related to --step ($step + 1))
     | dfr into-lazy
-    | dfr sort-by [link_local_index step height]
+    | dfr sort-by [link_local_index height]
     | dfr unique --subset [particle_from particle_to]
     | dfr collect
 }
