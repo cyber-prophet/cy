@@ -1128,7 +1128,7 @@ export def 'graph-to-particles' [
     --to                    # Use only particles from the 'to' column
     --include_system (-s)   # Include tweets, follow and avatar paritlces
     --include_global        # Include column with global particles' df (that includes content)
-    --include_index         # Include local 'particle_index' column
+    --include_particle_index         # Include local 'particle_index' column
     --is_first_neuron       # Check if 'neuron' and 'neuron_global' columns are equal
     --only_first_neuron (-o)
     --cids_only (-c)        # Output one column with CIDs only
@@ -1136,8 +1136,15 @@ export def 'graph-to-particles' [
 ] {
     let $c = ( graph-links-df | dfr into-lazy )
 
+    let $c_columns = ($c | dfr columns)
     if ($to and $from) {
         error make {msg: 'you need to use only 'to', 'from' or none flags at all, none both of them'}
+    }
+
+    def if_column_name_to [
+        condition: bool
+    ] {
+        if $condition {'to'} else {'from'}
     }
 
     def graph-to-particles-keep-column [
@@ -1145,18 +1152,23 @@ export def 'graph-to-particles' [
         --to
     ] {
         $c
-        | dfr rename $'particle_(if $to {'to'} else {'from'})' particle
-        | dfr drop $'particle_(if $to {'from'} else {'to'})'
+        | dfr rename $'particle_(if_column_name_to $to)' particle
+        | dfr drop $'particle_(if_column_name_to (not $to))'
         | dfr with-column [
-            (dfr lit (if $to {'to'} else {'from'}) | dfr as 'init-role'),
+            (dfr lit (if_column_name_to $to) | dfr as 'init-role'),
         ]
     }
 
-    (
+    let $dummy = (
         $c
         | dfr rename particle_from particle
         | dfr drop  particle_to
+        | dfr with-column (dfr lit 'a' | dfr as 'init-role')
         | dfr fetch 0  # Create dummy dfr to have something to appended to
+    )
+
+    (
+        $dummy
         | if not $to {
             dfr append --col (
                 graph-to-particles-keep-column $c
@@ -1168,7 +1180,11 @@ export def 'graph-to-particles' [
             )
         } else {}
         | dfr into-lazy
-        | dfr sort-by [link_local_index height]
+        | if ('link_local_index' in $c_columns) {
+            dfr sort-by [link_local_index height]
+        } else {
+            dfr sort-by [height]
+        }
         | dfr unique --subset [particle]
         | if not $include_system {
             gp-filter-system
@@ -1176,7 +1192,7 @@ export def 'graph-to-particles' [
         | if $cids_only {
             dfr select particle
         } else {
-            if $include_index {
+            if $include_particle_index {
                 dfr with-column (
                     dfr arg-where ((dfr col height) != 0) | dfr as particle_index
                 )
@@ -1286,7 +1302,7 @@ export def 'graph-append-related' [
             ]
         }
         | if 'step' in $columns_in {} else {
-            dfr with-column (dfr lit ($step - 1) | dfr as 'step')
+            dfr with-column (dfr lit '' | dfr as 'step')
         }
         | if 'init-role' in $columns_in {} else {
             dfr with-column (dfr lit 'base' | dfr as 'init-role')
@@ -1310,7 +1326,7 @@ export def 'graph-append-related' [
             | dfr into-lazy
         ) $'particle_($from_or_to)' $'particle_($from_or_to)'
         | dfr with-column [
-            (dfr lit $step | dfr as 'step')
+            (dfr concat-str '-' [(dfr col step) (dfr col 'init-role') (dfr lit ($from_or_to))])
         ]
     }
 
