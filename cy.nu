@@ -1294,7 +1294,7 @@ export def 'graph-append-related' [
             dfr with-column [
                 (dfr arg-where ((dfr col height) != 0) | $in + 100_000_000 | dfr as link_local_index),
             ]
-            | dfr with-column (dfr concat-str '-' [(dfr col link_local_index) (dfr lit base)])
+            | dfr with-column (dfr concat-str '' [(dfr col link_local_index) (dfr lit '')])
         }
         | if 'init-role' in $columns_in {} else {
             dfr with-column (dfr lit 'base' | dfr as 'init-role')
@@ -1321,7 +1321,13 @@ export def 'graph-append-related' [
             | dfr into-lazy
         ) $'particle_($from_or_to)' $'particle_($from_or_to)'
         | dfr with-column [
-            (dfr concat-str '-' [(dfr col 'link_local_index') (dfr col 'init-role') (dfr lit ($from_or_to))]),
+            (dfr concat-str '-' [
+                (dfr col 'link_local_index')
+                (dfr col 'init-role')
+                (dfr col $'particle_($from_or_to)')
+                (dfr lit ($from_or_to))
+                (dfr col $'particle_(col-name-reverse $from_or_to)')
+            ]),
             (dfr lit $step | dfr as step)
         ]
     }
@@ -2635,14 +2641,14 @@ export def 'cprint' [
 }
 
 def 'col-name-reverse' [
-        column: string
-    ] {
-        match $column {
-            'from' => {'to'},
-            'to' => {'from'},
-            _ => {''}
-        }
+    column: string
+] {
+    match $column {
+        'from' => {'to'},
+        'to' => {'from'},
+        _ => {''}
     }
+}
 
 def 'now-fn' [
     --pretty (-P)
