@@ -1141,21 +1141,15 @@ export def 'graph-to-particles' [
         error make {msg: 'you need to use only 'to', 'from' or none flags at all, none both of them'}
     }
 
-    def if_column_name_to [
-        condition: bool
-    ] {
-        if $condition {'to'} else {'from'}
-    }
-
     def graph-to-particles-keep-column [
         c
-        --to
+        --column: string
     ] {
         $c
-        | dfr rename $'particle_(if_column_name_to $to)' particle
-        | dfr drop $'particle_(if_column_name_to (not $to))'
+        | dfr rename $'particle_($column)' particle
+        | dfr drop $'particle_(col-name-reverse $column)'
         | dfr with-column [
-            (dfr lit (if_column_name_to $to) | dfr as 'init-role'),
+            (dfr lit ($column) | dfr as 'init-role'),
         ]
     }
 
@@ -1171,12 +1165,12 @@ export def 'graph-to-particles' [
         $dummy
         | if not $to {
             dfr append --col (
-                graph-to-particles-keep-column $c
+                graph-to-particles-keep-column $c --column from
             )
         } else {}
         | if not $from {
             dfr append --col (
-                graph-to-particles-keep-column --to $c
+                graph-to-particles-keep-column $c --column to
             )
         } else {}
         | dfr into-lazy
@@ -2639,6 +2633,16 @@ export def 'cprint' [
         | if $echo { } else { newlineit }
     )
 }
+
+def 'col-name-reverse' [
+        column: string
+    ] {
+        match $column {
+            'from' => {'to'},
+            'to' => {'from'},
+            _ => {''}
+        }
+    }
 
 def 'now-fn' [
     --pretty (-P)
