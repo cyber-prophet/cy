@@ -1314,7 +1314,7 @@ export def 'graph-append-related' [
             particles-only-first-neuron
         } else {}
         | dfr into-lazy
-        | dfr select particle link_local_index init-role
+        | dfr select particle link_local_index init-role step
         | dfr rename particle $'particle_($from_or_to)'
         | dfr join (
             graph-links-df --not_in --exclude_system
@@ -1328,7 +1328,7 @@ export def 'graph-append-related' [
                 (dfr lit ($from_or_to))
                 (dfr col $'particle_(col-name-reverse $from_or_to)')
             ]),
-            (dfr lit $step | dfr as step)
+            ((dfr col step) + (if $from_or_to == from {1} else {-1}))
         ]
     }
 
@@ -1498,10 +1498,11 @@ export def 'graph-to-txt-feed' [] {
     | particles-only-first-neuron
     | graph-add-metadata --full_content
     # | dfr filter-with ($in.content_s | dfr is-null | dfr not)
-    | dfr sort-by [link_local_index step height]
+    | dfr sort-by [link_local_index height]
     | dfr drop content_s neuron
     | dfr into-nu
     | reject index
+    | do {|i| print ($i | get 0.init-role); $i} $in
     | each {|i| echo_particle_txt $i}
     | str join (char nl)
 }
@@ -2542,16 +2543,23 @@ export def 'echo_particle_txt' [
     i
     --markdown (-m)
 ] {
+    let $indent = ($i.step | into int | $in * 4 | $in + 12)
+
     if $i.content == null {
         $'⭕️ ($i.timestamp), ($i.nick) - timeout - ($i.particle)'
     } else {
         $'🟢 ($i.timestamp), ($i.nick)(char nl)($i.content)(char nl)($i.particle)'
     }
-    | if $markdown {
-        rich -m -w 80 - -d $'0,0,1,($i.step | into int | $in * 4)'
-    } else {
-        rich -w 80 - -d $'0,0,1,($i.step | into int | $in * 4)'
-    }
+    | ^rich (
+        [
+            '-w' (80 + $indent)
+            '-'
+            '-d' $'0,0,1,($indent)'
+        ]
+        | if $markdown {
+            append '-m'
+        } else {}
+    )
 }
 
 # Print string colourfully
