@@ -1661,7 +1661,7 @@ export def-env 'config-new' [
         | inspect2
     )
 
-    let $keyring = $addr_table | where address == $address | get keyring
+    let $keyring = $addr_table | where address == $address | get keyring.0
 
     let $config_name = (
         $addr_table
