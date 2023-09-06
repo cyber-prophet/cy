@@ -1622,6 +1622,7 @@ export def-env 'config-new' [
     # config_name?: string@'nu-complete-config-names'
 ] {
     print (check-requirements)
+    make_default_folders_fn
 
     cprint -c green 'Choose the name of executable:'
     let $exec = (nu-complete-executables | input list -f | inspect2)
@@ -1725,8 +1726,6 @@ export def-env 'config-new' [
         'ipfs-storage': $ipfs_storage
         'rpc-address': $rpc_address
     } | config-save $config_name
-
-    make_default_folders_fn
 }
 
 # View a saved JSON config file
@@ -1781,7 +1780,7 @@ export def-env 'config-activate' [
 ] {
     let $config = ($in | default (config-view $config_name))
     let $config_toml = (
-        open '~/.cy_config.toml'
+        open ('~/.cy_config.toml' | path expand)
         | merge $config
     )
 
@@ -1790,9 +1789,9 @@ export def-env 'config-activate' [
     cprint -c green_underline -b 1 'Config is loaded'
     # $config_toml | save $'($env.cy.path)/config/default.toml' -f
     (
-        open '~/.cy_config.toml'
+        open ('~/.cy_config.toml' | path expand)
         | upsert 'config-name' ($config_toml | get 'config-name')
-        | save '~/.cy_config.toml' -f
+        | save ('~/.cy_config.toml' | path expand) -f
     )
 
     $config_toml
@@ -2506,15 +2505,15 @@ def is-connected []  {
 def open_cy_config_toml [] {
     if not ('~/.cy_config.toml' | path exists) {
         {
-            'path': '~/cy/'
-            'ipfs-files-folder': '~/cy/graph/particles/safe/'
+            'path': ('~/cy/' | path expand)
+            'ipfs-files-folder': ('~/cy/graph/particles/safe/' | path expand)
             'ipfs-download-from': 'gateway'
             'ipfs-storage': 'cybernode'
         } |
-        save '~/.cy_config.toml'
+        save ('~/.cy_config.toml' | path expand)
     }
 
-    open '~/.cy_config.toml'
+    open ('~/.cy_config.toml' | path expand)
 }
 
 def make_default_folders_fn [] {
