@@ -737,12 +737,20 @@ def 'tx-json-create-from-cybelinks' [] {
 }
 
 def 'tx-sign-and-broadcast' [] {
-    (
-        ^($env.cy.exec) tx sign $'($env.cy.path)/temp/tx-unsigned.json' --from $env.cy.address
+
+    let $params = (
+        [
+        --from $env.cy.address
         --chain-id $env.cy.chain-id
         --node $env.cy.rpc-address
         --output-document $'($env.cy.path)/temp/tx-signed.json'
+        ] | if $env.cy.keyring-backend? == 'test' {
+            append ['--keyring-backend' 'test']
+        } else {}
+    )
 
+    (
+        ^($env.cy.exec) tx sign $'($env.cy.path)/temp/tx-unsigned.json' $params
         | complete
         | if ($in.exit_code != 0) {
             error make {msg: 'Error signing the transaction!'}
@@ -1624,6 +1632,13 @@ export def-env 'config-new' [
         | flatten
         | select name address
         | upsert keyring main
+        | append (
+            ^($exec) keys list --output json --keyring-backend test
+            | from json
+            | flatten
+            | select name address
+            | upsert keyring test
+        )
     )
 
     if ($addr_table | length) == 0 {
@@ -1644,6 +1659,8 @@ export def-env 'config-new' [
         | get address
         | inspect2
     )
+
+    let $keyring = $addr_table | where address == $address | get keyring
 
     let $config_name = (
         $addr_table
@@ -1702,6 +1719,7 @@ export def-env 'config-new' [
         'config-name': $config_name
         'exec': $exec
         'address': $address
+        'keyring-backend': $keyring
         'passport-nick': $passport_nick
         'chain-id': $chain_id
         'ipfs-storage': $ipfs_storage
@@ -2229,13 +2247,10 @@ export def 'balances' [
     --test      # Use keyring-backend test (with no password)
 ] {
     let $balances = (
-        ^($env.cy.exec) (
-            [keys list --output json]   # Params for CLI
-            | if $test {
-                append [--keyring-backend test]
-            } else { }
-        )
-        | from json
+        ^($env.cy.exec) keys list --output json --keyring-backend test | from json
+        | if not $test {
+            append ( ^($env.cy.exec) keys list --output json | from json )
+        } else {}
         | select name address
         | if ($name | is-empty) { } else {
             where name in $name
