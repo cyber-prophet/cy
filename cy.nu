@@ -2927,4 +2927,3 @@ def agree [
     | input list
     | inspect2
     | $in in [yes]
-}
