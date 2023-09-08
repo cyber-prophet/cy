@@ -833,17 +833,13 @@ export def 'tsv-paste' [] {
     pbpaste | from tsv
 }
 
-# Update-cy to the latest version
+# Update Cy to the latest version
 export def 'update-cy' [
-    --branch: string@'nu-complete-git-branches' = 'main'
+    --branch: string@'nu-complete-git-branches' = 'dev'
 ] {
-
-    let $url = $'https://raw.githubusercontent.com/cyber-prophet/($branch)/dev/cy.nu'
-
-    mkdir $env.cy.path
-    | http get $url
-    | save $'($env.cy.path)/cy.nu -f'
-
+    cd $env.cy.path;
+    git checkout $branch
+    git pull --autostash -v
 }
 
 # Get a passport by providing a neuron's address or nick
