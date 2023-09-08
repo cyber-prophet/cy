@@ -1103,6 +1103,51 @@ export def-env 'graph-download-snapshot' [
     }
 }
 
+# Download the latest cyberlinks from a hasura cybernode endpoint
+export def 'graph-download-links' [] {
+    def get_links_query [
+        height
+        multiplier
+    ] {
+        let $chunk_size = 1000
+
+        $"{cyberlinks\(limit: ($chunk_size), offset: ($multiplier * $chunk_size), order_by: {height: asc},
+        where: {height: {_gte: ($height)}}) {neuron particle_from particle_to height timestamp}}"
+        | {'query': $in}
+    }
+
+    let $graphql_api = "https://titan.cybernode.ai/graphql/v1/graphql"
+    let $path_csv = $'($env.cy.path)/graph/cyberlinks.csv'
+
+    let $last_height = (
+        if ($path_csv | path exists) {
+            'a,b,c,height,t'
+            | append (tail -n 1 ($path_csv))
+            | str join (char nl)
+            | from csv
+            | get height.0
+            | into int
+            | $in + 1
+        } else {
+            $'neuron,particle_from,particle_to,height,timestamp(char nl)' # csv headers
+            | save -r $path_csv;
+            0
+        }
+    )
+
+    for $mult in 0.. {
+        let $links = (
+            http post -t application/json $graphql_api (get_links_query $last_height $mult)
+            | get data.cyberlinks
+        );
+        if $links != [] {
+            $links | to csv --noheaders | save -r -a $path_csv
+        } else {
+            break
+        }
+    }
+}
+
 def 'gp-filter-system' [
     column = 'particle'
 ] {
