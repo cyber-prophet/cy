@@ -523,7 +523,7 @@ export def 'tmp-replace' [
 export def 'tmp-clear' [] {
     backup-fn $'($env.cy.path)/cyberlinks_(tmp-links-name).csv'
 
-    'from_text,to_text,from,to,timestamp'
+    $'from_text,to_text,from,to,timestamp(char nl)'
     | save $'($env.cy.path)/cyberlinks_(tmp-links-name).csv' --force
     # print 'TMP-table is clear now.'
 }
@@ -747,7 +747,8 @@ def 'tx-sign-and-broadcast' [] {
         --chain-id $env.cy.chain-id
         --node $env.cy.rpc-address
         --output-document $'($env.cy.path)/temp/tx-signed.json'
-        ] | if $env.cy.keyring-backend? == 'test' {
+        ]
+        | if $env.cy.keyring-backend? == 'test' {
             append ['--keyring-backend' 'test']
         } else {}
     )
@@ -1148,6 +1149,7 @@ export def 'graph-download-links' [] {
     }
 }
 
+# filter system particles out
 def 'gp-filter-system' [
     column = 'particle'
 ] {
@@ -1650,6 +1652,7 @@ export def 'graph-links-df' [
             dfr open $'($env.cy.path)/graph/cyberlinks_contracts.csv'
         )
     } else {}
+    | dfr with-column ($in.timestamp | dfr as-datetime '%Y-%m-%dT%H:%M:%S' | dfr rename datetime timestamp)
     | if $exclude_system {
         dfr into-lazy
         | gp-filter-system particle_from
