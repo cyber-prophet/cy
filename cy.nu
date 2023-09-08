@@ -687,8 +687,11 @@ def 'link-exist' [
 export def 'tmp-remove-existed' [] {
     let $links_with_status = (
         tmp-view -q
-        | upsert link_exist {
-            |row| (link-exist  $row.from $row.to $env.cy.address)
+        | par-each {
+            |i| $i
+            | upsert link_exist {
+                |row| (link-exist  $row.from $row.to $env.cy.address)
+            }
         }
     )
 
