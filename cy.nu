@@ -2315,6 +2315,12 @@ export def 'tokens-supply-get' [
     | transpose -idr
 }
 
+export def 'tokens-pools-get' [
+    --height: int = 0
+] {
+    ber query liquidity pools [--height $height]
+}
+
 # Check balances for the keys added to the active CLI
 #
 # > cy balances --test | to yaml
