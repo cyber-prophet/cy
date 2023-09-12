@@ -2295,7 +2295,7 @@ export def 'balance-get' [
     }
 
     ber query bank balances $address
-    | if ($in == null) {{}} else {
+    | if (($in | describe) in [null {}]) {{}} else {
         get balances
         | upsert amount {
             |b| $b.amount
@@ -2478,7 +2478,8 @@ export def 'ber' [
                 | from json
                 | insert update_time (date now)
             } else {
-                {error: $in, update_time: (date now)}
+                print {error: $in, update_time: (date now)}
+                return
             }
         )
 
