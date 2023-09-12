@@ -46,7 +46,7 @@ export-env {
         try {
             $config
             | merge (
-                open $'($config.path)/config/($config.config-name).toml'
+                open ($config.path | path join config $'($config.config-name).toml')
             )
             | sort
         } catch {
@@ -471,8 +471,9 @@ export def 'tmp-view' [
     --quiet (-q) # Don't print info
     --no_timestamp
 ] {
+    let $filename = ($env.cy.path | path join $'cyberlinks_(tmp-links-name).csv')
     let $tmp_links = (
-        $'($env.cy.path)/cyberlinks_(tmp-links-name).csv'
+        $filename
         | try {
             open
             | if $no_timestamp { reject timestamp } else {}
@@ -485,7 +486,7 @@ export def 'tmp-view' [
         let $links_count = ($tmp_links | length)
 
         if $links_count == 0 {
-            cprint $'The temp cyberlinks table *"($env.cy.path)/cyberlinks_(tmp-links-name).csv"* is empty.
+            cprint $'The temp cyberlinks table *($filename)* is empty.
             You can add cyberlinks to it manually or by using commands like *"cy link-texts"*'
         } else {
             cprint $'There are *($links_count) cyberlinks* in the temp table:'
@@ -514,17 +515,18 @@ export def 'tmp-replace' [
 ] {
     $in
     | default $cyberlinks
-    | save $'($env.cy.path)/cyberlinks_(tmp-links-name).csv' --force
+    | save ($env.cy.path | path join $'cyberlinks_(tmp-links-name).csv') --force
 
     if (not $quiet) { tmp-view -q }
 }
 
 # Empty the temp cyberlinks table
 export def 'tmp-clear' [] {
-    backup-fn $'($env.cy.path)/cyberlinks_(tmp-links-name).csv'
+    let $filename = ($env.cy.path | path join $'cyberlinks_(tmp-links-name).csv')
+    backup-fn $filename
 
     $'from_text,to_text,from,to,timestamp(char nl)'
-    | save $'($env.cy.path)/cyberlinks_(tmp-links-name).csv' --force
+    | save $filename --force
     # print 'TMP-table is clear now.'
 }
 
@@ -736,7 +738,7 @@ def 'tx-json-create-from-cybelinks' [] {
     $trans
     | upsert body.messages.neuron $env.cy.address
     | upsert body.messages.links $c
-    | save $'($env.cy.path)/temp/tx-unsigned.json' --force
+    | save ($env.cy.path | path join temp tx-unsigned.json) --force
 }
 
 def 'tx-sign-and-broadcast' [] {
@@ -746,7 +748,7 @@ def 'tx-sign-and-broadcast' [] {
         --from $env.cy.address
         --chain-id $env.cy.chain-id
         --node $env.cy.rpc-address
-        --output-document $'($env.cy.path)/temp/tx-signed.json'
+        --output-document ($env.cy.path | path join temp tx-signed.json)
         ]
         | if $env.cy.keyring-backend? == 'test' {
             append ['--keyring-backend' 'test']
@@ -754,7 +756,7 @@ def 'tx-sign-and-broadcast' [] {
     )
 
     (
-        ^($env.cy.exec) tx sign $'($env.cy.path)/temp/tx-unsigned.json' $params
+        ^($env.cy.exec) tx sign ($env.cy.path | path join temp tx-unsigned.json) $params
         | complete
         | if ($in.exit_code != 0) {
             error make {msg: 'Error signing the transaction!'}
@@ -762,7 +764,7 @@ def 'tx-sign-and-broadcast' [] {
     )
 
     (
-        ^($env.cy.exec) tx broadcast $'($env.cy.path)/temp/tx-signed.json'
+        ^($env.cy.exec) tx broadcast ($env.cy.path | path join temp tx-signed.json)
         --broadcast-mode block
         --output json
         --node $env.cy.rpc-address
@@ -800,13 +802,14 @@ export def 'tmp-send-tx' [] {
         | select raw_log code txhash
     )
 
+    let $filename = ($env.cy.path | path join cyberlinks_archive.csv)
     if $_var.code == 0 {
-        open $'($env.cy.path)/cyberlinks_archive.csv'
+        open $filename
         | append (
             $c
             | upsert neuron $env.cy.address
         )
-        | save $'($env.cy.path)/cyberlinks_archive.csv' --force
+        | save $filename --force
 
         if ($in_cyberlinks == null) {
             tmp-clear
@@ -950,7 +953,7 @@ export def 'passport-set' [
 export def 'dict-neurons' [
     --df        # output as a dataframe
 ] {
-    open $'($env.cy.path)/graph/neurons_dict.yaml'
+    open ($env.cy.path | path join graph neurons_dict.yaml)
     | if $df {
         fill non-exist
         | dfr into-df
@@ -1031,7 +1034,7 @@ export def 'dict-neurons-update' [
     | if $dont_save {} else {
         do {
             |i|
-            let $yaml = $'($env.cy.path)/graph/neurons_dict.yaml'
+            let $yaml = ($env.cy.path | path join graph neurons_dict.yaml)
             backup-fn $yaml;
 
             dict-neurons
@@ -1051,10 +1054,10 @@ export def-env 'graph-download-snapshot' [
 ] {
     make_default_folders_fn
 
-    let $path = $'($env.cy.path)/graph'
+    let $path = ($env.cy.path | path join graph)
     let $cur_data_cid = (passport-get graphkeeper | get data -i)
     let $update_info = (
-        $'($path)/update.toml'
+        ($path | path join update.toml)
         | if ($in | path exists) {open} else {{}}
     )
     let $last_data_cid = ($update_info | get -i last_cid)
@@ -1073,7 +1076,7 @@ export def-env 'graph-download-snapshot' [
     print 'Downloading particles zips'
     ipfs get $'($cur_data_cid)/graph/particles/' -o $'($path)/particles_arch/'
 
-    let $archives = (ls $'($path)/particles_arch/*.zip' | get name)
+    let $archives = (ls ($path | path join particles_arch/*.zip) | get name)
     let $last_archive = (
         $update_info
         | get -i last_archive
@@ -1084,16 +1087,16 @@ export def-env 'graph-download-snapshot' [
         $archives
         | skip until {|x| $x == $last_archive}
         | each {
-            |i| unzip -ojq $i -d $'($path)/particles/safe/';
+            |i| unzip -ojq $i -d ($path | path join particles safe);
             cprint $'*($i)* is unzipped'
         }
     )
 
     (
-        try {open $'($path)/update.toml'} catch {{}}
+        try {open ($path | path join update.toml)} catch {{}}
         | upsert 'last_cid' $cur_data_cid
         | upsert 'last_archive' ($archives | last)
-        | save $'($path)/update.toml' -f
+        | save -f ($path | path join update.toml)
     )
 
     cprint $'The graph data has been downloaded to the *"($path)"* directory'
@@ -1271,10 +1274,10 @@ export def 'graph-update-particles-parquet' [
 ] {
 
     let $downloaded_particles = (
-        ls -s $'($env.cy.path)/graph/particles/safe' # I use ls instead of glob to have the filesize column
+        ls -s ($env.cy.path | path join graph particles safe) # I use ls instead of glob to have the filesize column
         | reject modified type
         | upsert content {
-            |i| open -r $'($env.cy.path)/graph/particles/safe/($i.name)'
+            |i| open -r ($env.cy.path | path join graph particles safe $i.name)
         }
         | dfr into-df
         | dfr with-column (
@@ -1293,7 +1296,7 @@ export def 'graph-update-particles-parquet' [
         }
     )
 
-    backup-fn $'($env.cy.path)/graph/particles.parquet'
+    backup-fn ($env.cy.path | path join graph particles.parquet)
 
     (
         graph-to-particles --include_system
@@ -1311,7 +1314,7 @@ export def 'graph-update-particles-parquet' [
             dfr concat-str '|' [(dfr col content_s) (dfr col short_cid)]
         )
         | dfr drop short_cid
-        | dfr to-parquet $'($env.cy.path)/graph/particles.parquet'
+        | dfr to-parquet ($env.cy.path | path join graph particles.parquet)
         | print ($in | get 0 -i)
     )
 }
@@ -1485,7 +1488,7 @@ export def 'graph-to-gephi' [] {
             | dfr as Timeset
         )
         | dfr rename [particle_from particle_to] [source target]
-        | dfr to-csv $'($env.cy.path)/gephi/!cyberlinks.csv'
+        | dfr to-csv ($env.cy.path | path join export !gephi_cyberlinks.csv)
     )
 
     (
@@ -1506,7 +1509,7 @@ export def 'graph-to-gephi' [] {
         | dfr into-nu
         | reject index
         | move id label cid --before height
-        | save $'($env.cy.path)/gephi/!particles.csv' -f
+        | save  -f ($env.cy.path | path join export !gephi_particles.csv)
     )
 }
 
@@ -1521,26 +1524,26 @@ export def 'graph-to-logseq' [
         | inspect2
     )
 
-    let $path = $'($env.cy.path)/logseq/(date now | date format "%Y-%m-%d_%H-%M-%S")/'
-    mkdir $'($path)/pages'
-    mkdir $'($path)/journals'
+    let $path = ($env.cy.path) | path join export $'logseq_(date now | date format "%Y-%m-%d_%H-%M-%S")'
+    mkdir ($path | path join pages)
+    mkdir ($path | path join journals)
 
     $particles
     | dfr into-nu
     | par-each {|p|
         # print $p.particle
         $"author:: [[($p.nick)]]\n\n- (
-            do -i {open $'($env.cy.ipfs-files-folder)/($p.particle).md'
+            do -i {open ($env.cy.ipfs-files-folder | path join $'($p.particle).md')
             | default "timeout"
         } )\n- --- \n- ## cyberlinks from \n" |
-        save $'($path)/pages/($p.particle).md'
+        save ($path | path join pages $'($p.particle).md')
     }
 
     $c
     | dfr into-nu
     | each {|c|
         $"\t- [[($c.particle_to)]] ($c.height) [[($c.nick?)]]\n" |
-        save $'($path)/pages/($c.particle_from).md' -a
+        save -a ($path | path join pages $'($c.particle_from).md')
     }
 }
 
@@ -1657,11 +1660,11 @@ export def 'graph-links-df' [
 ] {
     $in
     | if ($not_in or ($in | describe | $in == 'nothing')) {
-        graph-open-csv-make-df $'($env.cy.path)/graph/cyberlinks.csv'
+        graph-open-csv-make-df ($env.cy.path | path join graph cyberlinks.csv)
     } else {}
     | if $include_contracts {
         dfr append -c (
-            graph-open-csv-make-df $'($env.cy.path)/graph/cyberlinks_contracts.csv'
+            graph-open-csv-make-df ($env.cy.path | path join graph cyberlinks_contracts.csv)
         )
     } else {}
     | if $exclude_system {
@@ -1685,7 +1688,7 @@ def 'graph-open-csv-make-df' [
 }
 
 export def 'graph-particles-df' [] {
-    let $p = (dfr open $'($env.cy.path)/graph/particles.parquet')
+    let $p = (dfr open ($env.cy.path | path join graph particles.parquet))
     $p
 }
 
@@ -1808,7 +1811,7 @@ export def 'config-view' [
     if $config_name == null {
         $env.cy
     } else {
-        let $filename = $'($env.cy.path)/config/($config_name).toml'
+        let $filename = ($env.cy.path | path join config $'($config_name).toml')
         open $filename
     }
     # | if $quiet {} else {inspect2}
@@ -1820,26 +1823,26 @@ export def-env 'config-save' [
     --inactive # Don't activate current config
 ] {
     let $in_config = ($in | upsert config-name $config_name)
-    let $file_name = $'($env.cy.path)/config/($config_name).toml'
+    let $filename = ($env.cy.path | path join config $'($config_name).toml')
 
-    let $file_name2 = (
-        if not ($file_name | path exists) {
-            $file_name
+    let $filename2 = (
+        if not ($filename | path exists) {
+            $filename
         } else {
-            cprint -c green --before 1 $'($file_name) exists. Do you want to overwrite it?'
+            cprint -c green --before 1 $'($filename) exists. Do you want to overwrite it?'
 
             ['yes' 'no'] | input list
             | if $in == 'yes' {
-                backup-fn $file_name;
-                $file_name
+                backup-fn $filename;
+                $filename
             } else {
-                $'($env.cy.path)/config/(now-fn).toml'
+                ($env.cy.path | path join config $'(now-fn).toml')
             }
         }
     )
 
-    $in_config | save $file_name2 -f
-    print $'($file_name2) is saved'
+    $in_config | save $filename2 -f
+    print $'($filename2) is saved'
 
     if (not $inactive) {
         $in_config | config-activate
@@ -1851,19 +1854,19 @@ export def-env 'config-activate' [
     config_name?: string@'nu-complete-config-names'
 ] {
     let $config = ($in | default (config-view $config_name))
+    let $config_path = ('~' | path expand | path join .cy_config.toml)
     let $config_toml = (
-        open ('~/.cy_config.toml' | path expand)
+        open $config_path
         | merge $config
     )
 
     $env.cy = $config_toml
 
     cprint -c green_underline -b 1 'Config is loaded'
-    # $config_toml | save $'($env.cy.path)/config/default.toml' -f
     (
-        open ('~/.cy_config.toml' | path expand)
+        open $config_path
         | upsert 'config-name' ($config_toml | get 'config-name')
-        | save ('~/.cy_config.toml' | path expand) -f
+        | save $config_path -f
     )
 
     $config_toml
@@ -1969,13 +1972,13 @@ def 'search-auto-refresh' [
         return
     }
 
-    $results | save $'($env.cy.path)/cache/search/($cid)-(date now|into int).json'
+    $results | save ($env.cy.path | path join cache search '($cid)-(date now|into int).json')
 
     clear; print $'Searching ($env.cy.exec) for ($cid)';
 
     serp1 $results
 
-    watch $'($env.cy.path)/cache/queue' {|| clear; print $'Searching ($env.cy.exec) for ($cid)'; serp1 $results}
+    watch ($env.cy.path | path join cache queue) {|| clear; print $'Searching ($env.cy.exec) for ($cid)'; serp1 $results}
 }
 
 # Use the built-in node search function in cyber or pussy
@@ -2048,7 +2051,7 @@ export def log_row_csv [
     --status: string = ''
     --file: string =
 ] {
-    let $file = ($file | default $'($env.cy.path)/cache/MIME_types.csv')
+    let $file = ($file | default ($env.cy.path | path join cache MIME_types.csv))
     $'($cid),($source),"($type)",($size),($status),(history session)\n' | save -a $file
 }
 
@@ -2057,7 +2060,7 @@ export def 'cid-read-or-download' [
     cid: string
     --full  # output full text of a particle
 ] {
-    do -i {open $'($env.cy.ipfs-files-folder)/($cid).md'}
+    do -i {open ($env.cy.ipfs-files-folder | path join $'($cid).md')}
     | default (
         pu-add $'cy cid-download ($cid)';
         'downloading'
@@ -2077,7 +2080,7 @@ export def 'cid-download-async' [
     --folder: string
 ] {
     let $folder = ($folder | default $'($env.cy.ipfs-files-folder)')
-    let $content = (do -i {open $'($env.cy.ipfs-files-folder)/($cid).md'})
+    let $content = (do -i {open ($env.cy.ipfs-files-folder | path join $'($cid).md')})
     let $source = ($source | default $env.cy.ipfs-download-from)
 
     if ($content == null) or ($content == 'timeout') or $force {
@@ -2101,7 +2104,7 @@ export def 'cid-download' [
     }
 
     if ($status) in ['text' 'non_text'] {
-        rm --force $'($env.cy.path)/cache/queue/($cid)'
+        rm --force ($env.cy.path | path join cache queue $cid)
         'downloaded'
     } else if $status == 'not found' {
         cid-queue-add $cid '-'
@@ -2154,7 +2157,7 @@ def 'cid-download-kubo' [
             )
             | sort -r
             | to toml
-            | save -f $'($folder)/($cid).md'
+            | save -f ($folder | path join $'($cid).md')
         )
         return 'non_text'
     }
@@ -2175,11 +2178,11 @@ export def 'cid-download-gateway' [
     if (
         (($type | default '') == 'text/plain; charset=utf-8') and (not $info_only)
     ) {
-        http get $'($gate_url)($cid)' -m 120 | save -f $'($folder)/($cid).md'
+        http get $'($gate_url)($cid)' -m 120 | save -f ($folder | path join $'($cid).md')
         return 'text'
         # log_row_csv --cid $cid --source $gate_url --type $type --size $size --status '4.downloaded file'
     } else if ($type != null) {
-        {'MIME type': $type, 'Size': $size} | sort -r | to toml | save -f $'($folder)/($cid).md'
+        {'MIME type': $type, 'Size': $size} | sort -r | to toml | save -f ($folder | path join $'($cid).md')
         return 'non_text'
         # log_row_csv --cid $cid --source $gate_url --type $type --size $size --status '4.downloaded info'
     } else {
@@ -2191,12 +2194,12 @@ export def 'cid-queue-add' [
     cid: string
     symbol: string = '+'
 ] {
-    $symbol | save -a $'($env.cy.path)/cache/queue/($cid)'
+    $symbol | save -a ($env.cy.path | path join cache queue $cid)
 }
 
 # Watch the queue folder, and if there are updates, request files to download
 export def 'watch-search-folder' [] {
-    watch $'($env.cy.path)/cache/search' {|| queue-check }
+    watch ($env.cy.path | path join cache search) {|| queue-check }
 }
 
 # Check the queue for the new CIDs, and if there are any, safely download the text ones
@@ -2205,7 +2208,7 @@ export def 'queue-check' [
     --info
     --quiet
 ] {
-    let $files = (ls -s $'($env.cy.path)/cache/queue/')
+    let $files = (ls -s ($env.cy.path | path join cache queue))
 
     if (do -i {pueue status -g d} | complete | $in.exit_code != 0) {
         return 'Tasks queue manager is turned off. Launch it with "brew services start pueue" or "pueued -d" command'
@@ -2247,7 +2250,7 @@ export def 'queue-check' [
 
 # Clear the cache folder
 export def 'cache-clear' [] {
-    backup-fn $'($env.cy.path)/cache'
+    backup-fn ($env.cy.path | path join cache)
     make_default_folders_fn
 }
 
@@ -2453,7 +2456,7 @@ export def 'ber' [
         | str replace -r '--node.*' ''
         | str replace -r -a '[^A-Za-z0-9_А-Яа-я]' '_'
         | str replace -r -a '_+' '_'
-        | $'($env.cy.path)/cache/jsonl/($in).jsonl'
+        | ($env.cy.path | path join cache jsonl $'($in).jsonl')
     )
 
     def 'request-and-save-exec-response' [] {
@@ -2546,7 +2549,7 @@ export def 'help' [
     --to_md (-m) # export table as markdown
 ] {
     let $text = (
-        open $'($env.cy.path)/cy.nu' --raw
+        open ($env.cy.path | path join cy.nu) --raw
         | parse -r "(\n(# )(?<desc>.*?)(?:\n#[^\n]*)*\nexport (def|def.env) '(?<command>.*)')"
         | select command desc
         | upsert command {|row index| ('cy ' + $row.command)}
@@ -2591,17 +2594,18 @@ def is-connected []  {
 }
 
 def open_cy_config_toml [] {
-    if not ('~/.cy_config.toml' | path exists) {
+    let $config_path = ('~' | path expand | path join .cy_config.toml)
+    if not ($config_path | path exists) {
         {
-            'path': ('~/cy/' | path expand)
-            'ipfs-files-folder': ('~/cy/graph/particles/safe/' | path expand)
+            'path': ('~' | path expand | path join cy)
+            'ipfs-files-folder': ('~' | path expand | path join cy graph particles safe)
             'ipfs-download-from': 'gateway'
             'ipfs-storage': 'cybernode'
         } |
-        save ('~/.cy_config.toml' | path expand)
+        save ($config_path | path expand)
     }
 
-    open ('~/.cy_config.toml' | path expand)
+    open ($config_path | path expand)
 }
 
 def make_default_folders_fn [] {
@@ -2619,17 +2623,17 @@ def make_default_folders_fn [] {
     touch ($env.cy.path | path join graph update.toml)
 
     if (
-        not ($'($env.cy.path)/cyberlinks_(tmp-links-name).csv' | path exists)
+        not ($env.cy.path | path join $'cyberlinks_(tmp-links-name).csv' | path exists)
     ) {
         'from,to'
-        | save $'($env.cy.path)/cyberlinks_(tmp-links-name).csv'
+        | save ($env.cy.path | path join $'cyberlinks_(tmp-links-name).csv')
     }
 
     if (
-        not ($'($env.cy.path)/cyberlinks_archive.csv' | path exists)
+        not ($env.cy.path | path join cyberlinks_archive.csv | path exists)
     ) {
         'from,to,address,timestamp,txhash'
-        | save $'($env.cy.path)/cyberlinks_archive.csv'
+        | save ($env.cy.path | path join cyberlinks_archive.csv)
     }
 }
 
@@ -2775,7 +2779,7 @@ def 'backup-fn' [
     filename
 ] {
     let $basename1 = ($filename | path basename)
-    let $path2 = $'($env.cy.path)/backups/(now-fn)($basename1)'
+    let $path2 = ($env.cy.path | path join backups $'(now-fn)($basename1)')
 
     if (
         $filename
@@ -2827,7 +2831,7 @@ def 'nu-complete-neurons-nicknames' [] {
 }
 
 def 'nu-complete-config-names' [] {
-    ls $'($env.cy.path)/config/' -s
+    ls ($env.cy.path | path join config) -s
     | sort-by modified -r
     | get name
     | parse '{short}.{ext}'
