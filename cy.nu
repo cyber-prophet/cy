@@ -2306,6 +2306,15 @@ export def 'balance-get' [
     }
 }
 
+export def 'tokens-supply-get' [
+    --height: int = 0
+] {
+    ber query bank total [--height $height]
+    | get supply
+    | upsert amount {|i| $i.amount | into int}
+    | transpose -idr
+}
+
 # Check balances for the keys added to the active CLI
 #
 # > cy balances --test | to yaml
