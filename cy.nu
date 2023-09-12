@@ -1628,7 +1628,7 @@ export def 'graph-add-metadata' [
     | dfr select $columns_order_target
 }
 
-# Output full graph, or pass piped in graph
+# Output a full graph, or pass piped in graph further
 #
 # > cy graph-links-df | dfr into-nu | first 1 | to yaml
 # - index: 0
@@ -1642,21 +1642,33 @@ export def 'graph-links-df' [
     --exclude_system    # exclude system particles in from column (tweet, follow, avatar)
     --include_contracts # include links from contracts (including passport)
 ] {
-    if $not_in {
-        dfr open $'($env.cy.path)/graph/cyberlinks.csv'
-    } else {
-        $in | default (dfr open $'($env.cy.path)/graph/cyberlinks.csv')
-    }
+    $in
+    | if ($not_in or ($in | describe | $in == 'nothing')) {
+        graph-open-csv-make-df $'($env.cy.path)/graph/cyberlinks.csv'
+    } else {}
     | if $include_contracts {
         dfr append -c (
-            dfr open $'($env.cy.path)/graph/cyberlinks_contracts.csv'
+            graph-open-csv-make-df $'($env.cy.path)/graph/cyberlinks_contracts.csv'
         )
     } else {}
-    | dfr with-column ($in.timestamp | dfr as-datetime '%Y-%m-%dT%H:%M:%S' | dfr rename datetime timestamp)
     | if $exclude_system {
         dfr into-lazy
         | gp-filter-system particle_from
     } else { }
+}
+
+def 'graph-open-csv-make-df' [
+    path: path
+    --datetime
+] {
+    dfr open $path
+    | if $datetime {
+        dfr with-column (
+            $in.timestamp
+            | dfr as-datetime '%Y-%m-%dT%H:%M:%S' -n
+            | dfr rename datetime timestamp
+        )
+    } else {}
 }
 
 export def 'graph-particles-df' [] {
