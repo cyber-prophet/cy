@@ -2605,18 +2605,18 @@ def open_cy_config_toml [] {
 }
 
 def make_default_folders_fn [] {
-    mkdir $'($env.cy.path)/temp/'
-    mkdir $'($env.cy.path)/backups/'
-    mkdir $'($env.cy.path)/config/'
-    mkdir $'($env.cy.path)/graph/particles/safe/'
-    mkdir $'($env.cy.path)/export/'
-    mkdir $'($env.cy.path)/gephi/'
-    mkdir $'($env.cy.path)/cache/search/'
-    mkdir $'($env.cy.path)/cache/queue/'
-    mkdir $'($env.cy.path)/cache/cli_out/'
-    mkdir $'($env.cy.path)/cache/jsonl/'
+    mkdir ($env.cy.path | path join temp)
+    mkdir ($env.cy.path | path join backups)
+    mkdir ($env.cy.path | path join config)
+    mkdir ($env.cy.path | path join graph particles safe)
+    mkdir ($env.cy.path | path join export)
+    mkdir ($env.cy.path | path join gephi)
+    mkdir ($env.cy.path | path join cache search)
+    mkdir ($env.cy.path | path join cache queue)
+    mkdir ($env.cy.path | path join cache cli_out)
+    mkdir ($env.cy.path | path join cache jsonl)
 
-    touch $'($env.cy.path)/graph/update.toml'
+    touch ($env.cy.path | path join graph update.toml)
 
     if (
         not ($'($env.cy.path)/cyberlinks_(tmp-links-name).csv' | path exists)
