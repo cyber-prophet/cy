@@ -2609,6 +2609,7 @@ def make_default_folders_fn [] {
     mkdir $'($env.cy.path)/backups/'
     mkdir $'($env.cy.path)/config/'
     mkdir $'($env.cy.path)/graph/particles/safe/'
+    mkdir $'($env.cy.path)/export/'
     mkdir $'($env.cy.path)/gephi/'
     mkdir $'($env.cy.path)/cache/search/'
     mkdir $'($env.cy.path)/cache/queue/'
