@@ -1452,7 +1452,7 @@ export def 'graph-neurons-stats' [] {
     )
 }
 
-# Export the entire graph into CSV file for import to Gephi
+# Export a graph into CSV file for import to Gephi
 export def 'graph-to-gephi' [] {
     let $c = (graph-links-df)
     let $particles = (
@@ -1559,6 +1559,19 @@ export def 'graph-to-txt-feed' [] {
     | do {|i| print ($i | get 0.init-role); $i} $in
     | each {|i| echo_particle_txt $i}
     | str join (char nl)
+}
+
+# Export graph in cosmograph format
+export def 'graph-to-cosmograph' [] {
+    $in
+    | graph-add-metadata
+    | dfr into-nu
+    | reject index
+    | save -f (
+        $env.cy.path
+        | path join 'export' $'cosmograph(now-fn).csv'
+        | inspect2
+    )
 }
 
 # Add content_s and neuron's nicknames columns to piped in or the whole graph df
