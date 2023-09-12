@@ -1,7 +1,6 @@
 .DS_Store
 cy_config.json
-cyberlinks_archive.csv
-cyberlinks_temp.csv
+cyberlinks_*.csv
 temp/
 backups/
 *.yaml
@@ -12,3 +11,4 @@ graph/
 logseq/
 cy-commands.nu
 help_output.md
+export
