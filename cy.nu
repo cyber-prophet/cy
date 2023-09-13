@@ -6,6 +6,8 @@
 
 # use std assert equal
 
+use helpers *
+
 export def main [] { help }
 
 # Check if all necessary dependencies are installed
@@ -380,7 +382,7 @@ def 'link-chuck' [] {
         | $in + "\n\n" + 'via [Chucknorris.io](https://chucknorris.io)'
     )
 
-    cprint -f '=' $quote
+    cprint -f '=' --indent 4 $quote
 
     link-texts --quiet 'chuck norris' $quote
 }
@@ -392,7 +394,7 @@ def 'link-quote' [] {
         | $in + "\n\n" + 'via [forismatic.com](https://forismatic.com)'
     )
 
-    cprint -f '=' $quote
+    cprint -f '=' --indent 4 $quote
 
     # link-texts 'quote' $quote
     link-texts --quiet 'quote' $quote
@@ -2666,116 +2668,6 @@ export def 'echo_particle_txt' [
         | if $markdown {
             append '-m'
         } else {}
-    )
-}
-
-# Print string colourfully
-export def 'cprint' [
-    ...text_args
-    --color (-c): any = 'default'
-    --highlight_color (-h): any = 'green_bold'
-    --frame_color (-r): any = 'dark_gray'
-    --frame (-f): string        # A symbol (or a string) to frame text
-    --before (-b): int = 0      # A number of new lines before text
-    --after (-a): int = 1       # A number of new lines after text
-    --echo (-e)                 # Echo text string instead of printing
-    --width (-w): int = 100
-] {
-    def compactit [] {
-        $in
-        | str replace -r -a '(\n[\t ]*(\n[\t ]*)+)' '⏎'
-        | str replace -r -a '\n?[\t ]+' ' '    # remove single line breaks used for code formatting
-        | str replace -a '⏎' "\n\n"
-        | lines
-        | each {|i| $i | str trim}
-        | str join "\n"
-    }
-
-    def colorit [] {
-        let text = ($in | split chars)
-        mut agg = []
-        mut open_tag = true
-        mut line_length = 0
-        mut last_space_index = -1
-        mut total_length = 0
-
-        for i in $text {
-            if $i == '*' {
-                if $open_tag {
-                    $open_tag = false
-                    $agg = ($agg | append $'(ansi reset)(ansi $highlight_color)')
-                } else {
-                    $open_tag = true
-                    $agg = ($agg | append $'(ansi reset)(ansi $color)')
-                }
-            } else {
-                if $i == "\n" {
-                    $line_length = 0
-                    $last_space_index = -1
-                } else {
-                    $line_length = ($line_length + 1)
-                    if $line_length > $width {
-                        if $last_space_index != -1 {
-                            $agg = ($agg | update $last_space_index "\n")
-                            $line_length = $total_length - $last_space_index
-                            $last_space_index = -1
-                        } else {
-                            $agg = ($agg | append "\n")
-                            $line_length = 0
-                        }
-                    }
-                }
-                if $i == ' ' {
-                    $last_space_index = $total_length
-                }
-                $agg = ($agg | append $i)
-                $total_length = ($total_length + 1)
-            }
-        }
-
-        $agg
-        | str join ''
-        | $'(ansi $color)($in)(ansi reset)'
-    }
-
-    def frameit [] {
-        let $text = $in
-        let $width = (
-            term size
-            | get columns
-            | ($in / ($frame | str length) | math round)
-            | $in - 1
-            | [$in 1]
-            | math max  # term size gives 0 in tests
-        )
-        let $line = (
-            ' '
-            | fill -a r -w $width -c $frame
-            | $'(ansi $frame_color)($in)(ansi reset)'
-        )
-
-        (
-            $line + "\n" + $text + "\n" + $line
-        )
-    }
-
-    def newlineit [] {
-        let $text = $in
-
-        print ("\n" * $before) -n
-        print $text -n
-        print ("\n" * $after) -n
-    }
-
-    (
-        $text_args
-        | str join ' '
-        | compactit
-        | colorit
-        | if $frame != null {
-            frameit
-        } else {}
-        | if $echo { } else { newlineit }
     )
 }
 
