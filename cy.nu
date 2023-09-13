@@ -1843,12 +1843,16 @@ export def-env 'config-save' [
         }
     )
 
-    $in_config | save $filename2 -f
-    print $'($filename2) is saved'
 
-    if (not $inactive) {
-        $in_config | config-activate
-    }
+    $in_config
+    | upsert config-name ($filename2 | path parse | get stem)
+    | if (not $inactive) {
+        config-activate
+    } else {}
+    | inspect2
+    | save $filename2 -f
+
+    print $'($filename2) is saved'
 }
 
 # Activate the config JSON
