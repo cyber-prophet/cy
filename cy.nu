@@ -2679,6 +2679,7 @@ export def 'cprint' [
     --before (-b): int = 0      # A number of new lines before text
     --after (-a): int = 1       # A number of new lines after text
     --echo (-e)                 # Echo text string instead of printing
+    --width (-w): int = 100
 ] {
     def compactit [] {
         $in
@@ -2694,6 +2695,9 @@ export def 'cprint' [
         let text = ($in | split chars)
         mut agg = []
         mut open_tag = true
+        mut line_length = 0
+        mut last_space_index = -1
+        mut total_length = 0
 
         for i in $text {
             if $i == '*' {
@@ -2705,7 +2709,27 @@ export def 'cprint' [
                     $agg = ($agg | append $'(ansi reset)(ansi $color)')
                 }
             } else {
+                if $i == "\n" {
+                    $line_length = 0
+                    $last_space_index = -1
+                } else {
+                    $line_length = ($line_length + 1)
+                    if $line_length > $width {
+                        if $last_space_index != -1 {
+                            $agg = ($agg | update $last_space_index "\n")
+                            $line_length = $total_length - $last_space_index
+                            $last_space_index = -1
+                        } else {
+                            $agg = ($agg | append "\n")
+                            $line_length = 0
+                        }
+                    }
+                }
+                if $i == ' ' {
+                    $last_space_index = $total_length
+                }
                 $agg = ($agg | append $i)
+                $total_length = ($total_length + 1)
             }
         }
 
