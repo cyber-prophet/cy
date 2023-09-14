@@ -2487,8 +2487,7 @@ export def 'ber' [
                 | from json
                 | insert update_time (date now)
             } else {
-                print {error: $in, update_time: (date now)}
-                return
+                {error: $in, update_time: (date now)}
             }
         )
 
@@ -2518,12 +2517,14 @@ export def 'ber' [
         ($freshness > $cache_stale_refresh)
     ) {
         request-and-save-exec-response
+    } else if ('error' in ($last_data | columns)) {
+        cprint $'last update *($freshness)* was unsuccessfull, requesting for a new one'
+        request-and-save-exec-response
     } else {
         if ($freshness > $cache_validity_duration) {
             cprint $'Using cache data, updated *($freshness | format duration day) ago*. Update is requested.'
             pu-add -o 2 $'cy ber --exec ($executable) --force_update --quiet ($flatten_rest | str join " ")'
-        };
-
+        }
         $last_data
     }
 }
