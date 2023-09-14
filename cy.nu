@@ -2450,6 +2450,7 @@ export def 'ber' [
     --cache_validity_duration: duration = 60min # Sets the cache's valid duration. No updates initiated during this period.
     --cache_stale_refresh: duration = 7day      # Sets stale cache's usable duration. Triggers background update and returns cache results. If exceeded, requests immediate data update.
     --force_update
+    --disable_update (-U)
     --quiet
     --no_default_params                         # Don't use default params (like output, chain-id)
 ] {
@@ -2462,7 +2463,8 @@ export def 'ber' [
         | str replace -r '--node.*' ''
         | str replace -r -a '[^A-Za-z0-9_А-Яа-я]' '_'
         | str replace -r -a '_+' '_'
-        | ($env.cy.path | path join cache jsonl $'($in).jsonl')
+        | [$env.cy.path cache jsonl $'($in).jsonl']
+        | path join
     )
 
     def 'request-and-save-exec-response' [] {
@@ -2514,16 +2516,16 @@ export def 'ber' [
     if (
         $force_update or
         ($env.cy.ber_force_update? | default false) or
-        ($freshness > $cache_stale_refresh)
+        (($freshness > $cache_stale_refresh) and (not $disable_update))
     ) {
-        request-and-save-exec-response
+        (request-and-save-exec-response)
     } else if ('error' in ($last_data | columns)) {
         cprint $'last update *($freshness)* was unsuccessfull, requesting for a new one'
-        request-and-save-exec-response
+        (request-and-save-exec-response)
     } else {
         if ($freshness > $cache_validity_duration) {
-            cprint $'Using cache data, updated *($freshness | format duration day) ago*. Update is requested.'
-            pu-add -o 2 $'cy ber --exec ($executable) --force_update --quiet ($flatten_rest | str join " ")'
+            cprint $'($executable) ($flatten_rest | str join " ") Using cache data, updated *($freshness | format duration day) ago*. Update is requested.'
+            pu-add -o 2 $'cy ber --exec ($executable) --force_update --quiet [($flatten_rest | str join " ")]'
         }
         $last_data
     }
