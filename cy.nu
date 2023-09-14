@@ -2328,6 +2328,32 @@ export def 'tokens-pools-get' [
     --height: int = 0
 ] {
     ber query liquidity pools [--height $height]
+# Check IBC denoms
+#
+# > cy tokens-ibc-denoms | first 2 | to yaml
+# - path: transfer/channel-2
+#   base_denom: uosmo
+#   denom: ibc/13B2C536BB057AC79D5616B8EA1B9540EC1F2170718CAFF6F0083C966FFFED0B
+#   amount: '59014043327'
+# - path: transfer/channel-2/transfer/channel-0
+#   base_denom: uatom
+#   denom: ibc/5F78C42BCC76287AE6B3185C6C1455DFFF8D805B1847F94B9B625384B93885C7
+#   amount: '150000'
+export def 'tokens-ibc-denoms' [] {
+    tokens-supply-get
+    | transpose
+    | rename denom amount
+    | where denom =~ '^ibc'
+    | upsert ibc_hash {|i| $i.denom | str replace 'ibc/' ''}
+    | each {|i| $i
+        | upsert temp_out {
+            |i| ber --disable_update query ibc-transfer denom-trace $i.ibc_hash
+            | get denom_trace
+        }
+    }
+    | flatten
+    | reject ibc_hash
+    | sort-by path --natural
 }
 
 # Check balances for the keys added to the active CLI
@@ -2380,34 +2406,6 @@ export def 'ipfs-bootstrap-add-congress' [] {
 
     print 'ipfs routing findpeer QmUgmRxoLtGERot7Y6G7UyF6fwvnusQZfGR15PuE6pY3aB'
     ipfs routing findpeer QmUgmRxoLtGERot7Y6G7UyF6fwvnusQZfGR15PuE6pY3aB
-}
-
-# Check IBC denoms
-#
-# > cy tokens-ibc-denoms | first 2 | to yaml
-# - path: transfer/channel-2
-#   base_denom: uosmo
-#   denom: ibc/13B2C536BB057AC79D5616B8EA1B9540EC1F2170718CAFF6F0083C966FFFED0B
-#   amount: '59014043327'
-# - path: transfer/channel-2/transfer/channel-0
-#   base_denom: uatom
-#   denom: ibc/5F78C42BCC76287AE6B3185C6C1455DFFF8D805B1847F94B9B625384B93885C7
-#   amount: '150000'
-export def 'tokens-ibc-denoms' [] {
-    tokens-supply-get
-    | transpose
-    | rename denom amount
-    | where denom =~ '^ibc'
-    | upsert ibc_hash {|i| $i.denom | str replace 'ibc/' ''}
-    | each {|i| $i
-        | upsert temp_out {
-            |i| ber --disable_update query ibc-transfer denom-trace $i.ibc_hash
-            | get denom_trace
-        }
-    }
-    | flatten
-    | reject ibc_hash
-    | sort-by path --natural
 }
 
 # Dump the peers connected to the given node to the comma-separated 'persistent_peers' list
