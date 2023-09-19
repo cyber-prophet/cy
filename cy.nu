@@ -2448,7 +2448,12 @@ export def 'ber' [
     --no_default_params                         # Don't use default params (like output, chain-id)
 ] {
     let $executable = if $exec != '' {$exec} else {$env.cy.exec}
-    let $flatten_rest = ($rest | flatten) # to recieve params as a list from passport-get
+    let $flatten_rest = if $rest == [] {
+        print 'The "ber" function needs arguments'
+        return
+    } else {
+        ($rest | flatten | flatten) # to recieve params as a list from passport-get
+    }
     let $jsonl_path = (
         $executable
         | append ($flatten_rest)
