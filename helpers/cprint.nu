@@ -1,5 +1,7 @@
 # export def main [] {}
 
+use 'str repeat.nu'
+
 # Print the string colorfully with bells and whistles.
 export def main [
     ...text_args
@@ -23,22 +25,20 @@ export def main [
 
     def wrapit [] {
         $in
-        | if $keep_single_breaks {
-            str replace -r -a '^[\t ]+' ''
-        } else {
+        | str replace -r -a '(?m)^[\t ]+' ''
+        | if $keep_single_breaks { } else {
             str replace -r -a '(\n[\t ]*(\n[\t ]*)+)' '⏎'
-            | str replace -r -a '^[\t ]+' ''
             | str replace -r -a '\n' ' '        # remove single line breaks used for code formatting
             | str replace -a '⏎' "\n\n"
         }
         | str replace -r -a '[\t ]+$' ''
         | str replace -r -a $"\(.{1,($width_safe - $indent)}\)\(\\s|$\)|\(.{1,($width_safe - $indent)}\)" "$1$3\n"
         | str replace -r $'(char nl)$' ''       # trailing new line
-        | str replace -r -a '(?m)^(.)' $'((char sp) * $indent)$1'
+        | str replace -r -a '(?m)^(.)' $'((char sp) | str repeat $indent)$1'
     }
 
     def colorit [] {
-        str replace -r -a '\*(.*?)\*' $"(ansi reset)(ansi $highlight_color)$1(ansi reset)(ansi $color)"
+        str replace -r -a '\*([\s\S]+?)\*' $'(ansi reset)(ansi $highlight_color)$1(ansi reset)(ansi $color)'
         | $'(ansi $color)($in)(ansi reset)'
     }
 
@@ -62,7 +62,7 @@ export def main [
     }
 
     def newlineit [] {
-        $"((char nl) * $before)($in)((char nl) * $after)"
+        $"((char nl) | str repeat $before)($in)((char nl) | str repeat $after)"
     }
 
     (
