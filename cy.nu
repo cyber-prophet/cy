@@ -2326,7 +2326,7 @@ export def 'tokens-supply-get' [
     | transpose -idr
 }
 
-export def 'tokens-pools-get' [
+export def 'tokens-pools-table-get' [
     --height: int = 0
     --short     # get only basic information
 ] {
@@ -2368,7 +2368,7 @@ export def 'tokens-pools-equivalent' [
     | select ($in | columns | where $it =~ 'pool')
     | transpose
     | rename denom amount
-    | join -l (tokens-pools-get --height $height) denom pool_coin_denom
+    | join -l (tokens-pools-table-get --height $height) denom pool_coin_denom
     | upsert percentage {|i| $i.amount / $i.pool_coin_amount_total}
     | upsert amount {|i| $i.reserve_coin_amount * $i.percentage | math round}
     | select id amount reserve_coin_denom
@@ -2376,7 +2376,7 @@ export def 'tokens-pools-equivalent' [
     | rename pool_id amount denom
 }
 
-export def 'tokens-delegations-get' [
+export def 'tokens-delegations-table-get' [
     address: string
     --height: int = 0
 ] {
@@ -2395,7 +2395,7 @@ export def 'tokens-rewards-get' [
     | upsert amount {|i| $i.amount | into int}
 }
 
-export def 'tokens-investmint-status' [
+export def 'tokens-investmint-status-table' [
     address: string
     --h_liquid      # retrun amount of liquid H
     --quiet         # don't output amount of H liquid
@@ -2433,7 +2433,8 @@ export def 'tokens-investmint-status' [
 
     let $hydrogen_liquid = (
         $investmint_status
-        | get hydrogen
+        | where denom == 'hydrogen'
+        | get amount
         | math sum
         | $h_all - $in
     )
@@ -2453,7 +2454,7 @@ export def 'tokens-investmint-status' [
 
 # Check IBC denoms
 #
-# > cy tokens-ibc-denoms | first 2 | to yaml
+# > cy tokens-ibc-denoms-table | first 2 | to yaml
 # - path: transfer/channel-2
 #   base_denom: uosmo
 #   denom: ibc/13B2C536BB057AC79D5616B8EA1B9540EC1F2170718CAFF6F0083C966FFFED0B
@@ -2462,7 +2463,7 @@ export def 'tokens-investmint-status' [
 #   base_denom: uatom
 #   denom: ibc/5F78C42BCC76287AE6B3185C6C1455DFFF8D805B1847F94B9B625384B93885C7
 #   amount: '150000'
-export def 'tokens-ibc-denoms' [] {
+export def 'tokens-ibc-denoms-table' [] {
     tokens-supply-get
     | transpose
     | rename denom amount
