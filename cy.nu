@@ -2360,6 +2360,22 @@ export def 'tokens-pools-get' [
     | flatten | flatten
 }
 
+export def 'tokens-pools-equivalent' [
+    $address
+    --height: int = 0
+] {
+    tokens-balance-get --height $height $address
+    | select ($in | columns | where $it =~ 'pool')
+    | transpose
+    | rename denom amount
+    | join -l (tokens-pools-get --height $height) denom pool_coin_denom
+    | upsert percentage {|i| $i.amount / $i.pool_coin_amount_total}
+    | upsert amount {|i| $i.reserve_coin_amount * $i.percentage | math round}
+    | select id amount reserve_coin_denom
+    | upsert state pool
+    | rename pool_id amount denom
+}
+
 # Check IBC denoms
 #
 # > cy tokens-ibc-denoms | first 2 | to yaml
