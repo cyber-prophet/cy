@@ -2408,10 +2408,17 @@ export def 'tokens-delegations-table-get' [
 export def 'tokens-rewards-get' [
     address: string
     --height: int = 0
+    --sum
 ] {
     ber query distribution rewards $address [--height $height]
     | get total
     | upsert amount {|i| $i.amount | into int}
+    | if $sum {
+        group-by denom
+        | values
+        | each {|i| {denom: $i.denom.0, amount: ($i.amount | math sum)}}
+    } else {}
+    | upsert state rewards
 }
 
 export def 'tokens-investmint-status-table' [
