@@ -2327,7 +2327,6 @@ export def 'tokens-supply-get' [
 export def 'tokens-pools-get' [
     --height: int = 0
 ] {
-    ber query liquidity pools [--height $height]
 # Check IBC denoms
 #
 # > cy tokens-ibc-denoms | first 2 | to yaml
