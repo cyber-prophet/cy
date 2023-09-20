@@ -2386,6 +2386,14 @@ export def 'tokens-delegations-get' [
     | upsert amount {|i| $i.amount | into int}
 }
 
+export def 'tokens-rewards-get' [
+    address: string
+    --height: int = 0
+] {
+    ber query distribution rewards $address [--height $height]
+    | get total
+    | upsert amount {|i| $i.amount | into int}
+}
 # Check IBC denoms
 #
 # > cy tokens-ibc-denoms | first 2 | to yaml
