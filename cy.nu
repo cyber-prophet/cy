@@ -2437,6 +2437,7 @@ export def 'tokens-investmint-status-table' [
     --h_liquid      # retrun amount of liquid H
     --quiet         # don't output amount of H liquid
     --height: int = 0
+    --sum
 ] {
     let $account_vesting = (ber query account $address [--height $height])
 
@@ -2483,6 +2484,11 @@ export def 'tokens-investmint-status-table' [
         $hydrogen_liquid
     } else {
         $investmint_status
+        | if $sum {
+            group-by denom
+            | values
+            | each {|i| {denom: $i.denom.0, amount: ($i.amount | math sum), state: 'frozen'}}
+        } else {}
     }
 }
 
