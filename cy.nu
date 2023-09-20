@@ -1025,7 +1025,10 @@ export def 'dict-neurons-update' [
     } else {}
     | if $balance or $all {
         par-each -t $threads {|i|
-            $i | merge (tokens-balance-get $i.neuron)
+            $i | merge (
+                tokens-balance-get $i.neuron
+                | transpose -idr
+            )
         }
     } else {}
     | if $karma or $all {
@@ -2292,10 +2295,14 @@ export def 'karma-get' [
 # Get a balance for a given account
 #
 # > cy tokens-balance-get bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8 | to yaml
-# boot: 348358
-# hydrogen: 486000000
-# milliampere: 25008
-# millivolt: 7023
+# - denom: boot
+#   amount: 348358
+# - denom: hydrogen
+#   amount: 486000000
+# - denom: milliampere
+#   amount: 25008
+# - denom: millivolt
+#   amount: 7023
 export def 'tokens-balance-get' [
     address: string
     --height = 0
@@ -2312,8 +2319,6 @@ export def 'tokens-balance-get' [
             |b| $b.amount
             | into int
         }
-        | transpose -i -r
-        | into record
     }
 }
 
@@ -2342,9 +2347,12 @@ export def 'tokens-pools-table-get' [
     | get pools
     | par-each {
         |b| $b
-        | upsert balances {|i| tokens-balance-get $i.reserve_account_address}
+        | upsert balances {|i|
+            tokens-balance-get $i.reserve_account_address
+            | transpose -idr
+        }
     }
-    | where balances != {}
+    | where balances != []
     | upsert balances {
         |i| $i.balances | select $i.reserve_coin_denoms # keep only pool's tokens
     }
@@ -2365,9 +2373,7 @@ export def 'tokens-pools-equivalent' [
     --height: int = 0
 ] {
     tokens-balance-get --height $height $address
-    | select ($in | columns | where $it =~ 'pool')
-    | transpose
-    | rename denom amount
+    | where denom =~ 'pool'
     | join -l (tokens-pools-table-get --height $height) denom pool_coin_denom
     | upsert percentage {|i| $i.amount / $i.pool_coin_amount_total}
     | upsert amount {|i| $i.reserve_coin_amount * $i.percentage | math round}
@@ -2420,11 +2426,13 @@ export def 'tokens-investmint-status-table' [
         | where release_time > (date now)
         | flatten --all
         | upsert amount {|i| $i.amount | into int}
+        | upsert state frozen
     );
 
     let $h_all = (
         tokens-balance-get $address --height $height
-        | get hydrogen -i
+        | where denom == hydrogen
+        | get amount.0
         | into int
     )
 
@@ -2499,6 +2507,7 @@ export def 'balances' [
         }
         | par-each {
             |i| tokens-balance-get $i.address
+            | transpose -idr
             | merge $i
         }
     )
