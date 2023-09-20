@@ -2394,6 +2394,63 @@ export def 'tokens-rewards-get' [
     | get total
     | upsert amount {|i| $i.amount | into int}
 }
+
+export def 'tokens-investmint-status' [
+    address: string
+    --h_liquid      # retrun amount of liquid H
+    --quiet         # don't output amount of H liquid
+    --height: int = 0
+] {
+    #investmint_status
+    let $account_vesting = (ber query account $address [--height $height])
+
+    let $release_slots = (
+        $account_vesting.vesting_periods.length
+        | reduce -f [($account_vesting.start_time | into int)] {
+            |i acc| $acc | append (($i | into int) + ($acc | last))
+        }
+        | skip
+        | each {|i| 10 ** 9 * $i | into datetime}
+        | wrap release_time
+    )
+
+    let $investmint_status = (
+        $account_vesting.vesting_periods
+        | reject length
+        | merge $release_slots
+        | upsert hydrogen {|i| $i.amount.amount.0 | into int}
+        | upsert resource_amount {|i| $i.amount.amount.1 | into int}
+        | upsert resource_token {|i| $i.amount.denom.1}
+        | reject amount
+        | where release_time > (date now)
+    );
+
+    let $h_all = (
+        tokens-balance-get $address --height $height
+        | get hydrogen -i
+        | into int
+    )
+
+    let $hydrogen_liquid = (
+        $investmint_status
+        | get hydrogen
+        | math sum
+        | $h_all - $in
+    )
+
+    if ((not $quiet) or (not $h_liquid)) {
+        print $'liquid hydrogen availible for investminting: ($hydrogen_liquid)'
+    }
+
+    if $h_liquid {
+        $hydrogen_liquid
+    } else {
+        $investmint_status
+    }
+}
+
+
+
 # Check IBC denoms
 #
 # > cy tokens-ibc-denoms | first 2 | to yaml
