@@ -2492,6 +2492,12 @@ export def 'tokens-investmint-status-table' [
     }
 }
 
+def tokens-sum [] {
+    $in
+    | group-by denom
+    | values
+    | each {|i| {denom: $i.denom.0, amount: ($i.amount | math sum)}
+}
 
 
 # Check IBC denoms
