@@ -33,7 +33,7 @@ export def check-requirements [] {
 
 export-env {
     banner2
-    let $tested_versions = ['0.84.0']
+    let $tested_versions = ['0.85.0']
 
     version
     | get version
@@ -2536,7 +2536,7 @@ export def 'qnbn' [
     --df
 ] {
     let neurons = (
-        cy dict-neurons
+        dict-neurons
         | select nick neuron
         | where nick in $nicks
         | select neuron
