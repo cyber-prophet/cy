@@ -2371,8 +2371,19 @@ export def 'tokens-pools-table-get' [
 export def 'tokens-pools-equivalent' [
     $address
     --height: int = 0
+    --sum
 ] {
     tokens-balance-get --height $height $address
+    | tokens-pools-convert-value --height $height
+    | if $sum {
+        group-by denom
+        | values
+        | each {|i| {denom: $i.denom.0, amount: ($i.amount | math sum)}}
+        | where amount > 0
+    } else {}
+    # | upsert state pool
+}
+
 export def 'tokens-pools-convert-value' [
     --height: int = 0
 ] {
