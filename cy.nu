@@ -2563,6 +2563,29 @@ export def 'balances' [
     }
 }
 
+export def 'tokens-balance-all' [
+    $address
+    --height: int = 0
+] {
+    let $invstiminted_frozen = (tokens-investmint-status-table $address --sum)
+    let liquid = (
+        tokens-balance-get $address --height $height
+        | where denom !~ 'pool'
+        | append (
+            $invstiminted_frozen
+            | upsert amount {|i| $i.amount * -1}
+        )
+        | group-by denom
+        | values
+        | each {|i| {denom: $i.denom.0, amount: ($i.amount | math sum), state: liquid}}
+        | append $invstiminted_frozen
+        | append (tokens-pools-equivalent --sum $address)
+        | append (tokens-rewards-get --sum $address)
+        | sort-by denom
+        | inspect
+    )
+}
+
 # Add the cybercongress node to bootstrap nodes
 export def 'ipfs-bootstrap-add-congress' [] {
     ipfs bootstrap add '/ip4/135.181.19.86/tcp/4001/p2p/12D3KooWNMcnoQynAY9hyi4JxzSu64BsRGcJ9z7vKghqk8sTrpqY'
