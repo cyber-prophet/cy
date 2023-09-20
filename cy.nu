@@ -2376,6 +2376,16 @@ export def 'tokens-pools-equivalent' [
     | rename pool_id amount denom
 }
 
+export def 'tokens-delegations-get' [
+    address: string
+    --height: int = 0
+] {
+    ber query staking delegations $address [--height $height]
+    | get delegation_responses
+    | each {|i| $i.delegation | merge $i.balance}
+    | upsert amount {|i| $i.amount | into int}
+}
+
 # Check IBC denoms
 #
 # > cy tokens-ibc-denoms | first 2 | to yaml
