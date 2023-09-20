@@ -2328,7 +2328,38 @@ export def 'tokens-supply-get' [
 
 export def 'tokens-pools-get' [
     --height: int = 0
+    --short     # get only basic information
 ] {
+    let $liquidity_pools = (ber query liquidity pools [--height $height])
+
+    if $short {
+        return $liquidity_pools
+    }
+
+    let $supply = (tokens-supply-get)
+
+    $liquidity_pools
+    | get pools
+    | par-each {
+        |b| $b
+        | upsert balances {|i| tokens-balance-get $i.reserve_account_address}
+    }
+    | where balances != {}
+    | upsert balances {
+        |i| $i.balances | select $i.reserve_coin_denoms # keep only pool's tokens
+    }
+    | reject reserve_coin_denoms
+    | upsert pool_coin_amount_total {
+        |i| $supply | get $i.pool_coin_denom
+    }
+    | upsert balances {
+        |i| $i.balances
+        | transpose
+        | rename reserve_coin_denom reserve_coin_amount
+    }
+    | flatten | flatten
+}
+
 # Check IBC denoms
 #
 # > cy tokens-ibc-denoms | first 2 | to yaml
