@@ -2401,7 +2401,6 @@ export def 'tokens-investmint-status-table' [
     --quiet         # don't output amount of H liquid
     --height: int = 0
 ] {
-    #investmint_status
     let $account_vesting = (ber query account $address [--height $height])
 
     let $release_slots = (
@@ -2418,11 +2417,9 @@ export def 'tokens-investmint-status-table' [
         $account_vesting.vesting_periods
         | reject length
         | merge $release_slots
-        | upsert hydrogen {|i| $i.amount.amount.0 | into int}
-        | upsert resource_amount {|i| $i.amount.amount.1 | into int}
-        | upsert resource_token {|i| $i.amount.denom.1}
-        | reject amount
         | where release_time > (date now)
+        | flatten --all
+        | upsert amount {|i| $i.amount | into int}
     );
 
     let $h_all = (
