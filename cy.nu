@@ -1025,7 +1025,7 @@ export def 'dict-neurons-update' [
     } else {}
     | if $balance or $all {
         par-each -t $threads {|i|
-            $i | merge (balance-get $i.neuron)
+            $i | merge (tokens-balance-get $i.neuron)
         }
     } else {}
     | if $karma or $all {
@@ -2291,20 +2291,21 @@ export def 'karma-get' [
 
 # Get a balance for a given account
 #
-# > cy balance-get bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8 | to yaml
+# > cy tokens-balance-get bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8 | to yaml
 # boot: 348358
 # hydrogen: 486000000
 # milliampere: 25008
 # millivolt: 7023
-export def 'balance-get' [
+export def 'tokens-balance-get' [
     address: string
+    --height = 0
 ] {
     if not (is-neuron $address) {
         cprint $"*($address)* doesn't look like an address"
         return null
     }
 
-    ber query bank balances $address
+    ber query bank balances $address [--height $height]
     | if (($in | describe) in [null {}]) {{}} else {
         get balances
         | upsert amount {
@@ -2377,7 +2378,7 @@ export def 'balances' [
             where name in $name
         }
         | par-each {
-            |i| balance-get $i.address
+            |i| tokens-balance-get $i.address
             | merge $i
         }
     )
