@@ -2504,7 +2504,8 @@ export def 'ber' [
     let $last_data = (
         if ($jsonl_path | path exists) {
             ^tail -n 1 $jsonl_path
-            | from json
+            | from json -o
+            | last
             | upsert update_time ($in.update_time | into datetime)
         } else {
             {'update_time': (0 | into datetime)}
