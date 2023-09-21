@@ -2487,6 +2487,15 @@ export def 'tokens-investmint-status-table' [
     }
 }
 
+export def 'tokens-routed-from' [
+    address
+    --height
+] {
+    ber query grid routed-from $address
+    | get value
+    | upsert amount {|i| $i.amount | into int}
+    | upsert state routed-from
+}
 
 # Check IBC denoms
 #
