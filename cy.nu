@@ -2389,8 +2389,9 @@ export def 'tokens-pools-convert-value' [
 ] {
     let $in_table = $in
 
-    $in_table
-    | where denom =~ 'pool'
+    (
+        $in_table | where denom =~ '^pool'
+    )
     | join -l (
         tokens-pools-table-get --height $height
         | select pool_coin_denom reserve_coin_denom reserve_coin_amount pool_coin_amount_total
@@ -2399,9 +2400,9 @@ export def 'tokens-pools-convert-value' [
     | upsert amount {|i| $i.reserve_coin_amount * $i.percentage | math round}
     | upsert denom {|i| $i.reserve_coin_denom}
     | reject percentage pool_coin_denom reserve_coin_denom pool_coin_amount_total reserve_coin_amount
+    | upsert state 'pool'
     | append (
-        $in_table
-        | where denom !~ 'pool'
+        $in_table | where denom !~ '^pool'
     )
     | where amount > 0
 }
