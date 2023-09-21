@@ -2438,6 +2438,10 @@ export def 'tokens-investmint-status-table' [
 ] {
     let $account_vesting = (ber query account $address [--height $height])
 
+    if $account_vesting == null {
+        return
+    }
+
     let $release_slots = (
         $account_vesting.vesting_periods.length
         | reduce -f [($account_vesting.start_time | into int)] {
