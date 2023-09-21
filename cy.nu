@@ -2493,13 +2493,6 @@ export def 'tokens-investmint-status-table' [
     }
 }
 
-def tokens-sum [] {
-    $in
-    | group-by denom
-    | values
-    | each {|i| {denom: $i.denom.0, amount: ($i.amount | math sum)}
-}
-
 
 # Check IBC denoms
 #
@@ -2591,6 +2584,27 @@ export def 'tokens-balance-all' [
         | sort-by denom
         | inspect
     )
+}
+
+export def 'tokens-sum' [
+    --state: string = '-'
+] {
+    $in
+    | sort-by amount -r
+    | group-by denom
+    | values
+    | each {
+        |i| {}
+        | upsert denom $i.denom.0
+        | upsert amount ($i.amount | math sum)
+        | upsert state (
+            if $state == '-' {
+                $i.state? | default null | uniq | str join '+'
+            } else {
+                $state
+            }
+        )
+    }
 }
 
 # Add the cybercongress node to bootstrap nodes
