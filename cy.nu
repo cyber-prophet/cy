@@ -2403,11 +2403,16 @@ export def 'tokens-pools-convert-value' [
 export def 'tokens-delegations-table-get' [
     address: string
     --height: int = 0
+    --sum
 ] {
     ber query staking delegations $address [--height $height]
     | get delegation_responses
     | each {|i| $i.delegation | merge $i.balance}
     | upsert amount {|i| $i.amount | into int}
+    | upsert state delegated
+    | if $sum {
+        tokens-sum
+    } else {}
 }
 
 export def 'tokens-rewards-get' [
