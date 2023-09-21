@@ -2306,6 +2306,7 @@ export def 'karma-get' [
 export def 'tokens-balance-get' [
     address: string
     --height: int = 0
+    --record
 ] {
     if not (is-neuron $address) {
         cprint $"*($address)* doesn't look like an address"
@@ -2313,13 +2314,22 @@ export def 'tokens-balance-get' [
     }
 
     ber query bank balances $address [--height $height]
-    | if (($in | describe) in [null {}]) {{}} else {
-        get balances
-        | upsert amount {
+    | get balances
+    | if ($in == []) {
+        token-dummy-balance
+    } else {
+        upsert amount {
             |b| $b.amount
             | into int
         }
     }
+    | if $record {
+        transpose -idr
+    } else {}
+}
+
+def 'token-dummy-balance' [] {
+    [{denom: boot, amount: 0}]
 }
 
 export def 'tokens-supply-get' [
@@ -2348,11 +2358,10 @@ export def 'tokens-pools-table-get' [
     | par-each {
         |b| $b
         | upsert balances {|i|
-            tokens-balance-get $i.reserve_account_address
-            | transpose -idr
+            tokens-balance-get --record $i.reserve_account_address
         }
     }
-    | where balances != []
+    | where balances != (token-dummy-balance | transpose -idr)
     | upsert balances {
         |i| $i.balances | select $i.reserve_coin_denoms # keep only pool's tokens
     }
@@ -2527,8 +2536,7 @@ export def 'balances' [
             where name in $name
         }
         | par-each {
-            |i| tokens-balance-get $i.address
-            | transpose -idr
+            |i| tokens-balance-get --record $i.address
             | merge $i
         }
     )
@@ -2554,6 +2562,9 @@ export def 'tokens-balance-all' [
     let $invstiminted_frozen = (tokens-investmint-status-table $address --sum)
     (
         tokens-balance-get $address --height $height
+        | if $in == (token-dummy-balance) {
+            return
+        } else {}
         | tokens-minus $invstiminted_frozen --state 'liquid'
         | append $invstiminted_frozen
         | tokens-pools-convert-value
