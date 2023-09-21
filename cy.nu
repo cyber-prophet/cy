@@ -2552,14 +2552,13 @@ export def 'tokens-balance-all' [
     --height: int = 0
 ] {
     let $invstiminted_frozen = (tokens-investmint-status-table $address --sum)
-    let liquid = (
+    (
         tokens-balance-get $address --height $height
         | tokens-minus $invstiminted_frozen --state 'liquid'
         | append $invstiminted_frozen
         | tokens-pools-convert-value
         | append (tokens-rewards-get --sum $address)
         | sort-by denom
-        | inspect
     )
 }
 
