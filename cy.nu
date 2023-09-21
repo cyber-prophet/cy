@@ -2424,9 +2424,7 @@ export def 'tokens-rewards-get' [
     | get total
     | upsert amount {|i| $i.amount | into int}
     | if $sum {
-        group-by denom
-        | values
-        | each {|i| {denom: $i.denom.0, amount: ($i.amount | math sum)}}
+        tokens-sum
     } else {}
     | upsert state rewards
 }
@@ -2484,9 +2482,7 @@ export def 'tokens-investmint-status-table' [
     } else {
         $investmint_status
         | if $sum {
-            group-by denom
-            | values
-            | each {|i| {denom: $i.denom.0, amount: ($i.amount | math sum), state: 'frozen'}}
+            tokens-sum --state investminting
         } else {}
     }
 }
