@@ -2607,6 +2607,17 @@ export def 'tokens-sum' [
     }
 }
 
+def 'tokens-minus' [
+    minus_table: table
+    --state: string = '-'
+] {
+    append (
+        $minus_table
+        | upsert amount {|i| $i.amount * -1}
+    )
+    | tokens-sum --state $state
+}
+
 # Add the cybercongress node to bootstrap nodes
 export def 'ipfs-bootstrap-add-congress' [] {
     ipfs bootstrap add '/ip4/135.181.19.86/tcp/4001/p2p/12D3KooWNMcnoQynAY9hyi4JxzSu64BsRGcJ9z7vKghqk8sTrpqY'
