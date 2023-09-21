@@ -2577,8 +2577,11 @@ export def 'tokens-balance-all' [
         } else {}
         | tokens-minus $invstiminted_frozen --state 'liquid'
         | append $invstiminted_frozen
-        | tokens-pools-convert-value
         | append (tokens-rewards-get --sum $address)
+        | append (tokens-delegations-table-get --sum $address)
+        | append (tokens-routed-from $address)
+        | tokens-pools-convert-value
+        | sort-by amount -r
         | sort-by denom
     )
 }
