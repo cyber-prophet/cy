@@ -2128,7 +2128,7 @@ def 'cid-download-kubo' [
     cid: string
     --timeout = '300s'
     --folder: string
-    --info_only = false # Don't download the file by write a card with filetype and size
+    --info_only = false # Don't download the file but write a card with filetype and size
 ] {
     print $'cid to download ($cid)'
     let $type = (
@@ -2305,7 +2305,7 @@ export def 'karma-get' [
 #   amount: 7023
 export def 'tokens-balance-get' [
     address: string
-    --height = 0
+    --height: int = 0
 ] {
     if not (is-neuron $address) {
         cprint $"*($address)* doesn't look like an address"
