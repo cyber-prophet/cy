@@ -2695,6 +2695,10 @@ export def 'ber' [
         | $'($in)(char nl)'
         | save -a -r $jsonl_path;
 
+        if ('error' in ($response | columns)) {
+            return
+        }
+
         if not $quiet {$response}
     }
 
