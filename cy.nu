@@ -1152,6 +1152,7 @@ export def 'graph-download-links' [] {
         );
         if $links != [] {
             $links | to csv --noheaders | save -r -a $path_csv
+            print $'($links | length) was downloaded!'
         } else {
             break
         }
@@ -1284,6 +1285,7 @@ export def 'graph-update-particles-parquet' [
         | reject modified type
         | upsert content {
             |i| open -r ($env.cy.path | path join graph particles safe $i.name)
+            | str substring -g 0..4000
         }
         | dfr into-df
         | dfr with-column (
