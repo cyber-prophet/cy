@@ -2119,7 +2119,7 @@ export def 'cid-download' [
     } else if $status == 'not found' {
         cid-queue-add $cid '-'
         'not found'
-        error make {msg: $'($cid) is not found'}
+        # error make {msg: $'($cid) is not found'}
     }
 }
 
@@ -2220,10 +2220,6 @@ export def 'queue-check' [
 ] {
     let $files = (ls -s ($env.cy.path | path join cache queue))
 
-    if (do -i {pueue status -g d} | complete | $in.exit_code != 0) {
-        return 'Tasks queue manager is turned off. Launch it with "brew services start pueue" or "pueued -d" command'
-    }
-
     if ( ($files | length) == 0 ) {
         return 'there are no files in queue'
     }
@@ -2238,11 +2234,12 @@ export def 'queue-check' [
         | sort-by size
     )
 
+    let $filtered_count = ($filtered_files | length)
+
     if ($filtered_files == []) {
         return $'There are no files, that was attempted to download for less than ($attempts) times.'
     } else {
-        ($filtered_files | length)
-        | print $'There are ($in) files that was attempted to be downloaded ($attempts) times already.'
+        print $'There are ($filtered_count) files that was attempted to be downloaded ($attempts) times already.'
 
         ($filtered_files | sort-by modified -r | sort-by size | get modified.0 -i)
         | print $'The latest file was added into the queue ($in)'
@@ -2252,8 +2249,9 @@ export def 'queue-check' [
     if not $info {
         $filtered_files
         | get name -i
-        | each {
-            |i| pu-add $'cy cid-download ($i)'
+        | enumerate
+        | par-each -t 15 {
+            |i| print -n $"( ansi -e '1000D' )( bar --width 60 --background yellow ($i.index / $filtered_count) ) ($i.index):(cid-download $i.item)"
         }
     }
 }
