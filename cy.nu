@@ -2679,14 +2679,14 @@ export def 'ber' [
     } else {
         ($rest | flatten | flatten) # to recieve params as a list from passport-get
     }
-    let $jsonl_path = (
+    let $json_path = (
         $executable
         | append ($flatten_rest)
         | str join '_'
         | str replace -r '--node.*' ''
         | str replace -r -a '[^A-Za-z0-9_А-Яа-я]' '_'
         | str replace -r -a '_+' '_'
-        | [$env.cy.path cache jsonl $'($in).jsonl']
+        | [$env.cy.path cache jsonl $'($in).json']
         | path join
     )
 
@@ -2718,8 +2718,7 @@ export def 'ber' [
 
         $response
         | to json -r
-        | $'($in)(char nl)'
-        | save -a -r $jsonl_path;
+        | save -f -r $json_path;
 
         if ('error' in ($response | columns)) {
             return
@@ -2729,10 +2728,15 @@ export def 'ber' [
     }
 
     let $last_data = (
-        if ($jsonl_path | path exists) {
-            ^tail -n 1 $jsonl_path
-            | from json -o
-            | last
+        if ($json_path | path exists) {
+            let $last_file = (open $json_path)
+
+            $last_file
+            | to json -r
+            | $'($in)(char nl)'
+            | save -a -r ($json_path | str replace '.json' '_arch.jsonl')
+
+            $last_file
             | upsert update_time ($in.update_time | into datetime)
         } else {
             {'update_time': (0 | into datetime)}
