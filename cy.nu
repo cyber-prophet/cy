@@ -2289,7 +2289,7 @@ export def 'karma-get' [
     address: string
 ] {
     ber query rank karma $address
-    | upsert karma {|i| $i.karma | into int}
+    | upsert karma {|i| $i.karma? | default 0 | into int}
 }
 
 # Get a balance for a given account
