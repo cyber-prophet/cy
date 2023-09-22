@@ -2202,11 +2202,20 @@ export def 'cid-download-gateway' [
     }
 }
 
+# Add a CID to the download queue
 export def 'cid-queue-add' [
     cid: string
     symbol: string = '+'
 ] {
-    $symbol | save -a ($env.cy.path | path join cache queue $cid)
+    let $path = ($env.cy.path | path join cache queue $cid)
+
+    if not ($path | path exists) {
+        touch $path
+    } else {
+        if $symbol != '+' {
+            $symbol | save -a $path
+        }
+    }
 }
 
 # Watch the queue folder, and if there are updates, request files to download
