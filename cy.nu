@@ -832,7 +832,7 @@ export def 'tmp-send-tx' [] {
 
 # Copy a table from the pipe into the clipboard (in tsv format)
 export def 'tsv-copy' [] {
-    $in | to tsv | clip --no-notify --silent
+    $in | to tsv | clip --no-notify --silent --no-strip
 }
 
 # Paste a table from the clipboard to stdin (so it can be piped further)
