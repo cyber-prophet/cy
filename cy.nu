@@ -8,6 +8,7 @@
 
 use helpers *
 use std clip
+use log
 
 export def main [] { help }
 
@@ -2680,19 +2681,28 @@ export def 'ber' [
     --cache_stale_refresh: duration = 7day      # Sets stale cache's usable duration. Triggers background update and returns cache results. If exceeded, requests immediate data update.
     --force_update
     --disable_update (-U)
-    --quiet
+    --quiet                                     # Don't output execution's result
     --no_default_params                         # Don't use default params (like output, chain-id)
 ] {
     let $executable = if $exec != '' {$exec} else {$env.cy.exec}
-    let $flatten_rest = if $rest == [] {
-        print 'The "ber" function needs arguments'
-        return
-    } else {
-        ($rest | flatten | flatten) # to recieve params as a list from passport-get
-    }
+    let $sub_commands_and_args = (
+        if $rest == [] {
+            error make {msg: 'The "ber" function needs arguments'}
+        } else {
+            ($rest | flatten | flatten)         # to recieve params as a list from passport-get
+        }
+        | if $no_default_params {} else {
+            append [
+                '--node' $env.cy.rpc-address
+                '--chain-id' $env.cy.chain-id   # todo chainid to choose
+                '--output' 'json'
+            ]
+        }
+    )
+
     let $json_path = (
         $executable
-        | append ($flatten_rest)
+        | append ($sub_commands_and_args)
         | str join '_'
         | str replace -r '--node.*' ''
         | str replace -r -a '[^A-Za-z0-9_А-Яа-я]' '_'
@@ -2701,22 +2711,13 @@ export def 'ber' [
         | path join
     )
 
-    def 'request-and-save-exec-response' [] {
-        let $cmd = (
-            $flatten_rest
-            | if $no_default_params {} else {
-                append [
-                    '--node' $env.cy.rpc-address
-                    '--chain-id' $env.cy.chain-id
-                    '--output' 'json'
-                ]
-            }
-        )
+    log debug $'json path: ($json_path)'
+
+    def 'request-save-output-exec-response' [] {
+        log debug $'($executable) ($sub_commands_and_args | str join " ")'
 
         let $response = (
-            do -i {
-                ^($executable) $cmd
-            }
+            do -i { ^($executable) $sub_commands_and_args }
             | complete
             | if $in.exit_code == 0 {
                 get stdout
@@ -2756,19 +2757,20 @@ export def 'ber' [
 
     let $freshness = ((date now) - $last_data.update_time)
 
-    if (
+    let $update = (
         $force_update or
         ($env.cy.ber_force_update? | default false) or
         (($freshness > $cache_stale_refresh) and (not $disable_update))
-    ) {
-        (request-and-save-exec-response)
+    )
+
+    if $update {
+        request-save-output-exec-response
     } else if ('error' in ($last_data | columns)) {
-        cprint $'($executable) ($flatten_rest | str join " ") last update *($freshness)* was unsuccessfull, requesting for a new one'
-        (request-and-save-exec-response)
+        log debug $'last update ($freshness) was unsuccessfull, requesting for a new one';
+        request-save-output-exec-response
     } else {
         if ($freshness > $cache_validity_duration) {
-            cprint $'($executable) ($flatten_rest | str join " ") Using cache data, updated *($freshness | format duration day) ago*. Update is requested.'
-            pu-add -o 2 $'cy ber --exec ($executable) --force_update --quiet [($flatten_rest | str join " ")]'
+            pu-add -o 2 $'cy ber --exec ($executable) --force_update --quiet [($sub_commands_and_args | str join " ")]'
         }
         $last_data
     }
