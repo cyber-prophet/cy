@@ -2229,6 +2229,7 @@ export def 'queue-check' [
     attempts = 0
     --info
     --quiet
+    --threads: int = 15     # A number of threads to use for downloading
 ] {
     let $files = (ls -s ($env.cy.path | path join cache queue))
 
@@ -2262,8 +2263,11 @@ export def 'queue-check' [
         $filtered_files
         | get name -i
         | enumerate
-        | par-each -t 15 {
-            |i| print -n $"( ansi -e '1000D' )( bar --width 60 --background yellow ($i.index / $filtered_count) ) ($i.index):(cid-download $i.item)"
+        | par-each -t $threads {
+            |i| cid-download $i.item
+            | if $nu.is-interactive {
+                print -n $"( ansi -e '1000D' )( bar --width 60 --background yellow ($i.index / $filtered_count)) ($i.index):($in)"
+            } else {}
         }
     }
 }
