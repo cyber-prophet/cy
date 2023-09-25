@@ -102,7 +102,7 @@ export def 'pin-text' [
     if $only_hash {
         $text
         | ipfs add -Q --only-hash
-        | str replace '\n' ''
+        | str replace (char nl) ''
         | return $in
     }
 
@@ -110,7 +110,7 @@ export def 'pin-text' [
         if ($env.cy.ipfs-storage == 'kubo') or ($env.cy.ipfs-storage == 'both') {
             $text
             | ipfs add -Q
-            | str replace '\n' ''
+            | str replace (char nl) ''
         }
     )
 
@@ -263,7 +263,7 @@ export def 'link-files' [
         $files_col
         | par-each {|f| $f
             | upsert to_text $'pinned_file:($f.from_text)'
-            | upsert to (ipfs add $f.from_text -Q | str replace '\n' '')
+            | upsert to (ipfs add $f.from_text -Q | str replace (char nl) '')
             | if ($link_filenames) {
                 upsert from (pin-text $f.from_text --dont_follow_path)
                 | move from --before to
@@ -1297,7 +1297,7 @@ export def 'graph-update-particles-parquet' [
         | dfr with-column (
             $in.content
             | dfr str-slice 0 -l 150
-            | dfr replace-all -p "\n" -r '⏎'
+            | dfr replace-all -p (char nl) -r '⏎'
             | dfr rename content content_s
         )
         | if $full_content {} else {
@@ -2065,7 +2065,7 @@ export def log_row_csv [
     --file: string =
 ] {
     let $file = ($file | default ($env.cy.path | path join cache MIME_types.csv))
-    $'($cid),($source),"($type)",($size),($status),(history session)\n' | save -a $file
+    $'($cid),($source),"($type)",($size),($status),(history session)(char nl)' | save -a $file
 }
 
 # Read a CID from the cache, and if the CID is absent - add it into the queue
@@ -2079,8 +2079,8 @@ export def 'cid-read-or-download' [
         'downloading'
     ) | if $full {} else {
         str substring 0..400
-        | str replace "\n" '↩' --all
-        | $"($in)\n(ansi grey)($cid)(ansi reset)"
+        | str replace (char nl) '↩' --all
+        | $'($in)(char nl)(ansi grey)($cid)(ansi reset)'
     }
 }
 
@@ -2143,7 +2143,7 @@ def 'cid-download-kubo' [
             get stdout
             | file - -I
             | $in + ''
-            | str replace '\n' ''
+            | str replace (char nl) ''
             | str replace '/dev/stdin: ' ''
         }
     )
