@@ -1920,42 +1920,43 @@ def 'search-sync' [
 }
 
 def 'search-with-backlinks' [
-    query
+    query: string
     --page (-p) = 0
     --results_per_page (-r) = 10
 ] {
-    let $cid = if (is-cid $query) {
-        print $'searching (cid-read-or-download $query)'
-        $query
-    } else {
-        (pin-text $query --only_hash | inspect)
+    let $cid = (
+        if (is-cid $query) {
+            print $'searching (cid-read-or-download $query)'
+            $query
+        } else {
+            (pin-text $query --only_hash)
+        }
+    )
+
+    def search_or_back_request [
+        type: string
+    ] {
+        ber query rank $type $cid $page $results_per_page
+        | get -i result
+        | if $in == null {
+            null
+        } else {
+            select particle rank
+            | par-each {
+                |$r| $r
+                | upsert particle (cid-read-or-download $r.particle)
+            }
+            | upsert source $type
+            | sort-by rank -r -n
+        }
     }
 
     print $'searching ($env.cy.exec) for ($cid)'
 
-    let $serp = (
-        ber query rank search $cid $page $results_per_page
-        | get result
-        | upsert particle {
-            |i| cid-read-or-download $i.particle
-        }
-        | select particle rank
-        | upsert source 'search'
+    (
+        search_or_back_request search
+        | append (search_or_back_request backlinks)
     )
-
-    let $back = (
-        ber query rank backlinks $cid $page $results_per_page
-        | get result
-        | upsert particle {
-            |i| cid-read-or-download $i.particle
-        }
-        | select particle rank
-        | upsert source 'backlinks'
-    )
-
-    let $result = ($serp | append $back)
-
-    $result
 }
 
 def 'search-auto-refresh' [
