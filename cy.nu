@@ -2226,11 +2226,12 @@ export def 'watch-search-folder' [] {
 }
 
 # Check the queue for the new CIDs, and if there are any, safely download the text ones
-export def 'queue-check' [
-    attempts = 0
-    --info
-    --quiet
-    --threads: int = 15     # A number of threads to use for downloading
+export def 'queue-cids-download' [
+    attempts: int = 0       # limit a number of previous download attempts for cids in queue
+    --info                  # don't download data, just check queue
+    --quiet                 # don't print information
+    --threads: int = 15     # a number of threads to use for downloading
+    --cids_in_run: int = 0 # a number of files to download in one command run. 0 - means all (default)
 ] {
     let $files = (ls -s ($env.cy.path | path join cache queue))
 
@@ -2238,9 +2239,10 @@ export def 'queue-check' [
         return 'there are no files in queue'
     }
 
-    cprint $'Overall count of files in queue is *($files | length)*'
-
-    cprint $'*($env.cy.ipfs-download-from)* will be used for download'
+    if not $quiet {
+        cprint $'Overall count of files in queue is *($files | length)*'
+        cprint $'*($env.cy.ipfs-download-from)* will be used for download'
+    }
 
     let $filtered_files = (
         $files
@@ -2251,14 +2253,16 @@ export def 'queue-check' [
     let $filtered_count = ($filtered_files | length)
 
     if ($filtered_files == []) {
-        return $'There are no files, that was attempted to download for less than ($attempts) times.'
+        if not $quiet {print $'There are no files, that was attempted to download for less than ($attempts) times.'}
+        return
     } else {
-        print $'There are ($filtered_count) files that was attempted to be downloaded ($attempts) times already.'
+        if not $quiet {
+            print $'There are ($filtered_count) files that was attempted to be downloaded ($attempts) times already.'
 
-        ($filtered_files | sort-by modified -r | sort-by size | get modified.0 -i)
-        | print $'The latest file was added into the queue ($in)'
+            ($filtered_files | sort-by modified -r | sort-by size | get modified.0 -i)
+            | print $'The latest file was added into the queue ($in)'
+        }
     }
-
 
     if not $info {
         $filtered_files
