@@ -1,4 +1,4 @@
-# Cy - a tool for interactions wity cybergraphs
+# Cy - a tool for interactions with cybergraphs
 # https://github.com/cyber-prophet/cy
 #
 # Use:
@@ -126,7 +126,6 @@ export def 'pin-text' [
 def test_pin_text_1 [] {
     # use ~/cy/cy.nu
 
-
     equal (pin-text 'cyber') 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV'
     equal (pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV') 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV'
     equal (
@@ -145,7 +144,6 @@ def test_pin_text_file_paths [] {
 
     rm 'cyber.txt'
 }
-
 
 # Add a 2-texts cyberlink to the temp table
 #
@@ -298,7 +296,6 @@ def test-link-files [] {
 
     equal $expect $result
 }
-
 
 # Create a cyberlink according to semantic construction of following a neuron
 #
@@ -877,7 +874,6 @@ export def 'passport-get' [
     let $params = ['--node' 'https://rpc.bostrom.cybernode.ai:443' '--output' 'json']
     let $out = ber --exec 'cyber' --no_default_params query wasm contract-state smart $pcontract $json $params
 
-
     if $out.error? == null {
         $out
         | get data
@@ -890,7 +886,6 @@ export def 'passport-get' [
         {}
     }
 }
-
 
 # Set a passport's particle, data or avatar field for a given nickname
 #
@@ -951,7 +946,6 @@ export def 'passport-set' [
         "*cy passport-get ($nick) | get ($field) | $in == ($particle)*"'
     }
 }
-
 
 # Output neurons dict
 export def 'dict-neurons' [
@@ -1773,7 +1767,6 @@ export def-env 'config-new' [
 
     let $chain_id = ($chain_id_def)
 
-
     let $rpc_def = if ($exec == 'cyber') {
         'https://rpc.bostrom.cybernode.ai:443'
     } else {
@@ -1849,7 +1842,6 @@ export def-env 'config-save' [
             }
         }
     )
-
 
     $in_config
     | upsert config-name ($filename2 | path parse | get stem)
@@ -1960,7 +1952,7 @@ def 'search-with-backlinks' [
 }
 
 def 'search-auto-refresh' [
-    query
+    query: string
     --page (-p) = 0
     --results_per_page (-r) = 10
 ] {
