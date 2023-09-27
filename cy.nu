@@ -2638,6 +2638,7 @@ export def 'tokens-sum' [
     --state: string = '-'
 ] {
     $in
+    | if $in in [null []] {return} else {}
     | sort-by amount -r
     | group-by denom
     | values
