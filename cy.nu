@@ -4,10 +4,10 @@
 # Use:
 # > overlay use ~/cy/cy.nu -p -r
 
-# use std assert equal
-
-use helpers *
+use std assert equal
 use std clip
+use helpers *
+
 use log
 
 export def main [] { help }
@@ -125,7 +125,7 @@ export def 'pin-text' [
 #[test]
 def test_pin_text_1 [] {
     # use ~/cy/cy.nu
-    use std assert equal
+
 
     equal (pin-text 'cyber') 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV'
     equal (pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV') 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV'
@@ -137,7 +137,7 @@ def test_pin_text_1 [] {
 #[test]
 def test_pin_text_file_paths [] {
     # use ~/cy/cy.nu
-    use std assert equal
+    # use std assert equal
     "cyber" | save -f cyber.txt
 
     equal (pin-text 'cyber.txt' --dont_follow_path) 'QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6'
@@ -178,7 +178,7 @@ export def 'link-texts' [
 #[test]
 def test_link_texts [] {
     # use ~/cy/cy.nu
-    use std assert equal
+    # use std assert equal
     let expect = {
         from_text: cyber,
         to_text: bostrom,
@@ -277,7 +277,7 @@ export def 'link-files' [
 
 #[test]
 def test-link-files [] {
-    use std assert equal
+    # use std assert equal
 
     mkdir linkfilestest; cd linkfilestest
     'cyber' | save -f cyber.txt; 'bostrom' | save -f bostrom.txt
@@ -320,7 +320,7 @@ export def 'follow' [
 
 #[test]
 def test-follow [] {
-    use std assert equal
+    # use std assert equal
 
     let expect = {
         from_text: "QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx",
@@ -359,7 +359,7 @@ export def 'tweet' [
 
 #[test]
 def test-tweet [] {
-    use std assert equal
+    # use std assert equal
 
     let expect = {
         from_text: "QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx",
@@ -536,7 +536,7 @@ export def 'tmp-clear' [] {
 
 #[test]
 def test-tmps [] {
-    use std assert equal
+    # use std assert equal
     let $temp_name = (random chars)
     tmp-links-name-set ($temp_name)
     link-texts 'cyber' 'bostrom'
