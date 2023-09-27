@@ -3000,6 +3000,16 @@ export def 'pu-add' [
     | save -f $filename
 }
 
+export def 'queue-tasks-check' [
+    --threads: int = 10
+] {
+    glob /Users/user/cy/cache/queue_tasks/*.nu.txt
+    | sort
+    | par-each -t $threads {
+        |i| execute-task $i
+    }
+}
+
 def 'inspect2' [
     callback?: closure
 ] {
