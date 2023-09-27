@@ -2329,8 +2329,10 @@ export def 'tokens-balance-get' [
     }
 
     ber query bank balances $address [--height $height]
-    | get balances
-    | if ($in == []) {
+    | get balances -i
+    | if $in == null {
+        return
+    } else if ($in == []) {
         token-dummy-balance
     } else {
         upsert amount {
@@ -2421,7 +2423,8 @@ export def 'tokens-delegations-table-get' [
     --sum
 ] {
     ber query staking delegations $address [--height $height]
-    | get delegation_responses
+    | get -i delegation_responses
+    | if $in == null {return} else {}
     | each {|i| $i.delegation | merge $i.balance}
     | upsert amount {|i| $i.amount | into int}
     | upsert state delegated
@@ -2436,7 +2439,8 @@ export def 'tokens-rewards-get' [
     --sum
 ] {
     ber query distribution rewards $address [--height $height]
-    | get total
+    | get total -i
+    | if $in == null {return} else {}
     | upsert amount {|i| $i.amount | into int}
     | if $sum {
         tokens-sum
@@ -2488,6 +2492,7 @@ export def 'tokens-investmint-status-table' [
         $investmint_status
         | where denom == 'hydrogen'
         | get amount
+        | append 0
         | math sum
         | $h_all - $in
     )
@@ -2507,11 +2512,12 @@ export def 'tokens-investmint-status-table' [
 }
 
 export def 'tokens-routed-from' [
-    address
-    --height
+    address: string
+    --height: int = 0
 ] {
-    ber query grid routed-from $address
-    | get value
+    ber query grid routed-from $address [--height $height]
+    | get -i value
+    | if $in == null {return} else { }
     | upsert amount {|i| $i.amount | into int}
     | upsert state routed-from
 }
@@ -2632,6 +2638,7 @@ def 'tokens-minus' [
 ] {
     append (
         $minus_table
+        | if $in == null {return} else {}
         | upsert amount {|i| $i.amount * -1}
     )
     | tokens-sum --state $state
