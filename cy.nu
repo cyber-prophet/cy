@@ -2076,7 +2076,7 @@ export def 'cid-read-or-download' [
 ] {
     do -i {open ($env.cy.ipfs-files-folder | path join $'($cid).md')}
     | default (
-        pu-add $'cy cid-download ($cid)';
+        queue-task-add $'cy cid-download ($cid)';
         'downloading'
     ) | if $full {} else {
         str substring 0..400
@@ -2098,7 +2098,7 @@ export def 'cid-download-async' [
     let $source = ($source | default $env.cy.ipfs-download-from)
 
     if ($content == null) or ($content == 'timeout') or $force {
-        pu-add $'cy cid-download ($cid) --source ($source) --info_only ($info_only) --folder '($folder)''
+        queue-task-add $'cy cid-download ($cid) --source ($source) --info_only ($info_only) --folder '($folder)''
         print 'downloading'
     }
 }
@@ -2794,7 +2794,7 @@ export def 'ber' [
         request-save-output-exec-response
     } else {
         if ($freshness > $cache_validity_duration) {
-            pu-add -o 2 $'cy ber --exec ($executable) --force_update --quiet [($sub_commands_and_args | str join " ")]'
+            queue-task-add -o 2 $'cy ber --exec ($executable) --force_update --quiet [($sub_commands_and_args | str join " ")]'
         }
         $last_data
     }
@@ -2985,7 +2985,7 @@ def 'backup-fn' [
     }
 }
 
-export def 'pu-add' [
+export def 'queue-task-add' [
     command: string
     --priority (-o): int = 1
 ] {
