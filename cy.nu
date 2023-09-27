@@ -2895,6 +2895,7 @@ def make_default_folders_fn [] {
     mkdir ($env.cy.path | path join gephi)
     mkdir ($env.cy.path | path join cache search)
     mkdir ($env.cy.path | path join cache queue)
+    mkdir ($env.cy.path | path join cache queue_tasks)
     mkdir ($env.cy.path | path join cache cli_out)
     mkdir ($env.cy.path | path join cache jsonl)
 
@@ -2988,8 +2989,15 @@ export def 'pu-add' [
     command: string
     --priority (-o): int = 1
 ] {
-    do {pueue add -p -o $priority -- $'nu -c "($command)" --config "($nu.config-path)" --env-config "($nu.env-path)"'}
-    | null
+    let $filename = (
+        $command
+        | to-safe-filename --prefix $'($priority)-' --suffix '.nu.txt'
+        | [ $env.cy.path cache queue_tasks $in ]
+        | path join
+    )
+
+    $command
+    | save -f $filename
 }
 
 def 'inspect2' [
