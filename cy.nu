@@ -2522,6 +2522,19 @@ export def 'tokens-routed-from' [
     | upsert state routed-from
 }
 
+#[test]
+def test-tokens-routed-from [] {
+    equal (tokens-routed-from bostrom1vu39vtn2ld3aapued6nwlhm7wpg2gj9zzlncek) null
+    equal (tokens-routed-from bostrom1vu39vtn2ld3aapued6nwlhm7wpg2gj9zzlncej) []
+    equal (tokens-routed-from bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8) [
+        [denom, amount, state]; [milliampere, 2000, routed-from], [millivolt, 103000, routed-from]
+    ]
+    equal (tokens-routed-from bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 --height 10124681) [
+        [denom, amount, state]; [milliampere, 2000, routed-from], [millivolt, 103000, routed-from]
+    ]
+    equal (tokens-routed-from bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 --height 2000) []
+}
+
 # Check IBC denoms
 #
 # > cy tokens-ibc-denoms-table | first 2 | to yaml
