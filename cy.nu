@@ -6,7 +6,7 @@
 
 use std assert equal
 use std clip
-use helpers [bar, cprint, "str repeat", to-safe-filename]
+use nu-utils [bar, cprint, "str repeat", to-safe-filename]
 
 use log
 
