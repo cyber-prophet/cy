@@ -2730,9 +2730,8 @@ export def 'ber' [
         | append ($sub_commands_and_args)
         | str join '_'
         | str replace -r '--node.*' ''
-        | str replace -r -a '[^A-Za-z0-9_А-Яа-я]' '_'
-        | str replace -r -a '_+' '_'
-        | [$env.cy.path cache jsonl $'($in).json']
+        | to-safe-filename --suffix '.json'
+        | [$env.cy.path cache jsonl $in]
         | path join
     )
 
