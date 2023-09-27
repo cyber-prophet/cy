@@ -3010,6 +3010,15 @@ export def 'queue-tasks-check' [
     }
 }
 
+def 'execute-task' [
+    task
+] {
+    let $command = open $task
+    rm $task
+    nu -c $command --config $nu.config-path --env-config $nu.env-path
+    print $task
+}
+
 def 'inspect2' [
     callback?: closure
 ] {
