@@ -2222,7 +2222,7 @@ export def 'cid-queue-add' [
 
 # Watch the queue folder, and if there are updates, request files to download
 export def 'watch-search-folder' [] {
-    watch ($env.cy.path | path join cache search) {|| queue-check }
+    watch ($env.cy.path | path join cache search) {|| queue-cids-download }
 }
 
 # Check the queue for the new CIDs, and if there are any, safely download the text ones
@@ -2264,17 +2264,23 @@ export def 'queue-cids-download' [
         }
     }
 
-    if not $info {
-        $filtered_files
-        | get name -i
-        | enumerate
-        | par-each -t $threads {
-            |i| cid-download $i.item
-            | if $nu.is-interactive {
-                print -n $"( ansi -e '1000D' )( bar --width 60 --background yellow ($i.index / $filtered_count)) ($i.index):($in)"
-            } else {}
-        }
+    if $info {return}
+
+    ($filtered_files | where size < 4b | sort-by modified -r | sort-by size) # new small files first
+    | append ($filtered_files | where size >= 4b | sort-by modified) # old files first
+    | get name -i
+    | if $cids_in_run > 0 {
+        first $cids_in_run
+    } else {}
+    | enumerate
+    | par-each -t $threads {
+        |i| cid-download $i.item
+        | if $nu.is-interactive {
+            print -n $'(if ($in == "not found") {'-'} else {'+'})'
+            # print -n $"( ansi -e '1000D' )( bar --width 60 --background yellow ($i.index / $filtered_count)) ($i.index):($in)"
+        } else {}
     }
+    print ''
 }
 
 # Clear the cache folder
@@ -3012,7 +3018,7 @@ export def 'queue-tasks-check' [
         glob /Users/user/cy/cache/queue_tasks/*.nu.txt
         | sort
         | if ($in | length) == 0 {
-            queue-cids-download 10 --cids_in_run $cids_in_run --threads $threads
+            queue-cids-download 10 --cids_in_run $cids_in_run --threads $threads --quiet
         } else {
             par-each -t $threads {
                 |i| execute-task $i
