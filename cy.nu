@@ -864,9 +864,9 @@ export def 'passport-get' [
 ] {
     let $json = (
         if (is-neuron $address_or_nick) {
-            $'{"active_passport":{"address":"($address_or_nick)"}}'
+            $'`{"active_passport":{"address":"($address_or_nick)"}}`'   # not sure about backticks here
         } else {
-            $'{"passport_by_nickname":{"nickname":"($address_or_nick)"}}'
+            $'`{"passport_by_nickname":{"nickname":"($address_or_nick)"}}`'
         }
     )
 
