@@ -3021,12 +3021,17 @@ export def 'queue-tasks-check' [
 }
 
 def 'execute-task' [
-    task
+    task_path: path
 ] {
-    let $command = open $task
-    rm $task
-    nu -c $command --config $nu.config-path --env-config $nu.env-path
-    print $task
+    let $command = open $task_path
+    rm $task_path
+
+    do -i {nu -c $command --config $nu.config-path --env-config $nu.env-path}
+    | complete
+    | get exit_code
+    | if $in == 0 {print -n '🔵'} else {print -n '⭕'}
+
+    log debug $'run ($command)'
 }
 
 def 'inspect2' [
