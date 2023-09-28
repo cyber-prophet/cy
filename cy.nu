@@ -2116,7 +2116,7 @@ export def 'cid-download' [
         rm --force ($env.cy.path | path join cache queue $cid)
         'downloaded'
     } else if $status == 'not found' {
-        cid-queue-add $cid '-'
+        queue-cid-add $cid '-'
         'not found'
         # error make {msg: $'($cid) is not found'}
     }
@@ -2200,7 +2200,7 @@ export def 'cid-download-gateway' [
 }
 
 # Add a CID to the download queue
-export def 'cid-queue-add' [
+export def 'queue-cid-add' [
     cid: string
     symbol: string = '+'
 ] {
