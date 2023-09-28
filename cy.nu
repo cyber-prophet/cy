@@ -2275,7 +2275,6 @@ export def 'queue-cids-download' [
             # print -n $"( ansi -e '1000D' )( bar --width 60 --background yellow ($i.index / $filtered_count)) ($i.index):($in)"
         } else {}
     }
-    print ''
 }
 
 # Clear the cache folder
@@ -3005,7 +3004,7 @@ export def 'queue-task-add' [
     | save -f $filename
 }
 
-export def 'queue-tasks-check' [
+export def 'queue-tasks-monitor' [
     --threads: int = 10
     --cids_in_run: int = 10 # a number of files to download in one command run. 0 - means all (default)
 ] {
@@ -3013,11 +3012,13 @@ export def 'queue-tasks-check' [
         glob /Users/user/cy/cache/queue_tasks/*.nu.txt
         | sort
         | if ($in | length) == 0 {
-            queue-cids-download 10 --cids_in_run $cids_in_run --threads $threads --quiet
+            queue-cids-download 10 --cids_in_run $cids_in_run --threads $threads --quiet;
+            print ''
         } else {
             par-each -t $threads {
                 |i| execute-task $i
-            }
+            };
+            print ''
         };
         sleep 1sec
     }
