@@ -2534,6 +2534,17 @@ export def 'tokens-routed-from' [
     | upsert state routed-from
 }
 
+export def 'tokens-routed-to' [
+    address: string
+    --height: int = 0
+] {
+    ber query grid routed-to $address [--height $height]
+    | get -i value
+    | if $in == null {return} else { }
+    | upsert amount {|i| $i.amount | into int}
+    | upsert state routed-to
+}
+
 #[test]
 def test-tokens-routed-from [] {
     equal (tokens-routed-from bostrom1vu39vtn2ld3aapued6nwlhm7wpg2gj9zzlncek) null
