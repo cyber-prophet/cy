@@ -2021,6 +2021,9 @@ def serp1 [
 }
 
 # Obtain cid info
+# > cy cid-get-type-gateway QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV | to yaml
+# type: text/plain; charset=utf-8
+# size: '5'
 export def 'cid-get-type-gateway' [
     cid: string
     --gate_url: string = 'https://gateway.ipfs.cybernode.ai/ipfs/'
