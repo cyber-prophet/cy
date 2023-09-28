@@ -376,7 +376,7 @@ def test-tweet [] {
 # Add a random chuck norris cyberlink to the temp table
 def 'link-chuck' [] {
     let $quote = (
-        http get https://api.chucknorris.io/jokes/random
+        http get -e https://api.chucknorris.io/jokes/random
         | get value
         | $in + "\n\n" + 'via [Chucknorris.io](https://chucknorris.io)'
     )
@@ -389,7 +389,7 @@ def 'link-chuck' [] {
 # Add a random quote cyberlink to the temp table
 def 'link-quote' [] {
     let quote = (
-        http get -r https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=text
+        http get -e -r https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=text
         | $in + "\n\n" + 'via [forismatic.com](https://forismatic.com)'
     )
 
@@ -2184,7 +2184,7 @@ export def 'cid-download-gateway' [
     if (
         (($type | default '') == 'text/plain; charset=utf-8') and (not $info_only)
     ) {
-        http get $'($gate_url)($cid)' -m 120 | save -f ($folder | path join $'($cid).md')
+        http get -e $'($gate_url)($cid)' -m 120 | save -f ($folder | path join $'($cid).md')
         return 'text'
         # log_row_csv --cid $cid --source $gate_url --type $type --size $size --status '4.downloaded file'
     } else if ($type != null) {
@@ -2685,7 +2685,7 @@ export def 'validator-generate-persistent-peers-string' [
         cprint -a 2 $"Nodes list for *($env.cy.rpc-address)*"
     }
 
-    let $peers = (http get $'($node_address)/net_info' | get result.peers)
+    let $peers = (http get -e $'($node_address)/net_info' | get result.peers)
 
     cprint -a 2 $"*($peers | length)* peers found"
 
@@ -2855,7 +2855,6 @@ def 'banner' [] {
 def 'banner2' [] {
     print $'(ansi yellow)cy(ansi reset) is loaded'
 }
-
 
 def is-cid [particle: string] {
     ($particle =~ '^Qm\w{44}$')
