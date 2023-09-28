@@ -2355,10 +2355,12 @@ export def 'tokens-balance-get' [
     } else {}
 }
 
+# Unexisting addresses make cyber fail. To catch this I use token-dummy-balance
 def 'token-dummy-balance' [] {
     [{denom: boot, amount: 0}]
 }
 
+# Get supply of all tokens in a network
 export def 'tokens-supply-get' [
     --height: int = 0
 ] {
@@ -2461,7 +2463,7 @@ export def 'tokens-rewards-get' [
 export def 'tokens-investmint-status-table' [
     address: string
     --h_liquid      # retrun amount of liquid H
-    --quiet         # don't output amount of H liquid
+    --quiet         # don't print amount of H liquid
     --height: int = 0
     --sum
 ] {
@@ -2889,8 +2891,8 @@ def open_cy_config_toml [] {
             'ipfs-files-folder': ('~' | path expand | path join cy graph particles safe)
             'ipfs-download-from': 'gateway'
             'ipfs-storage': 'cybernode'
-        } |
-        save ($config_path | path expand)
+        }
+        | save ($config_path | path expand)
     }
 
     open ($config_path | path expand)
