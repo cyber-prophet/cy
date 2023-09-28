@@ -33,7 +33,7 @@ export def check-requirements [] {
 }
 
 export-env {
-    banner2
+    # banner2
     let $tested_versions = ['0.85.0']
 
     version
