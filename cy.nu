@@ -872,18 +872,17 @@ export def 'passport-get' [
 
     let $pcontract = 'bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel'
     let $params = ['--node' 'https://rpc.bostrom.cybernode.ai:443' '--output' 'json']
-    let $out = ber --exec 'cyber' --no_default_params query wasm contract-state smart $pcontract $json $params
 
-    if $out.error? == null {
-        $out
-        | get data
-        | merge $in.extension
-        | reject extension approvals token_uri
-    } else {
+    ber --exec 'cyber' --no_default_params query wasm contract-state smart $pcontract $json $params
+    | if $in == null {
         if not $quiet {
             cprint --before 1 --after 2 $'No passport for *($address_or_nick)* is found'
         }
         {}
+    } else {
+        get data
+        | merge $in.extension
+        | reject extension approvals token_uri
     }
 }
 
