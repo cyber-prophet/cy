@@ -886,6 +886,13 @@ export def 'passport-get' [
     }
 }
 
+#[test]
+def passport-get-test [] {
+    equal (passport-get bostrom1aypv5wxute0nnhfv44jkhyfkzt7zyrden85tel) {}
+    equal (passport-get bostrom1aypv5wxute0nnhfv44jkhyfkzt7zyrden85ted) {}
+    equal (passport-get bostrom1de53jgxjfj5n84qzyfd7z44m9wrudygt524v6r | get nickname) 'graphkeeper'
+}
+
 # Set a passport's particle, data or avatar field for a given nickname
 #
 # > cy passport-set QmZSbGCBAPpqwXHSbUkn4P2RHiL2nRjv7BGFP4vVjcYKHd
