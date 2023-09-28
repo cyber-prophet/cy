@@ -2813,6 +2813,33 @@ export def 'ber' [
     }
 }
 
+#[test]
+def ber-test [] {
+    equal (
+        ber query rank karma bostrom1smsn8u0h5tlvt3jazf78nnrv54aspged9h2nl9 | describe
+    ) 'record<karma: string, update_time: date>'
+    equal (
+        ber query bank balances bostrom1quchyywzdxp62dq3rwan8fg35v6j58sjwnfpuu | describe
+    ) 'record<balances: table<denom: string, amount: string>, pagination: record<next_key: nothing, total: string>, update_time: date>'
+    equal (
+        ber query bank balances bostrom1cj8j6pc3nda8v708j3s4a6gq2jrnue7j857m9t | describe
+    ) 'record<balances: table<denom: string, amount: string>, pagination: record<next_key: nothing, total: string>, update_time: date>'
+    equal (
+        ber query staking delegations bostrom1eg3v42jpwf3d66v6rnrn9hedyd8qvhqy4dt8pc | describe
+    ) 'record<delegation_responses: table<delegation: record<delegator_address: string, validator_address: string, shares: string>, balance: record<denom: string, amount: string>>, pagination: record<next_key: nothing, total: string>, update_time: date>'
+    equal (
+        ber query staking delegations bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 | describe
+    ) 'record<delegation_responses: table<delegation: record<delegator_address: string, validator_address: string, shares: string>, balance: record<denom: string, amount: string>>, pagination: record<next_key: nothing, total: string>, update_time: date>'
+    equal (
+        ber query rank top  | describe
+    ) 'record<result: table<particle: string, rank: string>, pagination: record<total: int>, update_time: date>'
+    equal (
+        ber query ibc-transfer denom-traces  | describe
+    ) 'record<denom_traces: table<path: string, base_denom: string>, pagination: record<next_key: nothing, total: string>, update_time: date>'
+    equal (
+        ber query liquidity pools  | describe
+    ) 'record<pools: table<id: string, type_id: int, reserve_coin_denoms: list<string>, reserve_account_address: string, pool_coin_denom: string>, pagination: record<next_key: nothing, total: string>, update_time: date>'}
+
 # query neuron addrsss by his nick
 export def 'qnbn' [
     ...nicks: string@'nu-complete-neurons-nicks'
