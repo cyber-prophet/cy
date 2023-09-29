@@ -638,7 +638,7 @@ export def 'tmp-pin-columns' [
             return
         } else {}
         | uniq
-        | par-each {|i| {$i: (pin-text $i)}}
+        | par-each -t 3 {|i| {$i: (pin-text $i)}}
         | reduce -f {} {|it acc|
             $acc
             | merge $it
