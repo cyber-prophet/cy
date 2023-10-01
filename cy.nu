@@ -958,7 +958,10 @@ export def 'passport-set' [
 export def 'dict-neurons' [
     --df        # output as a dataframe
 ] {
-    open ($env.cy.path | path join graph neurons_dict.yaml)
+    ($env.cy.path | path join graph neurons_dict.yaml)
+    | if ($in | path exists) {
+        open
+    } else { [[neuron];['bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8']] }
     | if $df {
         fill non-exist
         | dfr into-df
