@@ -619,6 +619,7 @@ export def 'tmp-link-all' [
 #   to: QmddL5M8JZiaUDcEHT2LgUnZZGLMTTDEYVKWN1iMLk6PY8
 export def 'tmp-pin-columns' [
     --dont_replace (-D) # Don't replace the tmp cyberlinks table
+    --threads: int = 3  # A number of threads to use to pin particles
 ] {
     let $c = (
         $in
@@ -638,7 +639,7 @@ export def 'tmp-pin-columns' [
             return
         } else {}
         | uniq
-        | par-each -t 3 {|i| {$i: (pin-text $i)}}
+        | par-each -t $threads {|i| {$i: (pin-text $i)}}
         | reduce -f {} {|it acc|
             $acc
             | merge $it
