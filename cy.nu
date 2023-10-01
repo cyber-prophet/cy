@@ -70,7 +70,7 @@ export-env {
 # > "cyber" | save -f cyber.txt; cy pin-text 'cyber.txt'
 # QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 #
-# > "cyber" | save -f cyber.txt; cy pin-text 'cyber.txt' --dont_follow_path
+# > "cyber" | save -f cyber.txt; cy pin-text 'cyber.txt' --follow_file_path
 # QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6
 #
 # > cy pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV'
@@ -82,14 +82,14 @@ export def 'pin-text' [
     text_param?: string
     --only_hash  # calculate hash only, don't pin anywhere
     --dont_detect_cid  # work with CIDs as regular texts
-    --dont_follow_path # treat existing file paths as reuglar texts
+    --follow_file_path # treat existing file paths as reuglar texts
 ] {
     let $text = (
         $in
         | default $text_param
         | into string
         | if (
-            (not $dont_follow_path) and (path-exists-safe $in)
+            ($follow_file_path) and (path-exists-safe $in)
         ) {
             open
         } else {}
@@ -139,8 +139,8 @@ def test_pin_text_file_paths [] {
     # use std assert equal
     "cyber" | save -f cyber.txt
 
-    equal (pin-text 'cyber.txt' --dont_follow_path) 'QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6'
-    equal (pin-text 'cyber.txt') 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV'
+    equal (pin-text 'cyber.txt') 'QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6'
+    equal (pin-text 'cyber.txt' --follow_file_path) 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV'
 
     rm 'cyber.txt'
 }
@@ -263,7 +263,7 @@ export def 'link-files' [
             | upsert to_text $'pinned_file:($f.from_text)'
             | upsert to (ipfs add $f.from_text -Q | str replace (char nl) '')
             | if ($link_filenames) {
-                upsert from (pin-text $f.from_text --dont_follow_path)
+                upsert from (pin-text $f.from_text)
                 | move from --before to
             } else { reject from_text }
         }
