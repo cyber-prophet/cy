@@ -1753,7 +1753,7 @@ export def-env 'config-new' [
         | select address name
         | transpose -r -d
         | get $address
-        | $'($in)+($exec)'
+        | $'($in)-($exec)'
     )
 
     let $passport_nick = (
@@ -1852,6 +1852,7 @@ export def-env 'config-save' [
 
     $in_config
     | upsert config-name ($filename2 | path parse | get stem)
+    | upsert config-path ($filename2)
     | if (not $inactive) {
         config-activate
     } else {}
