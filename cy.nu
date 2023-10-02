@@ -2903,7 +2903,7 @@ def 'banner' [] {
     / ___\) | | |
    \( \(___| |_| |
     \\____)\\__  |   (ansi yellow)cy(ansi reset) nushell module is loaded
-         \(____/    have fun"
+         \(____/    have fun🔵"
 }
 
 def 'banner2' [] {
