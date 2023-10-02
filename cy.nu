@@ -2047,10 +2047,10 @@ export def log_row_csv [
     --type: string = ''
     --size: string = ''
     --status: string = ''
-    --file: string =
+    --file: path = ''
 ] {
-    let $file = ($file | default ($env.cy.path | path join cache MIME_types.csv))
-    $'($cid),($source),"($type)",($size),($status),(history session)(char nl)' | save -a $file
+    let $file_path = ($file | if $in == '' {$env.cy.path | path join cache MIME_types.csv} else {})
+    $'($cid),($source),"($type)",($size),($status),(history session)(char nl)' | save -a $file_path
 }
 
 # Read a CID from the cache, and if the CID is absent - add it into the queue
