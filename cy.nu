@@ -2115,10 +2115,11 @@ export def 'cid-download' [
 def 'cid-download-kubo' [
     cid: string
     --timeout = '300s'
-    --folder: string
+    --folder: path
     --info_only = false # Don't download the file but write a card with filetype and size
 ] {
-    print $'cid to download ($cid)'
+    log debug $'cid to download ($cid)'
+    let $file_path = ($folder | default $'($env.cy.ipfs-files-folder)' | path join $'($cid).md')
     let $type = (
         do -i {ipfs cat --timeout $timeout -l 400 $cid}
         | complete
@@ -2138,10 +2139,13 @@ def 'cid-download-kubo' [
     } else if (
         ($type =~ '(text/plain)|(ASCII text)|(Unicode text, UTF-8)|(very short file)') and (not $info_only)
      ) {
-        try {
-            ipfs get --progress=false --timeout $timeout -o $'($folder)/($cid).md' $cid
+        if (
+            ipfs get --progress=false --timeout $timeout -o $file_path $cid
+            | complete # complete here is to hide ipfs get err output, as it sends there information
+            | $in.exit_code == 0
+        ) {
             return 'text'
-        } catch {
+        } else {
             return 'not found'
         }
     } else {
@@ -2155,7 +2159,7 @@ def 'cid-download-kubo' [
             )
             | sort -r
             | to toml
-            | save -f ($folder | path join $'($cid).md')
+            | save -f $file_path
         )
         return 'non_text'
     }
