@@ -599,14 +599,14 @@ export def 'tmp-pin-columns' [
     --dont_replace (-D) # Don't replace the tmp cyberlinks table
     --threads: int = 3  # A number of threads to use to pin particles
 ] {
-    let $c = (
+    let $links = (
         $in
         | default ( tmp-view -q )
         | fill non-exist -v null
     )
 
     let $dict = (
-        $c
+        $links
         | reduce -f [] {|it acc|
             $acc
             | if $it.from_text? not-in [null ''] { append $it.from_text } else {}
@@ -624,7 +624,7 @@ export def 'tmp-pin-columns' [
         }
     )
 
-    $c
+    $links
     | each {|i| $i
         | if $i.from_text? != null {
             upsert from (
@@ -698,13 +698,13 @@ export def 'tmp-remove-existed' [] {
 
 # Create a custom unsigned cyberlinks transaction
 def 'tx-json-create-from-cybelinks' [] {
-    let $c = (
+    let $links = (
         $in
         | select from to
         | uniq
     )
 
-    let $trans = (
+    let $transaction_body = (
         '{"body":{"messages":[
         {"@type":"/cyber.graph.v1beta1.MsgCyberlink",
         "neuron":"","links":[{"from":"","to":""}]}
@@ -715,9 +715,9 @@ def 'tx-json-create-from-cybelinks' [] {
         "signatures":[]}' | from json
     )
 
-    $trans
+    $transaction_body
     | upsert body.messages.neuron $env.cy.address
-    | upsert body.messages.links $c
+    | upsert body.messages.links $links
     | save ($env.cy.path | path join temp tx-unsigned.json) --force
 }
 
@@ -764,17 +764,17 @@ def 'tx-sign-and-broadcast' [] {
 # code: 0
 # txhash: 9B37FA56D666C2AA15E36CDC507D3677F9224115482ACF8CAF498A246DEF8EB0
 export def 'tmp-send-tx' [] {
-    let $in_cyberlinks = $in
+    let $in_links = $in
 
     if not (is-connected) {
         error make {msg: 'there is no internet!'}
     }
 
-    let $c = ($in_cyberlinks | default (tmp-view -q))
+    let $links = ($in_links | default (tmp-view -q))
 
-    let $c_count = ($c | length)
+    let $links_count = ($links | length)
 
-    $c | tx-json-create-from-cybelinks
+    $links | tx-json-create-from-cybelinks
 
     let $transaction_result = (
         tx-sign-and-broadcast
@@ -786,16 +786,16 @@ export def 'tmp-send-tx' [] {
     if $transaction_result.code == 0 {
         open $filename
         | append (
-            $c
+            $links
             | upsert neuron $env.cy.address
         )
         | save $filename --force
 
-        if ($in_cyberlinks == null) {
+        if ($in_links == null) {
             tmp-clear
         }
 
-        {'cy': $'($c_count) cyberlinks should be successfully sent'}
+        {'cy': $'($links_count) cyberlinks should be successfully sent'}
         | merge $transaction_result
         | select cy code txhash
 
@@ -1181,18 +1181,18 @@ export def 'graph-to-particles' [
     --cids_only (-c)        # Output one column with CIDs only
     # --init_role             # Output if particle originally was in 'from' or 'to' column
 ] {
-    let $c = ( graph-links-df | dfr into-lazy )
+    let $links = ( graph-links-df | dfr into-lazy )
 
-    let $c_columns = ($c | dfr columns)
+    let $links_columns = ($links | dfr columns)
     if ($to and $from) {
-        error make {msg: 'you need to use only 'to', 'from' or none flags at all, none both of them'}
+        error make {msg: 'you need to use only "to", "from" or none flags at all, none both of them'}
     }
 
     def graph-to-particles-keep-column [
         c
         --column: string
     ] {
-        $c
+        $links
         | dfr rename $'particle_($column)' particle
         | dfr drop $'particle_(col-name-reverse $column)'
         | dfr with-column [
@@ -1201,7 +1201,7 @@ export def 'graph-to-particles' [
     }
 
     let $dummy = (
-        $c
+        $links
         | dfr rename particle_from particle
         | dfr drop particle_to
         | dfr with-column (dfr lit 'a' | dfr as 'init-role')
@@ -1212,16 +1212,16 @@ export def 'graph-to-particles' [
         $dummy
         | if not $to {
             dfr append --col (
-                graph-to-particles-keep-column $c --column from
+                graph-to-particles-keep-column $links --column from
             )
         } else {}
         | if not $from {
             dfr append --col (
-                graph-to-particles-keep-column $c --column to
+                graph-to-particles-keep-column $links --column to
             )
         } else {}
         | dfr into-lazy
-        | if ('link_local_index' in $c_columns) {
+        | if ('link_local_index' in $links_columns) {
             dfr sort-by [link_local_index height]
         } else {
             dfr sort-by [height]
@@ -1335,7 +1335,7 @@ export def 'graph-append-related' [
         }
     )
 
-    let $c = (
+    let $links = (
         $links_in
         | dfr into-lazy
         | if 'link_local_index' in $columns_in {} else {
@@ -1356,7 +1356,7 @@ export def 'graph-append-related' [
         from_or_to: string
         --step: int
     ] {
-        $c
+        $links
         | graph-to-particles --include_system
         | if $only_first_neuron {
             particles-only-first-neuron
@@ -1380,7 +1380,7 @@ export def 'graph-append-related' [
         ]
     }
 
-    $c
+    $links
     | dfr append -c (append_related from --step ($step))
     | dfr append -c (append_related to --step ($step + 1))
     | dfr into-lazy
@@ -1391,13 +1391,13 @@ export def 'graph-append-related' [
 
 # Output neurons stats based on piped in or the whole graph
 export def 'graph-neurons-stats' [] {
-    let $c = (graph-links-df)
+    let $links = (graph-links-df)
     let $p = (graph-particles-df)
 
     let $follows = (
         [['particle'];['QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx']] # follow
         | dfr into-df
-        | dfr join --left $c particle particle_from
+        | dfr join --left $links particle particle_from
         | dfr group-by neuron
         | dfr agg [
             (dfr col timestamp | dfr count | dfr as 'follows')
@@ -1408,7 +1408,7 @@ export def 'graph-neurons-stats' [] {
     let $followers = (
         [['particle'];['QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx']] # follow
         | dfr into-df
-        | dfr join --left $c particle particle_from
+        | dfr join --left $links particle particle_from
         | dfr join $p particle_to particle
         | dfr with-column (
             $in | dfr select content_s | dfr replace -p '\|.*' -r ''
@@ -1423,7 +1423,7 @@ export def 'graph-neurons-stats' [] {
     let $tweets = (
         [['particle'];['QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx']] # tweet
         | dfr into-df
-        | dfr join --left $c particle particle_from
+        | dfr join --left $links particle particle_from
         | dfr group-by neuron
         | dfr agg [
             (dfr col timestamp | dfr count | dfr as 'tweets')
@@ -1431,7 +1431,7 @@ export def 'graph-neurons-stats' [] {
     )
 
     (
-        $c
+        $links
         | dfr group-by neuron
         | dfr agg [
             (dfr col timestamp | dfr count  | dfr as 'links_count')
@@ -1448,14 +1448,14 @@ export def 'graph-neurons-stats' [] {
 
 # Export a graph into CSV file for import to Gephi
 export def 'graph-to-gephi' [] {
-    let $c = (graph-links-df)
+    let $links = (graph-links-df)
     let $particles = (
-        $c
+        $links
         | graph-to-particles --include_system --include_global
     )
 
     let $t1_height_index = (
-        $c.height
+        $links.height
         | dfr append -c $particles.height # Particles might be created before they appear in the filtered graph
         | dfr unique
         | dfr with-column (
@@ -1468,7 +1468,7 @@ export def 'graph-to-gephi' [] {
     )
 
     (
-        $c
+        $links
         | dfr join --left $t1_height_index height height
         | dfr with-column (
             dfr concat-str '' [
@@ -1508,9 +1508,9 @@ export def 'graph-to-gephi' [] {
 export def 'graph-to-logseq' [
     # --path: string
 ] {
-    let $c = (graph-links-df | inspect2)
+    let $links = (graph-links-df | inspect2)
     let $particles = (
-        $c
+        $links
         | graph-to-particles --include_system --include_global
         | inspect2
     )
@@ -1530,11 +1530,11 @@ export def 'graph-to-logseq' [
         save ($path | path join pages $'($p.particle).md')
     }
 
-    $c
+    $links
     | dfr into-nu
     | each {|c|
-        $"\t- [[($c.particle_to)]] ($c.height) [[($c.nick?)]]\n" |
-        save -a ($path | path join pages $'($c.particle_from).md')
+        $"\t- [[($links.particle_to)]] ($links.height) [[($links.nick?)]]\n" |
+        save -a ($path | path join pages $'($links.particle_from).md')
     }
 }
 
@@ -1593,7 +1593,7 @@ export def 'graph-add-metadata' [
     --full_content
     --include_text_only
 ] {
-    let $c = (graph-links-df)
+    let $links = (graph-links-df)
     let $p = (
         graph-particles-df
         | if $full_content {
@@ -1606,22 +1606,22 @@ export def 'graph-add-metadata' [
         } else { }
     )
 
-    let $c_columns = ($c | dfr columns)
+    let $links_columns = ($links | dfr columns)
 
     let $c_out = (
-        $c
-        | if 'particle_to' in $c_columns {
+        $links
+        | if 'particle_to' in $links_columns {
             dfr join --left $p particle_to particle
             | dfr rename content_s content_s_to
         } else {}
-        | if 'particle_from' in $c_columns {
+        | if 'particle_from' in $links_columns {
             dfr join --left $p particle_from particle
             | dfr rename content_s content_s_from
         } else {}
-        | if 'particle' in $c_columns {
+        | if 'particle' in $links_columns {
             dfr join --left $p particle particle
         } else {}
-        | if 'neuron' in $c_columns {
+        | if 'neuron' in $links_columns {
             dfr join --left (
                 dict-neurons --df
                 | dfr select neuron nick
@@ -2595,14 +2595,14 @@ export def 'balances' [
         }
     )
 
-    let $dummy1 = (
+    let $default_columns = (
         $balances | columns | prepend 'name' | uniq
         | reverse | prepend ['address'] | uniq
         | reverse | reduce -f {} {|i acc| $acc | merge {$i : 0}}
     )
 
     $balances
-    | each {|i| $dummy1 | merge $i}
+    | each {|i| $default_columns | merge $i}
     | sort-by name
     | if (($in | length) > 1) { } else {
         into record
@@ -3027,15 +3027,15 @@ def 'now-fn' [
 def 'backup-fn' [
     filename
 ] {
-    let $basename1 = ($filename | path basename)
-    let $path2 = ($env.cy.path | path join backups $'(now-fn)($basename1)')
+    let $basename = ($filename | path basename)
+    let $backups_path = ($env.cy.path | path join backups $'(now-fn)($basename)')
 
     if (
         $filename
         | path exists
     ) {
-        ^cp $filename $path2
-        # print $'Previous version of ($filename) is backed up to ($path2)'
+        ^cp $filename $backups_path
+        # print $'Previous version of ($filename) is backed up to ($backups_path)'
     } else {
         cprint $'*($filename)* does not exist'
     }
