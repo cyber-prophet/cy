@@ -942,6 +942,12 @@ export def 'dict-neurons' [
     } else { [[neuron];['bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8']] }
     | if $df {
         fill non-exist
+        | if ('addresses' in ($in | columns)) {
+            reject addresses # quick fix for failing df conversion
+        } else {}
+        | to yaml
+        | str replace -a 'null' "''"
+        | from yaml
         | dfr into-df
     } else { }
 }
