@@ -153,8 +153,8 @@ def test_pin_text_file_paths [] {
 # from: QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 # to: QmXFUupJCSfydJZ85HQHD8tU1L7CZFErbRdMTBxkAmBJaD
 export def 'link-texts' [
-    text_from
-    text_to
+    text_from: string
+    text_to: string
     --disable_append (-D) # Disable adding the cyberlink into the temp table
     --quiet (-q) # Don't output the cyberlink record after executing the command
 ] {
@@ -301,7 +301,7 @@ def test-link-files [] {
 # from: QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx
 # to: QmYwEKZimUeniN7CEAfkBRHCn4phJtNoNJxnZXEAhEt3af
 export def 'follow' [
-    neuron
+    neuron: string
 ] {
     if not (is-neuron $neuron) {
         cprint $"*($neuron)* doesn't look like an address"
@@ -337,7 +337,7 @@ def test-follow [] {
 # from: QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx
 # to: QmWm9pmmz66cq41t1vtZWoRz5xmHSmoKCrrgdP9adcpoZK
 export def 'tweet' [
-    text_to
+    text_to: string
     --disable_send (-D)
 ] {
     # let $cid_from = pin-text 'tweet'
