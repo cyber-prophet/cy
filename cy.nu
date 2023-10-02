@@ -177,18 +177,14 @@ export def 'link-texts' [
 def test_link_texts [] {
     # use ~/cy/cy.nu
     # use std assert equal
-    let expect = {
+    equal {
         from_text: cyber,
         to_text: bostrom,
         from: "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV",
         to: "QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb"
-    }
-
-    let result = (
+    } (
         link-texts "cyber" "bostrom"
     )
-
-    equal $expect $result
 }
 
 # Add a link chain to the temp table
@@ -280,7 +276,7 @@ def test-link-files [] {
     mkdir linkfilestest; cd linkfilestest
     'cyber' | save -f cyber.txt; 'bostrom' | save -f bostrom.txt
 
-    let expect = [
+    let $expect = [
         [from_text, to_text, from, to];
         [bostrom.txt, "pinned_file:bostrom.txt",
         "QmPtV5CU9v3u7MY7hMgG3z9kTno8o7JHJD1e6f3NLfZ86k", "QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb"],
@@ -288,7 +284,7 @@ def test-link-files [] {
         "QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6", "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV"]
     ]
 
-    let result = (
+    let $result = (
         link-files --link_filenames --yes
     )
 
@@ -319,14 +315,14 @@ export def 'follow' [
 def test-follow [] {
     # use std assert equal
 
-    let expect = {
+    let $expect = {
         from_text: "QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx",
         to_text: "bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8",
         from: "QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx",
         to: "QmYwEKZimUeniN7CEAfkBRHCn4phJtNoNJxnZXEAhEt3af"
     }
 
-    let result = (
+    let $result = (
         follow bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8
     )
 
@@ -358,14 +354,14 @@ export def 'tweet' [
 def test-tweet [] {
     # use std assert equal
 
-    let expect = {
+    let $expect = {
         from_text: "QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx",
         to_text: "cyber-prophet is cool",
         from: "QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx",
         to: "QmWm9pmmz66cq41t1vtZWoRz5xmHSmoKCrrgdP9adcpoZK"
     }
 
-    let result = (
+    let $result = (
         tmp-clear;
         tweet 'cyber-prophet is cool' --disable_send;
     )
@@ -388,7 +384,7 @@ def 'link-chuck' [] {
 
 # Add a random quote cyberlink to the temp table
 def 'link-quote' [] {
-    let quote = (
+    let $quote = (
         http get -e -r https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=text
         | $in + "\n\n" + 'via [forismatic.com](https://forismatic.com)'
     )
@@ -609,7 +605,7 @@ export def 'tmp-pin-columns' [
         | fill non-exist -v null
     )
 
-    let dict = (
+    let $dict = (
         $c
         | reduce -f [] {|it acc|
             $acc
@@ -780,14 +776,14 @@ export def 'tmp-send-tx' [] {
 
     $c | tx-json-create-from-cybelinks
 
-    let $_var = (
+    let $transaction_result = (
         tx-sign-and-broadcast
         | from json
         | select raw_log code txhash
     )
 
     let $filename = ($env.cy.path | path join cyberlinks_archive.csv)
-    if $_var.code == 0 {
+    if $transaction_result.code == 0 {
         open $filename
         | append (
             $c
@@ -800,14 +796,14 @@ export def 'tmp-send-tx' [] {
         }
 
         {'cy': $'($c_count) cyberlinks should be successfully sent'}
-        | merge $_var
+        | merge $transaction_result
         | select cy code txhash
 
-    } else if $_var.code == 2 {
+    } else if $transaction_result.code == 2 {
         {'cy': ('Use *"cy tmp-remove-existed"*' | cprint $in --echo) }
-        | merge $_var
+        | merge $transaction_result
     } else {
-        $_var
+        $transaction_result
     }
 }
 
@@ -1395,10 +1391,10 @@ export def 'graph-append-related' [
 
 # Output neurons stats based on piped in or the whole graph
 export def 'graph-neurons-stats' [] {
-    let c = (graph-links-df)
-    let p = (graph-particles-df)
+    let $c = (graph-links-df)
+    let $p = (graph-particles-df)
 
-    let follows = (
+    let $follows = (
         [['particle'];['QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx']] # follow
         | dfr into-df
         | dfr join --left $c particle particle_from
@@ -2866,7 +2862,7 @@ export def 'qnbn' [
     ...nicks: string@'nu-complete-neurons-nicks'
     --df
 ] {
-    let neurons = (
+    let $neurons = (
         dict-neurons
         | select nick neuron
         | where nick in $nicks
@@ -3097,7 +3093,7 @@ def 'execute-task' [
 def 'inspect2' [
     callback?: closure
 ] {
-    let input = $in
+    let $input = $in
 
     if $callback == $nothing {
         print $input
@@ -3190,7 +3186,7 @@ def agree [
     prompt
     --default-not (-n): bool
 ] {
-    let prompt = if ($prompt | str ends-with '!') {
+    let $prompt = if ($prompt | str ends-with '!') {
         $'(ansi red)($prompt)(ansi reset)'
     } else {
         $'($prompt)'
