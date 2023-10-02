@@ -2568,12 +2568,18 @@ export def 'tokens-ibc-denoms-table' [] {
     | upsert ibc_hash {|i| $i.denom | str replace 'ibc/' ''}
     | each {|i| $i
         | upsert temp_out {
-            |i| ber --disable_update query ibc-transfer denom-trace $i.ibc_hash
+            |i| ber query ibc-transfer denom-trace $i.ibc_hash
             | get denom_trace
         }
     }
     | flatten
     | reject ibc_hash
+    | upsert denom_comp {
+        |i| $i.path         #denom compound
+        | str replace -ra '[^-0-9]' ''
+        | str trim -c '-'
+        | $'($i.base_denom)/($i.denom | str substring 64..68)/($in)'
+    }
     | sort-by path --natural
 }
 
