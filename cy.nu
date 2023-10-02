@@ -431,17 +431,22 @@ export def 'link-random' [
 }
 
 # Set the custom name for tmp-links csv table
-export def-env 'tmp-links-name-set' [
+export def-env 'set-tmp-links-name' [
     name: string
 ] {
     $env.cy.tmp_links_name = $name
 }
 
 # Set the custom name for tmp-links csv table
-export def-env 'ber-force-update-set' [
-    value: bool
+export def-env 'set-ber-force-update' [
+    value?: bool
 ] {
-    $env.cy.ber_force_update = $value
+    $env.cy.ber_force_update = (
+        if $value == null {
+            not ($env.cy.ber_force_update? | default false)
+        } else {$value}
+        | inspect2
+    )
 }
 
 def 'tmp-links-name' [] {
@@ -535,7 +540,7 @@ export def 'tmp-clear' [] {
 def test-tmps [] {
     # use std assert equal
     let $temp_name = (random chars)
-    tmp-links-name-set ($temp_name)
+    set-tmp-links-name ($temp_name)
     link-texts 'cyber' 'bostrom'
 
     [[from_text, to_text]; ['cyber-prophet' '🤘'] ['tweet' 'cy is cool!']]
