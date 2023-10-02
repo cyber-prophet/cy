@@ -430,29 +430,6 @@ export def 'link-random' [
     null
 }
 
-# Set the custom name for tmp-links csv table
-export def-env 'set-tmp-links-name' [
-    name: string
-] {
-    $env.cy.tmp_links_name = $name
-}
-
-# Set the custom name for tmp-links csv table
-export def-env 'set-ber-force-update' [
-    value?: bool
-] {
-    $env.cy.ber_force_update = (
-        if $value == null {
-            not ($env.cy.ber_force_update? | default false)
-        } else {$value}
-        | inspect2
-    )
-}
-
-def 'tmp-links-name' [] {
-    $env.cy.tmp_links_name? | default 'temp'
-}
-
 # View the temp cyberlinks table
 #
 # > cy tmp-view | to yaml
@@ -2689,6 +2666,29 @@ def 'tokens-minus' [
         | upsert amount {|i| $i.amount * -1}
     )
     | tokens-sum --state $state
+}
+
+# Set the custom name for tmp-links csv table
+export def-env 'set-tmp-links-name' [
+    name: string
+] {
+    $env.cy.tmp_links_name = $name
+}
+
+# Set the custom name for tmp-links csv table
+export def-env 'set-ber-force-update' [
+    value?: bool
+] {
+    $env.cy.ber_force_update = (
+        if $value == null {
+            not ($env.cy.ber_force_update? | default false)
+        } else {$value}
+        | inspect2
+    )
+}
+
+def 'tmp-links-name' [] {
+    $env.cy.tmp_links_name? | default 'temp'
 }
 
 # Add the cybercongress node to bootstrap nodes
