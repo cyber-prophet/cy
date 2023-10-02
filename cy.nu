@@ -2166,13 +2166,13 @@ def 'cid-download-kubo' [
 }
 
 # Download a cid from gateway immediately
-export def 'cid-download-gateway' [
+def 'cid-download-gateway' [
     cid: string
     --gate_url: string = 'https://gateway.ipfs.cybernode.ai/ipfs/'
     --folder: string
     --info_only: bool = false # Don't download the file by write a card with filetype and size
 ] {
-    let $folder = ($folder | default $'($env.cy.ipfs-files-folder)')
+    let $file_path = ($folder | default $'($env.cy.ipfs-files-folder)' | path join $'($cid).md')
     let $meta = (cid-get-type-gateway $cid)
     let $type = ($meta | get -i type)
     let $size = ($meta | get -i size)
@@ -2180,13 +2180,11 @@ export def 'cid-download-gateway' [
     if (
         (($type | default '') == 'text/plain; charset=utf-8') and (not $info_only)
     ) {
-        http get -e $'($gate_url)($cid)' -m 120 | save -f ($folder | path join $'($cid).md')
+        http get -e $'($gate_url)($cid)' -m 120 | save -f $file_path
         return 'text'
-        # log_row_csv --cid $cid --source $gate_url --type $type --size $size --status '4.downloaded file'
     } else if ($type != null) {
-        {'MIME type': $type, 'Size': $size} | sort -r | to toml | save -f ($folder | path join $'($cid).md')
+        {'MIME type': $type, 'Size': $size} | sort -r | to toml | save -f $file_path
         return 'non_text'
-        # log_row_csv --cid $cid --source $gate_url --type $type --size $size --status '4.downloaded info'
     } else {
         return 'not found'
     }
