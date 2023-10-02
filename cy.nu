@@ -23,7 +23,7 @@ export def check-requirements [] {
         }
     }
 
-    ['ipfs', 'bat', 'mdcat', 'rich', 'curl', 'pueue', 'cyber', 'pussy']
+    ['ipfs', 'rich', 'curl', 'cyber', 'pussy']
     | par-each {
         |i| if (which ($i) | is-empty) {
             $'($i) is missing'
