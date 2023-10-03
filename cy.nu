@@ -229,7 +229,7 @@ export def 'link-chain' [
 #   to: QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 # > cd ..; rm -r linkfilestest
 export def 'link-files' [
-    ...files: string        # filenames to add into the local ipfs node
+    ...files: path        # filenames to add into the local ipfs node
     --link_filenames (-n)   # Add filenames as a from link
     --disable_append (-D)   # Don't append links to the tmp table
     --quiet                 # Don't output results page
@@ -477,11 +477,9 @@ export def 'tmp-view' [
 
 # Append piped-in table to the temp cyberlinks table
 export def 'tmp-append' [
-    cyberlinks?: table          # cyberlinks table
     --quiet (-q)
 ] {
     $in
-    | default $cyberlinks
     | upsert timestamp (now-fn)
     | prepend (tmp-view -q)
     | if $quiet { tmp-replace -q } else { tmp-replace }
@@ -489,11 +487,9 @@ export def 'tmp-append' [
 
 # Replace the temp table with piped-in table
 export def 'tmp-replace' [
-    cyberlinks?: table          # cyberlinks table
     --quiet (-q)
 ] {
     $in
-    | default $cyberlinks
     | save ($env.cy.path | path join $'cyberlinks_(tmp-links-name).csv') --force
 
     if (not $quiet) { tmp-view -q }
