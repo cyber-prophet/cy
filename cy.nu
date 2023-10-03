@@ -1263,8 +1263,8 @@ export def 'graph-to-particles' [
         | dfr collect
     )
 }
-
-export def particles-only-first-neuron [
+# In the piped in particles df leave only particles appeared for the first time
+export def 'particles-keep-only-first-neuron' [
 ] {
     dfr join -s '_global' (
         graph-particles-df
@@ -1332,11 +1332,13 @@ export def 'graph-update-particles-parquet' [
 export def 'graph-filter-neurons' [
     ...neurons_nicks: string@'nu-complete-neurons-nicks'
 ] {
+    let $links = ( graph-links-df )
+
     $neurons_nicks
     | dfr into-df
     | dfr join ( dict-neurons --df ) '0' nick
     | dfr select neuron
-    | dfr join ( graph-links-df ) neuron neuron
+    | dfr join ( $links ) neuron neuron
 }
 
 # Append related cyberlinks to the piped in graph
@@ -1377,7 +1379,7 @@ export def 'graph-append-related' [
         $links
         | graph-to-particles --include_system
         | if $only_first_neuron {
-            particles-only-first-neuron
+            particles-keep-only-first-neuron
         } else {}
         | dfr into-lazy
         | dfr select particle link_local_index init-role step
@@ -1561,7 +1563,7 @@ export def 'graph-to-txt-feed' [] {
     $in
     | graph-append-related --only_first_neuron
     | graph-to-particles
-    | particles-only-first-neuron
+    | particles-keep-only-first-neuron
     | graph-add-metadata --full_content
     # | dfr filter-with ($in.content_s | dfr is-null | dfr not)
     | dfr sort-by [link_local_index height]
