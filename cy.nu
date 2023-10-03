@@ -4,7 +4,7 @@
 # Use:
 # > overlay use ~/cy/cy.nu -p -r
 
-use std assert equal
+use std assert [equal greater]
 use std clip
 use nu-utils [bar, cprint, "str repeat", to-safe-filename]
 
@@ -948,6 +948,12 @@ export def 'dict-neurons' [
     } else { }
 }
 
+#[test]
+def dict-neurons-test-dummy [] {
+    equal (dict-neurons; null) null
+    equal (dict-neurons --df; null) null
+}
+
 # Add neurons to YAML-dictionary WIP
 export def 'dict-neurons-add' [] {
     let $i = $in
@@ -1098,6 +1104,11 @@ export def-env 'graph-download-snapshot' [
     }
 }
 
+#[test]
+def graph-download-snapshot-test-dummy [] {
+    equal (graph-download-snapshot; null) null
+}
+
 # Download the latest cyberlinks from a hasura cybernode endpoint
 export def 'graph-download-links' [] {
     def get_links_query [
@@ -1142,6 +1153,11 @@ export def 'graph-download-links' [] {
             break
         }
     }
+}
+
+#[test]
+def graph-download-links-test-dummy [] {
+    equal (graph-download-links; null) null
 }
 
 # filter system particles out
@@ -2011,6 +2027,11 @@ def serp1 [
     $serp
 }
 
+#[test]
+def search-test-dummy [] {
+    greater (search 'cy' | length) 0
+}
+
 # Obtain cid info
 # > cy cid-get-type-gateway QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV | to yaml
 # type: text/plain; charset=utf-8
@@ -2167,6 +2188,11 @@ def 'cid-download-kubo' [
     }
 }
 
+#[test]
+def cid-download-kubo-test-dummy [] {
+    equal (cid-download-kubo 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV') 'text'
+}
+
 # Download a cid from gateway immediately
 def 'cid-download-gateway' [
     cid: string
@@ -2190,6 +2216,11 @@ def 'cid-download-gateway' [
     } else {
         return 'not found'
     }
+}
+
+#[test]
+def cid-download-gateway-test-dummy [] {
+    equal (cid-download-gateway QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV) 'text'
 }
 
 # Add a CID to the download queue
