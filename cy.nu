@@ -2589,7 +2589,9 @@ def test-tokens-routed-from [] {
 #   base_denom: uatom
 #   denom: ibc/5F78C42BCC76287AE6B3185C6C1455DFFF8D805B1847F94B9B625384B93885C7
 #   amount: '150000'
-export def 'tokens-ibc-denoms-table' [] {
+export def 'tokens-ibc-denoms-table' [
+    --full # return all the columns
+] {
     tokens-supply-get
     | transpose
     | rename denom amount
@@ -2610,6 +2612,9 @@ export def 'tokens-ibc-denoms-table' [] {
         | $'($i.base_denom)/($i.denom | str substring 64..68)/($in)'
     }
     | sort-by path --natural
+    | if $full {} else {
+        select denom denom_comp
+    }
 }
 
 # Check balances for the keys added to the active CLI
