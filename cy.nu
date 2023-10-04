@@ -2617,6 +2617,12 @@ export def 'tokens-ibc-denoms-table' [
     }
 }
 
+export def 'tokens-ibc-convert' [] {
+    join -l (cy tokens-ibc-denoms-table) denom denom
+    | upsert denom {|i| if $i.denom_comp? != null {$i.denom_comp} else {$i.denom}}
+    | reject denom_comp
+}
+
 # Check balances for the keys added to the active CLI
 #
 # > cy balances --test | to yaml
