@@ -1161,7 +1161,7 @@ def graph-download-links-test-dummy [] {
 }
 
 # filter system particles out
-def 'gp-filter-system' [
+def 'gp-filter-out-system-particles' [
     column = 'particle'
 ] {
     dfr filter-with ( (dfr col $column) | dfr is-in (system_cids) | dfr expr-not )
@@ -1246,7 +1246,7 @@ export def 'graph-to-particles' [
         }
         | dfr unique --subset [particle]
         | if not $include_system {
-            gp-filter-system
+            gp-filter-out-system-particles
         } else {}
         | if $cids_only {
             dfr select particle
@@ -1680,7 +1680,7 @@ export def 'graph-links-df' [
     } else {}
     | if $exclude_system {
         dfr into-lazy
-        | gp-filter-system particle_from
+        | gp-filter-out-system-particles particle_from
     } else { }
 }
 
