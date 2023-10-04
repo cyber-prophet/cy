@@ -1868,7 +1868,7 @@ export def-env 'config-activate' [
     config_name?: string@'nu-complete-config-names'
 ] {
     let $config = ($in | default (config-view $config_name))
-    let $config_path = ('~' | path expand | path join .cy_config.toml)
+    let $config_path = ($nu.home-path | path join .cy_config.toml)
     let $config_toml = (
         open $config_path
         | merge $config
@@ -2983,11 +2983,11 @@ def is-connected []  {
 }
 
 def open_cy_config_toml [] {
-    let $config_path = ('~' | path expand | path join .cy_config.toml)
+    let $config_path = ($nu.home-path | path join .cy_config.toml)
     if not ($config_path | path exists) {
         {
-            'path': ('~' | path expand | path join cy)
-            'ipfs-files-folder': ('~' | path expand | path join cy graph particles safe)
+            'path': ($nu.home-path | path join cy)
+            'ipfs-files-folder': ($nu.home-path | path join cy graph particles safe)
             'ipfs-download-from': 'gateway'
             'ipfs-storage': 'cybernode'
         }
