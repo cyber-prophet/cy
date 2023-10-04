@@ -2473,6 +2473,7 @@ export def 'tokens-rewards-get' [
     ber query distribution rewards $address [--height $height]
     | get total -i
     | if $in == null {return} else {}
+    | if $in == [] {return} else {}
     | upsert amount {|i| $i.amount | into int}
     | if $sum {
         tokens-sum
