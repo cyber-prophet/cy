@@ -6,7 +6,7 @@
 
 use std assert [equal greater]
 use std clip
-use nu-utils [bar, cprint, "str repeat", to-safe-filename]
+use nu-utils [bar, cprint, "str repeat", to-safe-filename, to-number-format]
 
 use log
 
@@ -2610,11 +2610,14 @@ export def 'tokens-ibc-denoms-table' [
     }
     | flatten
     | reject ibc_hash
+    | join -l (tokens-denoms-decimals-dict) base_denom base_denom
+    # | default coinMinimalDenom base_denom
+    | upsert amount {|i| $i.amount / (10 ** ($i.coinDecimals? | default 0))}
     | upsert denom_comp {
         |i| $i.path         #denom compound
         | str replace -ra '[^-0-9]' ''
         | str trim -c '-'
-        | $'($i.base_denom)/($i.denom | str substring 64..68)/($in)'
+        | $'($i.base_denom)/($i.denom | str substring 62..68)/($in)'
     }
     | sort-by path --natural
     | if $full {} else {
@@ -2626,6 +2629,38 @@ export def 'tokens-ibc-convert' [] {
     join -l (cy tokens-ibc-denoms-table) denom denom
     | upsert denom {|i| if $i.denom_comp? != null {$i.denom_comp} else {$i.denom}}
     | reject denom_comp
+}
+
+export def 'tokens-denoms-decimals-dict' [] {
+    # eventually should be on contract bostrom15phze6xnvfnpuvvgs2tw58xnnuf872wlz72sv0j2yauh6zwm7cmqqpmc42
+    # but now on git
+    http get 'https://raw.githubusercontent.com/cybercongress/cyb/master/src/utils/tokenList.js'
+    | str replace -r -m '(?s).*(\[.*\]).*' '$1'
+    | from nuon
+    | rename -c ['coinMinimalDenom' 'base_denom']
+    | rename -c ['denom' 'ticker']
+    | append [[base_denom, ticker, coinDecimals]; [usomm, SOMM, 6], [ucre, CRE, 6]]
+}
+
+export def 'tokens-naive-prices-in-h' [] {
+    let $pools = (tokens-pools-table-get | select reserve_coin_amount reserve_account_address reserve_coin_denom)
+
+    $pools
+    | where reserve_coin_denom == hydrogen
+    | rename hydrogen
+    | join -l ($pools | where reserve_coin_denom != hydrogen) reserve_account_address
+    | insert price_in_h_naive {|i| $i.hydrogen / $i.reserve_coin_amount}
+    | select reserve_coin_denom_ price_in_h_naive
+    | rename denom
+    | append {denom: hydrogen price_in_h_naive: 1}
+}
+
+export def 'tokens-naive-amount-in-h' [] {
+    join (tokens-naive-prices-in-h) denom denom -l
+    | default 0 price_in_h_naive
+    | upsert amount_in_h_naive {
+        |i| $i.amount * $i.price_in_h_naive | to-number-format $in -D H -w 15
+    }
 }
 
 # Check balances for the keys added to the active CLI
