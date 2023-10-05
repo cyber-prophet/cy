@@ -773,7 +773,7 @@ export def 'tmp-send-tx' [] {
         error make {msg: 'there is no internet!'}
     }
 
-    let $links = ($in_links | default (tmp-view -q))
+    let $links = ($in_links | default (tmp-view -q) | first 100)
 
     let $links_count = ($links | length)
 
@@ -788,14 +788,11 @@ export def 'tmp-send-tx' [] {
     let $filename = ($env.cy.path | path join cyberlinks_archive.csv)
     if $transaction_result.code == 0 {
         open $filename
-        | append (
-            $links
-            | upsert neuron $env.cy.address
-        )
+        | append ( $links | upsert neuron $env.cy.address )
         | save $filename --force
 
         if ($in_links == null) {
-            tmp-clear
+            tmp-view -q | skip 100 | tmp-replace
         }
 
         {'cy': $'($links_count) cyberlinks should be successfully sent'}
