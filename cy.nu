@@ -452,9 +452,8 @@ export def 'tmp-view' [
 ] {
     let $filename = ($env.cy.path | path join $'cyberlinks_(tmp-links-name).csv')
     let $tmp_links = (
-        $filename
-        | try {
-            open
+        try {
+            open $filename
             | if $no_timestamp { reject timestamp } else {}
         } catch {
             [[from]; [null]] | first 0
@@ -472,7 +471,15 @@ export def 'tmp-view' [
         }
     }
 
+    let $links_columns = ($tmp_links | columns)
+
     $tmp_links
+    | if 'from_text' in $links_columns {
+        into string from_text
+    } else {}
+    | if 'to_text' in $links_columns {
+        into string to_text
+    } else {}
 }
 
 # Append piped-in table to the temp cyberlinks table
