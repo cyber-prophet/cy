@@ -799,11 +799,18 @@ export def 'tmp-send-tx' [] {
         | merge $transaction_result
         | select cy code txhash
 
-    } else if $transaction_result.code == 2 {
-        {'cy': ('Use *"cy tmp-remove-existed"*' | cprint $in --echo) }
-        | merge $transaction_result
     } else {
-        $transaction_result
+        print $transaction_result
+
+        if $transaction_result.raw_log == 'not enough personal bandwidth' {
+            print (links-bandwidth-neuron $env.cy.address)
+            make error-cy --unspanned 'Increase your *Volts* balance or wait time.'
+        }
+        if $transaction_result.raw_log =~ 'your cyberlink already exists' {
+            make error-cy --unspanned 'Use *cy tmp-remove-existed*'
+        }
+
+        cprint 'The transaction might be not sent.'
     }
 }
 
