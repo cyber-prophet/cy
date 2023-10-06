@@ -344,7 +344,7 @@ export def 'tweet' [
     let $cid_from = 'QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx'
 
     if (not $disable_send) {
-        link-texts $cid_from $text_to -D | tmp-send-tx
+        link-texts $cid_from $text_to -D | tmp-send-tx $in
     } else {
         link-texts $cid_from $text_to
     }
@@ -766,14 +766,18 @@ def 'tx-sign-and-broadcast' [] {
 # cy: 2 cyberlinks should be successfully sent
 # code: 0
 # txhash: 9B37FA56D666C2AA15E36CDC507D3677F9224115482ACF8CAF498A246DEF8EB0
-export def 'tmp-send-tx' [] {
-    let $in_links = $in
-
+export def 'tmp-send-tx' [
+    $links_param?
+] {
     if not (is-connected) {
         error make {msg: 'there is no internet!'}
     }
 
-    let $links = ($in_links | default (tmp-view -q) | first 100)
+    if ($links_param != null) and ($links_param | length | $in > 100) {
+        error-make-cy '*$links_param* length is bigger than 100, use links-add'
+    }
+
+    let $links = ($links_param | default (tmp-view -q) | first 100)
 
     let $links_count = ($links | length)
 
@@ -791,7 +795,7 @@ export def 'tmp-send-tx' [] {
         | append ( $links | upsert neuron $env.cy.address )
         | save $filename --force
 
-        if ($in_links == null) {
+        if ($links_param == null) {
             tmp-view -q | skip 100 | tmp-replace
         }
 
@@ -804,10 +808,10 @@ export def 'tmp-send-tx' [] {
 
         if $transaction_result.raw_log == 'not enough personal bandwidth' {
             print (links-bandwidth-neuron $env.cy.address)
-            make error-cy --unspanned 'Increase your *Volts* balance or wait time.'
+            error-make-cy --unspanned 'Increase your *Volts* balance or wait time.'
         }
         if $transaction_result.raw_log =~ 'your cyberlink already exists' {
-            make error-cy --unspanned 'Use *cy tmp-remove-existed*'
+            error-make-cy --unspanned 'Use *cy tmp-remove-existed*'
         }
 
         cprint 'The transaction might be not sent.'
