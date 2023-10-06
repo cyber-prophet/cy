@@ -3292,3 +3292,15 @@ def agree [
     | inspect2
     | $in in [yes]
 }
+
+def 'error-make-cy' [
+    msg: string
+    --unspanned (-u) # remove the origin label from the error
+] {
+    {msg: (cprint --echo $msg)}
+    | if $unspanned {
+        error make --unspanned $in
+    } else {
+        error make $in
+    }
+}
