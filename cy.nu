@@ -773,24 +773,24 @@ export def 'tmp-send-tx' [
         error make {msg: 'there is no internet!'}
     }
 
-    if ($links_param != null) and ($links_param | length | $in > 100) {
+    if ($links_param | describe | $in =~ '^(table|list)') and ($links_param | length | $in > 100) {
         error-make-cy '*$links_param* length is bigger than 100, use links-add'
     }
 
-    let $links = ($links_param | default (tmp-view -q) | first 100)
+    let $links = $links_param | default (tmp-view -q | first 100)
 
     let $links_count = ($links | length)
 
     $links | tx-json-create-from-cybelinks
 
-    let $transaction_result = (
+    let $response = (
         tx-sign-and-broadcast
         | from json
         | select raw_log code txhash
     )
 
     let $filename = ($env.cy.path | path join cyberlinks_archive.csv)
-    if $transaction_result.code == 0 {
+    if $response.code == 0 {
         open $filename
         | append ( $links | upsert neuron $env.cy.address )
         | save $filename --force
@@ -800,17 +800,17 @@ export def 'tmp-send-tx' [
         }
 
         {'cy': $'($links_count) cyberlinks should be successfully sent'}
-        | merge $transaction_result
+        | merge $response
         | select cy code txhash
 
     } else {
-        print $transaction_result
+        print $response
 
-        if $transaction_result.raw_log == 'not enough personal bandwidth' {
+        if $response.raw_log == 'not enough personal bandwidth' {
             print (links-bandwidth-neuron $env.cy.address)
             error-make-cy --unspanned 'Increase your *Volts* balance or wait time.'
         }
-        if $transaction_result.raw_log =~ 'your cyberlink already exists' {
+        if $response.raw_log =~ 'your cyberlink already exists' {
             error-make-cy --unspanned 'Use *cy tmp-remove-existed*'
         }
 
