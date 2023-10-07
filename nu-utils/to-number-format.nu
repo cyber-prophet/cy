@@ -2,8 +2,8 @@
 export def main [
     num?                            # Number to format
     --thousands_delim (-t) = '_'    # Thousands delimiter: number-format 1000 -t ': 1'000
-    --whole_part_length (-w) = 0    # Length of padding whole-part digits: number-format 123 -w 6:    123
-    --decimal_digits (-d) = 0       # Number of digits after decimal delimiter: number-format 1000.1234 -d 2: 1000.12
+    --integers (-w) = 0    # Length of padding whole-part digits: number-format 123 -w 6:    123
+    --decimals (-d) = 0       # Number of digits after decimal delimiter: number-format 1000.1234 -d 2: 1000.12
     --denom (-D) = ''               # Denom `--denom "Wt": number-format 1000 --denom 'Wt': 1000Wt
 ] {
     let $in_num = $in
@@ -32,8 +32,8 @@ export def main [
             skip 1
         } else { }
         | str join ''
-        | if $whole_part_length == 0 { } else {
-            fill -w $whole_part_length -c ' ' -a r
+        | if $integers == 0 { } else {
+            fill -w $integers -c ' ' -a r
         }
     )
 
@@ -46,11 +46,11 @@ export def main [
     )
 
     let dec_part2 = (
-        if $decimal_digits == 0 {
+        if $decimals == 0 {
             ''
         } else {
-            $".($dec_part | str substring 0..$decimal_digits)"
-            | fill -w ($decimal_digits + 1) -c '0' -a l
+            $".($dec_part | str substring 0..$decimals)"
+            | fill -w ($decimals + 1) -c '0' -a l
         }
     )
 

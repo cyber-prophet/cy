@@ -3,7 +3,7 @@ use to-number-format.nu
 export def main [
     column_name: string
     --thousands_delim (-t) = '_'    # Thousands delimiter: number-format 1000 -t ': 1'000
-    --decimal_digits (-d) = 0       # Number of digits after decimal delimiter: number-format 1000.1234 -d 2: 1000.12
+    --decimals (-d) = 0       # Number of digits after decimal delimiter: number-format 1000.1234 -d 2: 1000.12
     --denom (-D) = ''               # Denom `--denom "Wt": number-format 1000 --denom 'Wt': 1000Wt
 ] {
     let $input = $in
@@ -12,19 +12,19 @@ export def main [
         error make {'msg': $'There is no ($column_name) in columns'}
     }
 
-    # let $whole_part_length = (
+    # let $integers = (
     #     $input
     #     | get $column_name
     #     | math max
-    #     | number-format $in --denom $denom --decimal_digits $decimal_digits --thousands_delim $thousands_delim
+    #     | number-format $in --denom $denom --decimals $decimals --thousands_delim $thousands_delim
     #     | inspect
     #     | str length --grapheme-clusters
     #     | append ($column_name | str length)
     #     | math max
-    #     | $in - $decimal_digits - ($thousands_delim | str length) - ($denom | str length)
+    #     | $in - $decimals - ($thousands_delim | str length) - ($denom | str length)
     # )
 
-    # let $whole_part_length = (
+    # let $integers = (
     #     $input
     #     | get $column_name
     #     | math max
@@ -32,17 +32,17 @@ export def main [
     #     | split row '.'
     #     | get 0
     #     | str length
-    #     | number-format $in --denom $denom --decimal_digits $decimal_digits --thousands_delim $thousands_delim
+    #     | number-format $in --denom $denom --decimals $decimals --thousands_delim $thousands_delim
     #     | inspect
     #     | str length --grapheme-clusters
     #     | append ($column_name | str length)
     #     | math max
-    #     | $in - $decimal_digits - ($thousands_delim | str length) - ($denom | str length)
+    #     | $in - $decimals - ($thousands_delim | str length) - ($denom | str length)
     # )
 
     let $thousands_delim_length = ($thousands_delim | str length --grapheme-clusters)
 
-    let $whole_part_length = (
+    let $integers = (
         $input
         | get $column_name
         | math max
@@ -54,7 +54,7 @@ export def main [
         } else {}
         | append (
             $column_name | str length
-            | $in - $decimal_digits - $thousands_delim_length - ($denom | str length --grapheme-clusters)
+            | $in - $decimals - $thousands_delim_length - ($denom | str length --grapheme-clusters)
         )
         | math max
     )
@@ -64,8 +64,8 @@ export def main [
     | upsert $column_name {
         |i| (
             to-number-format ($i | get $column_name)
-            --denom $denom --decimal_digits $decimal_digits
-            --thousands_delim $thousands_delim --whole_part_length $whole_part_length
+            --denom $denom --decimals $decimals
+            --thousands_delim $thousands_delim --integers $integers
         )
     }
 }
