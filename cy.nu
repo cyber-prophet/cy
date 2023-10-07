@@ -818,6 +818,16 @@ export def 'tmp-send-tx' [
     }
 }
 
+export def 'links-bandwidth-neuron' [
+    neuron?
+] {
+    ber query bandwidth neuron ($neuron | default $env.cy.address) --cache_stale_refresh 5min
+    | get neuron_bandwidth
+    | select max_value remained_value
+    | transpose param links
+    | upsert links {|i| $i.links | into int | $in / (links-price-get) | math floor}
+}
+
 # Publish all links in the temp table to cybergraph
 export def 'links-publish' [] {
     tmp-view | length | $in // 100 | 0..$in | each {tmp-send-tx}
