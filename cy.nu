@@ -343,10 +343,10 @@ export def 'tweet' [
     # let $cid_from = pin-text 'tweet'
     let $cid_from = 'QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx'
 
-    if (not $disable_send) {
-        link-texts $cid_from $text_to -D | tmp-send-tx $in
-    } else {
+    if $disable_send {
         link-texts $cid_from $text_to
+    } else {
+        link-texts $cid_from $text_to -D | [$in] | tmp-send-tx $in
     }
 }
 
