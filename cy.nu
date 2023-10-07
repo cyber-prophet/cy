@@ -2703,6 +2703,23 @@ export def 'tokens-naive-amount-in-h' [] {
     | move amount_in_h_naive --before amount
 }
 
+export def 'tokens-format-amount' [] {
+    tokens-ibc-convert
+    | upsert base_denom {|i| $i.denom_comp | split row '/' | get 0 }
+    | join -l (tokens-denoms-decimals-dict) base_denom base_denom
+    | default 0 decimals
+    | upsert denom_comp {
+        |i| $i.denom_comp
+        | str replace $i.base_denom ($i.ticker? | default ($i.denom_comp | str upcase))
+    }
+    | upsert amount_common {
+        |i| $i.amount / (10 ** $i.decimals)
+        | to-number-format --integers 9 --decimals 2
+    }
+    | move amount_common --after denom_comp
+    | reject base_denom ticker decimals
+}
+
 # Check balances for the keys added to the active CLI
 #
 # > cy balances --test | to yaml
