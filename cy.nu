@@ -2649,10 +2649,11 @@ export def 'tokens-ibc-denoms-table' [
     }
 }
 
-export def 'tokens-ibc-convert' [] {
-    join -l (cy tokens-ibc-denoms-table) denom denom
-    | upsert denom {|i| if $i.denom_comp? != null {$i.denom_comp} else {$i.denom}}
-    | reject denom_comp
+def 'tokens-ibc-convert' [] {
+    join -l (tokens-ibc-denoms-table) denom denom
+    | upsert denom_comp {|i| if $i.denom_comp? != null {$i.denom_comp} else {$i.denom}}
+    | move denom_comp --before amount
+    | move denom --after ($in | columns | last)
 }
 
 export def 'tokens-denoms-decimals-dict' [] {
