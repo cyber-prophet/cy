@@ -818,6 +818,11 @@ export def 'tmp-send-tx' [
     }
 }
 
+# Publish all links in the temp table to cybergraph
+export def 'links-publish' [] {
+    tmp-view | length | $in // 100 | 0..$in | each {tmp-send-tx}
+}
+
 # Copy a table from the pipe into the clipboard (in tsv format)
 export def 'tsv-copy' [] {
     $in | to tsv | clip --no-notify --silent --no-strip
