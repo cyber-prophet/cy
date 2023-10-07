@@ -2696,8 +2696,11 @@ export def 'tokens-naive-amount-in-h' [] {
     join (tokens-naive-prices-in-h) denom denom -l
     | default 0 price_in_h_naive
     | upsert amount_in_h_naive {
-        |i| $i.amount * $i.price_in_h_naive | to-number-format $in -D H -w 15
+        |i| $i.amount * $i.price_in_h_naive
+        | to-number-format -D H -w 15
     }
+    | reject price_in_h_naive
+    | move amount_in_h_naive --before amount
 }
 
 # Check balances for the keys added to the active CLI
