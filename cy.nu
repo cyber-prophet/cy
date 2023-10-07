@@ -818,6 +818,10 @@ export def 'tmp-send-tx' [
     }
 }
 
+def 'links-price-get' [] {
+    ber query bandwidth price | get price.dec | into float | $in * 1000
+}
+
 export def 'links-bandwidth-neuron' [
     neuron?
 ] {
