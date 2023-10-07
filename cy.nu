@@ -833,7 +833,7 @@ export def 'links-bandwidth-neuron' [
 
 # Publish all links in the temp table to cybergraph
 export def 'links-publish' [] {
-    links-view | length | $in // 100 | 0..$in | each {links-send-tx}
+    links-view -q | length | $in // 100 | 0..$in | each {links-send-tx}
 }
 
 # Copy a table from the pipe into the clipboard (in tsv format)
