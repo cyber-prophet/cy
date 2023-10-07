@@ -765,7 +765,7 @@ def 'tx-sign-and-broadcast' [] {
 # cy: 2 cyberlinks should be successfully sent
 # code: 0
 # txhash: 9B37FA56D666C2AA15E36CDC507D3677F9224115482ACF8CAF498A246DEF8EB0
-export def 'links-send-tx' [
+def 'links-send-tx' [
     $links_param?
 ] {
     if not (is-connected) {
