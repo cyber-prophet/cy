@@ -167,7 +167,7 @@ export def 'link-texts' [
     }
 
     if not $disable_append {
-        $row | tmp-append --quiet
+        $row | links-append --quiet
     }
 
     if not $quiet {$row}
@@ -231,7 +231,7 @@ export def 'link-chain' [
 export def 'link-files' [
     ...files: path        # filenames to add into the local ipfs node
     --link_filenames (-n)   # Add filenames as a from link
-    --disable_append (-D)   # Don't append links to the tmp table
+    --disable_append (-D)   # Don't append links to the links table
     --quiet                 # Don't output results page
     --yes (-y)              # Confirm uploading files without request
 ] {
@@ -265,7 +265,7 @@ export def 'link-files' [
         }
     )
 
-    if not $disable_append { $results | tmp-append --quiet }
+    if not $disable_append { $results | links-append --quiet }
     if not $quiet { $results }
 }
 
@@ -331,7 +331,7 @@ def test-follow [] {
 
 # Add a tweet and send it immediately (unless of disable_send flag)
 #
-# > cy tmp-clear; cy tweet 'cyber-prophet is cool' --disable_send | to yaml
+# > cy links-clear; cy tweet 'cyber-prophet is cool' --disable_send | to yaml
 # from_text: QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx
 # to_text: cyber-prophet is cool
 # from: QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx
@@ -346,7 +346,7 @@ export def 'tweet' [
     if $disable_send {
         link-texts $cid_from $text_to
     } else {
-        link-texts $cid_from $text_to -D | [$in] | tmp-send-tx $in
+        link-texts $cid_from $text_to -D | [$in] | links-send-tx $in
     }
 }
 
@@ -362,7 +362,7 @@ def test-tweet [] {
     }
 
     let $result = (
-        tmp-clear;
+        links-clear;
         tweet 'cyber-prophet is cool' --disable_send;
     )
 
@@ -428,7 +428,7 @@ export def 'link-random' [
 
 # View the temp cyberlinks table
 #
-# > cy tmp-view | to yaml
+# > cy links-view | to yaml
 # There are 2 cyberlinks in the temp table:
 # - from_text: chuck norris
 #   to_text: |-
@@ -446,12 +446,12 @@ export def 'link-random' [
 #   from: QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna
 #   to: QmWoxYsWYuTP4E2xaQHr3gUZZTBC7HdNDVhis1BK9X3qjX
 #   timestamp: 20230702-113842
-export def 'tmp-view' [
+export def 'links-view' [
     --quiet (-q) # Don't print info
     --no_timestamp
 ] {
-    let $filename = ($env.cy.path | path join $'cyberlinks_(tmp-links-name).csv')
-    let $tmp_links = (
+    let $filename = ($env.cy.path | path join $'cyberlinks_(links-list-name).csv')
+    let $links = (
         try {
             open $filename
             | if $no_timestamp { reject timestamp } else {}
@@ -461,7 +461,7 @@ export def 'tmp-view' [
     )
 
     if (not $quiet) {
-        let $links_count = ($tmp_links | length)
+        let $links_count = ($links | length)
 
         if $links_count == 0 {
             cprint $'The temp cyberlinks table *($filename)* is empty.
@@ -471,9 +471,9 @@ export def 'tmp-view' [
         }
     }
 
-    let $links_columns = ($tmp_links | columns)
+    let $links_columns = ($links | columns)
 
-    $tmp_links
+    $links
     | if 'from_text' in $links_columns {
         into string from_text
     } else {}
@@ -483,48 +483,47 @@ export def 'tmp-view' [
 }
 
 # Append piped-in table to the temp cyberlinks table
-export def 'tmp-append' [
+export def 'links-append' [
     --quiet (-q)
 ] {
     $in
     | upsert timestamp (now-fn)
-    | prepend (tmp-view -q)
-    | if $quiet { tmp-replace -q } else { tmp-replace }
+    | prepend (links-view -q)
+    | if $quiet { links-replace -q } else { links-replace }
 }
 
 # Replace the temp table with piped-in table
-export def 'tmp-replace' [
+export def 'links-replace' [
     --quiet (-q)
 ] {
     $in
-    | save ($env.cy.path | path join $'cyberlinks_(tmp-links-name).csv') --force
+    | save ($env.cy.path | path join $'cyberlinks_(links-list-name).csv') --force
 
-    if (not $quiet) { tmp-view -q }
+    if (not $quiet) { links-view -q }
 }
 
 # Empty the temp cyberlinks table
-export def 'tmp-clear' [] {
-    let $filename = ($env.cy.path | path join $'cyberlinks_(tmp-links-name).csv')
+export def 'links-clear' [] {
+    let $filename = ($env.cy.path | path join $'cyberlinks_(links-list-name).csv')
     backup-fn $filename
 
     $'from_text,to_text,from,to,timestamp(char nl)'
     | save $filename --force
-    # print 'TMP-table is clear now.'
 }
 
 #[test]
 def test-tmps [] {
     # use std assert equal
     let $temp_name = (random chars)
-    set-tmp-links-name ($temp_name)
+    set-links-table-name ($temp_name)
     link-texts 'cyber' 'bostrom'
 
     [[from_text, to_text]; ['cyber-prophet' '🤘'] ['tweet' 'cy is cool!']]
-    | tmp-append
+    | links-append
 
-    tmp-pin-columns;
+    links-pin-columns;
     equal (
-        tmp-view --no_timestamp
+        links-view --no_timestamp
     ) [
         [from_text, to_text, from, to];
         [cyber, bostrom, "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV", "QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb"],
@@ -532,9 +531,9 @@ def test-tmps [] {
         [tweet, "cy is cool!", "QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx", "QmddL5M8JZiaUDcEHT2LgUnZZGLMTTDEYVKWN1iMLk6PY8"]
     ]
 
-    tmp-link-all 'cy testing script'
+    links-link-all 'cy testing script'
     equal (
-        tmp-view --no_timestamp
+        links-view --no_timestamp
     ) [
         [from_text, to_text, from, to];
         ["cy testing script", bostrom, "QmdMy9SGd3StRUXoEX4BZQvGsgW6ejn4gMCT727GypSeZx", "QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb"],
@@ -546,15 +545,15 @@ def test-tmps [] {
 
     link-random -n 3
     link-random forismatic.com -n 3
-    tmp-remove-existed
+    links-remove-existed
 
-    equal (tmp-send-tx | get code) 0
+    equal (links-send-tx | get code) 0
 }
 
 # Add the same text particle into the 'from' or 'to' column of the temp cyberlinks table
 #
 # > [[from_text, to_text]; ['cyber-prophet' null] ['tweet' 'cy is cool!']]
-# | cy tmp-pin-columns | cy tmp-link-all 'master' --column 'to' --non_empty | to yaml
+# | cy links-pin-columns | cy links-link-all 'master' --column 'to' --non_empty | to yaml
 # - from_text: cyber-prophet
 #   to_text: master
 #   from: QmXFUupJCSfydJZ85HQHD8tU1L7CZFErbRdMTBxkAmBJaD
@@ -563,14 +562,14 @@ def test-tmps [] {
 #   to_text: cy is cool!
 #   from: QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx
 #   to: QmddL5M8JZiaUDcEHT2LgUnZZGLMTTDEYVKWN1iMLk6PY8
-export def 'tmp-link-all' [
+export def 'links-link-all' [
     text: string            # a text to upload to ipfs
     --dont_replace (-D)     # don't replace the temp cyberlinks table, just output results
     --column (-c): string = 'from'  # a column to use for values ('from' or 'to'). 'from' is default
     --non_empty             # fill non-empty only
 ] {
     $in
-    | default (tmp-view -q)
+    | default (links-view -q)
     | if $non_empty {
         each {|i|
             $i
@@ -583,13 +582,13 @@ export def 'tmp-link-all' [
         upsert $column (pin-text $text)
         | upsert $'($column)_text' $text
     }
-    | if $dont_replace {} else { tmp-replace }
+    | if $dont_replace {} else { links-replace }
 }
 
 # Pin values from column 'text_from' and 'text_to' to an IPFS node and fill according columns with their CIDs
 #
 # > [{from_text: 'cyber' to_text: 'cyber-prophet'} {from_text: 'tweet' to_text: 'cy is cool!'}]
-# | cy tmp-pin-columns | to yaml
+# | cy links-pin-columns | to yaml
 # - from_text: cyber
 #   to_text: cyber-prophet
 #   from: QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
@@ -598,13 +597,13 @@ export def 'tmp-link-all' [
 #   to_text: cy is cool!
 #   from: QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx
 #   to: QmddL5M8JZiaUDcEHT2LgUnZZGLMTTDEYVKWN1iMLk6PY8
-export def 'tmp-pin-columns' [
-    --dont_replace (-D) # Don't replace the tmp cyberlinks table
+export def 'links-pin-columns' [
+    --dont_replace (-D) # Don't replace the links cyberlinks table
     --threads: int = 3  # A number of threads to use to pin particles
 ] {
     let $links = (
         $in
-        | default ( tmp-view -q )
+        | default ( links-view -q )
         | fill non-exist -v null
     )
 
@@ -641,10 +640,10 @@ export def 'tmp-pin-columns' [
                 | get -i $i.to_text
             }
         } else {}
-    } | if $dont_replace {} else { tmp-replace }
+    } | if $dont_replace {} else { links-replace }
 }
 
-# Check if any of the links in the tmp table exist
+# Check if any of the links in the links table exist
 #
 # > let $from = 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufA'
 # > let $to = 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufB'
@@ -669,9 +668,9 @@ def 'link-exist' [
 }
 
 # Remove existing cyberlinks from the temp cyberlinks table
-export def 'tmp-remove-existed' [] {
+export def 'links-remove-existed' [] {
     let $links_with_status = (
-        tmp-view -q
+        links-view -q
         | par-each {
             |i| $i
             | upsert link_exist {
@@ -693,7 +692,7 @@ export def 'tmp-remove-existed' [] {
         ($existed_links | select from_text from to_text to | each {|i| print $i})
         cprint -c red -a 2 'So they were removed from the temp table!'
 
-        $links_with_status | filter {|x| not $x.link_exist} | tmp-replace
+        $links_with_status | filter {|x| not $x.link_exist} | links-replace
     } else {
         cprint 'There are no cyberlinks in the temp table for the current address exist the cybergraph'
     }
@@ -762,11 +761,11 @@ def 'tx-sign-and-broadcast' [] {
 
 # Create a tx from the piped in or temp cyberlinks table, sign and broadcast it
 #
-# > cy tmp-send-tx | to yaml
+# > cy links-send-tx | to yaml
 # cy: 2 cyberlinks should be successfully sent
 # code: 0
 # txhash: 9B37FA56D666C2AA15E36CDC507D3677F9224115482ACF8CAF498A246DEF8EB0
-export def 'tmp-send-tx' [
+export def 'links-send-tx' [
     $links_param?
 ] {
     if not (is-connected) {
@@ -777,7 +776,7 @@ export def 'tmp-send-tx' [
         error-make-cy '*$links_param* length is bigger than 100, use links-add'
     }
 
-    let $links = $links_param | default (tmp-view -q | first 100)
+    let $links = $links_param | default (links-view -q | first 100)
 
     let $links_count = ($links | length)
 
@@ -796,7 +795,7 @@ export def 'tmp-send-tx' [
         | save $filename --force
 
         if ($links_param == null) {
-            tmp-view -q | skip 100 | tmp-replace
+            links-view -q | skip 100 | links-replace
         }
 
         {'cy': $'($links_count) cyberlinks should be successfully sent'}
@@ -811,7 +810,7 @@ export def 'tmp-send-tx' [
             error-make-cy --unspanned 'Increase your *Volts* balance or wait time.'
         }
         if $response.raw_log =~ 'your cyberlink already exists' {
-            error-make-cy --unspanned 'Use *cy tmp-remove-existed*'
+            error-make-cy --unspanned 'Use *cy links-remove-existed*'
         }
 
         cprint 'The transaction might be not sent.'
@@ -834,7 +833,7 @@ export def 'links-bandwidth-neuron' [
 
 # Publish all links in the temp table to cybergraph
 export def 'links-publish' [] {
-    tmp-view | length | $in // 100 | 0..$in | each {tmp-send-tx}
+    links-view | length | $in // 100 | 0..$in | each {links-send-tx}
 }
 
 # Copy a table from the pipe into the clipboard (in tsv format)
@@ -2788,14 +2787,14 @@ def 'tokens-minus' [
     | tokens-sum --state $state
 }
 
-# Set the custom name for tmp-links csv table
-export def-env 'set-tmp-links-name' [
+# Set the custom name for links csv table
+export def-env 'set-links-table-name' [
     name: string
 ] {
-    $env.cy.tmp_links_name = $name
+    $env.cy.links_table_name = $name
 }
 
-# Set the custom name for tmp-links csv table
+# Force ber to update results with every request
 export def-env 'set-ber-force-update' [
     value?: bool
 ] {
@@ -2807,8 +2806,8 @@ export def-env 'set-ber-force-update' [
     )
 }
 
-def 'tmp-links-name' [] {
-    $env.cy.tmp_links_name? | default 'temp'
+def 'links-list-name' [] {
+    $env.cy.links_table_name? | default 'temp'
 }
 
 # Add the cybercongress node to bootstrap nodes
@@ -3082,10 +3081,10 @@ def make_default_folders_fn [] {
     touch ($env.cy.path | path join graph update.toml)
 
     if (
-        not ($env.cy.path | path join $'cyberlinks_(tmp-links-name).csv' | path exists)
+        not ($env.cy.path | path join $'cyberlinks_(links-list-name).csv' | path exists)
     ) {
         'from,to'
-        | save ($env.cy.path | path join $'cyberlinks_(tmp-links-name).csv')
+        | save ($env.cy.path | path join $'cyberlinks_(links-list-name).csv')
     }
 
     if (
