@@ -2631,17 +2631,11 @@ export def 'tokens-ibc-denoms-table' [
     | rename denom amount
     | where denom =~ '^ibc'
     | upsert ibc_hash {|i| $i.denom | str replace 'ibc/' ''}
-    | each {|i| $i
-        | upsert temp_out {
-            |i| ber query ibc-transfer denom-trace $i.ibc_hash
-            | get denom_trace
-        }
+    | each {
+        |i| $i
+        | merge ( ber query ibc-transfer denom-trace $i.ibc_hash | get denom_trace )
     }
-    | flatten
     | reject ibc_hash
-    | join -l (tokens-denoms-decimals-dict) base_denom base_denom
-    # | default coinMinimalDenom base_denom
-    | upsert amount {|i| $i.amount / (10 ** ($i.coinDecimals? | default 0))}
     | upsert denom_comp {
         |i| $i.path         #denom compound
         | str replace -ra '[^-0-9]' ''
@@ -2649,6 +2643,7 @@ export def 'tokens-ibc-denoms-table' [
         | $'($i.base_denom)/($i.denom | str substring 62..68)/($in)'
     }
     | sort-by path --natural
+    | reject path amount
     | if $full {} else {
         select denom denom_comp
     }
