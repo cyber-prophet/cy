@@ -411,8 +411,8 @@ def 'link-quote' [] {
 # via [forismatic.com](https://forismatic.com)
 # ==========================================================
 export def 'link-random' [
-    source?: string@'nu-complete-random-sources'
-    -n: int = 1 # Number of links to append
+    n: int = 1 # Number of links to append
+    --source: string@'nu-complete-random-sources' = 'forismatic.com'
 ] {
     1..$n
     | each {|i|
@@ -543,8 +543,8 @@ def test-tmps [] {
 
     config-activate cy-testing1+cyber
 
-    link-random -n 3
-    link-random forismatic.com -n 3
+    link-random 3
+    link-random 3 --source forismatic.com
     links-remove-existed
 
     equal (links-send-tx | get code) 0
