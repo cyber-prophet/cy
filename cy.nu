@@ -2664,7 +2664,19 @@ export def 'tokens-denoms-decimals-dict' [] {
     | from nuon
     | rename -c ['coinMinimalDenom' 'base_denom']
     | rename -c ['denom' 'ticker']
-    | append [[base_denom, ticker, coinDecimals]; [usomm, SOMM, 6], [ucre, CRE, 6]]
+    | rename -c ['coinDecimals' 'decimals']
+    | select base_denom ticker decimals
+    | append [
+        # [base_denom, ticker, coinDecimals];
+        {base_denom: usomm, ticker: SOMM, decimals: 6}
+        {base_denom: ucre, ticker: CRE, decimals: 6}
+        {base_denom: boot, ticker: mBOOT, decimals: 6}
+        {base_denom: pussy, ticker: gPUSSY, decimals: 9}
+        {base_denom: hydrogen, ticker: mH, decimals: 6}
+        {base_denom: tocyb, ticker: mTOCYB, decimals: 6}
+    ]
+    | reverse
+    | uniq-by base_denom
 }
 
 export def 'tokens-naive-prices-in-h' [] {
