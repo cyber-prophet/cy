@@ -14,16 +14,19 @@ export def main [
         $num
         | default $in_num
         | into string
-        | split row "."
+        | split chars
+        | if $significant_integers == 0 {} else {
+            enumerate
+            | each {
+                |i| if $i.item == '.' {'.'} else { # if decimals are in range - they miss one symbol, better to fix
+                    if $i.index < $significant_integers {$i.item} else {0}}
+                }
+        }
+        | split list '.'
     )
 
     let $whole_part = (
         $parts.0
-        | split chars
-        | if $significant_integers == 0 {} else {
-            enumerate
-            | each {|i| if $i.index < $significant_integers {$i.item} else {0}}
-        }
         | reverse
         | window 3 -s 3 --remainder
         | each {|i| $i | reverse | str join}
@@ -39,8 +42,9 @@ export def main [
             ''
         } else {
             $parts.1?
-            | default '0'
-            | str substring 0..$decimals
+            | default [0]
+            | first $decimals
+            | str join
             | '.' + $in
             | fill -w ($decimals + 1) -c '0' -a l
         }
