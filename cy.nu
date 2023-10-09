@@ -2703,6 +2703,40 @@ export def 'tokens-naive-amount-in-h' [] {
     | move amount_in_h_naive --before amount
 }
 
+export def 'tokens-price-in-h-real' [
+    percentage: float = 0.3
+] {
+    join (tokens-naive-prices-in-h --all_data) denom denom -l
+    # | default 0 price_in_h_naive
+    # | filter {|i| $i.reserve_coin_amount? != null}
+    # | fill non-exist 0.0
+    | upsert source_amount {|i| $i.amount * $percentage }
+    | each {|i| tokens-price-in-h-real-record $i}
+    | fill non-exist 0.0
+    | reject hydrogen reserve_coin_denom reserve_coin_amount
+}
+
+export def 'tokens-price-in-h-real-record' [
+    row: record
+] {
+    if $row.denom == 'hydrogen' {
+        return ($row | upsert h_out_amount {|i| $i.source_amount} | upsert h_out_price 1)
+    }
+
+    if $row.hydrogen? == null {
+        return $row
+    }
+
+    $row
+    # | upsert hydrogen {|i| $i.hydrogen | into float}
+    # | upsert reserve_coin_amount {|i| $i.reserve_coin_amount | into float}
+    | upsert h_out_amount {
+        |i| ($i.source_amount * $i.hydrogen * (1 - 0.003)) / ($i.reserve_coin_amount + 2 * $i.source_amount)
+        | into int
+    }
+    | upsert h_out_price {|i| ($i.hydrogen * (1 - 0.003)) / ($i.reserve_coin_amount + 2 * $i.source_amount)}
+}
+
 export def 'tokens-format' [] {
     join -l (tokens-ibc-denoms-table) denom denom
     | upsert denom_comp {|i| if $i.denom_comp? != null {$i.denom_comp} else {$i.denom}}
