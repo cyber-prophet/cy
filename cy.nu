@@ -3394,9 +3394,5 @@ def 'error-make-cy' [
     --unspanned (-u) # remove the origin label from the error
 ] {
     {msg: (cprint --echo $msg)}
-    | if $unspanned {
-        error make --unspanned $in
-    } else {
-        error make $in
-    }
+    | error make --unspanned $in
 }
