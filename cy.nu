@@ -2706,10 +2706,12 @@ export def 'tokens-naive-amount-in-h' [] {
 export def 'tokens-price-in-h-real' [
     percentage: float = 0.3
 ] {
-    join (tokens-naive-prices-in-h --all_data) denom denom -l
-    # | default 0 price_in_h_naive
-    # | filter {|i| $i.reserve_coin_amount? != null}
-    # | fill non-exist 0.0
+    let $input = $in
+
+    let percent_formatted = if $percentage > 1 or $percentage <= 0 {
+        error-make-cy 'Percentage should be in the range from (0 to 1]'
+    } else {
+        $percentage * 100 | math round | into string | $in + '%'
     | upsert source_amount {|i| $i.amount * $percentage }
     | each {|i| tokens-price-in-h-real-record $i}
     | fill non-exist 0.0
