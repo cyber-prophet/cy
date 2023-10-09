@@ -2737,6 +2737,30 @@ export def 'tokens-price-in-h-real-record' [
         | into int
     }
     | upsert h_out_price {|i| ($i.hydrogen * (1 - 0.003)) / ($i.reserve_coin_amount + 2 * $i.source_amount)}
+def pool_calc_price [
+def swap_calc_price [
+    --source_coin_amount (-s): float
+    --target_coin_pool_amount (-T): float
+    --source_coin_pool_amount (-S): float
+    --pool_fee (-f): float = 0.003
+] {
+    (
+        ($target_coin_pool_amount * (1 - $pool_fee))
+        / ($source_coin_pool_amount + 2 * $source_coin_amount)
+    )
+}
+
+def swap_calc_amount [
+    --source_coin_amount (-s): float
+    --target_coin_pool_amount (-T): float
+    --source_coin_pool_amount (-S): float
+    --pool_fee (-f): float = 0.003
+] {
+    (
+        ($source_coin_amount * $target_coin_pool_amount * (1 - $pool_fee))
+        / ($source_coin_pool_amount + 2 * $source_coin_amount)
+    )
+    | into int
 }
 
 export def 'tokens-format' [] {
