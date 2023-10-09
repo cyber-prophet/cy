@@ -2712,9 +2712,15 @@ export def 'tokens-price-in-h-real' [
         error-make-cy 'Percentage should be in the range from (0 to 1]'
     } else {
         $percentage * 100 | math round | into string | $in + '%'
+    }
+
+    $input
+    | join (tokens-naive-prices-in-h --all_data) denom denom -l
     | upsert source_amount {|i| $i.amount * $percentage }
     | each {|i| tokens-price-in-h-real-record $i}
     | fill non-exist 0.0
+    | rename -c [h_out_price $'price_in_h_swap($percent_formatted)']
+    | rename -c [h_out_amount $'amount_in_h_swap($percent_formatted)']
     | reject hydrogen reserve_coin_denom reserve_coin_amount
 }
 
@@ -2730,14 +2736,14 @@ export def 'tokens-price-in-h-real-record' [
     }
 
     $row
-    # | upsert hydrogen {|i| $i.hydrogen | into float}
-    # | upsert reserve_coin_amount {|i| $i.reserve_coin_amount | into float}
-    | upsert h_out_amount {
-        |i| ($i.source_amount * $i.hydrogen * (1 - 0.003)) / ($i.reserve_coin_amount + 2 * $i.source_amount)
-        | into int
+    | upsert h_out_price {|i|
+        swap_calc_price -s $i.source_amount -T $i.hydrogen -S $i.reserve_coin_amount
     }
-    | upsert h_out_price {|i| ($i.hydrogen * (1 - 0.003)) / ($i.reserve_coin_amount + 2 * $i.source_amount)}
-def pool_calc_price [
+    | upsert h_out_amount {|i|
+        $i.h_out_price * $i.source_amount
+    }
+}
+
 def swap_calc_price [
     --source_coin_amount (-s): float
     --target_coin_pool_amount (-T): float
