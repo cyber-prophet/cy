@@ -2679,7 +2679,9 @@ export def 'tokens-denoms-decimals-dict' [] {
     | uniq-by base_denom
 }
 
-export def 'tokens-naive-prices-in-h' [] {
+export def 'tokens-naive-prices-in-h' [
+    --all_data
+] {
     let $pools = (tokens-pools-table-get | select reserve_coin_amount reserve_account_address reserve_coin_denom)
 
     $pools
@@ -2687,8 +2689,8 @@ export def 'tokens-naive-prices-in-h' [] {
     | rename hydrogen
     | join -l ($pools | where reserve_coin_denom != hydrogen) reserve_account_address
     | insert price_in_h_naive {|i| $i.hydrogen / $i.reserve_coin_amount}
-    | select reserve_coin_denom_ price_in_h_naive
-    | rename denom
+    | if $all_data {} else {select reserve_coin_denom_ price_in_h_naive}
+    | rename -c [reserve_coin_denom_ denom]
     | append {denom: hydrogen price_in_h_naive: 1}
 }
 
