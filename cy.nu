@@ -2649,13 +2649,6 @@ export def 'tokens-ibc-denoms-table' [
     }
 }
 
-def 'tokens-ibc-convert' [] {
-    join -l (tokens-ibc-denoms-table) denom denom
-    | upsert denom_comp {|i| if $i.denom_comp? != null {$i.denom_comp} else {$i.denom}}
-    | move denom_comp --before amount
-    | move denom --after ($in | columns | last)
-}
-
 export def 'tokens-denoms-decimals-dict' [] {
     # eventually should be on contract bostrom15phze6xnvfnpuvvgs2tw58xnnuf872wlz72sv0j2yauh6zwm7cmqqpmc42
     # but now on git
@@ -2705,8 +2698,11 @@ export def 'tokens-naive-amount-in-h' [] {
     | move amount_in_h_naive --before amount
 }
 
-export def 'tokens-format-amount' [] {
-    tokens-ibc-convert
+export def 'tokens-format' [] {
+    join -l (tokens-ibc-denoms-table) denom denom
+    | upsert denom_comp {|i| if $i.denom_comp? != null {$i.denom_comp} else {$i.denom}}
+    | move denom_comp --before ($in | columns | first)
+    | move denom --after ($in | columns | last)
     | upsert base_denom {|i| $i.denom_comp | split row '/' | get 0 }
     | join -l (tokens-denoms-decimals-dict) base_denom base_denom
     | default 0 decimals
