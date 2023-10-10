@@ -2708,11 +2708,8 @@ export def 'tokens-price-in-h-real' [
 ] {
     let $input = $in
 
-    let percent_formatted = if $percentage > 1 or $percentage <= 0 {
-        error-make-cy 'Percentage should be in the range from (0 to 1]'
-    } else {
-        $percentage * 100 | math round | into string | $in + '%'
-    }
+    # You can use percent any percent here
+    let percent_formatted = $percentage * 100 | math round | into string | $in + '%'
 
     $input
     | join (tokens-naive-prices-in-h --all_data) denom denom -l
@@ -2721,6 +2718,7 @@ export def 'tokens-price-in-h-real' [
     | fill non-exist 0.0
     | rename -c [h_out_price $'price_in_h_swap($percent_formatted)']
     | rename -c [h_out_amount $'amount_in_h_swap($percent_formatted)']
+    | rename -c [source_amount $'amount_source($percent_formatted)']
     | reject hydrogen reserve_coin_denom reserve_coin_amount
 }
 
