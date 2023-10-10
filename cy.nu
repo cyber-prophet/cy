@@ -6,7 +6,7 @@
 
 use std assert [equal greater]
 use std clip
-use nu-utils [bar, cprint, "str repeat", to-safe-filename, to-number-format]
+export use nu-utils [bar, cprint, "str repeat", to-safe-filename, to-number-format, number-col-format]
 
 use log
 
@@ -2773,7 +2773,16 @@ def swap_calc_amount [
 }
 
 export def 'tokens-format' [] {
-    join -l (tokens-ibc-denoms-table) denom denom
+    let $input = join -l (tokens-ibc-denoms-table) denom denom | fill non-exist
+
+    let $columns = $input | columns
+
+    $columns
+    | where $it =~ 'amount_in_h'
+    | if ($in | length | $in > 0) {
+        reduce -f $input {|i acc| $acc | merge ($acc | number-col-format $i --decimals 0 --denom 'H')}
+    } else {}
+    # $input
     | upsert denom_f {|i| if $i.denom_f? != null {$i.denom_f} else {$i.denom}}
     | move denom_f --before ($in | columns | first)
     | move denom --after ($in | columns | last)
@@ -2784,12 +2793,14 @@ export def 'tokens-format' [] {
         |i| $i.denom_f
         | str replace $i.base_denom ($i.ticker? | default ($i.denom_f | str upcase))
     }
-    | upsert amount_f {
-        |i| $i.amount / (10 ** $i.decimals)
-        | to-number-format --integers 9 --decimals 2
-    }
-    | move amount_f --after denom_f
-    | reject base_denom ticker decimals
+    | if amount in $columns {
+        upsert amount_f {
+            |i| $i.amount / (10 ** $i.decimals)
+            | to-number-format --integers 9 --decimals 2
+        }
+        | move amount_f --after denom_f
+    } else {}
+    | reject ($in | columns | where $it in [base_denom ticker decimals])
 }
 
 # Check balances for the keys added to the active CLI
