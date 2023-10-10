@@ -2672,7 +2672,7 @@ export def 'tokens-denoms-decimals-dict' [] {
     | uniq-by base_denom
 }
 
-export def 'tokens-naive-prices-in-h' [
+export def 'tokens-price-in-h-naive' [
     --all_data
 ] {
     let $pools = (
@@ -2692,12 +2692,11 @@ export def 'tokens-naive-prices-in-h' [
     | append {denom: hydrogen price_in_h_naive: 1}
 }
 
-export def 'tokens-naive-amount-in-h' [] {
-    join (tokens-naive-prices-in-h) denom denom -l
+export def 'tokens-amount-in-h-naive' [] {
+    join (tokens-price-in-h-naive) denom denom -l
     | default 0 price_in_h_naive
     | upsert amount_in_h_naive {
         |i| $i.amount * $i.price_in_h_naive
-        | to-number-format -D H -w 15
     }
     | reject price_in_h_naive
     | move amount_in_h_naive --before amount
@@ -2712,7 +2711,7 @@ export def 'tokens-price-in-h-real' [
     let percent_formatted = $percentage * 100 | math round | into string | $in + '%'
 
     $input
-    | join (tokens-naive-prices-in-h --all_data) denom denom -l
+    | join (tokens-price-in-h-naive --all_data) denom denom -l
     | upsert source_amount {|i| $i.amount * $percentage }
     | each {|i| tokens-price-in-h-real-record $i}
     | fill non-exist 0.0
