@@ -2633,7 +2633,7 @@ export def 'tokens-ibc-denoms-table' [
     | upsert ibc_hash {|i| $i.denom | str replace 'ibc/' ''}
     | each {
         |i| $i
-        | merge ( ber query ibc-transfer denom-trace $i.ibc_hash | get denom_trace )
+        | merge ( ber query ibc-transfer denom-trace $"'($i.ibc_hash)'" | get denom_trace )
     }
     | reject ibc_hash
     | upsert denom_f {
