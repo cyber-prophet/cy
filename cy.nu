@@ -2118,7 +2118,7 @@ export def 'cid-read-or-download' [
 ] {
     do -i {open ($env.cy.ipfs-files-folder | path join $'($cid).md')}
     | default (
-        queue-task-add $'cy cid-download ($cid)';
+        queue-task-add $'cid-download ($cid)';
         'downloading'
     ) | if $full {} else {
         str substring 0..400
@@ -2140,7 +2140,7 @@ export def 'cid-download-async' [
     let $source = ($source | default $env.cy.ipfs-download-from)
 
     if ($content == null) or ($content == 'timeout') or $force {
-        queue-task-add $'cy cid-download ($cid) --source ($source) --info_only ($info_only) --folder '($folder)''
+        queue-task-add $'cid-download ($cid) --source ($source) --info_only ($info_only) --folder '($folder)''
         print 'downloading'
     }
 }
@@ -3044,7 +3044,7 @@ export def 'ber' [
         request-save-output-exec-response
     } else {
         if ($freshness > $cache_validity_duration) {
-            queue-task-add -o 2 $'cy ber --exec ($executable) --force_update --quiet [($sub_commands_and_args | str join " ")]'
+            queue-task-add -o 2 $'ber --exec ($executable) --force_update --quiet [($sub_commands_and_args | str join " ")]'
         }
         $last_data
     }
@@ -3300,12 +3300,18 @@ def 'execute-task' [
     task_path: path
 ] {
     let $command = open $task_path
-    rm $task_path
 
-    do -i {nu -c $command --config $nu.config-path --env-config $nu.env-path}
+    do -i {
+        nu -c $'use ($env.cy.path | path join cy.nu); ($command)' --config $nu.config-path --env-config $nu.env-path
+    }
     | complete
     | get exit_code
-    | if $in == 0 {print -n '🔵'} else {print -n '⭕'}
+    | if $in == 0 {
+        rm $task_path;
+        print -n '🔵'
+    } else {
+        print -n '⭕'
+    }
 
     log debug $'run ($command)'
 }
