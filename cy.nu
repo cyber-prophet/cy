@@ -2722,7 +2722,7 @@ export def 'tokens-price-in-h-real' [
     | reject hydrogen reserve_coin_denom reserve_coin_amount
 }
 
-export def 'tokens-price-in-h-real-record' [
+def 'tokens-price-in-h-real-record' [
     row: record
 ] {
     if $row.denom == 'hydrogen' {
@@ -2875,7 +2875,7 @@ export def 'tokens-sum' [
     | each {
         |i| {}
         | upsert denom $i.denom.0
-        | upsert amount ($i.amount | math sum)
+        | upsert amount ($i.amount | into float | math sum | into int)
         | upsert state (
             if $state == '-' {
                 $i.state? | default null | uniq | str join '+'
