@@ -2636,7 +2636,7 @@ export def 'tokens-ibc-denoms-table' [
         | merge ( ber query ibc-transfer denom-trace $i.ibc_hash | get denom_trace )
     }
     | reject ibc_hash
-    | upsert denom_comp {
+    | upsert denom_f {
         |i| $i.path         #denom compound
         | str replace -ra '[^-0-9]' ''
         | str trim -c '-'
@@ -2645,7 +2645,7 @@ export def 'tokens-ibc-denoms-table' [
     | sort-by path --natural
     | reject path amount
     | if $full {} else {
-        select denom denom_comp
+        select denom denom_f
     }
 }
 
@@ -2774,21 +2774,21 @@ def swap_calc_amount [
 
 export def 'tokens-format' [] {
     join -l (tokens-ibc-denoms-table) denom denom
-    | upsert denom_comp {|i| if $i.denom_comp? != null {$i.denom_comp} else {$i.denom}}
-    | move denom_comp --before ($in | columns | first)
+    | upsert denom_f {|i| if $i.denom_f? != null {$i.denom_f} else {$i.denom}}
+    | move denom_f --before ($in | columns | first)
     | move denom --after ($in | columns | last)
-    | upsert base_denom {|i| $i.denom_comp | split row '/' | get 0 }
+    | upsert base_denom {|i| $i.denom_f | split row '/' | get 0 }
     | join -l (tokens-denoms-decimals-dict) base_denom base_denom
     | default 0 decimals
-    | upsert denom_comp {
-        |i| $i.denom_comp
-        | str replace $i.base_denom ($i.ticker? | default ($i.denom_comp | str upcase))
+    | upsert denom_f {
+        |i| $i.denom_f
+        | str replace $i.base_denom ($i.ticker? | default ($i.denom_f | str upcase))
     }
-    | upsert amount_common {
+    | upsert amount_f {
         |i| $i.amount / (10 ** $i.decimals)
         | to-number-format --integers 9 --decimals 2
     }
-    | move amount_common --after denom_comp
+    | move amount_f --after denom_f
     | reject base_denom ticker decimals
 }
 
