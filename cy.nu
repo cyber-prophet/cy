@@ -2750,10 +2750,13 @@ def swap_calc_price [
     --source_coin_pool_amount (-S): float
     --pool_fee (-f): float = 0.003
 ] {
-    (
-        ($target_coin_pool_amount * (1 - $pool_fee))
-        / ($source_coin_pool_amount + 2 * $source_coin_amount)
-    )
+    if $source_coin_amount == 0 {
+        $target_coin_pool_amount / $source_coin_pool_amount
+    } else {
+        ( ($target_coin_pool_amount * (1 - $pool_fee))
+            / ($source_coin_pool_amount + 2 * $source_coin_amount) )
+    }
+
 }
 
 def swap_calc_amount [
@@ -2762,11 +2765,13 @@ def swap_calc_amount [
     --source_coin_pool_amount (-S): float
     --pool_fee (-f): float = 0.003
 ] {
-    (
-        ($source_coin_amount * $target_coin_pool_amount * (1 - $pool_fee))
-        / ($source_coin_pool_amount + 2 * $source_coin_amount)
-    )
-    | into int
+    if source_coin_amount == 0 {
+        0
+    } else {
+        ( ($source_coin_amount * $target_coin_pool_amount * (1 - $pool_fee))
+            / ($source_coin_pool_amount + 2 * $source_coin_amount) )
+        | into int
+    }
 }
 
 export def 'tokens-format' [] {
