@@ -3025,6 +3025,17 @@ export def 'query-tx' [
     | reject events
 }
 
+# Query tx by acc/seq
+export def 'query-tx-seq' [
+    neuron: string
+    seq: int
+] {
+    ber --disable_update [query tx --type=acc_seq $'($neuron)/($seq)']
+    | if 'events' in ($in | columns) {
+        reject events
+    } else {}
+}
+
 # Query account
 export def 'query-account' [
     neuron: string
