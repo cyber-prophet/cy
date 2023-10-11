@@ -2784,7 +2784,7 @@ export def 'tokens-format' [] {
     | where $it =~ 'amount_in_h'
     | if ($in | length | $in > 0) {
         reduce -f $input {|i acc| $acc | merge ($acc | number-col-format $i --decimals 0 --denom 'H')}
-    } else {}
+    } else {$input}
     # $input
     | upsert denom_f {|i| if $i.denom_f? != null {$i.denom_f} else {$i.denom}}
     | move denom_f --before ($in | columns | first)
