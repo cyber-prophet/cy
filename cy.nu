@@ -2814,7 +2814,7 @@ export def 'tokens-format' [] {
 # hydrogen: 50
 # address: bostrom1aypv5wxute0nnhfv44jkhyfkzt7zyrden85tel
 export def 'balances' [
-    ...name: string@'nu-complete keys values'
+    ...address: string@'nu-complete keys values'
     --test      # Use keyring-backend test (with no password)
 ] {
     let $balances = (
@@ -2823,8 +2823,8 @@ export def 'balances' [
             append ( ^($env.cy.exec) keys list --output json | from json )
         } else {}
         | select name address
-        | if ($name | is-empty) { } else {
-            where name in $name
+        | if ($address | is-empty) { } else {
+            where address in $address
         }
         | par-each {
             |i| tokens-balance-get --record $i.address
@@ -3380,14 +3380,9 @@ def 'nu-complete-executables' [] {
     ['cyber' 'pussy']
 }
 
-# cyber keys in a form of table
-def 'nu-complete-keys-table' [] {
-    cyber keys list --output json | from json | select name address
-}
-
 # Helper function to use addresses for completions in --from parameter
 def 'nu-complete keys values' [] {
-    (nu-complete-keys-table).name | zip (nu-complete-keys-table).address | flatten
+    cyber keys list --output json | from json | select name address | rename description value
 }
 
 def 'nu-complete-bool' [] {
