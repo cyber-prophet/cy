@@ -2673,7 +2673,7 @@ export def 'tokens-denoms-decimals-dict' [] {
     | uniq-by base_denom
 }
 
-export def 'tokens-price-in-h-naive' [
+def 'tokens-price-in-h-naive' [
     --all_data
 ]: nothing -> table {
     let $pools = (
@@ -2693,17 +2693,21 @@ export def 'tokens-price-in-h-naive' [
     | append {denom: hydrogen price_in_h_naive: 1.0}
 }
 
-export def 'tokens-amount-in-h-naive' [] {
+export def 'tokens-in-h-naive' [
+    --price # leave price in h column
+] {
     join (tokens-price-in-h-naive) denom denom -l
     | default 0 price_in_h_naive
     | upsert amount_in_h_naive {
         |i| $i.amount * $i.price_in_h_naive
     }
-    | reject price_in_h_naive
+    | if $price {} else {
+        reject price_in_h_naive
+    }
     | move amount_in_h_naive --before amount
 }
 
-export def 'tokens-price-in-h-real' [
+export def 'tokens-in-h-swap-calc' [
     percentage: float = 0.3
 ] {
     let $input = $in
@@ -2722,8 +2726,8 @@ export def 'tokens-price-in-h-real' [
     }
     | move $'price_in_h_slip($percent_formatted)' --after price_in_h_naive
     | rename -c [h_out_amount $'amount_in_h_swap($percent_formatted)']
-    | rename -c [source_amount $'amount_source($percent_formatted)']
-    | reject hydrogen reserve_coin_denom reserve_coin_amount h_out_price
+    # | rename -c [source_amount $'amount_source($percent_formatted)']
+    | reject hydrogen reserve_coin_denom reserve_coin_amount h_out_price price_in_h_naive source_amount
 }
 
 def 'tokens-price-in-h-real-record' [
