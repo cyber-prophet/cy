@@ -3324,7 +3324,7 @@ def 'execute-task' [
     | complete
     | get exit_code
     | if $in == 0 {
-        rm $task_path;
+        rm $task_path -f;
         print -n '🔵'
     } else {
         print -n '⭕'
