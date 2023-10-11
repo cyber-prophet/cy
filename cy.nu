@@ -3024,6 +3024,19 @@ export def 'query-tx' [
     | reject events
 }
 
+# Query account
+export def 'query-account' [
+    neuron: string
+    --height: int = 0
+    --seq   # return sequence
+] {
+    ber query account $neuron [--height $height]
+    | if $seq {
+        get base_vesting_account.base_account.sequence
+        | into int
+    } else {}
+}
+
 # A wrapper, to cache CLI requests
 export def 'ber' [
     ...rest
