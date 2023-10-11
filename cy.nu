@@ -3099,6 +3099,7 @@ def ber-test [] {
 export def 'qnbn' [
     ...nicks: string@'nu-complete keys-nicks'
     --df
+    --force_list_output (-f)
 ] {
     let $addresses = $nicks | where (is-neuron $it) | wrap neuron
 
@@ -3106,7 +3107,7 @@ export def 'qnbn' [
         if ($nicks | where (not (is-neuron $it)) | is-empty ) {
             []
         } else {
-            retrieve-nicks-1
+            nicks-and-keynames
             | where name in $nicks
             | select neuron
             | uniq-by neuron
@@ -3117,7 +3118,7 @@ export def 'qnbn' [
     | append $addresses
     | if $df {
         dfr into-df
-    } else if ($in | length | $in == 1) {
+    } else if ($in | length | $in == 1) and (not $force_list_output) {
         get neuron.0
     } else {}
 }
@@ -3391,7 +3392,7 @@ def 'nu-complete keys values' [] {
     cyber keys list --output json | from json | select name address | rename description value
 }
 
-def 'retrieve-nicks-1' [] {
+def 'nicks-and-keynames' [] {
     ^$env.cy.exec keys list --output json
     | from json
     | select name address
@@ -3401,7 +3402,7 @@ def 'retrieve-nicks-1' [] {
 }
 
 def 'nu-complete keys-nicks' [] {
-    retrieve-nicks-1
+    nicks-and-keynames
     | get name
     | where $it not-in [null '']
 }
