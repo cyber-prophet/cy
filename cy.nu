@@ -3096,17 +3096,24 @@ def ber-test [] {
 
 # query neuron addrsss by his nick
 export def 'qnbn' [
-    ...nicks: string@'nu-complete-neurons-nicks'
+    ...nicks: string@'nu-complete keys-nicks'
     --df
 ] {
+    let $addresses = $nicks | where (is-neuron $it) | wrap neuron
+
     let $neurons = (
-        dict-neurons
-        | select nick neuron
-        | where nick in $nicks
-        | select neuron
+        if ($nicks | where (not (is-neuron $it)) | is-empty ) {
+            []
+        } else {
+            retrieve-nicks-1
+            | where name in $nicks
+            | select neuron
+            | uniq-by neuron
+        }
     )
 
     $neurons
+    | append $addresses
     | if $df {
         dfr into-df
     } else {
@@ -3383,6 +3390,21 @@ def 'nu-complete-executables' [] {
 # Helper function to use addresses for completions in --from parameter
 def 'nu-complete keys values' [] {
     cyber keys list --output json | from json | select name address | rename description value
+}
+
+def 'retrieve-nicks-1' [] {
+    ^$env.cy.exec keys list --output json
+    | from json
+    | select name address
+    | rename name neuron
+    | upsert name {|i| $i.name + 🔑}
+    | append (dict-neurons | select nickname neuron | rename name neuron | uniq-by name)
+}
+
+def 'nu-complete keys-nicks' [] {
+    retrieve-nicks-1
+    | get name
+    | where $it not-in [null '']
 }
 
 def 'nu-complete-bool' [] {
