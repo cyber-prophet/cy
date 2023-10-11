@@ -2966,6 +2966,13 @@ export def 'validator-generate-persistent-peers-string' [
     | $'persistent_peers = "($in)"'
 }
 
+export def 'query-tx' [
+    hash: string
+] {
+    ber [query tx --type hash $hash]
+    | reject events
+}
+
 # A wrapper, to cache CLI requests
 export def 'ber' [
     ...rest
