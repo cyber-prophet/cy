@@ -3017,10 +3017,11 @@ export def 'validator-generate-persistent-peers-string' [
     | $'persistent_peers = "($in)"'
 }
 
+# Query tx by hash
 export def 'query-tx' [
     hash: string
 ] {
-    ber [query tx --type hash $hash]
+    ber --disable_update [query tx --type hash $hash]
     | reject events
 }
 
