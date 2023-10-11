@@ -3110,6 +3110,7 @@ export def 'ber' [
     let $update = (
         $force_update or
         ($env.cy.ber_force_update? | default false) or
+        ($last_data.update_time == (0 | into datetime)) or
         (($freshness > $cache_stale_refresh) and (not $disable_update))
     )
 
