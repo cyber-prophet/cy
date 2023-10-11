@@ -2522,7 +2522,7 @@ export def 'tokens-investmint-status-table' [
     --height: int = 0
     --sum
 ] {
-    let $account_vesting = (ber query account $address [--height $height])
+    let $account_vesting = (query-account $address --height $height)
 
     if ($account_vesting | get -i vesting_periods) == null {
         return
