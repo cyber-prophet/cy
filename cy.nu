@@ -2715,10 +2715,14 @@ export def 'tokens-price-in-h-real' [
     | upsert source_amount {|i| $i.amount * $percentage }
     | each {|i| tokens-price-in-h-real-record $i}
     | fill non-exist 0.0
-    | rename -c [h_out_price $'price_in_h_swap($percent_formatted)']
+    | move h_out_amount --before amount
+    | upsert $'price_in_h_slip($percent_formatted)' {
+        |i| ($i.h_out_price - $i.price_in_h_naive) / $i.price_in_h_naive * 100
+    }
+    | move $'price_in_h_slip($percent_formatted)' --after price_in_h_naive
     | rename -c [h_out_amount $'amount_in_h_swap($percent_formatted)']
     | rename -c [source_amount $'amount_source($percent_formatted)']
-    | reject hydrogen reserve_coin_denom reserve_coin_amount
+    | reject hydrogen reserve_coin_denom reserve_coin_amount h_out_price
 }
 
 def 'tokens-price-in-h-real-record' [
