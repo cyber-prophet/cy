@@ -11,6 +11,7 @@ export use nu-utils [bar, cprint, "str repeat", to-safe-filename, to-number-form
 use log
 
 export def main [] { help }
+# export def cy [] { help }
 
 # Check if all necessary dependencies are installed
 export def check-requirements [] {
@@ -3116,11 +3117,9 @@ export def 'qnbn' [
     | append $addresses
     | if $df {
         dfr into-df
-    } else {
-        if ($in | length | $in == 1) {
-            get neuron.0
-        } else {}
-    }
+    } else if ($in | length | $in == 1) {
+        get neuron.0
+    } else {}
 }
 
 # An ordered list of cy commands
