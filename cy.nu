@@ -2902,6 +2902,53 @@ def 'tokens-minus' [
     | tokens-sum --state $state
 }
 
+# Withdraw rewards, make stats
+export def 'rewards-withdraw' [
+    neuron: string
+] {
+
+    let $tx = (
+        ^($env.cy.exec) tx distribution withdraw-all-rewards --from $neuron --fees 2000boot --gas 2000000 --output json --yes
+        | from json
+    )
+
+    if $tx.code? != 0 { cprint '*tx.code != 0*' }
+    print $tx
+
+    let $tx_hash = $tx | get txhash
+
+    sleep 20sec
+
+    let $rewards = (
+        query-tx $tx_hash
+        | get logs
+        | each {|i| $i
+            | get -i events
+            | where type == withdraw_rewards
+            | get attributes.0 -i
+            | transpose -r
+            | upsert amount {|i| $i.amount | split row ',' }
+            | flatten
+        }
+        | flatten
+        | insert denom {|i| $i.amount | str replace -r '\d+' '$1'}
+        | insert rewards {|i| $i.amount | str replace -r '\D+' '$1' | into int}
+        | reject amount
+    )
+
+    let $result = (
+        tokens-delegations-table-get $neuron
+        | reject delegator_address shares denom
+        | rename validator delegated
+        | where delegated > 0
+        | join ($rewards | where denom == boot) -l validator validator
+        | upsert percent {|i| (($i.rewards) / $i.delegated) }
+    );
+
+    $result
+    | upsert percent_rel {|i| $i.percent / ($result.percent | math max)}
+}
+
 # Set the custom name for links csv table
 export def-env 'set-links-table-name' [
     name: string
