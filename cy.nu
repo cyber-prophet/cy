@@ -2689,7 +2689,7 @@ export def 'tokens-price-in-h-naive' [
     | insert price_in_h_naive {|i| $i.hydrogen / $i.reserve_coin_amount}
     | if $all_data {} else {select reserve_coin_denom_ price_in_h_naive}
     | rename -c [reserve_coin_denom_ denom]
-    | append {denom: hydrogen price_in_h_naive: 1}
+    | append {denom: hydrogen price_in_h_naive: 1.0}
 }
 
 export def 'tokens-amount-in-h-naive' [] {
@@ -2725,7 +2725,7 @@ def 'tokens-price-in-h-real-record' [
     row: record
 ] {
     if $row.denom == 'hydrogen' {
-        return ($row | upsert h_out_amount {|i| $i.source_amount} | upsert h_out_price 1)
+        return ($row | upsert h_out_amount {|i| $i.source_amount} | upsert h_out_price 1.0)
     }
 
     if $row.hydrogen? == null {
@@ -2750,8 +2750,8 @@ def swap_calc_price [
     if $source_coin_amount == 0 {
         $target_coin_pool_amount / $source_coin_pool_amount
     } else {
-        ( ($target_coin_pool_amount * (1 - $pool_fee))
-            / ($source_coin_pool_amount + 2 * $source_coin_amount) )
+        ( (($target_coin_pool_amount | into float) * (1 - $pool_fee))
+            / (($source_coin_pool_amount | into float) + 2 * ($source_coin_amount | into float)) )
     }
 
 }
