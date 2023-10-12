@@ -2908,23 +2908,36 @@ def 'tokens-minus' [
 
 # Withdraw rewards, make stats
 export def 'rewards-withdraw' [
-    neuron: string
+    neuron?: string
 ] {
+    let $address = $neuron | default $env.cy.address
 
     let $tx = (
-        ^($env.cy.exec) tx distribution withdraw-all-rewards --from $neuron --fees 2000boot --gas 2000000 --output json --yes
+        ^($env.cy.exec) tx distribution withdraw-all-rewards --from $address --fees 2000boot --gas 2000000 --output json --yes
         | from json
     )
 
     if $tx.code? != 0 { cprint '*tx.code != 0*' }
-    print $tx
+    print ($tx | select code txhash)
 
     let $tx_hash = $tx | get txhash
 
+    print 'Waiting for 20 seconds to query for transaction info from the node'
     sleep 20sec
 
+    rewards-withdraw-tx-analyse $tx_hash
+}
+
+export def 'rewards-withdraw-tx-analyse' [
+    tx_hash: string
+] {
+    let $tx = query-tx $tx_hash
+
+    let $tx_height = $tx | get height | into int | $in - 1
+    let $tx_neuron = $tx | get tx.body.messages.0.delegator_address
+
     let $rewards = (
-        query-tx $tx_hash
+        $tx
         | get logs
         | each {|i| $i
             | get -i events
@@ -2941,7 +2954,7 @@ export def 'rewards-withdraw' [
     )
 
     let $result = (
-        tokens-delegations-table-get $neuron
+        tokens-delegations-table-get $tx_neuron --height $tx_height
         | reject delegator_address shares denom
         | rename validator delegated
         | where delegated > 0
