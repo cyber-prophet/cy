@@ -10,8 +10,8 @@ export use nu-utils [bar, cprint, "str repeat", to-safe-filename, to-number-form
 
 use log
 
-export def main [] { help }
-# export def cy [] { help }
+export def main [] { help-cy }
+# export def cy [] { help-cy }
 
 # Check if all necessary dependencies are installed
 export def check-requirements [] {
@@ -3222,7 +3222,7 @@ export def 'qnbn' [
 }
 
 # An ordered list of cy commands
-export def 'help' [
+export def 'help-cy' [
     --to_md (-m) # export table as markdown
 ] {
     let $text = (
