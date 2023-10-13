@@ -2525,7 +2525,7 @@ export def 'tokens-investmint-status-table' [
     let $account_vesting = (query-account $address --height $height)
 
     if ($account_vesting | get -i vesting_periods) == null {
-        return
+        return []
     }
 
     let $release_slots = (
@@ -2575,6 +2575,7 @@ export def 'tokens-investmint-status-table' [
         | if $sum {
             tokens-sum --state investminting
         } else {}
+        | append null   # if no investmint slots are busy, the command should return a list
     }
 }
 
