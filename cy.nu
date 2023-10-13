@@ -3469,12 +3469,14 @@ def 'nu-complete-neurons-nicknames' [] {
 }
 
 def 'nu-complete-config-names' [] {
-    ls ($env.cy.path | path join config) -s
-    | sort-by modified -r
-    | get name
-    | parse '{short}.{ext}'
-    | where ext == 'toml'
-    | get short
+    ls ($env.cy.path | path join config)
+    | sort-by modified
+    | select name
+    | where ($it.name | path parse | get extension) == 'toml'
+    | upsert address {|i| open $i.name | get address}
+    | sort-by name -r
+    | upsert name {|i| $i.name | path parse | get stem}
+    | rename value description
 }
 
 def 'nu-complete-git-branches' [] {
