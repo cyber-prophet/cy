@@ -724,6 +724,11 @@ def 'tx-json-create-from-cybelinks' [] {
     | save ($env.cy.path | path join temp tx-unsigned.json) --force
 }
 
+export def 'links-max-in-block' [] : nothing -> int {
+    ( query-links-bandwidth-params | get max_block_bandwidth ) / ( query-links-bandwidth-price )
+    | into int
+}
+
 def 'tx-sign-and-broadcast' [] {
 
     let $params = (
@@ -807,7 +812,7 @@ def 'links-send-tx' [
         print $response
 
         if $response.raw_log == 'not enough personal bandwidth' {
-            print (links-bandwidth-neuron $env.cy.address)
+            print (query-links-bandwidth-neuron $env.cy.address)
             error-make-cy --unspanned 'Increase your *Volts* balance or wait time.'
         }
         if $response.raw_log =~ 'your cyberlink already exists' {
@@ -818,19 +823,6 @@ def 'links-send-tx' [
     }
 }
 
-def 'links-price-get' [] {
-    ber query bandwidth price | get price.dec | into float | $in * 1000
-}
-
-export def 'links-bandwidth-neuron' [
-    neuron?
-] {
-    ber query bandwidth neuron ($neuron | default $env.cy.address) --cache_stale_refresh 5min
-    | get neuron_bandwidth
-    | select max_value remained_value
-    | transpose param links
-    | upsert links {|i| $i.links | into int | $in / (links-price-get) | math floor}
-}
 
 # Publish all links in the temp table to cybergraph
 export def 'links-publish' [] {
