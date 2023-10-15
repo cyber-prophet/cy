@@ -724,9 +724,6 @@ def 'tx-json-create-from-cybelinks' [] {
     | save ($env.cy.path | path join temp tx-unsigned.json) --force
 }
 
-export def 'links-max-in-block' [] : nothing -> int {
-    ( query-links-bandwidth-params | get max_block_bandwidth ) / ( query-links-bandwidth-price )
-    | into int
 }
 
 def 'tx-sign-and-broadcast' [] {
@@ -3054,6 +3051,34 @@ export def 'query-account' [
         | into int
     } else {}
 }
+
+export def 'query-links-max-in-block' [] : nothing -> int {
+    ( query-links-bandwidth-params | get max_block_bandwidth ) / ( query-links-bandwidth-price )
+    | into int
+}
+
+def 'query-links-bandwidth-price' [] : nothing -> int {
+    ber query bandwidth price | get price.dec | into float | $in * 1000 | into int # price in millivolt
+}
+
+def 'query-links-bandwidth-params' [] : nothing -> record {
+    ber query bandwidth params
+    | get params
+    | transpose key value
+    | upsert value {|i| $i.value | into float}
+    | transpose -idr
+}
+
+export def 'query-links-bandwidth-neuron' [
+    neuron?
+] nothing - table {
+    ber query bandwidth neuron ($neuron | default $env.cy.address) --cache_stale_refresh 5min
+    | get neuron_bandwidth
+    | select max_value remained_value
+    | transpose param links
+    | upsert links {|i| $i.links | into int | $in / (query-links-bandwidth-price) | math floor}
+}
+
 
 # A wrapper, to cache CLI requests
 export def 'ber' [
