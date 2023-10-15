@@ -724,6 +724,24 @@ def 'tx-json-create-from-cybelinks' [] {
     | save ($env.cy.path | path join temp tx-unsigned.json) --force
 }
 
+def 'transaction-template' [
+    --memo: string = 'cy'
+    --timeout_height: string = '0'
+    --gas_limit: string = '234567890'
+    --payer: string = ''
+    --granter: string = ''
+]: table -> record {
+    let $messages = $in
+
+    { body: {
+        messages: $messages,
+        memo: $memo,
+        timeout_height: $timeout_height,
+        extension_options: [],
+        non_critical_extension_options: []
+    }, auth_info: {
+        signer_infos: [], fee: {amount: [], gas_limit: $gas_limit, payer: $payer, granter: $granter}
+    }, signatures: [] }
 }
 
 def 'tx-sign-and-broadcast' [] {
