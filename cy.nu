@@ -2866,7 +2866,7 @@ export def 'tokens-balance-all' [
     (
         tokens-balance-get $address --height $height
         | if $in == (token-dummy-balance) {
-            return
+            return []
         } else {}
         | tokens-minus $invstiminted_frozen --state 'liquid'
         | append $invstiminted_frozen
