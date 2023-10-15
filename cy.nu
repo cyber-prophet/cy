@@ -3036,9 +3036,6 @@ export def 'query-tx' [
     hash: string
 ] {
     ber --disable_update --error [query tx --type hash $hash]
-    | if 'error' in ($in | columns) {
-        error make {msg: ($in.error.stderr | lines | first)}
-    } else {}
     | reject events
 }
 
@@ -3127,7 +3124,7 @@ export def 'ber' [
 
         if ('error' in ($response | columns)) {
             if $error {
-                $response.error
+                error make {msg: ($response.error.stderr | lines | first)}
             } else {
                 return
             }
