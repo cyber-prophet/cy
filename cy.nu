@@ -3605,3 +3605,11 @@ def 'error-make-cy' [
     {msg: (cprint --echo $msg)}
     | error make --unspanned $in
 }
+
+def 'cy-path' [
+    ...segments: string
+]: nothing -> path {
+    [$env.cy.path]
+    | append $segments
+    | path join
+}
