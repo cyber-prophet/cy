@@ -542,7 +542,7 @@ def test-tmps [] {
         ["cy testing script", "cy is cool!", "QmdMy9SGd3StRUXoEX4BZQvGsgW6ejn4gMCT727GypSeZx", "QmddL5M8JZiaUDcEHT2LgUnZZGLMTTDEYVKWN1iMLk6PY8"]
     ]
 
-    config-activate cy-testing1+cyber
+    config-activate 42gboot+cyber
 
     link-random 3
     link-random 3 --source forismatic.com
