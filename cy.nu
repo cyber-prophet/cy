@@ -3035,7 +3035,10 @@ export def 'validator-generate-persistent-peers-string' [
 export def 'query-tx' [
     hash: string
 ] {
-    ber --disable_update [query tx --type hash $hash]
+    ber --disable_update --error [query tx --type hash $hash]
+    | if 'error' in ($in | columns) {
+        error make {msg: ($in.error.stderr | lines | first)}
+    } else {}
     | reject events
 }
 
@@ -3073,6 +3076,7 @@ export def 'ber' [
     --disable_update (-U)
     --quiet                                     # Don't output execution's result
     --no_default_params                         # Don't use default params (like output, chain-id)
+    --error # return error and not null in case of cli's error
 ] {
     let $executable = if $exec != '' {$exec} else {$env.cy.exec}
     let $sub_commands_and_args = (
@@ -3122,7 +3126,11 @@ export def 'ber' [
         | save -f -r $json_path;
 
         if ('error' in ($response | columns)) {
-            return
+            if $error {
+                $response.error
+            } else {
+                return
+            }
         }
 
         if not $quiet {$response}
