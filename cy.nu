@@ -450,7 +450,7 @@ export def 'links-view' [
     --quiet (-q) # Don't print info
     --no_timestamp
 ] : [nothing -> table] {
-    let $filename = (cy-path $'cyberlinks_(links-list-name).csv')
+    let $filename = (current-links-csv-path)
     let $links = (
         try {
             open $filename
@@ -497,14 +497,14 @@ export def 'links-replace' [
     --quiet (-q)
 ] : [table -> table, table -> nothing] {
     $in
-    | save (cy-path $'cyberlinks_(links-list-name).csv') --force
+    | save (current-links-csv-path) --force
 
     if (not $quiet) { links-view -q }
 }
 
 # Empty the temp cyberlinks table
 export def 'links-clear' [] : [nothing -> nothing] {
-    let $filename = (cy-path $'cyberlinks_(links-list-name).csv')
+    let $filename = (current-links-csv-path)
     backup-fn $filename
 
     $'from_text,to_text,from,to,timestamp(char nl)'
@@ -808,7 +808,7 @@ def 'links-send-tx' [
         | select raw_log code txhash
     )
 
-    let $filename = (cy-path cyberlinks_archive.csv)
+    let $filename = (cy-path mylinks _cyberlinks_archive.csv)
     if $response.code == 0 {
         open $filename
         | append ( $links | upsert neuron $env.cy.address )
@@ -2991,8 +2991,13 @@ export def-env 'set-ber-force-update' [
     )
 }
 
-def 'links-list-name' [] {
-    $env.cy.links_table_name? | default 'temp'
+export def 'current-links-csv-path' [
+    name?: path
+] {
+    $name
+    | default ($env.cy.links_table_name?)
+    | default 'temp'
+    | cy-path mylinks $'($in).csv'
 }
 
 # Add the cybercongress node to bootstrap nodes
@@ -3334,21 +3339,17 @@ def make_default_folders_fn [] {
     mkdir (cy-path cache queue_tasks)
     mkdir (cy-path cache cli_out)
     mkdir (cy-path cache jsonl)
+    mkdir (cy-path mylinks)
 
     touch (cy-path graph update.toml)
 
-    if (
-        not (cy-path $'cyberlinks_(links-list-name).csv' | path exists)
-    ) {
-        'from,to'
-        | save (cy-path $'cyberlinks_(links-list-name).csv')
+    if ( current-links-csv-path | path exists | not $in ) {
+        'from,to' | save (current-links-csv-path)
     }
 
-    if (
-        not (cy-path cyberlinks_archive.csv | path exists)
-    ) {
+    if ( cy-path mylinks _cyberlinks_archive.csv | path exists | not $in ) {
         'from,to,address,timestamp,txhash'
-        | save (cy-path cyberlinks_archive.csv)
+        | save (cy-path mylinks _cyberlinks_archive.csv) # underscore is supposed to place the file first in the folder
     }
 }
 
