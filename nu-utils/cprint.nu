@@ -15,6 +15,7 @@ export def main [
     --keep_single_breaks        # Don't remove single line breaks
     --width (-w): int = 80      # The width of text to format it
     --indent (-i): int = 0
+    --err_msg                       # produce a record with an error message
 ] {
     let $width_safe = (
         term size
@@ -74,6 +75,8 @@ export def main [
             frameit
         } else {}
         | newlineit
-        | if $echo { } else { print -n $in }
+        | if $err_msg {
+            {msg: $in}
+        } else if $echo { } else { print -n $in }
     )
 }
