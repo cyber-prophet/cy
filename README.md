@@ -2,6 +2,15 @@
 
 Cy - a [nushell](https://www.nushell.sh/) wrapper, for interacting with cybergraphs.
 
+## Quick start
+
+If you have cyber cli, nushell, curl installed:
+
+```nushel
+git clone https://github.com/cyber-prophet/cy; cd cy;
+overlay use cy -r cy.nu
+```
+
 ## The Goals of Cy:
 
 1. To demonstrate the use cases of cybergraphs and the capabilities of Cyber family blockchains.
@@ -14,10 +23,12 @@ Bostrom is the name of the consensus computer that maintains a general-purpose, 
 
 ## References to the documentation of Cy
 
-I intend to locate all the documentation of Cy in one place  to prevent fragmentation of attention. The main feedback resource is GitHub [issues](https://github.com/cyber-prophet/cy/issues).
+I intend to locate all the documentation of Cy in one place  to prevent fragmentation of attention.
 
 1. In the comments to its code (`.nu` files of this repository, mainly in [cy.nu](https://github.com/cyber-prophet/cy/blob/dev/cy.nu)).
 2. From the code, the documentation is semi-automatically parsed and written to `.md` documents of this repository (mainly to [README.md](https://github.com/cyber-prophet/cy/blob/dev/README.md)).
+
+The main feedback resource is GitHub [issues](https://github.com/cyber-prophet/cy/issues).
 
 ## Key features of Cy
 
@@ -28,7 +39,7 @@ I intend to locate all the documentation of Cy in one place  to prevent fragment
 - Cyber search in terminal
 - Many more (see list of functions below)
 
-## Installation (Mac, Linux)
+## Install all the neccessary apps using homebrew (Mac, Linux)
 
 Open Terminal app on your computer.
 
