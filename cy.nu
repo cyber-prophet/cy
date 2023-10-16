@@ -840,7 +840,13 @@ def 'links-send-tx' [
 
 # Publish all links in the temp table to cybergraph
 export def 'links-publish' [] {
-    links-view -q | length | $in // 100 | 0..$in | each {links-send-tx}
+    links-view -q
+    | length
+    | if $in == 0 {
+        error make ( cprint --err_msg $'
+        there are no cyberlinks in the *(current-links-csv-path)* file' )
+    } else { }
+    | $in // 100 | 0..$in | each {links-send-tx}
 }
 
 # Copy a table from the pipe into the clipboard (in tsv format)
