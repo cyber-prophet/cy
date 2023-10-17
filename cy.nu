@@ -846,7 +846,9 @@ export def 'links-publish' [] {
         error make ( cprint --err_msg $'
         there are no cyberlinks in the *(current-links-csv-path)* file' )
     } else { }
-    | $in // 100 | 0..$in | each {links-send-tx}
+    | $in // 100
+    | seq 0 $in
+    | each {links-send-tx}
 }
 
 # Copy a table from the pipe into the clipboard (in tsv format)
