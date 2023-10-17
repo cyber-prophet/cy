@@ -1171,7 +1171,7 @@ export def 'graph-download-links' [] {
     }
 
     let $graphql_api = "https://titan.cybernode.ai/graphql/v1/graphql"
-    let $path_csv = $'($env.cy.path)/graph/cyberlinks.csv'
+    let $path_csv = (cy-path graph cyberlinks.csv)
 
     let $last_height = (
         if ($path_csv | path exists) {
