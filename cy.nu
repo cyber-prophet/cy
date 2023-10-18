@@ -3451,7 +3451,7 @@ export def 'queue-tasks-monitor' [
     --cids_in_run: int = 10 # a number of files to download in one command run. 0 - means all (default)
 ] {
     loop {
-        glob /Users/user/cy/cache/queue_tasks/*.nu.txt
+        glob (cy-path cache queue_tasks *.nu.txt)
         | sort
         | if ($in | length) == 0 {
             queue-cids-download 10 --cids_in_run $cids_in_run --threads $threads --quiet;
