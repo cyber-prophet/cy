@@ -6,7 +6,7 @@
 
 use std assert [equal greater]
 use std clip
-export use nu-utils [bar, cprint, "str repeat", to-safe-filename, to-number-format, number-col-format]
+use nu-utils [bar, cprint, "str repeat", to-safe-filename, to-number-format, number-col-format]
 
 use log
 
@@ -25,7 +25,7 @@ export def check-requirements [] {
     }
 
     ['ipfs', 'rich', 'curl', 'cyber', 'pussy']
-    | par-each {
+    | each {
         |i| if (which ($i) | is-empty) {
             $'($i) is missing'
         }
@@ -35,7 +35,7 @@ export def check-requirements [] {
 
 export-env {
     # banner2
-    let $tested_versions = ['0.85.0']
+    let $tested_versions = ['0.86.0']
 
     version
     | get version
@@ -867,7 +867,7 @@ export def 'update-cy' [
 ] {
     cd $env.cy.path;
     git checkout $branch
-    git pull --autostash -v --rebase
+    git pull --autostash -v
 }
 
 # Get a passport by providing a neuron's address or nick
@@ -1094,7 +1094,7 @@ export def 'dict-neurons-update' [
 }
 
 # Download a snapshot of cybergraph by graphkeeper
-export def-env 'graph-download-snapshot' [
+export def --env 'graph-download-snapshot' [
     --disable_update_parquet (-D)   # Don't update the particles parquet file
 ] {
     make_default_folders_fn
@@ -1752,7 +1752,7 @@ export def 'graph-particles-df' [] {
 }
 
 # Create a config JSON to set env variables, to use them as parameters in cyber cli
-export def-env 'config-new' [
+export def --env 'config-new' [
     # config_name?: string@'nu-complete-config-names'
 ] {
     print (check-requirements)
@@ -1876,7 +1876,7 @@ export def 'config-view' [
 }
 
 # Save the piped-in JSON into config file
-export def-env 'config-save' [
+export def --env 'config-save' [
     config_name: string@'nu-complete-config-names'
     --inactive # Don't activate current config
 ] {
@@ -1912,7 +1912,7 @@ export def-env 'config-save' [
 }
 
 # Activate the config JSON
-export def-env 'config-activate' [
+export def --env 'config-activate' [
     config_name?: string@'nu-complete-config-names'
 ] {
     let $config = ($in | default (config-view $config_name))
@@ -2193,11 +2193,11 @@ def 'cid-download-kubo' [
     --info_only: bool = false # Don't download the file but write a card with filetype and size
 ] {
     log debug $'cid to download ($cid)'
-    let $file_path = ($folder | default $'($env.cy.ipfs-files-folder)' | path join $'($cid).md')
+    let $file_path = ($folder | default $env.cy.ipfs-files-folder | path join $'($cid).md')
     let $type = (
-        do -i {ipfs cat --timeout $timeout -l 400 $cid}
+        do {^ipfs cat --timeout $timeout -l 400 $cid}
         | complete
-        | if $in.exit_code == 1 {
+        | if ($in == null) or ($in.exit_code == 1) {
             'empty'
         } else {
             get stdout
@@ -2982,14 +2982,14 @@ export def 'rewards-withdraw-tx-analyse' [
 }
 
 # Set the custom name for links csv table
-export def-env 'set-links-table-name' [
+export def --env 'set-links-table-name' [
     name: string
 ] : nothing -> nothing {
     $env.cy.links_table_name = $name
 }
 
 # Force ber to update results with every request
-export def-env 'set-ber-force-update' [
+export def --env 'set-ber-force-update' [
     value?: bool
 ] : nothing -> bool {
     $env.cy.ber_force_update = (
@@ -3111,16 +3111,16 @@ export def 'query-links-bandwidth-neuron' [
 
 
 # A wrapper, to cache CLI requests
-export def 'ber' [
+export def --wrapped 'ber' [
     ...rest
-    --exec: string = ''
+    --exec: string = ''                         # The name of executable
     --cache_validity_duration: duration = 60min # Sets the cache's valid duration. No updates initiated during this period.
     --cache_stale_refresh: duration = 7day      # Sets stale cache's usable duration. Triggers background update and returns cache results. If exceeded, requests immediate data update.
     --force_update
     --disable_update (-U)
     --quiet                                     # Don't output execution's result
     --no_default_params                         # Don't use default params (like output, chain-id)
-    --error # return error and not null in case of cli's error
+    --error                                     # raise error instead of null in case of cli's error
 ] : nothing -> record {
     let $executable = if $exec != '' {$exec} else {$env.cy.exec}
     let $sub_commands_and_args = (
@@ -3190,10 +3190,9 @@ export def 'ber' [
             | save -a -r ($json_path | str replace '.json' '_arch.jsonl')
 
             $last_file
-            | upsert update_time ($in.update_time | into datetime)
         } else {
-            {'update_time': (0 | into datetime)}
-        }
+            {'update_time': 0}
+        } | into datetime update_time
     )
 
     let $freshness = ((date now) - $last_data.update_time)
@@ -3284,11 +3283,8 @@ export def 'help-cy' [
         | upsert command {|row index| ('cy ' + $row.command)}
     )
 
-    if $to_md {
-        $text | to md
-    } else {
-        $text
-    }
+    $text
+    | if $to_md { to md } else { }
 }
 
 def 'banner' [] {
@@ -3330,10 +3326,10 @@ def open_cy_config_toml [] {
             'ipfs-download-from': 'gateway'
             'ipfs-storage': 'cybernode'
         }
-        | save ($config_path | path expand)
+        | save $config_path
     }
 
-    open ($config_path | path expand)
+    open $config_path
 }
 
 def make_default_folders_fn [] {
