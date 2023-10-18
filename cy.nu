@@ -867,7 +867,7 @@ export def 'update-cy' [
 ] {
     cd $env.cy.path;
     git checkout $branch
-    git pull --autostash -v
+    git pull --autostash -v --rebase
 }
 
 # Get a passport by providing a neuron's address or nick
