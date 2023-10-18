@@ -2,9 +2,9 @@ use to-number-format.nu
 
 export def main [
     column_name: string
-    --thousands_delim (-t) = '_'    # Thousands delimiter: number-format 1000 -t ': 1'000
-    --decimals (-d) = 0       # Number of digits after decimal delimiter: number-format 1000.1234 -d 2: 1000.12
-    --denom (-D) = ''               # Denom `--denom "Wt": number-format 1000 --denom 'Wt': 1000Wt
+    --thousands_delim (-t): string = '_'    # Thousands delimiter: number-format 1000 -t ': 1'000
+    --decimals (-d): int = 0       # Number of digits after decimal delimiter: number-format 1000.1234 -d 2: 1000.12
+    --denom (-D): string = ''               # Denom `--denom "Wt": number-format 1000 --denom 'Wt': 1000Wt
 ] {
     let $input = $in
 

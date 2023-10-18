@@ -251,7 +251,7 @@ export def 'link-files' [
     )
 
     $'Confirm uploading ($files_col | length) files?'
-    | if $yes or (agree -n $in) { } else { return }
+    | if $yes or (agree -n true $in) { } else { return }
 
     let $results = (
         $files_col
@@ -1936,8 +1936,8 @@ export def-env 'config-activate' [
 
 def 'search-sync' [
     query
-    --page (-p) = 0
-    --results_per_page (-r) = 10
+    --page (-p): int = 0
+    --results_per_page (-r): int = 10
 ] {
     let $cid = if (is-cid $query) {
         $query
@@ -1970,8 +1970,8 @@ def 'search-sync' [
 
 def 'search-with-backlinks' [
     query: string
-    --page (-p) = 0
-    --results_per_page (-r) = 10
+    --page (-p): int = 0
+    --results_per_page (-r): int: int = 10
 ] {
     let $cid = (
         if (is-cid $query) {
@@ -2010,8 +2010,8 @@ def 'search-with-backlinks' [
 
 def 'search-auto-refresh' [
     query: string
-    --page (-p) = 0
-    --results_per_page (-r) = 10
+    --page (-p): int = 0
+    --results_per_page (-r): int = 10
 ] {
     let $cid = (pin-text $query --only_hash)
 
@@ -2047,10 +2047,11 @@ def 'search-auto-refresh' [
 # Use the built-in node search function in cyber or pussy
 export def 'search' [
     query
-    --page (-p) = 0
-    --results_per_page (-r) = 10
+    --page (-p): int = 0
+    --results_per_page (-r): int = 10
     --search_type: string@'nu-complete-search-functions' = 'search-with-backlinks'
 ] {
+    # todo `use match`
     if $search_type == 'search-with-backlinks' {
         search-with-backlinks $query --page $page --results_per_page $results_per_page
     } else if $search_type == 'search-auto-refresh' {
@@ -2189,7 +2190,7 @@ def 'cid-download-kubo' [
     cid: string
     --timeout = '300s'
     --folder: path
-    --info_only = false # Don't download the file but write a card with filetype and size
+    --info_only: bool = false # Don't download the file but write a card with filetype and size
 ] {
     log debug $'cid to download ($cid)'
     let $file_path = ($folder | default $'($env.cy.ipfs-files-folder)' | path join $'($cid).md')
@@ -2671,9 +2672,9 @@ export def 'tokens-denoms-decimals-dict' [] {
     http get 'https://raw.githubusercontent.com/cybercongress/cyb/master/src/utils/tokenList.js'
     | str replace -r -m '(?s).*(\[.*\]).*' '$1'
     | from nuon
-    | rename -c ['coinMinimalDenom' 'base_denom']
-    | rename -c ['denom' 'ticker']
-    | rename -c ['coinDecimals' 'decimals']
+    | rename -c {'coinMinimalDenom': 'base_denom'}
+    | rename -c {'denom': 'ticker'}
+    | rename -c {'coinDecimals': 'decimals'}
     | select base_denom ticker decimals
     | append [
         # [base_denom, ticker, coinDecimals];
@@ -2704,7 +2705,7 @@ export def 'tokens-price-in-h-naive' [
     | reject reserve_account_address
     | insert price_in_h_naive {|i| $i.hydrogen / $i.reserve_coin_amount}
     | if $all_data {} else {select reserve_coin_denom_ price_in_h_naive}
-    | rename -c [reserve_coin_denom_ denom]
+    | rename -c {reserve_coin_denom_: denom}
     | append {denom: hydrogen price_in_h_naive: 1.0}
 }
 
@@ -2739,8 +2740,8 @@ export def 'tokens-in-h-swap-calc' [
         |i| ($i.h_out_price - $i.price_in_h_naive) / $i.price_in_h_naive * 100
     }
     | move $'price_in_h_slip($percent_formatted)' --after price_in_h_naive
-    | rename -c [h_out_amount $'amount_in_h_swap($percent_formatted)']
-    # | rename -c [source_amount $'amount_source($percent_formatted)']
+    | rename -c {h_out_amount: $'amount_in_h_swap($percent_formatted)'}
+    # | rename -c {source_amount: $'amount_source($percent_formatted)'}
     | reject ($in | columns | where $it in [hydrogen reserve_coin_denom reserve_coin_amount h_out_price price_in_h_naive source_amount])
 }
 
@@ -2983,14 +2984,14 @@ export def 'rewards-withdraw-tx-analyse' [
 # Set the custom name for links csv table
 export def-env 'set-links-table-name' [
     name: string
-] {
+] : nothing -> nothing {
     $env.cy.links_table_name = $name
 }
 
 # Force ber to update results with every request
 export def-env 'set-ber-force-update' [
     value?: bool
-] {
+] : nothing -> bool {
     $env.cy.ber_force_update = (
         if $value == null {
             not ($env.cy.ber_force_update? | default false)
@@ -3001,7 +3002,7 @@ export def-env 'set-ber-force-update' [
 
 export def 'current-links-csv-path' [
     name?: path
-] {
+] : nothing -> path {
     $name
     | default ($env.cy.links_table_name?)
     | default 'temp'
@@ -3009,7 +3010,7 @@ export def 'current-links-csv-path' [
 }
 
 # Add the cybercongress node to bootstrap nodes
-export def 'ipfs-bootstrap-add-congress' [] {
+export def 'ipfs-bootstrap-add-congress' [] : nothing -> nothing {
     ipfs bootstrap add '/ip4/135.181.19.86/tcp/4001/p2p/12D3KooWNMcnoQynAY9hyi4JxzSu64BsRGcJ9z7vKghqk8sTrpqY'
     print 'check if bootstrap node works by executing commands:'
 
@@ -3027,7 +3028,7 @@ export def 'ipfs-bootstrap-add-congress' [] {
 # persistent_peers = "7ad32f1677ffb11254e7e9b65a12da27a4f877d6@195.201.105.229:36656,d0518ce9881a4b0c5872e5e9b7c4ea8d760dad3f@85.10.207.173:26656"
 export def 'validator-generate-persistent-peers-string' [
     node_address?: string
-] {
+] : nothing -> string {
     let $node_address = ($node_address | default $'($env.cy.rpc-address)')
     if $node_address == $env.cy.rpc-address {
         cprint -a 2 $"Nodes list for *($env.cy.rpc-address)*"
@@ -3052,7 +3053,7 @@ export def 'validator-generate-persistent-peers-string' [
 # Query tx by hash
 export def 'query-tx' [
     hash: string
-] {
+] : nothing -> record {
     ber --disable_update --error [query tx --type hash $hash]
     | reject events
 }
@@ -3061,7 +3062,7 @@ export def 'query-tx' [
 export def 'query-tx-seq' [
     neuron: string
     seq: int
-] {
+] : nothing -> record {
     ber --disable_update [query tx --type=acc_seq $'($neuron)/($seq)']
     | if 'events' in ($in | columns) {
         reject events
@@ -3073,7 +3074,7 @@ export def 'query-account' [
     neuron: string
     --height: int = 0
     --seq   # return sequence
-] {
+] : nothing -> record {
     ber query account $neuron [--height $height]
     | if $seq {
         get base_vesting_account.base_account.sequence
@@ -3120,7 +3121,7 @@ export def 'ber' [
     --quiet                                     # Don't output execution's result
     --no_default_params                         # Don't use default params (like output, chain-id)
     --error # return error and not null in case of cli's error
-] {
+] : nothing -> record {
     let $executable = if $exec != '' {$exec} else {$env.cy.exec}
     let $sub_commands_and_args = (
         if $rest == [] {
