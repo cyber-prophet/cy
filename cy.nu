@@ -2566,8 +2566,9 @@ export def 'tokens-investmint-status-table' [
     let $h_all = (
         tokens-balance-get $address --height $height
         | where denom == hydrogen
-        | get amount.0
-        | into int
+        | if ($in | length | $in > 0) {
+            get amount.0 | into int
+        } else { 0 }
     )
 
     let $hydrogen_liquid = (
