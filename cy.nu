@@ -370,7 +370,7 @@ def test-tweet [] {
 }
 
 # Add a random chuck norris cyberlink to the temp table
-def 'link-chuck' [] : [nothing -> record] {
+def 'link-chuck' [] : [nothing -> nothing] {
     let $quote = (
         http get -e https://api.chucknorris.io/jokes/random
         | get value
@@ -383,7 +383,7 @@ def 'link-chuck' [] : [nothing -> record] {
 }
 
 # Add a random quote cyberlink to the temp table
-def 'link-quote' [] : [nothing -> record] {
+def 'link-quote' [] : [nothing -> nothing] {
     let $quote = (
         http get -e -r https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=text
         | $in + "\n\n" + 'via [forismatic.com](https://forismatic.com)'
@@ -3403,11 +3403,10 @@ def 'col-name-reverse' [
 def 'now-fn' [
     --pretty (-P)
 ] {
-    if $pretty {
-        date now | format date '%Y-%m-%d-%H:%M:%S'
-    } else {
-        date now | format date '%Y%m%d-%H%M%S'
-    }
+    date now
+    | format date (
+        if $pretty {'%Y-%m-%d-%H:%M:%S'} else {'%Y%m%d-%H%M%S'}
+    )
 }
 
 def 'backup-fn' [
@@ -3487,7 +3486,7 @@ def 'inspect2' [
 ] {
     let $input = $in
 
-    if $callback == $nothing {
+    if $callback == null {
         print $input
     } else {
         do $callback $input
