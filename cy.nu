@@ -3119,6 +3119,14 @@ export def 'query-links-bandwidth-neuron' [
     | upsert links {|i| $i.links | into int | $in / (query-links-bandwidth-price) | math floor}
 }
 
+export def 'query-staking-validators' [] {
+    ber query staking validators
+    | get validators
+    | upsert moniker {|i| $i.description.moniker}
+    | upsert commission {|i| $i.commission.commission_rates.rate | into float}
+    | select operator_address moniker commission jailed
+}
+
 
 # A wrapper, to cache CLI requests
 export def --wrapped 'ber' [
