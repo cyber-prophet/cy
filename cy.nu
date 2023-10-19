@@ -3218,7 +3218,7 @@ export def --wrapped 'ber' [
         request-save-output-exec-response
     } else {
         if ($freshness > $cache_validity_duration) {
-            queue-task-add -o 2 $'ber --exec ($executable) --force_update --quiet [($sub_commands_and_args | str join " ")]'
+            queue-task-add -o 2 $'ber --exec ($executable) --force_update [($sub_commands_and_args | str join " ")] | to yaml'
         }
         $last_data
     }
@@ -3457,14 +3457,13 @@ export def 'queue-tasks-monitor' [
         | sort
         | if ($in | length) == 0 {
             queue-cids-download 10 --cids_in_run $cids_in_run --threads $threads --quiet;
-            print ''
         } else {
             par-each -t $threads {
                 |i| execute-task $i
             };
-            print ''
         };
         sleep 1sec
+        print -n $"(char cr)(date now | format date '%H:%M:%S') - to exit press `ctrl+c`"
     }
 }
 
@@ -3477,12 +3476,12 @@ def 'execute-task' [
         nu -c $'use (cy-path cy.nu); ($command)' --config $nu.config-path --env-config $nu.env-path
     }
     | complete
-    | get exit_code
-    | if $in == 0 {
+    | if $in.exit_code == 0 {
         rm $task_path -f;
-        print -n '🔵'
+        print -n $'(char nl)🔵 ($command)'
+        print -n $'(char nl)($in.stdout)'
     } else {
-        print -n '⭕'
+        print -n $'(char nl)⭕ ($command)'
     }
 
     log debug $'run ($command)'
