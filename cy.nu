@@ -2802,7 +2802,9 @@ def swap_calc_amount [
     }
 }
 
-export def 'tokens-format' [] {
+export def 'tokens-format' [
+    --clean # display only formatted values
+] {
     let $input = join -l (tokens-ibc-denoms-table) denom denom | fill non-exist
 
     let $columns = $input | columns
@@ -2831,6 +2833,7 @@ export def 'tokens-format' [] {
         | move amount_f --after denom_f
     } else {}
     | reject ($in | columns | where $it in [base_denom ticker decimals])
+    | if $clean {reject denom amount} else {}
 }
 
 # Check balances for the keys added to the active CLI
