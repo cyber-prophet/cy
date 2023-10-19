@@ -2980,8 +2980,11 @@ export def 'rewards-withdraw-tx-analyse' [
 
     let $result = (
         tokens-delegations-table-get $tx_neuron --height $tx_height
+        | upsert height $tx_height
+        | join -l (query-staking-validators | rename validator_address) validator_address validator_address
         | reject delegator_address shares denom
         | rename validator delegated
+        | select moniker delegated commission jailed ($in | columns)
         | where delegated > 0
         | join ($rewards | where denom == boot) -l validator validator
         | upsert percent {|i| (($i.rewards) / $i.delegated) }
@@ -2989,6 +2992,7 @@ export def 'rewards-withdraw-tx-analyse' [
 
     $result
     | upsert percent_rel {|i| $i.percent / ($result.percent | math max)}
+    | move percent_rel --after commission
 }
 
 # Set the custom name for links csv table
