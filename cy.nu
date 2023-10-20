@@ -1196,7 +1196,7 @@ export def 'graph-download-links' [] {
         );
         if $links != [] {
             $links | to csv --noheaders | save -r -a $path_csv
-            print $'($links | length) was downloaded!'
+            print $'($mult * 1000) was downloaded!'
         } else {
             break
         }
