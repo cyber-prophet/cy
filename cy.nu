@@ -1510,6 +1510,7 @@ export def 'graph-neurons-stats' [] {
         | dfr join --left $followers neuron neuron
         | dfr join --left $follows neuron neuron
         | dfr join --left $tweets neuron neuron
+        | dfr fill-null 0
         | dfr join --left ( dict-neurons --df ) neuron neuron
     )
 }
