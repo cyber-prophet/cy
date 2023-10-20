@@ -2693,9 +2693,10 @@ export def 'tokens-denoms-decimals-dict' [] {
 
 export def 'tokens-price-in-h-naive' [
     --all_data
-]: nothing -> table {
+    --height: int = 0
+] : nothing -> table {
     let $pools = (
-        tokens-pools-table-get
+        tokens-pools-table-get --height $height
         | select reserve_coin_amount reserve_account_address reserve_coin_denom
         | into float reserve_coin_amount
     )
