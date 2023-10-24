@@ -2381,8 +2381,9 @@ export def 'query-current-height' [
 # > cy query-rank-karma bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 | to yaml
 # karma: 852564186396
 export def 'query-rank-karma' [
-    address: string
+    neuron?: string
 ] {
+    let $address = $neuron | default $env.cy.address
     ber query rank karma $address
     | upsert karma {|i| $i.karma? | default 0 | into int}
 }
@@ -2399,10 +2400,11 @@ export def 'query-rank-karma' [
 # - denom: millivolt
 #   amount: 7023
 export def 'tokens-balance-get' [
-    address: string
+    neuron?: string
     --height: int = 0
     --record
 ] {
+    let $address = $neuron | default $env.cy.address
     if not (is-neuron $address) {
         cprint $"*($address)* doesn't look like an address"
         return null
@@ -2500,11 +2502,11 @@ export def 'tokens-pools-convert-value' [
 }
 
 export def 'tokens-delegations-table-get' [
-    address: string
+    address?: string
     --height: int = 0
     --sum
 ] {
-    ber query staking delegations $address [--height $height]
+    ber query staking delegations ($address | default $env.cy.address) [--height $height]
     | get -i delegation_responses
     | if $in == null {return} else {}
     | each {|i| $i.delegation | merge $i.balance}
@@ -2516,10 +2518,11 @@ export def 'tokens-delegations-table-get' [
 }
 
 export def 'tokens-rewards-get' [
-    address: string
+    neuron?: string
     --height: int = 0
     --sum
 ] {
+    let $address = $neuron | default $env.cy.address
     ber query distribution rewards $address [--height $height]
     | get total -i
     | if $in == null {return} else {}
@@ -2532,12 +2535,13 @@ export def 'tokens-rewards-get' [
 }
 
 export def 'tokens-investmint-status-table' [
-    address: string
+    neuron?: string
     --h_liquid      # retrun amount of liquid H
     --quiet         # don't print amount of H liquid
     --height: int = 0
     --sum
 ] {
+    let $address = $neuron | default $env.cy.address
     let $account_vesting = (query-account $address --height $height)
 
     if ($account_vesting | get -i vesting_periods) == null {
@@ -2597,9 +2601,10 @@ export def 'tokens-investmint-status-table' [
 }
 
 export def 'tokens-routed-from' [
-    address: string
+    neuron?: string
     --height: int = 0
 ] {
+    let $address = $neuron | default $env.cy.address
     ber query grid routed-from $address [--height $height]
     | get -i value
     | if $in == null {return} else { }
@@ -2608,9 +2613,10 @@ export def 'tokens-routed-from' [
 }
 
 export def 'tokens-routed-to' [
-    address: string
+    neuron?: string
     --height: int = 0
 ] {
+    let $address = $neuron | default $env.cy.address
     ber query grid routed-to $address [--height $height]
     | get -i value
     | if $in == null {return} else { }
@@ -2879,10 +2885,11 @@ export def 'balances' [
 }
 
 export def 'tokens-balance-all' [
-    $address
+    $neuron?: string
     --height: int = 0
 ] {
     let $invstiminted_frozen = (tokens-investmint-status-table $address --sum)
+    let $address = $neuron | default $env.cy.address
     (
         tokens-balance-get $address --height $height
         | if $in == (token-dummy-balance) {
@@ -2995,6 +3002,45 @@ export def 'rewards-withdraw-tx-analyse' [
     $result
     | upsert percent_rel {|i| $i.percent / ($result.percent | math max)}
     | move percent_rel --after commission
+}
+
+# fuzzy fraction of piped-in token
+export def tokens-fraction [
+    value: any
+    --denom: string = ''
+] : [int -> int, int -> string, float -> int, float -> string ] {
+    let $input = $in
+
+    $value | describe
+    | match $in {
+        string => {
+            $value | if ($value | str contains '%') {
+                str replace '%' '' | into float | $in / 100 | $input * $in
+            } else {
+                {error make {msg: 'value should be `int`, `float` or `string`'}}
+            }
+        }
+        float => {
+            if $value <= 1 {
+                $value * $input
+            } else {
+                error make {msg: $'If the `value` param is `float`, it should be less than 1. Now it is ($value)' }
+            }
+        }
+        int => {
+            if $value <= 100 {
+                $value / 100 | $input * $in
+            } else {
+                {msg: $'If the `value` param is `int`, it should be less than 100. Now it is ($value)' }
+            }
+        }
+        _ => {error make {msg: 'value should be `int`, `float` or `string`'}}
+    }
+    | if $denom == '' {
+        into int
+    } else {
+        into string | $in + $denom
+    }
 }
 
 # Set the custom name for links csv table
