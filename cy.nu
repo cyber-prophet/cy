@@ -3490,7 +3490,7 @@ def 'execute-task' [
     let $command = open $task_path
 
     do -i {
-        nu -c $'use (cy-path cy.nu); ($command)' --config $nu.config-path --env-config $nu.env-path
+        nu -c $'use (cy-path cy.nu) *; ($command)' --config $nu.config-path --env-config $nu.env-path
     }
     | complete
     | if $in.exit_code == 0 {
