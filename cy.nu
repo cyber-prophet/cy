@@ -1062,7 +1062,7 @@ export def 'dict-neurons-update' [
             }
         }
     } else {}
-    | if $balance or $all {
+    | if $balance {
         par-each -t $threads {|i|
             $i | merge (
                 tokens-balance-get $i.neuron
@@ -1072,7 +1072,7 @@ export def 'dict-neurons-update' [
     } else {}
     | if $karma or $all {
         par-each -t $threads {|i|
-            $i | merge (karma-get $i.neuron)
+            $i | merge (query-rank-karma $i.neuron)
         }
     } else {}
     | upsert update_ts (date now)
@@ -2378,9 +2378,9 @@ export def 'query-current-height' [
 
 # Get a karma metric for a given neuron
 #
-# > cy karma-get bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 | to yaml
+# > cy query-rank-karma bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 | to yaml
 # karma: 852564186396
-export def 'karma-get' [
+export def 'query-rank-karma' [
     address: string
 ] {
     ber query rank karma $address
