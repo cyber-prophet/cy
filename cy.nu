@@ -3173,11 +3173,32 @@ export def 'query-links-bandwidth-neuron' [
 }
 
 export def 'query-staking-validators' [] {
-    ber query staking validators
-    | get validators
+    let $vals_1_page = (ber query staking validators --count-total)
+
+    let $offset_to_go = (
+        $vals_1_page
+        | get pagination.total
+        | into int
+        | $in // 100
+        | 1..$in
+        | each {|i| $i * 100}
+    );
+
+    let $all_validators = (
+        $offset_to_go
+        | each {|i| ber query staking validators --count-total --offset $i | get validators}
+        | flatten
+        | prepend $vals_1_page.validators
+    );
+
+    $all_validators
     | upsert moniker {|i| $i.description.moniker}
     | upsert commission {|i| $i.commission.commission_rates.rate | into float}
-    | select operator_address moniker commission jailed
+    | select moniker commission jailed tokens operator_address
+    | into int tokens
+    | sort-by tokens -r
+}
+
 export def 'validator-chooser' [
     --only_my_validators
 ] {
