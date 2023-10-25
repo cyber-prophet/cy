@@ -3201,7 +3201,7 @@ def 'query-links-bandwidth-params' [] : nothing -> record {
 
 export def 'query-links-bandwidth-neuron' [
     neuron?
-] nothing - table {
+] : nothing -> table {
     ber query bandwidth neuron ($neuron | default $env.cy.address) --cache_stale_refresh 5min
     | get neuron_bandwidth
     | select max_value remained_value
