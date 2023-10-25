@@ -3005,6 +3005,47 @@ export def 'rewards-withdraw-tx-analyse' [
     | move percent_rel --after commission
 }
 
+export def 'delegate-flow' [
+    $neuron?: string
+] {
+    let $address = $neuron | default $env.cy.address
+    let $boots_liquid: int = (
+        tokens-balance-all $address
+        | where state == liquid
+        | where denom == boot
+        | get amount.0
+    )
+
+    cprint $'You have ($boots_liquid | to-number-format --denom boot --significant_integers 0) liquid.
+    How much of them would you like to delegate?'
+
+    let $boots_to_delegate: int = (
+        5..1
+        | each {|i| 0.2 * $i | math round -p 1}
+        | wrap fraction
+        | upsert boots {|i| $i.fraction * $boots_liquid | math floor | into int}
+        | upsert fraction {|i| $i.fraction * 100 | into string | $in + '%'}
+        | append {fraction: another, boots: 0}
+        | input list
+        | get boots
+        | if $in == 0 {
+            $boots_liquid | tokens-fraction-input --denom boot
+        } else {}
+        | into int
+    )
+
+    let $operator = (
+        validator-chooser --only_my_validators
+        | append {moniker: 'load more'}
+        | input list --fuzzy
+        | if ($in | values | get 0 | $in == 'load more') {
+            validator-chooser | input list --fuzzy
+        } else {}
+        | get operator_address
+    )
+
+}
+
 export def 'tokens-fraction-input' [
     --dust_to_leave: int = 50_000 # the amount of token to leave for paing fee
     --denom: string = ''
