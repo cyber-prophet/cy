@@ -251,7 +251,7 @@ export def 'link-files' [
     )
 
     $'Confirm uploading ($files_col | length) files?'
-    | if $yes or (agree -n true $in) { } else { return }
+    | if $yes or (confirm -n true $in) { } else { return }
 
     let $results = (
         $files_col
@@ -2523,6 +2523,7 @@ export def 'tokens-rewards-get' [
     --sum
 ] {
     let $address = $neuron | default $env.cy.address
+
     ber query distribution rewards $address [--height $height]
     | get total -i
     | if $in == null {return} else {}
@@ -3654,20 +3655,16 @@ def 'path-exists-safe' [
     try {($'($path_to_check)' | path exists)} catch {false}
 }
 
-def agree [
-    prompt
-    --default-not (-n): bool
-] {
-    let $prompt = if ($prompt | str ends-with '!') {
-        $'(ansi red)($prompt)(ansi reset)'
-    } else {
-        $'($prompt)'
-    }
-    print $prompt
+def confirm [
+    prompt: string
+    --default_not (-n): bool = false
+    --dont_keep_prompt
+] : nothing -> bool {
+    if not $dont_keep_prompt {cprint $prompt}
 
     if $default_not { [no yes] } else { [yes no] }
-    | input list
-    | inspect2
+    | input list (if $dont_keep_prompt {cprint --echo --after 0 $prompt})
+    | if $dont_keep_prompt {} else {inspect2}
     | $in in [yes]
 }
 
