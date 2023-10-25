@@ -3005,42 +3005,38 @@ export def 'rewards-withdraw-tx-analyse' [
     | move percent_rel --after commission
 }
 
-# fuzzy fraction of piped-in token
-export def tokens-fraction [
-    value: any
+export def 'tokens-fraction-input' [
+    --dust_to_leave: int = 50_000 # the amount of token to leave for paing fee
     --denom: string = ''
-] : [int -> int, int -> string, float -> int, float -> string ] {
-    let $input = $in
+    --yes # proceed without confirmation
+] {
+    let $tokens = $in - $dust_to_leave
 
-    $value | describe
-    | match $in {
-        string => {
-            $value | if ($value | str contains '%') {
-                str replace '%' '' | into float | $in / 100 | $input * $in
-            } else {
-                {error make {msg: 'value should be `int`, `float` or `string`'}}
+    while true {
+        cprint $'you can enter integer value (char lp)like *4_000_000*(char rp) or percent
+        from your liquid BOOTs (char lp)like *30%*(char rp)'
+
+        let $input: string = input
+
+        let $value: int = (
+            $input
+            | if ($in | str contains '%') {
+                str replace '%' '' | into float | $in / 100 | $tokens * $in
+            } else { str replace -ar '[^0-9]' '' }
+            | into int
+        )
+
+        if ($value > $tokens) {
+            cprint $'*($value)* is bigger than *($tokens)*'
+        } else if ($value > 0) {
+            if $yes or (
+                confirm --dont_keep_prompt $"Is the amount correct (
+                    $value | to-number-format --denom $denom --significant_integers 0
+                ) - \(*($value / $tokens * 100 | math round -p 1)%* from *($tokens)*\)?"
+            ) {
+                return $value
             }
         }
-        float => {
-            if $value <= 1 {
-                $value * $input
-            } else {
-                error make {msg: $'If the `value` param is `float`, it should be less than 1. Now it is ($value)' }
-            }
-        }
-        int => {
-            if $value <= 100 {
-                $value / 100 | $input * $in
-            } else {
-                {msg: $'If the `value` param is `int`, it should be less than 100. Now it is ($value)' }
-            }
-        }
-        _ => {error make {msg: 'value should be `int`, `float` or `string`'}}
-    }
-    | if $denom == '' {
-        into int
-    } else {
-        into string | $in + $denom
     }
 }
 
