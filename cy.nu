@@ -3014,26 +3014,27 @@ export def 'delegate-flow' [
         | where state == liquid
         | where denom == boot
         | get amount.0
+        | $in - 2_000_000 # a fraction for fees
     )
 
-    cprint $'You have ($boots_liquid | to-number-format --denom boot --significant_integers 0) liquid.
-    How much of them would you like to delegate?'
+    cprint $'You have *($boots_liquid | to-number-format --denom boot --significant_integers 0 | ansi strip)*
+    liquid. How much of them would you like to delegate?'
 
     let $boots_to_delegate: int = (
-        5..1
-        | each {|i| 0.2 * $i | math round -p 1}
+        [1 0.5 0.2]
         | wrap fraction
         | upsert boots {|i| $i.fraction * $boots_liquid | math floor | into int}
         | upsert fraction {|i| $i.fraction * 100 | into string | $in + '%'}
-        | append {fraction: another, boots: 0}
+        | append {fraction: other, boots: 0}
         | input list
         | get boots
         | if $in == 0 {
             $boots_liquid | tokens-fraction-input --denom boot
-        } else {}
-        | into int
+        } else {$'($in)boot'}
+        | inspect2
     )
 
+    cprint $'Choose the validator to delegate *($boots_to_delegate)*.'
     let $operator = (
         validator-chooser --only_my_validators
         | append {moniker: 'load more'}
@@ -3044,6 +3045,7 @@ export def 'delegate-flow' [
         | get operator_address
     )
 
+    (^$env.cy.exec tx staking delegate $operator $boots_to_delegate --from $env.cy.address)
 }
 
 export def 'tokens-fraction-input' [
@@ -3054,7 +3056,7 @@ export def 'tokens-fraction-input' [
     let $tokens = $in - $dust_to_leave
 
     while true {
-        cprint $'you can enter integer value (char lp)like *4_000_000*(char rp) or percent
+        cprint $'you can enter integer value (char lp)like *4_000_000* or *4000000*(char rp) or percent
         from your liquid BOOTs (char lp)like *30%*(char rp)'
 
         let $input: string = input
@@ -3071,11 +3073,11 @@ export def 'tokens-fraction-input' [
             cprint $'*($value)* is bigger than *($tokens)*'
         } else if ($value > 0) {
             if $yes or (
-                confirm --dont_keep_prompt $"Is the amount correct (
-                    $value | to-number-format --denom $denom --significant_integers 0
-                ) - \(*($value / $tokens * 100 | math round -p 1)%* from *($tokens)*\)?"
+                confirm --dont_keep_prompt $"Is the amount *(
+                    $value | to-number-format --denom $denom --significant_integers 0 | ansi strip
+                )* correct? It is *($value / $tokens * 100 | math round -p 1)%* from *($tokens)*"
             ) {
-                return $value
+                return $'($value)($denom)'
             }
         }
     }
