@@ -2586,7 +2586,7 @@ export def 'tokens-investmint-status-table' [
         | $h_all - $in
     )
 
-    if ((not $quiet) or (not $h_liquid)) {
+    if not $quiet {
         print $'liquid hydrogen availible for investminting: ($hydrogen_liquid)'
     }
 
@@ -2801,7 +2801,7 @@ def swap_calc_amount [
     --target_coin_pool_amount (-T): float
     --source_coin_pool_amount (-S): float
     --pool_fee (-f): float = 0.003
-] {
+] : noting -> int {
     if source_coin_amount == 0 {
         0
     } else {
@@ -2889,8 +2889,8 @@ export def 'tokens-balance-all' [
     $neuron?: string
     --height: int = 0
 ] {
-    let $invstiminted_frozen = (tokens-investmint-status-table $address --sum)
     let $address = $neuron | default $env.cy.address
+    let $invstiminted_frozen = (tokens-investmint-status-table $address --sum --quiet)
     (
         tokens-balance-get $address --height $height
         | if $in == (token-dummy-balance) {
