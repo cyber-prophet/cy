@@ -3596,7 +3596,7 @@ export def 'queue-task-add' [
         | path join
     )
 
-    $command
+    $'use (cy-path cy.nu) *; ($command)'
     | save -f $filename
 }
 
@@ -3622,10 +3622,10 @@ export def 'queue-tasks-monitor' [
 export def 'queue-execute-task' [
     task_path: path
 ] {
-    let $command = open $task_path
+    let $command = (open $task_path)
 
     do -i {
-        nu -c $'use (cy-path cy.nu) *; ($command)' --config $nu.config-path --env-config $nu.env-path
+        nu --config $nu.config-path --env-config $nu.env-path $task_path
     }
     | complete
     | if $in.exit_code == 0 {
