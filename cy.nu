@@ -1577,11 +1577,11 @@ export def 'graph-to-gephi' [] {
 export def 'graph-to-logseq' [
     # --path: string
 ] {
-    let $links = (graph-links-df | inspect2)
+    let $links = (graph-links-df | print_pass)
     let $particles = (
         $links
         | graph-to-particles --include_system --include_global
-        | inspect2
+        | print_pass
     )
 
     let $path = ($env.cy.path) | path join export $'logseq_(date now | date format "%Y-%m-%d_%H-%M-%S")'
@@ -1633,7 +1633,7 @@ export def 'graph-to-cosmograph' [] {
     | save -f (
         $env.cy.path
         | path join 'export' $'cosmograph(now-fn).csv'
-        | inspect2
+        | print_pass
     )
 }
 
@@ -1760,7 +1760,7 @@ export def --env 'config-new' [
     make_default_folders_fn
 
     cprint -c green 'Choose the name of executable:'
-    let $exec = (nu-complete-executables | input list -f | inspect2)
+    let $exec = (nu-complete-executables | input list -f | print_pass)
 
     let $addr_table = (
         ^($exec) keys list --output json
@@ -1793,7 +1793,7 @@ export def --env 'config-new' [
         $addr_table
         | input list -f
         | get address
-        | inspect2
+        | print_pass
     )
 
     let $keyring = $addr_table | where address == $address | get keyring.0
@@ -1839,7 +1839,7 @@ export def --env 'config-new' [
                 input 'enter the RPC address:'
             } else {$x}
         } $in
-        | inspect2
+        | print_pass
     )
 
     cprint -c green --before 1 'Select the ipfs service to store particles:'
@@ -1847,7 +1847,7 @@ export def --env 'config-new' [
     let $ipfs_storage = (
         [cybernode, kubo, both]
         | input list -f
-        | inspect2
+        | print_pass
     )
 
     {
@@ -1873,7 +1873,7 @@ export def 'config-view' [
         let $filename = (cy-path config $'($config_name).toml')
         open $filename
     }
-    # | if $quiet {} else {inspect2}
+    # | if $quiet {} else {print_pass}
 }
 
 # Save the piped-in JSON into config file
@@ -1906,7 +1906,7 @@ export def --env 'config-save' [
     | if (not $inactive) {
         config-activate
     } else {}
-    | inspect2
+    | print_pass
     | save $filename2 -f
 
     print $'($filename2) is saved'
@@ -3031,7 +3031,7 @@ export def 'delegate-flow' [
         | if $in == 0 {
             $boots_liquid | tokens-fraction-input --denom boot
         } else {$'($in)boot'}
-        | inspect2
+        | print_pass
     )
 
     cprint $'Choose the validator to delegate *($boots_to_delegate)*.'
@@ -3098,7 +3098,7 @@ export def --env 'set-ber-force-update' [
         if $value == null {
             not ($env.cy.ber_force_update? | default false)
         } else {$value}
-        | inspect2
+        | print_pass
     )
 }
 
@@ -3639,7 +3639,7 @@ export def 'queue-execute-task' [
     log debug $'run ($command)'
 }
 
-def 'inspect2' [
+def 'print_pass' [
     callback?: closure
 ] {
     let $input = $in
@@ -3752,7 +3752,7 @@ def confirm [
 
     if $default_not { [no yes] } else { [yes no] }
     | input list (if $dont_keep_prompt {cprint --echo --after 0 $prompt})
-    | if $dont_keep_prompt {} else {inspect2}
+    | if $dont_keep_prompt {} else {print_pass}
     | $in in [yes]
 }
 
