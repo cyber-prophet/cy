@@ -3624,16 +3624,18 @@ export def 'queue-execute-task' [
 ] {
     let $command = (open $task_path)
 
-    do -i {
-        nu --config $nu.config-path --env-config $nu.env-path $task_path
-    }
-    | complete
+    let $results = (
+        do -i { nu --config $nu.config-path --env-config $nu.env-path $task_path }
+        | complete
+    )
+
+    $results
     | if $in.exit_code == 0 {
         rm $task_path -f;
         print -n $'(char nl)🔵 ($command)'
-        print -n $'(char nl)($in.stdout)'
+        print -n $'(char nl)($results.stdout)'
     } else {
-        print -n $'(char nl)⭕ ($command)'
+        print -n $'(char nl)🛑 ($command)'
     }
 
     log debug $'run ($command)'
