@@ -3283,7 +3283,7 @@ export def --wrapped 'ber' [
         }
     )
 
-    let $json_path = (
+    let $json_path: path = (
         $executable
         | append ($sub_commands_and_args)
         | str join '_'
@@ -3307,7 +3307,8 @@ export def --wrapped 'ber' [
             $last_file
         } else {
             {'update_time': 0}
-        } | into datetime update_time
+        }
+        | into datetime update_time
     )
 
     let $freshness = ((date now) - $last_data.update_time)
@@ -3315,7 +3316,6 @@ export def --wrapped 'ber' [
     let $update = (
         $force_update or
         ($env.cy.ber_force_update? | default false) or
-        ($last_data.update_time == (0 | into datetime)) or
         (($freshness > $cache_stale_refresh) and (not $disable_update))
     )
 
@@ -3326,7 +3326,7 @@ export def --wrapped 'ber' [
         request-save-output-exec-response $executable $sub_commands_and_args $json_path $error $quiet
     } else {
         if ($freshness > $cache_validity_duration) {
-            queue-task-add -o 2 $'ber --exec ($executable) --force_update [($sub_commands_and_args | str join " ")] | to yaml'
+            queue-task-add -o 2 $'ber --exec ($executable) --force_update [($sub_commands_and_args | str join " ")] | to yaml | lines | first 5 | str join "\n"'
         }
         $last_data
     }
@@ -3392,7 +3392,7 @@ def ber-test [] {
         ber query ibc-transfer denom-traces  | describe
     ) 'record<denom_traces: table<path: string, base_denom: string>, pagination: record<next_key: nothing, total: string>, update_time: date>'
     equal (
-        ber query liquidity pools  | describe
+        ber query liquidity pools --cache_validity_duration 0sec | describe
     ) 'record<pools: table<id: string, type_id: int, reserve_coin_denoms: list<string>, reserve_account_address: string, pool_coin_denom: string>, pagination: record<next_key: nothing, total: string>, update_time: date>'}
 
 # query neuron addrsss by his nick
