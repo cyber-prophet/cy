@@ -3273,19 +3273,13 @@ export def --wrapped 'ber' [
     --no_default_params                         # Don't use default params (like output, chain-id)
     --error                                     # raise error instead of null in case of cli's error
 ] : nothing -> record {
+    if $rest == [] { error make {msg: 'The "ber" function needs arguments'} }
+
     let $executable = if $exec != '' {$exec} else {$env.cy.exec}
     let $sub_commands_and_args = (
-        if $rest == [] {
-            error make {msg: 'The "ber" function needs arguments'}
-        } else {
-            ($rest | flatten | flatten)         # to recieve params as a list from passport-get
-        }
+        $rest | flatten | flatten         # to recieve params as a list from passport-get
         | if $no_default_params {} else {
-            append [
-                '--node' $env.cy.rpc-address
-                '--chain-id' $env.cy.chain-id   # todo chainid to choose
-                '--output' 'json'
-            ]
+            append (default-node-params)
         }
     )
 
@@ -3514,6 +3508,14 @@ def 'system_cids' [] {
         'QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx',
         'QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx',
         'Qmf89bXkJH9jw4uaLkHmZkxQ51qGKfUPtAMxA8rTwBrmTs'
+    ]
+}
+
+def 'default-node-params' [] {
+    [
+        '--node' $env.cy.rpc-address
+        '--chain-id' $env.cy.chain-id   # todo chainid to choose
+        '--output' 'json'
     ]
 }
 
