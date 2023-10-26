@@ -3295,36 +3295,6 @@ export def --wrapped 'ber' [
 
     log debug $'json path: ($json_path)'
 
-    def 'request-save-output-exec-response' [] {
-        log debug $'($executable) ($sub_commands_and_args | str join " ")'
-
-        let $response = (
-            do -i { ^($executable) $sub_commands_and_args }
-            | complete
-            | if $in.exit_code == 0 {
-                get stdout
-                | from json
-                | insert update_time (date now)
-            } else {
-                {error: $in, update_time: (date now)}
-            }
-        )
-
-        $response
-        | to json -r
-        | save -f -r $json_path;
-
-        if ('error' in ($response | columns)) {
-            if $error {
-                error make {msg: ($response.error.stderr | lines | first)}
-            } else {
-                return
-            }
-        }
-
-        if not $quiet {$response}
-    }
-
     let $last_data = (
         if ($json_path | path exists) {
             let $last_file = (open $json_path)
@@ -3350,16 +3320,52 @@ export def --wrapped 'ber' [
     )
 
     if $update {
-        request-save-output-exec-response
+        request-save-output-exec-response $executable $sub_commands_and_args $json_path $error $quiet
     } else if ('error' in ($last_data | columns)) {
         log debug $'last update ($freshness) was unsuccessfull, requesting for a new one';
-        request-save-output-exec-response
+        request-save-output-exec-response $executable $sub_commands_and_args $json_path $error $quiet
     } else {
         if ($freshness > $cache_validity_duration) {
             queue-task-add -o 2 $'ber --exec ($executable) --force_update [($sub_commands_and_args | str join " ")] | to yaml'
         }
         $last_data
     }
+}
+
+def 'request-save-output-exec-response' [
+    executable: string
+    sub_commands_and_args: list
+    json_path: string
+    error: bool = false
+    quiet: bool = false
+] {
+    log debug $'($executable) ($sub_commands_and_args | str join " ")'
+
+    let $response = (
+        do -i { ^($executable) $sub_commands_and_args }
+        | complete
+        | if $in.exit_code == 0 {
+            get stdout
+            | from json
+            | insert update_time (date now)
+        } else {
+            {error: $in, update_time: (date now)}
+        }
+    )
+
+    $response
+    | to json -r
+    | save -f -r $json_path;
+
+    if ('error' in ($response | columns)) {
+        if $error {
+            error make {msg: ($response.error.stderr | lines | first)}
+        } else {
+            return
+        }
+    }
+
+    if not $quiet {$response}
 }
 
 #[test]
