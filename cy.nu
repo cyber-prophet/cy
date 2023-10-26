@@ -3611,7 +3611,7 @@ export def 'queue-tasks-monitor' [
             queue-cids-download 10 --cids_in_run $cids_in_run --threads $threads --quiet;
         } else {
             par-each -t $threads {
-                |i| execute-task $i
+                |i| queue-execute-task $i
             };
         };
         sleep 1sec
@@ -3619,7 +3619,7 @@ export def 'queue-tasks-monitor' [
     }
 }
 
-def 'execute-task' [
+export def 'queue-execute-task' [
     task_path: path
 ] {
     let $command = open $task_path
