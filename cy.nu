@@ -3707,7 +3707,12 @@ def 'nicks-and-keynames' [] {
     | select name address
     | rename name neuron
     | upsert name {|i| $i.name + 🔑}
-    | append (dict-neurons | select nickname neuron | rename name neuron | uniq-by name)
+    | append (
+        dict-neurons
+        | select -i nickname neuron
+        | rename name neuron
+        | uniq-by name
+    )
 }
 
 def 'nu-complete keys-nicks' [] {
