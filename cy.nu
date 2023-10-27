@@ -3313,21 +3313,27 @@ export def --wrapped 'ber' [
 
     let $freshness = ((date now) - $last_data.update_time)
 
-    let $update = (
+    mut $update = (
         $force_update or
         ($env.cy.ber_force_update? | default false) or
         (($freshness > $cache_stale_refresh) and (not $disable_update))
     )
 
-    if $update {
-        request-save-output-exec-response $executable $sub_commands_and_args $json_path $error $quiet
-    } else if ('error' in ($last_data | columns)) {
+    if ('error' in ($last_data | columns)) {
         log debug $'last update ($freshness) was unsuccessfull, requesting for a new one';
+        $update = true
+    }
+
+    if $update {
         request-save-output-exec-response $executable $sub_commands_and_args $json_path $error $quiet
     } else {
         if ($freshness > $cache_validity_duration) {
-            queue-task-add -o 2 $'ber --exec ($executable) --force_update [($sub_commands_and_args | str join " ")] | to yaml | lines | first 5 | str join "\n"'
-        }
+            queue-task-add -o 2 (
+                $'ber --exec ($executable) --force_update [' +
+                ($sub_commands_and_args | str join ' ') +
+                '] | to yaml | lines | first 5 | str join "\n"'
+            )
+        };
         $last_data
     }
 }
