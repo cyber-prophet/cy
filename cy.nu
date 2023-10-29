@@ -3069,7 +3069,12 @@ export def 'tokens-investmint-flow' [
     let $times = (tokens-investmint-status-table $address)
 
     $env.cy.ber_force_update = false
-    let $h_free = (tokens-investmint-status-table $address --h_liquid --quiet | print_pass)
+    let $h_free = (
+        tokens-investmint-status-table $address --h_liquid --quiet
+        | if $in == [] {
+            error-make-cy $'no liquid hydrogen on *($address)* address'
+        } else {}
+    )
     let $h_to_investmint = (tokens-fraction-menu $h_free --denom hydrogen --bins_list [0.5 1 0.2])
 
     let $resource_token = (
