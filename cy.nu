@@ -3165,8 +3165,12 @@ export def 'validator-generate-persistent-peers-string' [
 export def 'query-tx' [
     hash: string
 ] : nothing -> record {
-    ber --disable_update --error [query tx --type hash $hash]
-    | reject events
+    ber --error [query tx --type hash $hash]
+    | if ($in | columns | $in == [update_time]) {
+        error-make-cy $'No transaction with hash ($hash) is found'
+    } else {
+        reject events
+    }
 }
 
 # Query tx by acc/seq
