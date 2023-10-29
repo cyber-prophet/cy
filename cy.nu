@@ -3035,7 +3035,11 @@ export def 'delegate-flow' [
         | get operator_address
     )
 
-    (^$env.cy.exec tx staking delegate $operator $boots_to_delegate --from $env.cy.address)
+    (
+        ^$env.cy.exec tx staking delegate $operator $boots_to_delegate
+        --from $env.cy.address (node-default-params)
+    )
+}
 
 def tokens-fraction-menu [
     tokens_max: int
@@ -3686,10 +3690,6 @@ def 'nu-complete-neurons-nicks' [] {
     dict-neurons | get nick
 }
 
-def 'nu-complete-neurons-nicknames' [] {
-    dict-neurons | get nickname | where $it != ""
-}
-
 def 'nu-complete-config-names' [] {
     ls (cy-path config)
     | sort-by modified
@@ -3766,7 +3766,7 @@ def 'fill non-exist' [
 def 'path-exists-safe' [
     path_to_check
 ] {
-    try {($'($path_to_check)' | path exists)} catch {false}
+    try { $path_to_check | path exists } catch {false}
 }
 
 def confirm [
