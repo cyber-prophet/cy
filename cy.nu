@@ -3061,6 +3061,43 @@ def tokens-fraction-menu [
     | print_pass
 }
 
+export def 'tokens-investmint-flow' [
+    $neuron?: string
+] {
+    let $address = $neuron | default $env.cy.address
+    $env.cy.ber_force_update = true
+    let $times = (tokens-investmint-status-table $address)
+
+    $env.cy.ber_force_update = false
+    let $h_free = (tokens-investmint-status-table $address --h_liquid --quiet | print_pass)
+    let $h_to_investmint = (tokens-fraction-menu $h_free --denom hydrogen --bins_list [0.5 1 0.2])
+
+    let $resource_token = (
+        ['Volt' 'Ampere']
+        | input list
+        | str downcase
+        | 'milli' + $in
+    )
+
+    let $release_time = (
+        $times
+        | uniq-by release_time
+        | select release_time amount
+        | upsert amount {|i| $i.amount | into int}
+        | append {release_time: (nearest-given-weekday)}
+        | sort-by release_time
+        | input list
+        | get release_time
+        | $in - (date now) | into int
+        | $in / 10 ** 9 | into int
+    )
+
+    (
+        cyber tx resources investmint $h_to_investmint $resource_token $release_time
+        --from $address --fees 2000boot --gas 1000000 (default-node-params)
+    )
+}
+
 export def 'tokens-fraction-input' [
     --dust_to_leave: int = 50_000 # the amount of token to leave for paing fee
     --denom: string = ''
