@@ -6,7 +6,7 @@
 
 use std assert [equal greater]
 use std clip
-use nu-utils [bar, cprint, "str repeat", to-safe-filename, to-number-format, number-col-format]
+use nu-utils [bar, cprint, "str repeat", to-safe-filename, to-number-format, number-col-format, nearest-given-weekday]
 
 use log
 
