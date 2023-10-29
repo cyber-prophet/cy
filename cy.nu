@@ -3046,6 +3046,25 @@ export def 'delegate-flow' [
     )
 
     (^$env.cy.exec tx staking delegate $operator $boots_to_delegate --from $env.cy.address)
+
+def tokens-fraction-menu [
+    tokens_max: int
+    --denom: string = ''
+    --bins_list: list = [1 0.5 0.2]
+] {
+    $bins_list
+    | wrap fraction
+    | upsert $denom {|i| $i.fraction * $tokens_max | math floor | into int}
+    | upsert fraction {|i| $i.fraction * 100 | into string | $in + '%'}
+    | append {fraction: other, $denom: 0}
+    | input list
+    | get $denom
+    | if $in == 0 {
+        $tokens_max | tokens-fraction-input --denom $denom
+    } else {
+        $'($in)($denom)'
+    }
+    | print_pass
 }
 
 export def 'tokens-fraction-input' [
