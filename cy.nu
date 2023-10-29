@@ -3020,18 +3020,8 @@ export def 'delegate-flow' [
     cprint $'You have *($boots_liquid | to-number-format --denom boot --significant_integers 0 | ansi strip)*
     liquid. How much of them would you like to delegate?'
 
-    let $boots_to_delegate: int = (
-        [1 0.5 0.2]
-        | wrap fraction
-        | upsert boots {|i| $i.fraction * $boots_liquid | math floor | into int}
-        | upsert fraction {|i| $i.fraction * 100 | into string | $in + '%'}
-        | append {fraction: other, boots: 0}
-        | input list
-        | get boots
-        | if $in == 0 {
-            $boots_liquid | tokens-fraction-input --denom boot
-        } else {$'($in)boot'}
-        | print_pass
+    let $boots_to_delegate: string = (
+        tokens-fraction-menu $boots_liquid --denom 'boot'
     )
 
     cprint $'Choose the validator to delegate *($boots_to_delegate)*.'
