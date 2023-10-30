@@ -3066,7 +3066,15 @@ export def 'tokens-investmint-wizzard' [
 ] {
     let $address = $neuron | default $env.cy.address
     $env.cy.ber_force_update = true
-    let $times = (tokens-investmint-status-table $address)
+    let $times = (
+        tokens-investmint-status-table $address
+        | window 2 --stride 2
+        | each {|i| $i | reduce -f '' {|a acc|
+            $acc + $'($a.amount)($a.denom) '
+        }
+        | wrap tokens
+        | upsert release_time $i.release_time.0}
+    )
 
     $env.cy.ber_force_update = false
     let $h_free = (
@@ -3084,23 +3092,34 @@ export def 'tokens-investmint-wizzard' [
         | 'milli' + $in
     )
 
+    cprint --before 1 --after 2 'Choose the investminting period.
+    In the list below fields that have `tokens` value are your currently used slots.
+    The first value is always a tuesday after the next 2 weeks.'
+
     let $release_time = (
         $times
-        | uniq-by release_time
-        | select release_time amount
-        | upsert amount {|i| $i.amount | into int}
-        | append {release_time: (nearest-given-weekday)}
-        | sort-by release_time
+        | select release_time tokens
+        | prepend {release_time: (nearest-given-weekday)}
         | input list
         | get release_time
         | $in - (date now) | into int
         | $in / 10 ** 9 | into int
     )
 
-    (
+    let $trans_unsigned = (
         cyber tx resources investmint $h_to_investmint $resource_token $release_time
-        --from $address --fees 2000boot --gas 1000000 (default-node-params)
+        --from $address --fees 2000boot --gas 2000000 (default-node-params) --generate-only
     )
+
+    print ($trans_unsigned | from json | to yaml)
+
+    if (confirm '*Confirm transaction?*') {
+        let $unsigned = cy-path temp 'tx_investmint_unsigned.json'
+        let $signed: string = cy-path temp 'tx_investmint_signed.json'
+        $trans_unsigned | save -rf $unsigned
+        cyber tx sign $unsigned --from $address --output-document $signed --yes (default-node-params)
+        cyber tx broadcast $signed (default-node-params) | from json
+    }
 }
 
 export def 'tokens-fraction-input' [
