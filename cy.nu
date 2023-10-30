@@ -2942,7 +2942,7 @@ def 'tokens-minus' [
 }
 
 # Withdraw rewards, make stats
-export def 'rewards-withdraw' [
+export def 'tokens-rewards-withdraw' [
     neuron?: string
 ] {
     let $address = $neuron | default $env.cy.address
@@ -3005,7 +3005,7 @@ export def 'rewards-withdraw-tx-analyse' [
     | move percent_rel --after commission
 }
 
-export def 'delegate-flow' [
+export def 'tokens-delegate-wizzard' [
     $neuron?: string
 ] {
     let $address = $neuron | default $env.cy.address
@@ -3061,7 +3061,7 @@ def tokens-fraction-menu [
     | print_pass
 }
 
-export def 'tokens-investmint-flow' [
+export def 'tokens-investmint-wizzard' [
     $neuron?: string
 ] {
     let $address = $neuron | default $env.cy.address
