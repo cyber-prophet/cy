@@ -3037,7 +3037,7 @@ export def 'tokens-delegate-wizzard' [
 
     (
         ^$env.cy.exec tx staking delegate $operator $boots_to_delegate
-        --from $env.cy.address (node-default-params)
+        --from $env.cy.address (default-node-params)
     )
 }
 
