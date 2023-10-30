@@ -2587,7 +2587,7 @@ export def 'tokens-investmint-status-table' [
     )
 
     if not $quiet {
-        print $'liquid hydrogen availible for investminting: ($hydrogen_liquid)'
+        print $'liquid hydrogen availible for investminting: ($hydrogen_liquid | to-number-format --significant_integers 0)'
     }
 
     if $h_liquid {
@@ -3811,7 +3811,7 @@ def 'path-exists-safe' [
     try { $path_to_check | path exists } catch {false}
 }
 
-def confirm [
+def 'confirm' [
     prompt: string
     --default_not (-n): bool = false
     --dont_keep_prompt
@@ -3819,7 +3819,7 @@ def confirm [
     if not $dont_keep_prompt {cprint $prompt}
 
     if $default_not { [no yes] } else { [yes no] }
-    | input list (if $dont_keep_prompt {cprint --echo --after 0 $prompt})
+    | input list (if $dont_keep_prompt {cprint --echo --after 0 $prompt} else {''})
     | if $dont_keep_prompt {} else {print_pass}
     | $in in [yes]
 }
