@@ -3097,9 +3097,10 @@ export def 'tokens-investmint-wizzard' [
     let $times = (
         tokens-investmint-status-table $address
         | window 2 --stride 2
-        | each {|i| $i | reduce -f '' {|a acc|
-            $acc + $'($a.amount)($a.denom) '
-        }
+        | each {|i|
+            $i | reduce -f '' {|a acc|
+                $acc + $'($a.amount)($a.denom) '
+            }
         | wrap tokens
         | upsert release_time $i.release_time.0}
     )
