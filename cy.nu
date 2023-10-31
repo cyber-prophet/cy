@@ -2361,6 +2361,26 @@ export def 'queue-cids-download' [
     }
 }
 
+# remove from queue CIDs with many attempts
+export def 'cache-clean-cids-queue' [
+    attempts: int = 15      # limit a number of previous download attempts for cids in queue
+] {
+    let $files = ls (cy-path cache queue_cids_to_download)
+    let $files_dead = cy-path cache queue_cids_dead
+
+    $files
+    | where size > ($attempts | into filesize)
+    | get name
+    | each {|i|
+        try {
+            mv $i $files_dead
+        } catch {
+            open $i | save -a (cy-path cache queue_cids_dead/ ($i | path basename))
+            rm $i
+        }
+    }
+}
+
 # Clear the cache folder
 export def 'cache-clear' [] {
     backup-fn (cy-path cache)
