@@ -3150,6 +3150,46 @@ export def 'tokens-investmint-wizzard' [
     }
 }
 
+export def 'investmint-message' [
+    --neuron: string
+    --h_amount: int
+    --resource: string
+    --length: int
+] {
+    {
+        @type: "/cyber.resources.v1beta1.MsgInvestmint",
+        neuron: $neuron,
+        amount: {
+            denom: hydrogen,
+            amount: ($h_amount | int string)
+        },
+        resource: $resource,
+        length: ($length | into string)
+    }
+}
+
+export def 'create-transaction' [
+
+] {
+    {
+        body: {
+            messages: [],
+            memo: "",
+            timeout_height: "0",
+            extension_options: [],
+            non_critical_extension_options: []
+        }, auth_info: {
+            signer_infos: [],
+            fee: {
+                amount: [[denom, amount]; [boot, "2000"]],
+                gas_limit: "200000",
+                payer: "",
+                granter: ""
+            }
+        }, signatures: []
+    }
+}
+
 export def 'tokens-fraction-input' [
     --dust_to_leave: int = 50_000 # the amount of token to leave for paing fee
     --denom: string = ''
