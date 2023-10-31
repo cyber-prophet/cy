@@ -3731,7 +3731,7 @@ export def 'queue-execute-task' [
         print -n $'(char nl)🛑 ($command)'
         $command + ';' | save -a (cy-path cache queue_tasks_failed ($task_path | path basename))
     }
-    rm $task_path -f;
+    ^rm -f $task_path;
     log debug $'run ($command)'
 }
 
