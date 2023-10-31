@@ -2133,11 +2133,14 @@ export def 'cid-read-or-download' [
     cid: string
     --full  # output full text of a particle
 ] {
-    do -i {open ($env.cy.ipfs-files-folder | path join $'($cid).md')}
-    | default (
+    ($env.cy.ipfs-files-folder | path join $'($cid).md')
+    | if ($in | path exists) {
+        open
+    } else {
         queue-task-add $'cid-download ($cid)';
         'downloading'
-    ) | if $full {} else {
+    }
+    | if $full {} else {
         str substring 0..400
         | str replace (char nl) '↩' --all
         | $'($in)(char nl)(ansi grey)($cid)(ansi reset)'
