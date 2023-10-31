@@ -2042,7 +2042,7 @@ def 'search-auto-refresh' [
 
     serp1 $results
 
-    watch (cy-path cache queue) {|| clear; print $'Searching ($env.cy.exec) for ($cid)'; serp1 $results}
+    watch (cy-path cache queue_cids_to_download) {|| clear; print $'Searching ($env.cy.exec) for ($cid)'; serp1 $results}
 }
 
 # Use the built-in node search function in cyber or pussy
@@ -2177,7 +2177,7 @@ export def 'cid-download' [
     }
 
     if ($status) in ['text' 'non_text'] {
-        rm --force (cy-path cache queue $cid)
+        rm --force (cy-path cache queue_cids_to_download $cid)
         'downloaded'
     } else if $status == 'not found' {
         queue-cid-add $cid '-'
@@ -2280,7 +2280,7 @@ export def 'queue-cid-add' [
     cid: string
     symbol: string = '+'
 ] {
-    let $path = (cy-path cache queue $cid)
+    let $path = (cy-path cache queue_cids_to_download $cid)
 
     if not ($path | path exists) {
         touch $path
@@ -2304,7 +2304,7 @@ export def 'queue-cids-download' [
     --threads: int = 15     # a number of threads to use for downloading
     --cids_in_run: int = 0 # a number of files to download in one command run. 0 - means all (default)
 ] {
-    let $files = (ls -s (cy-path cache queue))
+    let $files = ls -s (cy-path cache queue_cids_to_download)
 
     if ( ($files | length) == 0 ) {
         return 'there are no files in queue'
@@ -3575,11 +3575,12 @@ def make_default_folders_fn [] {
     mkdir (cy-path export)
     mkdir (cy-path gephi)
     mkdir (cy-path cache search)
-    mkdir (cy-path cache queue)
-    mkdir (cy-path cache queue_tasks)
+    mkdir (cy-path cache queue_cids_to_download)
+    mkdir (cy-path cache queue_cids_dead)
+    mkdir (cy-path cache queue_tasks_to_run)
+    mkdir (cy-path cache queue_tasks_failed)
     mkdir (cy-path cache cli_out)
     mkdir (cy-path cache jsonl)
-    mkdir (cy-path cache queue_tasks_failed)
     mkdir (cy-path mylinks)
 
     touch (cy-path graph update.toml)
@@ -3690,7 +3691,7 @@ export def 'queue-tasks-monitor' [
     --cids_in_run: int = 10 # a number of files to download in one command run. 0 - means all (default)
 ] {
     loop {
-        glob (cy-path cache queue_tasks *.nu.txt)
+        glob (cy-path cache queue_tasks_to_run *.nu.txt)
         | sort
         | if ($in | length) == 0 {
             queue-cids-download 10 --cids_in_run $cids_in_run --threads $threads --quiet;
