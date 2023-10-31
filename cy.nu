@@ -3579,6 +3579,7 @@ def make_default_folders_fn [] {
     mkdir (cy-path cache queue_tasks)
     mkdir (cy-path cache cli_out)
     mkdir (cy-path cache jsonl)
+    mkdir (cy-path cache queue_tasks_failed)
     mkdir (cy-path mylinks)
 
     touch (cy-path graph update.toml)
@@ -3715,13 +3716,13 @@ export def 'queue-execute-task' [
 
     $results
     | if $in.exit_code == 0 {
-        rm $task_path -f;
         print -n $'(char nl)🔵 ($command)'
         print -n $'(char nl)($results.stdout)'
     } else {
         print -n $'(char nl)🛑 ($command)'
+        $command + ';' | save -a (cy-path cache queue_tasks_failed ($task_path | path basename))
     }
-
+    rm $task_path -f;
     log debug $'run ($command)'
 }
 
