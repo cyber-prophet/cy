@@ -2341,7 +2341,12 @@ export def 'queue-cids-download' [
     if $info {return}
 
     ($filtered_files | where size < 4b | sort-by modified -r | sort-by size) # new small files first
-    | append ($filtered_files | where size >= 4b | sort-by modified) # old files first
+    | append (
+        $filtered_files
+        | where size >= 4b
+        | where modified < (date now | $in - 5hr)
+        | sort-by modified # old files first
+    )
     | get name -i
     | if $cids_in_run > 0 {
         first $cids_in_run
