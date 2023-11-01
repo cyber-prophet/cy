@@ -81,26 +81,29 @@ export-env {
 # QmcDUZon6VQLR3gjAvSKnudSVQ2RbGXUtFFV8mR6zHZK8F
 export def 'pin-text' [
     text_param?: string
-    --only_hash  # calculate hash only, don't pin anywhere
-    --dont_detect_cid  # work with CIDs as regular texts
-    --follow_file_path # treat existing file paths as reuglar texts
+    --only_hash         # calculate hash only, don't pin anywhere
+    --dont_detect_cid   # work with CIDs as regular texts
+    --follow_file_path  # check if `text_param` is a valid path, and if yes - try to open it
 ] : [string -> string, nothing -> string] {
     let $text = (
         $in
         | default $text_param
         | into string
         | if (
-            ($follow_file_path) and (path-exists-safe $in)
+            $env.cy.pin_text_follow_file_path? | default false | $in or $follow_file_path
+        ) and (
+            path-exists-safe $in
         ) {
             open
         } else {}
     )
 
-    if (not $dont_detect_cid) and (is-cid $text) {
-        return $text
+    if not ($env.cy.pin_text_dont_detect_cid? | default false | $in or $dont_detect_cid) {
+        if (is-cid $text) { return $text }
     }
 
-    if $only_hash {
+    if ($env.cy.pin_text_only_hash? | default false | $in or $follow_file_path
+    ) {
         $text
         | ipfs add -Q --only-hash
         | str replace (char nl) ''
