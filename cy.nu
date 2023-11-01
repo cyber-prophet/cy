@@ -6,7 +6,7 @@
 
 use std assert [equal greater]
 use std clip
-use nu-utils [bar, cprint, "str repeat", to-safe-filename, to-number-format, number-col-format, nearest-given-weekday]
+use nu-utils [bar, cprint, "str repeat", to-safe-filename, to-number-format, number-col-format, nearest-given-weekday, print-and-pass]
 
 use log
 
@@ -1577,11 +1577,11 @@ export def 'graph-to-gephi' [] {
 export def 'graph-to-logseq' [
     # --path: string
 ] {
-    let $links = (graph-links-df | print_pass)
+    let $links = (graph-links-df | print-and-pass)
     let $particles = (
         $links
         | graph-to-particles --include_system --include_global
-        | print_pass
+        | print-and-pass
     )
 
     let $path = ($env.cy.path) | path join export $'logseq_(date now | date format "%Y-%m-%d_%H-%M-%S")'
@@ -1633,7 +1633,7 @@ export def 'graph-to-cosmograph' [] {
     | save -f (
         $env.cy.path
         | path join 'export' $'cosmograph(now-fn).csv'
-        | print_pass
+        | print-and-pass
     )
 }
 
@@ -1760,7 +1760,7 @@ export def --env 'config-new' [
     make_default_folders_fn
 
     cprint -c green 'Choose the name of executable:'
-    let $exec = (nu-complete-executables | input list -f | print_pass)
+    let $exec = (nu-complete-executables | input list -f | print-and-pass)
 
     let $addr_table = (
         ^($exec) keys list --output json
@@ -1793,7 +1793,7 @@ export def --env 'config-new' [
         $addr_table
         | input list -f
         | get address
-        | print_pass
+        | print-and-pass
     )
 
     let $keyring = $addr_table | where address == $address | get keyring.0
@@ -1839,7 +1839,7 @@ export def --env 'config-new' [
                 input 'enter the RPC address:'
             } else {$x}
         } $in
-        | print_pass
+        | print-and-pass
     )
 
     cprint -c green --before 1 'Select the ipfs service to store particles:'
@@ -1847,7 +1847,7 @@ export def --env 'config-new' [
     let $ipfs_storage = (
         [cybernode, kubo, both]
         | input list -f
-        | print_pass
+        | print-and-pass
     )
 
     {
@@ -1873,7 +1873,7 @@ export def 'config-view' [
         let $filename = (cy-path config $'($config_name).toml')
         open $filename
     }
-    # | if $quiet {} else {print_pass}
+    # | if $quiet {} else {print-and-pass}
 }
 
 # Save the piped-in JSON into config file
@@ -1906,7 +1906,7 @@ export def --env 'config-save' [
     | if (not $inactive) {
         config-activate
     } else {}
-    | print_pass
+    | print-and-pass
     | save $filename2 -f
 
     print $'($filename2) is saved'
@@ -3086,7 +3086,7 @@ def tokens-fraction-menu [
     } else {
         $'($in)($denom)'
     }
-    | print_pass
+    | print-and-pass
 }
 
 export def 'tokens-investmint-wizzard' [
@@ -3096,7 +3096,7 @@ export def 'tokens-investmint-wizzard' [
     $env.cy.ber_force_update = true
     let $times = (
         tokens-investmint-status-table $address
-        | print_pass
+        | print-and-pass
         | window 2 --stride 2
         | each {|i|
             $i | reduce -f '' {|a acc|
@@ -3242,7 +3242,7 @@ export def --env 'set-ber-force-update' [
         if $value == null {
             not ($env.cy.ber_force_update? | default false)
         } else {$value}
-        | print_pass
+        | print-and-pass
     )
 }
 
@@ -3797,20 +3797,6 @@ export def 'queue-execute-task' [
     log debug $'run ($command)'
 }
 
-def 'print_pass' [
-    callback?: closure
-] {
-    let $input = $in
-
-    if $callback == null {
-        print $input
-    } else {
-        do $callback $input
-    }
-
-    $input
-}
-
 def 'nu-complete-random-sources' [] {
     ['chucknorris.io' 'forismatic.com']
 }
@@ -3911,7 +3897,7 @@ def 'confirm' [
 
     if $default_not { [no yes] } else { [yes no] }
     | input list (if $dont_keep_prompt {cprint --echo --after 0 $prompt} else {''})
-    | if $dont_keep_prompt {} else {print_pass}
+    | if $dont_keep_prompt {} else {print-and-pass}
     | $in in [yes]
 }
 
