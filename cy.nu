@@ -3096,6 +3096,7 @@ export def 'tokens-investmint-wizzard' [
     $env.cy.ber_force_update = true
     let $times = (
         tokens-investmint-status-table $address
+        | print_pass
         | window 2 --stride 2
         | each {|i|
             $i | reduce -f '' {|a acc|
@@ -3108,7 +3109,7 @@ export def 'tokens-investmint-wizzard' [
     $env.cy.ber_force_update = false
     let $h_free = (
         tokens-investmint-status-table $address --h_liquid --quiet
-        | if $in == [] {
+        | if $in in [[] 0] {
             error-make-cy $'no liquid hydrogen on *($address)* address'
         } else {}
     )
