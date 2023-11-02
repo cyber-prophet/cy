@@ -161,7 +161,14 @@ export def 'link-texts' [
     text_to: string
     --disable_append (-D) # Disable adding the cyberlink into the temp table
     --quiet (-q) # Don't output the cyberlink record after executing the command
+    --only_hash         # calculate hash only, don't pin anywhere
+    --dont_detect_cid   # work with CIDs as regular texts
+    --follow_file_path  # check if `text_param` is a valid path, and if yes - try to open it
 ] [nothing -> record, nothing -> nothing] {
+    $env.cy.pin_text_only_hash = ($env.cy.pin_text_only_hash? | default false ) or $only_hash
+    $env.cy.pin_text_dont_detect_cid = ($env.cy.pin_text_dont_detect_cid? | default false ) or $dont_detect_cid
+    $env.cy.pin_text_follow_file_path = ($env.cy.pin_text_follow_file_path? | default false ) or $follow_file_path
+
     let $row = {
         'from_text': $text_from
         'to_text': $text_to
