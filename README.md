@@ -6,9 +6,9 @@ Cy - a [nushell](https://www.nushell.sh/) wrapper, for interacting with cybergra
 
 If you have cyber cli, nushell, curl installed:
 
-```nushel
+```nushell
 git clone https://github.com/cyber-prophet/cy; cd cy;
-overlay use cy -r cy.nu
+overlay use cy -pr cy.nu
 ```
 
 ## The Goals of Cy:
@@ -23,7 +23,7 @@ Bostrom is the name of the consensus computer that maintains a general-purpose, 
 
 ## References to the documentation of Cy
 
-I intend to locate all the documentation of Cy in one place  to prevent fragmentation of attention.
+I intend to locate all the documentation of Cy in one place to prevent fragmentation of attention.
 
 1. In the comments to its code (`.nu` files of this repository, mainly in [cy.nu](https://github.com/cyber-prophet/cy/blob/dev/cy.nu)).
 2. From the code, the documentation is semi-automatically parsed and written to `.md` documents of this repository (mainly to [README.md](https://github.com/cyber-prophet/cy/blob/dev/README.md)).
@@ -45,28 +45,25 @@ Open Terminal app on your computer.
 
 1. Install [brew](https://brew.sh/)
 2. Add a custom tap to your Homebrew: `brew tap cyber-prophet/homebrew-taps`
-3. Install all the dependencies for running Cy: `brew install cybundle`
+3. Install all the dependencies for running Cy: `brew install cybundle; cybundle`
    This command will install the following software on your computer:
 
+   1. [nushell](https://www.nushell.sh/) app
    1. curl (if needed)
-   2. [gum](https://github.com/charmbracelet/gum)
-   3. [cyber](https://github.com/cybercongress/go-cyber)
-   4. [pussy](https://github.com/greatweb/space-pussy)
-   5. [nushell](https://www.nushell.sh/) app
-   6. [ipfs - kubo](https://github.com/ipfs/kubo) app
-   7. [wezterm](https://wezfurlong.org/wezterm/) terminal
-   8. [pueue](https://github.com/Nukesor/pueue) app
-   9. [cybundle script](https://github.com/cyber-prophet/homebrew-taps/blob/main/src/cybundle)
+   1. [cyber](https://github.com/cybercongress/go-cyber)
+   1. [pussy](https://github.com/greatweb/space-pussy)
+   1. [ipfs - kubo](https://github.com/ipfs/kubo) app
+   1. [pueue](https://github.com/Nukesor/pueue) app
+   1. [cybundle script](https://github.com/cyber-prophet/homebrew-taps/blob/main/src/cybundle)
 
 4. To continue installation of configs and execute necessary init steps, run: `cybundle`
 
 After installation, you can launch `nu` in your terminal with already configured `cy` in it.
-Or, if your system is MacOS or Linux (but not Linux under WSL) - you can launch Wezterm app.
-It should be configured to use `nu` with `cy` from the very start.
 
 To start using Cy, follow the instructions on your screen. They should include:
 
-1. Go through the wizard `cy config new`.
+0. Add a key to your `cyber` cli (`cyber keys add 'test'`)
+1. Go through the wizard `cy config-new`.
 2. See all the commands in logical order by executing `cy`.
 3. See all the commands suggestions by entering `cy` + tab.
 
