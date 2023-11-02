@@ -3748,8 +3748,7 @@ export def 'queue-task-add' [
     let $filename = (
         $command
         | to-safe-filename --prefix $'($priority)-' --suffix '.nu.txt'
-        | [ $env.cy.path cache queue_tasks $in ]
-        | path join
+        | cy-path cache queue_tasks_to_run $in
     )
 
     $'use (cy-path cy.nu) *; ($command)'
