@@ -1,6 +1,8 @@
 overlay hide cy
 overlay use ~/cy/cy.nu -pr
 
+rm 'help_output.md' -f
+
 cy help-cy
 | get command
 | drop

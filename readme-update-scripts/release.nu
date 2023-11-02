@@ -15,7 +15,10 @@ let lines_to_drop = (
 
 $readme
 | drop ($lines_to_drop)
-| append (open help_output.md)
-| save ~/cy/README.md -f -r
+| append (open -r help_output.md)
+| str join (char nl)
+| str replace -ram ' +$' ''
+| str replace -ra '<CompleterWrapper.*> -  ' ''
+| save ~/cy/README.md -fr
 
 print "success!"
