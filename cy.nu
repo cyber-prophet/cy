@@ -1019,31 +1019,45 @@ def dict-neurons-view-test-dummy [] {
 }
 
 # Add neurons to YAML-dictionary WIP
-export def 'dict-neurons-add' [] {
-    let $i = $in
+export def 'dict-neurons-add' [
+    value: string = ''
+    --category: string = 'default'
+] {
+    let $input = $in
+    let $desc = ($input | describe)
+    let $path_csv = (cy-path graph neurons_dict_tags.csv)
 
-    let $desc = ($i | describe)
+    if $input == 'nothing' {
+        error make {msg: 'you should pipe a list or a table containg `neuron` column to this command'}
+    }
 
     let $candidate = (
-        $i
+        $input
         | if ($desc == 'list<string>') {
             wrap neuron
         } else if ($desc == 'dataframe') {
             dfr into-nu
-        } else {}
+        } else if ($desc == 'string') {
+            [{neuron: $in}]
+        } else { }
+        | select neuron
     )
 
     let $validated_neurons = (
-        if ('neuron' in ($candidate | columns)) {
-            $candidate
-            | where (is-neuron $it.neuron)
-        } else {
-            error make {msg: 'no neuron column is found'}
-        }
+        $candidate
+        | where (is-neuron $it.neuron)
     )
 
-    dict-neuron
-    | par-each {|i| $i | merge ($validated_neurons | get -i $i.neuron)}
+    $validated_neurons
+    | upsert value $value
+    | upsert category $category
+    | upsert timestamp (date now | debug)
+    | if ($path_csv | path exists) {
+        to csv --noheaders
+    } else {
+        to csv
+    }
+    | save -ra $path_csv
 }
 
 # Update neurons YAML-dictionary
