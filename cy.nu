@@ -1060,6 +1060,22 @@ export def 'dict-neurons-add' [
     | save -ra $path_csv
 }
 
+export def 'dict-neurons-tags' [
+    --path      # return the path of tags file
+] {
+    let $path_csv = (cy-path graph neurons_dict_tags.csv)
+    if $path {
+        return $path_csv
+    }
+
+    open $path_csv
+    | reject timestamp
+    | group-by neuron
+    | values
+    | each { each {|i | {neuron: $i.neuron, $i.category: $i.value}}
+    | reduce -f {} {|i acc | $acc | merge $i}}
+}
+
 # Update neurons YAML-dictionary
 export def 'dict-neurons-update' [
     --passport              # Update passport data
