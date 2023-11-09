@@ -1169,6 +1169,10 @@ def graph-download-snapshot-test-dummy [] {
 
 # Download the latest cyberlinks from a hasura cybernode endpoint
 export def 'graph-download-links' [] {
+    let $graphql_api = "https://titan.cybernode.ai/graphql/v1/graphql"
+    let $path_csv = (cy-path graph cyberlinks.csv)
+    let $columns = ['particle_from' 'particle_to' 'neuron' 'height' 'timestamp']
+
     def get_links_query [
         height
         multiplier
@@ -1176,12 +1180,9 @@ export def 'graph-download-links' [] {
         let $chunk_size = 1000
 
         $"{cyberlinks\(limit: ($chunk_size), offset: ($multiplier * $chunk_size), order_by: {height: asc},
-        where: {height: {_gte: ($height)}}) {neuron particle_from particle_to height timestamp}}"
+        where: {height: {_gte: ($height)}}) {($columns | str join ' ')}}"
         | {'query': $in}
     }
-
-    let $graphql_api = "https://titan.cybernode.ai/graphql/v1/graphql"
-    let $path_csv = (cy-path graph cyberlinks.csv)
 
     let $last_height = (
         if ($path_csv | path exists) {
@@ -1193,7 +1194,7 @@ export def 'graph-download-links' [] {
             | into int
             | $in + 1
         } else {
-            $'neuron,particle_from,particle_to,height,timestamp(char nl)' # csv headers
+            $'($columns | str join ',')(char nl)' # csv headers
             | save -r $path_csv;
             0
         }
@@ -1206,7 +1207,7 @@ export def 'graph-download-links' [] {
         );
         if $links != [] {
             $links | to csv --noheaders | save -r -a $path_csv
-            print $'($mult * 1000) was downloaded!'
+            print -n $'(char cr)($mult * 1000 + ($links | length)) from ($last_height) height was downloaded!'
         } else {
             break
         }
