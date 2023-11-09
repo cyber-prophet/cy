@@ -987,7 +987,7 @@ export def 'passport-set' [
 }
 
 # Output neurons dict
-export def 'dict-neurons' [
+export def 'dict-neurons-view' [
     --df        # output as a dataframe
 ] {
     (cy-path graph neurons_dict.yaml)
@@ -1007,9 +1007,9 @@ export def 'dict-neurons' [
 }
 
 #[test]
-def dict-neurons-test-dummy [] {
-    equal (dict-neurons; null) null
-    equal (dict-neurons --df; null) null
+def dict-neurons-view-test-dummy [] {
+    equal (dict-neurons-view; null) null
+    equal (dict-neurons-view --df; null) null
 }
 
 # Add neurons to YAML-dictionary WIP
@@ -1052,12 +1052,12 @@ export def 'dict-neurons-update' [
     --quiet (-q)            # Don't output results table
 ] {
     if $all_neurons {
-        dict-neurons
+        dict-neurons-view
     } else {
         graph-links-df
         | dfr select neuron
         | dfr unique
-        | dfr join --left (dict-neurons --df) neuron neuron
+        | dfr join --left (dict-neurons-view --df) neuron neuron
         | dfr into-nu
         | reject index
     }
@@ -1092,7 +1092,7 @@ export def 'dict-neurons-update' [
             let $yaml = (cy-path graph neurons_dict.yaml)
             backup-fn $yaml;
 
-            dict-neurons
+            dict-neurons-view
             | prepend $i
             | uniq-by neuron
             | save -f $yaml;
@@ -1395,7 +1395,7 @@ export def 'graph-filter-neurons' [
 
     $neurons_nicks
     | dfr into-df
-    | dfr join ( dict-neurons --df ) '0' nick
+    | dfr join ( dict-neurons-view --df ) '0' nick
     | dfr select neuron
     | dfr join ( $links ) neuron neuron
 }
@@ -1522,7 +1522,7 @@ export def 'graph-neurons-stats' [] {
         | dfr join --left $follows neuron neuron
         | dfr join --left $tweets neuron neuron
         | dfr fill-null 0
-        | dfr join --left ( dict-neurons --df ) neuron neuron
+        | dfr join --left ( dict-neurons-view --df ) neuron neuron
     )
 }
 
@@ -1703,7 +1703,7 @@ export def 'graph-add-metadata' [
         } else {}
         | if 'neuron' in $links_columns {
             dfr join --left (
-                dict-neurons --df
+                dict-neurons-view --df
                 | dfr select neuron nick
             ) neuron neuron
         }
@@ -3816,7 +3816,7 @@ def 'nu-complete-search-functions' [] {
 }
 
 def 'nu-complete-neurons-nicks' [] {
-    dict-neurons | get nick
+    dict-neurons-view | get nick
 }
 
 def 'nu-complete-config-names' [] {
@@ -3850,7 +3850,7 @@ def 'nicks-and-keynames' [] {
     | rename name neuron
     | upsert name {|i| $i.name + 🔑}
     | append (
-        dict-neurons
+        dict-neurons-view
         | select -i nickname neuron
         | rename name neuron
         | uniq-by name
