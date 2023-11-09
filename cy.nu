@@ -989,8 +989,12 @@ export def 'passport-set' [
 # Output neurons dict
 export def 'dict-neurons-view' [
     --df        # output as a dataframe
+    --path      # output path of the dict
 ] {
     (cy-path graph neurons_dict.yaml)
+    | if $path {
+        return $in
+    } else {}
     | if ($in | path exists) {
         open
     } else { [[neuron];['bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8']] }
@@ -1000,16 +1004,18 @@ export def 'dict-neurons-view' [
             reject addresses # quick fix for failing df conversion
         } else {}
         | to yaml
-        | str replace -a 'null' "''"
+        | str replace -a 'null' "''" # dataframes errors on `object` type columns (that contains nulls)
         | from yaml
         | dfr into-df
     } else { }
+    | join --outer (dict-neurons-tags) neuron
 }
 
 #[test]
 def dict-neurons-view-test-dummy [] {
     equal (dict-neurons-view; null) null
     equal (dict-neurons-view --df; null) null
+    equal (dict-neurons-view --path) (cy-path graph neurons_dict.yaml)
 }
 
 # Add neurons to YAML-dictionary WIP
