@@ -1068,6 +1068,11 @@ export def 'dict-neurons-tags' [
         return $path_csv
     }
 
+    if not ($path_csv | path exists) {
+        'neuron,value,category,timestamp'
+        | save $path_csv
+    }
+
     open $path_csv
     | reject timestamp
     | group-by neuron
