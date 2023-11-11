@@ -984,6 +984,7 @@ export def 'passport-set' [
 export def 'dict-neurons-view' [
     --df        # output as a dataframe
     --path      # output path of the dict
+    --tags      # output neurons categories
 ] {
     (cy-path graph neurons_dict.yaml)
     | if $path {
@@ -992,6 +993,9 @@ export def 'dict-neurons-view' [
     | if ($in | path exists) {
         open
     } else { [[neuron];['bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8']] }
+    | if $tags {
+        join --outer (dict-neurons-tags) neuron
+    } else {}
     | if $df {
         fill non-exist
         | if ('addresses' in ($in | columns)) {
@@ -1002,7 +1006,6 @@ export def 'dict-neurons-view' [
         | from yaml
         | dfr into-df
     } else { }
-    | join --outer (dict-neurons-tags) neuron
 }
 
 #[test]
