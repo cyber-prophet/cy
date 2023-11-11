@@ -3821,7 +3821,7 @@ export def 'queue-tasks-monitor' [
             };
         };
         sleep 1sec
-        print -n $"(char cr)(date now | format date '%H:%M:%S') - to exit press `ctrl+c`"
+        print -n $"(char cr)⌛(date now | format date '%H:%M:%S') - to exit press `ctrl+c`"
     }
 }
 
