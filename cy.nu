@@ -16,21 +16,15 @@ export def main [] { help-cy }
 # Check if all necessary dependencies are installed
 export def check-requirements [] {
 
-    let $intermid = {
-        |x| if ($x | length | $in == 0) {
-            'all needed apps are installed'
-        } else {
-            $x
-        }
-    }
-
     ['ipfs', 'rich', 'curl', 'cyber', 'pussy']
     | each {
-        |i| if (which ($i) | is-empty) {
-            $'($i) is missing'
+        if (which ($in) | is-empty) {
+            $'($in) is missing'
         }
     }
-    | do $intermid $in
+    | if ($in | length | $in == 0) {
+        'all needed apps are installed'
+    }
 }
 
 export-env {
