@@ -1024,8 +1024,8 @@ export def 'dict-neurons-add' [
     let $desc = ($input | describe)
     let $path_csv = (cy-path graph neurons_dict_tags.csv)
 
-    if $input == 'nothing' {
-        error make {msg: 'you should pipe a list or a table containg `neuron` column to this command'}
+    if $input == null {
+        error make {msg: 'you should pipe a list, a table or a dataframe containg `neuron` column to this command'}
     }
 
     let $candidate = (
