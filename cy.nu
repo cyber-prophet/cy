@@ -994,7 +994,7 @@ export def 'dict-neurons-view' [
         open
     } else { [[neuron];['bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8']] }
     | if $tags {
-        join --outer (dict-neurons-tags) neuron
+        join --outer (dict-neurons-tags --wide) neuron
     } else {}
     | if $df {
         fill non-exist
@@ -1059,6 +1059,7 @@ export def 'dict-neurons-add' [
 
 export def 'dict-neurons-tags' [
     --path      # return the path of tags file
+    --wide      # return wide table with categories as columns
 ] {
     let $path_csv = (cy-path graph neurons_dict_tags.csv)
     if $path {
@@ -1067,15 +1068,18 @@ export def 'dict-neurons-tags' [
 
     if not ($path_csv | path exists) {
         'neuron,value,category,timestamp'
-        | save $path_csv
+        | save $path_csv;
+        return
     }
 
     open $path_csv
-    | reject timestamp
-    | group-by neuron
-    | values
-    | each { each {|i | {neuron: $i.neuron, $i.category: $i.value}}
-    | reduce -f {} {|i acc | $acc | merge $i}}
+    | if $wide {
+        reject timestamp
+        | group-by neuron
+        | values
+        | each { each {|i | {neuron: $i.neuron, $i.category: $i.value}}
+        | reduce -f {} {|i acc | $acc | merge $i}}
+    } else {}
 }
 
 # Update neurons YAML-dictionary
