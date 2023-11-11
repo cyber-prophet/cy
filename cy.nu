@@ -1129,18 +1129,16 @@ export def 'dict-neurons-update' [
     } else {}
     | upsert update_ts (date now)
     | if $dont_save {} else {
-        do {
-            |i|
-            let $yaml = (cy-path graph neurons_dict.yaml)
-            backup-fn $yaml;
+        let $i = $in
+        let $yaml = (cy-path graph neurons_dict.yaml)
+        backup-fn $yaml;
 
-            dict-neurons-view
-            | prepend $i
-            | uniq-by neuron
-            | save -f $yaml;
+        dict-neurons-view
+        | prepend $i
+        | uniq-by neuron
+        | save -f $yaml;
 
-            $i
-        } $in
+        $i
     }
     | if $quiet { null } else { }
 }
