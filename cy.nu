@@ -870,8 +870,11 @@ export def 'update-cy' [
     --branch: string@'nu-complete-git-branches' = 'dev'
 ] {
     cd $env.cy.path;
+    git stash
     git checkout $branch
-    git pull --autostash -v
+    git pull
+    git stash pop
+    cd -
 }
 
 # Get a passport by providing a neuron's address or nick
