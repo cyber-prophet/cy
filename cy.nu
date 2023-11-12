@@ -1262,6 +1262,49 @@ def graph-download-links-test-dummy [] {
     equal (graph-download-links; null) null
 }
 
+export def graph-download-missing-particles [
+    --dont_update_parquet
+    --whole_graph
+] {
+    if not $dont_update_parquet {
+        graph-update-particles-parquet
+    }
+
+    graph-download-links
+
+    let $follow_list = (dict-neurons-tags | where value == follow | get neuron)
+    let $block_list = (dict-neurons-tags | where value == block | get neuron)
+
+    let $particles = (
+        graph-links-df
+        | if $whole_graph {} else {
+            if ($follow_list | length | $in == 0) {
+                let $input = $in;
+                cprint "You don't have any neurons tagged follow, so we'll download missing particles for the whole
+                cybergraph. If you want to add any use *'bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8' | dict-neurons-add follow*"
+                $input
+            } else {
+                dfr filter-with ((dfr col neuron) | dfr is-in $follow_list)
+            }
+        }
+        | if ($block_list | length | $in == 0) {} else {
+            dfr filter-with ((dfr col neuron) | dfr is-in $block_list | dfr expr-not)
+        }
+        | graph-to-particles
+        | graph-add-metadata
+        | dfr filter-with ($in.content_s | dfr is-null)
+        | dfr select particle
+        | dfr into-nu
+        | get particle
+    )
+
+    $particles | each {queue-cid-add $in}
+
+    cprint --before 1 $'($particles | length) cids are added into queue'
+
+    queue-cids-download
+}
+
 # filter system particles out
 def 'gp-filter-out-system-particles' [
     column = 'particle'
@@ -2375,7 +2418,7 @@ export def 'queue-cids-download' [
 
     if not $quiet {
         cprint $'Overall count of files in queue is *($files | length)*'
-        cprint $'*($env.cy.ipfs-download-from)* will be used for download'
+        cprint $'*($env.cy.ipfs-download-from)* will be used for downloading'
     }
 
     let $filtered_files = (
