@@ -2314,7 +2314,13 @@ def 'cid-download-gateway' [
     if (
         (($type | default '') == 'text/plain; charset=utf-8') and (not $info_only)
     ) {
-        http get -e $'($gate_url)($cid)' -m 120 | save -f $file_path
+        # to catch response body closed before all bytes were read
+        # {http get -e https://gateway.ipfs.cybernode.ai/ipfs/QmdnSiS36vggN6gHbeeoJUBSUEa7B1xTJTcVR8F92vjTHK | save -f temp/test.md}
+        try {
+            http get -e $'($gate_url)($cid)' -m 120 | save -f $file_path
+        } catch {
+            return 'not found'
+        }
         return 'text'
     } else if ($type != null) {
         {'MIME type': $type, 'Size': $size} | sort -r | to toml | save -f $file_path
