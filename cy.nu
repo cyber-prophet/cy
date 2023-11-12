@@ -1247,7 +1247,7 @@ export def 'graph-download-links' [] {
         );
         if $links != [] {
             $links | to csv --noheaders | save -r -a $path_csv
-            print -n $'(char cr)Since a last update (char lp)which was on ($last_height) height(char rp) ($mult * 1000 + ($links | length)) cyberlinks recieved!'
+            print -n $'(char cr)Since the last update (char lp)which was on ($last_height) height(char rp) ($mult * 1000 + ($links | length)) cyberlinks recieved!'
         } else {
             break
         }
