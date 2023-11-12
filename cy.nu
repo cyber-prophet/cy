@@ -1729,7 +1729,7 @@ export def 'graph-to-cosmograph' [] {
     | dfr into-nu
     | reject index
     | save -f (
-        cy-path 'export' $'cosmograph(now-fn).csv'
+        cy-path 'export' $'cybergraph-in-cosmograph(now-fn).csv'
         | print-and-pass
     )
 }
