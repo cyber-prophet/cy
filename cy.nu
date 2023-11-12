@@ -1675,15 +1675,15 @@ export def 'graph-to-txt-feed' [] {
     | str join (char nl)
 }
 
-# Export graph in cosmograph format
+# Export piped-in graph to a CSV file in cosmograph format
 export def 'graph-to-cosmograph' [] {
-    $in
-    | graph-add-metadata
+    graph-add-metadata
+    | dfr rename timestamp time
+    | dfr select ($in | dfr columns | prepend [content_s_from content_s_to] | uniq)
     | dfr into-nu
     | reject index
     | save -f (
-        $env.cy.path
-        | path join 'export' $'cosmograph(now-fn).csv'
+        cy-path 'export' $'cosmograph(now-fn).csv'
         | print-and-pass
     )
 }
