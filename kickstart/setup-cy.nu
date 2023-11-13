@@ -41,7 +41,7 @@ install_if_missing "curl"
 install_if_missing "pueue"
 install_if_missing "ipfs"
 install_if_missing "rich-cli" "rich"
-install_if_missing "gum"
+# install_if_missing "gum"
 
 # depends_on "atuin"
 
@@ -87,4 +87,6 @@ if (not ('cy' in (scope modules | get name))) {
 }
 
 print "CY has been downloaded and installed. Now it will launch automatically with Nu."
-print "restart nu, and execute 'cy config-new'. Have fun!"
+print "Now nu exits. Execute 'cy config-new' after you relaunch it. Have fun!"
+
+exit
