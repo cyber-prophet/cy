@@ -22,7 +22,7 @@ export def check-requirements [] {
             $'($in) is missing'
         }
     }
-    | if ($in | length | $in == 0) {
+    | if ($in | is-empty) {
         'all needed apps are installed'
     }
 }
@@ -239,7 +239,7 @@ export def 'link-files' [
     --quiet                 # Don't output results page
     --yes (-y)              # Confirm uploading files without request
 ] : [nothing -> table, nothing -> nothing] {
-    if (ps | where name =~ ipfs | length | $in == 0) {
+    if (ps | where name =~ ipfs | is-empty) {
         error make {msg: "ipfs service isn't running. Try 'brew services start ipfs'" }
     }
 
@@ -1279,7 +1279,7 @@ export def graph-download-missing-particles [
     let $particles = (
         graph-links-df
         | if $whole_graph {} else {
-            if ($follow_list | length | $in == 0) {
+            if ($follow_list | is-empty) {
                 let $input = $in;
                 cprint "You don't have any neurons tagged follow, so we'll download missing particles for the whole
                 cybergraph. If you want to add any use *'bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8' | dict-neurons-add follow*"
@@ -1288,7 +1288,7 @@ export def graph-download-missing-particles [
                 dfr filter-with ((dfr col neuron) | dfr is-in $follow_list)
             }
         }
-        | if ($block_list | length | $in == 0) {} else {
+        | if ($block_list | is-empty) {} else {
             dfr filter-with ((dfr col neuron) | dfr is-in $block_list | dfr expr-not)
         }
         | graph-to-particles
