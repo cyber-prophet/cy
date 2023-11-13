@@ -1281,11 +1281,21 @@ export def graph-download-missing-particles [
         | if $whole_graph {} else {
             if ($follow_list | is-empty) {
                 let $input = $in;
-                cprint "You don't have any neurons tagged follow, so we'll download missing particles for the whole
-                cybergraph. If you want to add any use *'bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8' | dict-neurons-add follow*"
+                cprint "You don't have any neurons tagged `follow`, so we'll download only missing particles `maxim`.
+                If you want to download all the missing particles for the whole cybergraph you can use the command:
+                *graph-download-missing-particles --whole_graph*.
+                If you want to add tag `follow` to some neurons you can use the command:
+                *'bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8' | dict-neurons-add follow*"
                 $input
+                | dfr filter-with (
+                    (dfr col neuron)
+                    | dfr is-in ['bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8']
+                )
             } else {
-                dfr filter-with ((dfr col neuron) | dfr is-in $follow_list)
+                dfr filter-with (
+                    (dfr col neuron)
+                    | dfr is-in $follow_list
+                )
             }
         }
         | if ($block_list | is-empty) {} else {
