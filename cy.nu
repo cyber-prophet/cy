@@ -96,8 +96,7 @@ export def 'pin-text' [
         if (is-cid $text) { return $text }
     }
 
-    if ($env.cy.pin_text_only_hash? | default false | $in or $follow_file_path
-    ) {
+    if ($env.cy.pin_text_only_hash? | default false | $in or $only_hash) {
         $text
         | ipfs add -Q --only-hash
         | str replace (char nl) ''
@@ -1436,12 +1435,18 @@ export def 'graph-update-particles-parquet' [
     --full_content  # include column with full content of particles
     --quiet (-q)    # don't print info about the saved parquet file
 ] {
+    let $parquet_path = cy-path graph particles.parquet
+    let $particles_folder = $env.cy.ipfs-files-folder
+
+    if not $quiet {
+        cprint $'Cy is updating ($parquet_path). It will take a coulple of minutes.'
+    }
 
     let $downloaded_particles = (
-        ls -s (cy-path graph particles safe) # I use ls instead of glob to have the filesize column
+        ls -s $particles_folder # I use ls instead of glob to have the filesize column
         | reject modified type
         | upsert content {
-            |i| open -r (cy-path graph particles safe $i.name)
+            |i| open -r ($particles_folder | path join $i.name)
             | str substring -g 0..4000
         }
         | dfr into-df
@@ -1461,7 +1466,7 @@ export def 'graph-update-particles-parquet' [
         }
     )
 
-    backup-fn (cy-path graph particles.parquet)
+    backup-fn ($parquet_path)
 
     (
         graph-to-particles --include_system
@@ -1479,7 +1484,7 @@ export def 'graph-update-particles-parquet' [
             dfr concat-str '|' [(dfr col content_s) (dfr col short_cid)]
         )
         | dfr drop short_cid
-        | dfr to-parquet (cy-path graph particles.parquet)
+        | dfr to-parquet ($parquet_path)
         | print ($in | get 0 -i)
     )
 }
