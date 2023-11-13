@@ -2,14 +2,15 @@
 use ../nu-utils/ [cprint print-and-pass]
 
 def --env 'install_if_missing' [
-    cli_name: string
+    brew_cli_name: string
+    local_cli_name?
 ] {
-    if (which $cli_name) == [] {
-        if (confirm $"You don't have `($cli_name)` app availble now. Would you like to install it via homebrew?") {
+    if ($local_cli_name | default $brew_cli_name | which $in) == [] {
+        if (confirm $"You don't have `($brew_cli_name)` app availble now. Would you like to install it via homebrew?") {
             try {
-                brew install $cli_name
+                brew install $brew_cli_name
             } catch {
-                print $'($cli_name) failed to install.'
+                print $'($brew_cli_name) failed to install.'
             }
         }
     }
@@ -39,7 +40,7 @@ install_if_missing "pussy"
 install_if_missing "curl"
 install_if_missing "pueue"
 install_if_missing "ipfs"
-install_if_missing "rich-cli"
+install_if_missing "rich-cli" "rich"
 install_if_missing "gum"
 
 # depends_on "atuin"
