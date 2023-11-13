@@ -3744,6 +3744,7 @@ def open_cy_config_toml [] {
             'ipfs-files-folder': ($nu.home-path | path join cy graph particles safe)
             'ipfs-download-from': 'gateway'
             'ipfs-storage': 'cybernode'
+            'exec': 'cyber'
         }
         | save $config_path
     }
