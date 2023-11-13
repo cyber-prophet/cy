@@ -995,7 +995,8 @@ export def 'dict-neurons-view' [
     } else {}
     | if ($in | path exists) {
         open
-    } else { [[neuron];['bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8']] }
+    } else { [[neuron nick];
+        ['bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8' 'maxim_bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8']] }
     | if $tags {
         join --outer (dict-neurons-tags --wide) neuron
     } else {}
@@ -1072,7 +1073,7 @@ export def 'dict-neurons-tags' [
     if not ($path_csv | path exists) {
         'neuron,value,category,timestamp'
         | save $path_csv;
-        return
+        return null
     }
 
     open $path_csv
