@@ -1072,7 +1072,7 @@ export def 'dict-neurons-tags' [
     if not ($path_csv | path exists) {
         'neuron,value,category,timestamp'
         | save $path_csv;
-        return
+        return null
     }
 
     open $path_csv
