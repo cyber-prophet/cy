@@ -291,7 +291,8 @@ def test-link-files [] {
         link-files --link_filenames --yes
     )
 
-    cd ..; rm -r linkfilestest
+    cd ..;
+    rm -r linkfilestest
 
     equal $expect $result
 }
