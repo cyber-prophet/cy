@@ -3743,6 +3743,25 @@ def is-connected []  {
     (do -i {http get https://duckduckgo.com/} | describe) == 'raw input'
 }
 
+def --env is-connected-interval [
+    interval = 1min
+]  {
+    if ($env.internet-connected? | default (0 | into datetime)) > ((date now) - $interval) {
+        # print 'skip'
+        return true
+    }
+
+    if (is-connected) {
+        $env.internet-connected = (date now)
+        # print 'connected checked'
+        return true
+    } else {
+        $env.internet-connected = null
+        # print 'not connected'
+        return false
+    }
+}
+
 def open_cy_config_toml [] {
     let $config_path = ($nu.home-path | path join .cy_config.toml)
     if not ($config_path | path exists) {
