@@ -305,31 +305,32 @@ def test-link-files [] {
 # to: QmYwEKZimUeniN7CEAfkBRHCn4phJtNoNJxnZXEAhEt3af
 export def 'follow' [
     neuron: string
+    --use_local_list_only    # follow neuron locally only
 ] : [nothing -> record] {
     if not (is-neuron $neuron) {
         cprint $"*($neuron)* doesn't look like an address"
         return
     }
 
-    link-texts 'QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx' $neuron
+    $neuron | dict-neurons-add 'follow'
+
+    if not $use_local_list_only {
+        link-texts 'QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx' $neuron
+    }
 }
 
 #[test]
 def test-follow [] {
     # use std assert equal
-
-    let $expect = {
+    equal {
         from_text: "QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx",
         to_text: "bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8",
         from: "QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx",
         to: "QmYwEKZimUeniN7CEAfkBRHCn4phJtNoNJxnZXEAhEt3af"
-    }
-
-    let $result = (
+    } (
         follow bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8
     )
-
-    equal $expect $result
+    equal (follow bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8 --use_local_list_only) null
 }
 
 # Add a tweet and send it immediately (unless of disable_send flag)
