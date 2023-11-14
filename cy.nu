@@ -3896,18 +3896,20 @@ export def 'queue-task-add' [
     | save -f $filename
 }
 
-export def 'queue-tasks-monitor' [
+export def --env 'queue-tasks-monitor' [
     --threads: int = 10
     --cids_in_run: int = 10 # a number of files to download in one command run. 0 - means all (default)
 ] {
     loop {
         glob (cy-path cache queue_tasks_to_run *.nu.txt)
         | sort
-        | if ($in | length) == 0 {
-            queue-cids-download 10 --cids_in_run $cids_in_run --threads $threads --quiet;
-        } else {
-            par-each -t $threads {
-                |i| queue-execute-task $i
+        | if (is-connected-interval 10min) {
+            if ($in | length) == 0 {
+                queue-cids-download 10 --cids_in_run $cids_in_run --threads $threads --quiet;
+            } else {
+                par-each -t $threads {
+                    |i| queue-execute-task $i
+                };
             };
         };
         sleep 1sec
