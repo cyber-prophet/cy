@@ -2534,7 +2534,8 @@ export def 'query-rank-karma' [
 ] {
     let $address = $neuron | default $env.cy.address
     ber query rank karma $address
-    | upsert karma {|i| $i.karma? | default 0 | into int}
+    | default 0 karma
+    | into int karma
 }
 
 # Get a balance for a given account
@@ -2566,10 +2567,7 @@ export def 'tokens-balance-get' [
     } else if ($in == []) {
         token-dummy-balance
     } else {
-        upsert amount {
-            |b| $b.amount
-            | into int
-        }
+        into int amount
     }
     | if $record {
         transpose -idr
@@ -2587,7 +2585,7 @@ export def 'tokens-supply-get' [
 ] {
     ber query bank total [--height $height]
     | get supply
-    | upsert amount {|i| $i.amount | into int}
+    | into int amount
     | transpose -idr
 }
 
@@ -2659,7 +2657,7 @@ export def 'tokens-delegations-table-get' [
     | get -i delegation_responses
     | if $in == null {return} else {}
     | each {|i| $i.delegation | merge $i.balance}
-    | upsert amount {|i| $i.amount | into int}
+    | into int amount
     | upsert state delegated
     | if $sum {
         tokens-sum
@@ -2677,7 +2675,7 @@ export def 'tokens-rewards-get' [
     | get total -i
     | if $in == null {return} else {}
     | if $in == [] {return} else {}
-    | upsert amount {|i| $i.amount | into int}
+    | into int amount
     | if $sum {
         tokens-sum
     } else {}
@@ -2714,7 +2712,7 @@ export def 'tokens-investmint-status-table' [
         | merge $release_slots
         | where release_time > (date now)
         | flatten --all
-        | upsert amount {|i| $i.amount | into int}
+        | into int amount
         | upsert state frozen
     );
 
@@ -2758,7 +2756,7 @@ export def 'tokens-routed-from' [
     ber query grid routed-from $address [--height $height]
     | get -i value
     | if $in == null {return} else { }
-    | upsert amount {|i| $i.amount | into int}
+    | into int amount
     | upsert state routed-from
 }
 
@@ -2770,7 +2768,7 @@ export def 'tokens-routed-to' [
     ber query grid routed-to $address [--height $height]
     | get -i value
     | if $in == null {return} else { }
-    | upsert amount {|i| $i.amount | into int}
+    | into int amount
     | upsert state routed-to
 }
 
@@ -3466,7 +3464,7 @@ def 'query-links-bandwidth-params' [] : nothing -> record {
     ber query bandwidth params
     | get params
     | transpose key value
-    | upsert value {|i| $i.value | into float}
+    | into float value
     | transpose -idr
 }
 
@@ -3477,7 +3475,8 @@ export def 'query-links-bandwidth-neuron' [
     | get neuron_bandwidth
     | select max_value remained_value
     | transpose param links
-    | upsert links {|i| $i.links | into int | $in / (query-links-bandwidth-price) | math floor}
+    | into int links
+    | upsert links {|i| $i.links / (query-links-bandwidth-price) | math floor}
 }
 
 export def 'query-staking-validators' [] {
