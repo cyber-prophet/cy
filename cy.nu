@@ -29,7 +29,7 @@ export def check-requirements [] {
 
 export-env {
     # banner2
-    let $tested_versions = ['0.86.0']
+    let $tested_versions = ['0.87.0']
 
     version
     | get version
@@ -99,7 +99,7 @@ export def 'pin-text' [
     if ($env.cy.pin_text_only_hash? | default false | $in or $only_hash) {
         $text
         | ipfs add -Q --only-hash
-        | str replace (char nl) ''
+        | str trim --char (char nl)
         | return $in
     }
 
@@ -107,7 +107,7 @@ export def 'pin-text' [
         if ($env.cy.ipfs-storage == 'kubo') or ($env.cy.ipfs-storage == 'both') {
             $text
             | ipfs add -Q
-            | str replace (char nl) ''
+            | str trim --char (char nl)
         }
     )
 
@@ -210,7 +210,7 @@ export def 'link-chain' [
     }
 
     (
-        0..($count - 2) # The number of paris of cids to iterate through
+        0..($count - 2) # The number of cid-paris to iterate through
         | each {
             |i| link-texts ($rest | get $i) ($rest | get ($i + 1))
         }
@@ -625,27 +625,19 @@ export def 'links-pin-columns' [
         } else {}
         | uniq
         | par-each -t $threads {|i| {$i: (pin-text $i)}}
-        | reduce -f {} {|it acc|
-            $acc
-            | merge $it
-        }
+        | reduce -f {} {|it acc| $acc | merge $it }
     )
 
     $links
     | each {|i| $i
         | if $i.from_text? != null {
-            upsert from (
-                $dict
-                | get -i $i.from_text
-            )
+            upsert from ( $dict | get -i $i.from_text )
         } else {}
         | if $i.to_text? != null {
-            upsert to {
-                $dict
-                | get -i $i.to_text
-            }
+            upsert to ( $dict | get -i $i.to_text )
         } else {}
-    } | if $dont_replace {} else { links-replace }
+    }
+    | if $dont_replace {} else { links-replace }
 }
 
 # Check if any of the links in the links table exist
@@ -676,8 +668,7 @@ def 'link-exist' [
 export def 'links-remove-existed' [] : [nothing -> table, nothing -> nothing] {
     let $links_with_status = (
         links-view -q
-        | par-each {
-            |i| $i
+        | par-each { |i| $i
             | upsert link_exist {
                 |row| (link-exist  $row.from $row.to $env.cy.address)
             }
@@ -908,8 +899,7 @@ export def 'passport-get' [
     | if $in == null {
         if not $quiet {
             cprint --before 1 --after 2 $'No passport for *($address_or_nick)* is found'
-        }
-        {}
+        }; return {}
     } else {
         get data
         | merge $in.extension
@@ -1067,9 +1057,7 @@ export def 'dict-neurons-tags' [
     --wide      # return wide table with categories as columns
 ] {
     let $path_csv = (cy-path graph neurons_dict_tags.csv)
-    if $path {
-        return $path_csv
-    }
+    if $path { return $path_csv }
 
     if not ($path_csv | path exists) {
         'neuron,value,category,timestamp'
@@ -1134,16 +1122,16 @@ export def 'dict-neurons-update' [
     } else {}
     | upsert update_ts (date now)
     | if $dont_save {} else {
-        let $i = $in
+        let $input = $in
         let $yaml = (cy-path graph neurons_dict.yaml)
         backup-fn $yaml;
 
         dict-neurons-view
-        | prepend $i
+        | prepend $input
         | uniq-by neuron
         | save -f $yaml;
 
-        $i
+        $input
     }
     | if $quiet { null } else { }
 }
@@ -1154,10 +1142,11 @@ export def --env 'graph-download-snapshot' [
 ] {
     make_default_folders_fn
 
-    let $path = (cy-path graph)
     let $cur_data_cid = (passport-get graphkeeper | get data -i)
+    let $path = (cy-path graph)
     let $update_info = (
-        ($path | path join update.toml)
+        $path
+        | path join update.toml
         | if ($in | path exists) {open} else {{}}
     )
     let $last_data_cid = ($update_info | get -i last_cid)
@@ -1252,7 +1241,8 @@ export def 'graph-download-links' [] {
         );
         if $links != [] {
             $links | to csv --noheaders | save -r -a $path_csv
-            print -n $'(char cr)Since the last update (char lp)which was on ($last_height) height(char rp) ($mult * 1000 + ($links | length)) cyberlinks recieved!'
+            print -n $'(char cr)Since the last update (char lp)which was on ($last_height
+                ) height(char rp) ($mult * 1000 + ($links | length)) cyberlinks recieved!'
         } else {
             break
         }
@@ -1949,11 +1939,9 @@ export def --env 'config-new' [
     let $rpc_address = (
         [$rpc_def 'other']
         | input list -f
-        | do {
-            |x| if $x == 'other' {
-                input 'enter the RPC address:'
-            } else {$x}
-        } $in
+        | if $in == 'other' {
+            input 'enter the RPC address:'
+        } else {}
         | print-and-pass
     )
 
@@ -1985,8 +1973,7 @@ export def 'config-view' [
     if $config_name == null {
         $env.cy
     } else {
-        let $filename = (cy-path config $'($config_name).toml')
-        open $filename
+        open (cy-path config $'($config_name).toml')
     }
     # | if $quiet {} else {print-and-pass}
 }
@@ -2118,10 +2105,8 @@ def 'search-with-backlinks' [
 
     print $'searching ($env.cy.exec) for ($cid)'
 
-    (
-        search_or_back_request search
-        | append (search_or_back_request backlinks)
-    )
+    search_or_back_request search
+    | append (search_or_back_request backlinks)
 }
 
 def 'search-auto-refresh' [
@@ -2181,17 +2166,12 @@ def serp1 [
     results
     --pretty: bool@'nu-complete-bool' = false
 ] {
-
-    let $serp = (
-        $results
-        | get result
-        | upsert particle {
-            |i| cid-read-or-download $i.particle
-        }
-        | select particle rank
-    )
-
-    $serp
+    $results
+    | get result
+    | upsert particle {
+        |i| cid-read-or-download $i.particle
+    }
+    | select particle rank
 }
 
 #[test]
@@ -2220,9 +2200,10 @@ export def 'cid-get-type-gateway' [
     let $size = ($headers | get -i 'Content-Length')
 
     if (
-        ($type == null) or ($size == null) or
-        (($type == 'text/html') and (($size == '157'))
-    )) {
+        ($type == null)
+        or ($size == null)
+        or (($type == 'text/html') and (($size == '157')))
+    ) {
         return null
     }
 
@@ -2342,18 +2323,14 @@ def 'cid-download-kubo' [
             return 'not found'
         }
     } else {
-        (
-            {'MIME type': ($type | split row ';' | get -i 0)}
-            | merge (
-                do -i {
-                    ipfs dag stat $cid --enc json --timeout $timeout | from json
-                }
-                | default {'Size': null}
-            )
-            | sort -r
-            | to toml
-            | save -f $file_path
-        )
+        do -i {
+            ipfs dag stat $cid --enc json --timeout $timeout | from json
+        }
+        | default {'Size': null}
+        | merge {'MIME type': ($type | split row ';' | get -i 0)}
+        | sort -r
+        | to toml
+        | save -f $file_path;
         return 'non_text'
     }
 }
@@ -2402,16 +2379,14 @@ def cid-download-gateway-test-dummy [] {
 # Add a CID to the download queue
 export def 'queue-cid-add' [
     cid: string
-    symbol: string = '+'
+    symbol: string = ''
 ] {
     let $path = (cy-path cache queue_cids_to_download $cid)
 
     if not ($path | path exists) {
         touch $path
-    } else {
-        if $symbol != '+' {
-            $symbol | save -a $path
-        }
+    } else if $symbol != '' {
+        $symbol | save -a $path
     }
 }
 
@@ -2518,7 +2493,7 @@ export def 'query-current-height' [
     exec?: string@'nu-complete-executables'
 ] {
     let $exec = ($exec | default $env.cy.exec)
-    # print $'current height for ($exec)'
+
     ^($exec) query block -n $env.cy.rpc-address
     | from json
     | get block.header
@@ -2595,16 +2570,13 @@ export def 'tokens-pools-table-get' [
 ] {
     let $liquidity_pools = (ber query liquidity pools [--height $height])
 
-    if $short {
-        return $liquidity_pools
-    }
+    if $short { return $liquidity_pools }
 
     let $supply = (tokens-supply-get)
 
     $liquidity_pools
     | get pools
-    | par-each {
-        |b| $b
+    | par-each { |b| $b
         | upsert balances {|i|
             tokens-balance-get --record $i.reserve_account_address
         }
@@ -3144,7 +3116,7 @@ export def 'rewards-withdraw-tx-analyse' [
         | select moniker delegated commission jailed ($in | columns)
         | where delegated > 0
         | join ($rewards | where denom == boot) -l validator validator
-        | upsert percent {|i| (($i.rewards) / $i.delegated) }
+        | upsert percent {|i| ($i.rewards / $i.delegated) }
     );
 
     $result
@@ -3839,9 +3811,7 @@ export def 'echo_particle_txt' [
             '-'
             '-d' $'0,0,1,($indent)'
         ]
-        | if $markdown {
-            append '-m'
-        } else {}
+        | if $markdown { append '-m' } else {}
     )
 }
 
