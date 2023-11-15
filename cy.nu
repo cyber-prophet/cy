@@ -2903,9 +2903,9 @@ export def 'tokens-in-h-swap-calc' [
     | fill non-exist 0.0
     | rename -c {h_out_amount: $'amount_in_h_swap($percent_formatted)'}
     # | rename -c {source_amount: $'amount_source($percent_formatted)'}
-    | reject ($in | columns | where $it in [
+    | reject -i [
         hydrogen reserve_coin_denom reserve_coin_amount h_out_price price_in_h_naive source_amount
-    ])
+    ]
 }
 
 def 'tokens-price-in-h-real-record' [
@@ -2988,7 +2988,7 @@ export def 'tokens-format' [
         }
         | move amount_f --after denom_f
     } else {}
-    | reject ($in | columns | where $it in [base_denom ticker decimals])
+    | reject -i base_denom ticker decimals
     | if $clean {reject denom amount} else {}
 }
 
