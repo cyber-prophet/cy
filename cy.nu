@@ -2138,6 +2138,31 @@ def 'search-auto-refresh' [
     watch (cy-path cache queue_cids_to_download) {|| clear; print $'Searching ($env.cy.exec) for ($cid)'; serp1 $results}
 }
 
+export def search-walk [
+    query: string
+    --results_per_page: int = 100
+] {
+    let $cid = (pin-text $query --only_hash)
+
+    def serp [$cid: string, page: int] {
+        ber query rank search $cid $page $results_per_page --cache_validity_duration 2min
+        | upsert page $page
+    }
+
+    generate {
+        result: [],
+        page : -1,
+        pagination: {total: $results_per_page}
+    } {|i|
+        {out: $i.result}
+        | if ($i.pagination.total / $results_per_page - 1 | math ceil) > $i.page {
+            upsert next (serp $cid ($i.page + 1))
+        } else {}
+    }
+    | flatten
+    | into int rank
+}
+
 # Use the built-in node search function in cyber or pussy
 export def 'search' [
     query
