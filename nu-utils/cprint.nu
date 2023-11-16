@@ -21,7 +21,7 @@ export def main [
         term size
         | get columns
         | [$in $width] | math min
-        | [$in 1] | math max    # term size gives 0 in tests
+        | [$in 40] | math max    # term size gives 0 in tests
     )
 
     def wrapit [] {
@@ -77,6 +77,9 @@ export def main [
         | newlineit
         | if $err_msg {
             {msg: $in}
-        } else if $echo { } else { print -n $in }
+        } else if $echo {
+        } else {
+            print -n $in
+        }
     )
 }
