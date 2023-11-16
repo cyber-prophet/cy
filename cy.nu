@@ -1831,6 +1831,7 @@ export def 'graph-links-df' [
         dfr append -c (
             graph-open-csv-make-df (cy-path graph cyberlinks_contracts.csv)
         )
+        | dfr sort-by height
     } else {}
     | if $exclude_system {
         dfr into-lazy
