@@ -509,11 +509,8 @@ export def 'links-replace' [
 
 # Empty the temp cyberlinks table
 export def 'links-clear' [] : [nothing -> nothing] {
-    let $filename = (current-links-csv-path)
-    backup-fn $filename
-
     $'from_text,to_text,from,to,timestamp(char nl)'
-    | save $filename --force
+    | save  --force (current-links-csv-path | backup-and-echo --mv)
 }
 
 #[test]
@@ -1123,13 +1120,11 @@ export def 'dict-neurons-update' [
     | upsert update_ts (date now)
     | if $dont_save {} else {
         let $input = $in
-        let $yaml = (cy-path graph neurons_dict.yaml)
-        backup-fn $yaml;
 
         dict-neurons-view
         | prepend $input
         | uniq-by neuron
-        | save -f $yaml;
+        | save -f (cy-path graph neurons_dict.yaml | backup-and-echo);
 
         $input
     }
@@ -1458,8 +1453,6 @@ export def 'graph-update-particles-parquet' [
         }
     )
 
-    backup-fn ($parquet_path)
-
     (
         graph-to-particles --include_system
         | dfr join --left $downloaded_particles particle particle
@@ -1476,7 +1469,7 @@ export def 'graph-update-particles-parquet' [
             dfr concat-str '|' [(dfr col content_s) (dfr col short_cid)]
         )
         | dfr drop short_cid
-        | dfr to-parquet ($parquet_path)
+        | dfr to-parquet ($parquet_path | backup-and-echo --mv)
         | print ($in | get 0 -i)
     )
 }
@@ -1995,8 +1988,7 @@ export def --env 'config-save' [
 
             ['yes' 'no'] | input list
             | if $in == 'yes' {
-                backup-fn $filename;
-                $filename
+                $filename | backup-and-echo
             } else {
                 (cy-path config $'(now-fn).toml')
             }
@@ -2498,7 +2490,7 @@ export def 'cache-clean-cids-queue' [
 
 # Clear the cache folder
 export def 'cache-clear' [] {
-    backup-fn (cy-path cache)
+    cy-path cache | backup-and-echo
     make_default_folders_fn
 }
 
@@ -3853,20 +3845,27 @@ def 'now-fn' [
     )
 }
 
-def 'backup-fn' [
-    filename
+def 'backup-and-echo' [
+    filename?: path
+    --quiet # don't echo the file-path back
+    --mv # move the file to backup directory instead of copy
 ] {
-    let $basename = ($filename | path basename)
-    let $backups_path = (cy-path backups $'(now-fn)($basename)')
+    let $input = $in
+    let $path = $filename | default $input
+    let $backups_path = (cy-path backups $'(now-fn)($path | path basename)')
 
-    if (
-        $filename
-        | path exists
-    ) {
-        ^cp $filename $backups_path
-        # print $'Previous version of ($filename) is backed up to ($backups_path)'
+    if not ( $path | path exists ) {
+        error make {msg: ( cprint --echo $'*($path)* does not exist' )}
+    }
+
+    if $mv {
+        mv $path $backups_path
     } else {
-        cprint $'*($filename)* does not exist'
+        cp $path $backups_path
+    }
+
+    if not $quiet {
+        $path
     }
 }
 
