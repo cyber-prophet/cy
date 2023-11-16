@@ -2076,14 +2076,7 @@ def 'search-with-backlinks' [
     --page (-p): int = 0
     --results_per_page (-r): int: int = 10
 ] {
-    let $cid = (
-        if (is-cid $query) {
-            print $'searching (cid-read-or-download $query)'
-            $query
-        } else {
-            (pin-text $query --only_hash)
-        }
-    )
+    let $cid = (pin-text $query --only_hash)
 
     def search_or_back_request [
         type: string
