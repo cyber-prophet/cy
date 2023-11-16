@@ -568,14 +568,13 @@ export def 'links-link-all' [
     text: string            # a text to upload to ipfs
     --dont_replace (-D)     # don't replace the temp cyberlinks table, just output results
     --column (-c): string = 'from'  # a column to use for values ('from' or 'to'). 'from' is default
-    --non_empty             # fill non-empty only
+    --empty             # fill empty cells only
 ] : [nothing -> table, table -> table] {
     $in
     | default (links-view -q)
-    | if $non_empty {
-        each {|i|
-            $i
-            | if ( $in | get $column -i | is-empty ) {
+    | if $empty {
+        each {
+            if ( $in | get $column -i | is-empty ) {
                 upsert $column (pin-text $text)
                 | upsert $'($column)_text' $text
             } else { }
