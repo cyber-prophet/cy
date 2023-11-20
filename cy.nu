@@ -3121,10 +3121,12 @@ export def 'rewards-withdraw-tx-analyse' [
     let $result = (
         tokens-delegations-table-get $tx_neuron --height $tx_height
         | upsert height $tx_height
-        | join -l (query-staking-validators | rename validator_address) validator_address validator_address
+        | join -l (
+            query-staking-validators | rename -c {operator_address: validator_address}
+        ) validator_address validator_address
         | reject delegator_address shares denom
         | rename validator delegated
-        | select moniker delegated commission jailed ($in | columns)
+        | select -i moniker delegated commission rewards jailed ($in | columns)
         | where delegated > 0
         | join ($rewards | where denom == boot) -l validator validator
         | upsert percent {|i| ($i.rewards / $i.delegated) }
