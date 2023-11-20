@@ -1290,7 +1290,9 @@ export def graph-download-missing-particles [
         }
         | graph-to-particles
         | graph-add-metadata
-        | dfr filter-with ($in.content_s | dfr is-null)
+        | dfr filter-with (($in.content_s | dfr is-null) or ($in.content_s =~ '^timeout'))
+        # | dfr filter-with (((dfr col content_s) | dfr is-in ['timeout']))
+        | print-and-pass
         | dfr select particle
         | dfr into-nu
         | get particle
