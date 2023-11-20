@@ -3279,20 +3279,24 @@ export def 'investmint-message' [
 }
 
 export def 'create-transaction' [
-
+    message: record
+    --memo: string = 'cy'
+    --gas = 200000
+    --fee = 2000
 ] {
     {
         body: {
-            messages: [],
-            memo: "",
+            messages: [$message],
+            memo: $memo,
             timeout_height: "0",
             extension_options: [],
             non_critical_extension_options: []
-        }, auth_info: {
+        },
+        auth_info: {
             signer_infos: [],
             fee: {
-                amount: [[denom, amount]; [boot, "2000"]],
-                gas_limit: "200000",
+                amount: [[denom, amount]; [boot, ($fee | into string)]],
+                gas_limit: ($gas | into string),
                 payer: "",
                 granter: ""
             }
