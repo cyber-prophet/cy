@@ -3469,6 +3469,35 @@ def 'query-links-bandwidth-params' [] : nothing -> record {
     | transpose -idr
 }
 
+# Query status of authz grants for address
+#
+# > query-authz (qnbn bb🔑) | first 2 | to yaml
+# - expired: true
+#   expiration: 2023-04-25 05:40:44 +00:00
+#   grantee: bostrom1yrv70gskxcn04xu03rpywd044gvz9l0mmhad2d
+#   msg: /cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward
+#   granter: bostrom1mcslqq8ghtuf6xu987qtk64shy6rd86a2xtwu8
+#   '@type': /cosmos.authz.v1beta1.GenericAuthorization
+# - expired: true
+#   expiration: 2023-04-25 05:42:25 +00:00
+#   grantee: bostrom1yrv70gskxcn04xu03rpywd044gvz9l0mmhad2d
+#   msg: /cosmos.staking.v1beta1.MsgDelegate
+#   granter: bostrom1mcslqq8ghtuf6xu987qtk64shy6rd86a2xtwu8
+#   '@type': /cosmos.authz.v1beta1.GenericAuthorization
+export def 'query-authz' [
+    neuron?
+] {
+    $neuron
+    | if ($in != null) { } else { $env.cy.address }
+    | ber query authz grants-by-granter $in
+    | get grants
+    | each {|i| $i | merge $i.authorization | reject authorization}
+    | upsert expiration {|i| $i.expiration | into datetime}
+    | sort-by expiration
+    | upsert expired {|i| $i.expiration < (date now)}
+    | select -i expired expiration grantee msg ($in | columns)
+}
+
 export def 'query-links-bandwidth-neuron' [
     neuron?
 ] : nothing -> table {
