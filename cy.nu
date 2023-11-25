@@ -1804,7 +1804,7 @@ export def 'graph-add-metadata' [
                 dict-neurons-view --df
                 | dfr select neuron nick
             ) neuron neuron
-        }
+        } else {}
     )
 
     let $columns_order_target = ($c_out | dfr columns | reverse)
