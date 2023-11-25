@@ -3029,6 +3029,7 @@ export def 'balances' [
 export def 'tokens-balance-all' [
     $neuron?: string
     --height: int = 0
+    --routes: string = 'from'
 ] {
     let $address = $neuron | default $env.cy.address
     let $invstiminted_frozen = (tokens-investmint-status-table $address --sum --quiet)
@@ -3041,7 +3042,13 @@ export def 'tokens-balance-all' [
         | append $invstiminted_frozen
         | append (tokens-rewards-get --sum $address)
         | append (tokens-delegations-table-get --sum $address)
-        | append (tokens-routed-from $address)
+        | append (
+            if $routes == 'from' {
+                tokens-routed-from $address
+            } else {
+                tokens-routed-to $address
+            }
+        )
         | tokens-pools-convert-value
         | sort-by amount -r
         | sort-by denom
