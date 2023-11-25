@@ -23,13 +23,13 @@ export def check-requirements [] {
         }
     }
     | if ($in | is-empty) {
-        'all needed apps are installed'
+        'all required apps are installed'
     }
 }
 
 export-env {
     # banner2
-    let $tested_versions = ['0.87.0']
+    let $tested_versions = ['0.87.1']
 
     version
     | get version
@@ -731,7 +731,13 @@ def 'transaction-template' [
         extension_options: [],
         non_critical_extension_options: []
     }, auth_info: {
-        signer_infos: [], fee: {amount: [], gas_limit: $gas_limit, payer: $payer, granter: $granter}
+        signer_infos: [],
+        fee: {
+            amount: [],
+            gas_limit: $gas_limit,
+            payer: $payer,
+            granter: $granter
+        }
     }, signatures: [] }
 }
 
@@ -1241,6 +1247,7 @@ export def 'graph-download-links' [] {
             break
         }
     }
+    print ''
 }
 
 #[test]
@@ -1613,7 +1620,7 @@ export def 'graph-neurons-stats' [] {
         | dfr join --left $tweets neuron neuron
         | dfr fill-null 0
         | dfr join --left ( dict-neurons-view --df ) neuron neuron
-        | dfr select ($in | dfr columns | prepend [nickname links_count last_link])
+        | dfr select ($in | dfr columns | prepend [nickname links_count last_link] | uniq)
     )
 }
 
@@ -3153,8 +3160,8 @@ export def 'tokens-delegate-wizzard' [
         | $in - 2_000_000 # a fraction for fees
     )
 
-    cprint $'You have *($boots_liquid | to-number-format --denom boot --significant_integers 0 | ansi strip)*
-    liquid. How much of them would you like to delegate?'
+    ($boots_liquid | to-number-format --denom boot --significant_integers 0 | ansi strip)
+    | cprint $'You have *($in)* liquid. How much of them would you like to delegate?'
 
     let $boots_to_delegate: string = (
         tokens-fraction-menu $boots_liquid --denom 'boot'
