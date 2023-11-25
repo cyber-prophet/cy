@@ -2145,11 +2145,12 @@ def 'search-auto-refresh' [
 export def search-walk [
     query: string
     --results_per_page: int = 100
+    --duration: duration = 2min
 ] {
     let $cid = (pin-text $query --only_hash)
 
     def serp [$cid: string, page: int] {
-        ber query rank search $cid $page $results_per_page --cache_validity_duration 2min
+        ber query rank search $cid $page $results_per_page --cache_validity_duration $duration
         | upsert page $page
     }
 
