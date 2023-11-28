@@ -3758,6 +3758,10 @@ export def 'qnbn' [
     } else {}
 }
 
+export def 'crypto-prices' [] {
+    http get 'https://api.coincap.io/v2/assets' | get data
+}
+
 # An ordered list of cy commands
 export def 'help-cy' [
     --to_md (-m) # export table as markdown
