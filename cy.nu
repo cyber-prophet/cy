@@ -3367,12 +3367,11 @@ export def --env 'set-cy-setting' [
     --output_value_only
 ] {
     let $key_1 = if $key == null {
-        cprint 'Select the setting that you want to change:'
-
         open (cy-path kickstart settings-variants.yaml)
+        | items {|key value| {$key: $value.description}}
+        | input list 'Select the setting that you want to change'
         | columns
-        | input list
-        | print-and-pass
+        | get 0
     } else { $key }
 
     let $value_1 = if $value == null {
