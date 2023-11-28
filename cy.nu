@@ -3361,6 +3361,29 @@ export def --env 'set-links-table-name' [
     $env.cy.links_table_name = $name
 }
 
+def 'set-select-from-variants' [
+    $key
+] {
+    let $option = open (cy-path kickstart settings-variants.yaml) | get -i $key
+
+    if $option == null {
+        input 'type your setting: '
+    } else {
+        cprint --before 1 $option.description?
+
+        $option
+        | get variants
+        | input list -f
+        | if ($in == 'other') {
+            input 'type your setting: '
+        } else {}
+        | if ($in in ['true', 'false']) { # input list errors on booleans on 0.87.1
+            into bool
+        } else {}
+        | print-and-pass
+    }
+}
+
 # Force ber to update results with every request
 export def --env 'set-ber-force-update' [
     value?: bool
