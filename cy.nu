@@ -742,13 +742,12 @@ def 'transaction-template' [
 }
 
 def 'tx-sign-and-broadcast' [] {
-
     let $params = (
         [
-        --from $env.cy.address
-        --chain-id $env.cy.chain-id
-        --node $env.cy.rpc-address
-        --output-document (cy-path temp tx-signed.json)
+            --from $env.cy.address
+            --chain-id $env.cy.chain-id
+            --node $env.cy.rpc-address
+            --output-document (cy-path temp tx-signed.json)
         ]
         | if $env.cy.keyring-backend? == 'test' {
             append ['--keyring-backend' 'test']
@@ -772,7 +771,7 @@ def 'tx-sign-and-broadcast' [] {
         | if ($in.exit_code != 0 ) {
             error make { msg: 'exit code is not 0' }
         } else {
-            get stdout
+            get stdout | from json
         }
     )
 }
@@ -802,7 +801,6 @@ def 'links-send-tx' [
 
     let $response = (
         tx-sign-and-broadcast
-        | from json
         | select raw_log code txhash
     )
 
