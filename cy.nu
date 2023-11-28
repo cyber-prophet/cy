@@ -3361,6 +3361,31 @@ export def --env 'set-links-table-name' [
     $env.cy.links_table_name = $name
 }
 
+export def --env 'set-cy-setting' [
+    key?
+    value?
+    --output_value_only
+] {
+    let $key_1 = if $key == null {
+        cprint 'Select the setting that you want to change:'
+
+        open (cy-path kickstart settings-variants.yaml)
+        | columns
+        | input list
+        | print-and-pass
+    } else { $key }
+
+    let $value_1 = if $value == null {
+        set-select-from-variants $key_1
+    } else { $value }
+
+    if $output_value_only {
+        $value_1
+    } else {
+        $env.cy = ($env.cy | upsert $key_1 $value_1)
+    }
+}
+
 def 'set-select-from-variants' [
     $key
 ] {
