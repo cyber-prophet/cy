@@ -3393,11 +3393,11 @@ def 'set-select-from-variants' [
     if $option == null {
         input 'type your setting: '
     } else {
-        cprint --before 1 $option.description?
+        cprint -h green $'*($key): ($option.description?)*'
 
         $option
         | get variants
-        | input list -f
+        | input list
         | if ($in == 'other') {
             input 'type your setting: '
         } else {}
