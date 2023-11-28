@@ -3205,7 +3205,7 @@ export def 'tokens-investmint-wizzard' [
     $neuron?: string
 ] {
     let $address = $neuron | default $env.cy.address
-    $env.cy.ber_force_update = true
+    $env.cy.ber-force-update = true
     let $times = (
         tokens-investmint-status-table $address
         | print-and-pass
@@ -3218,7 +3218,7 @@ export def 'tokens-investmint-wizzard' [
         | upsert release_time $i.release_time.0}
     )
 
-    $env.cy.ber_force_update = false
+    $env.cy.ber-force-update = false
     let $h_free = (
         tokens-investmint-status-table $address --h_liquid --quiet
         | if $in in [[] 0] {
@@ -3401,9 +3401,9 @@ def 'set-select-from-variants' [
 export def --env 'set-ber-force-update' [
     value?: bool
 ] : nothing -> bool {
-    $env.cy.ber_force_update = (
+    $env.cy.ber-force-update = (
         if $value == null {
-            not ($env.cy.ber_force_update? | default false)
+            not ($env.cy.ber-force-update? | default false)
         } else {$value}
         | print-and-pass
     )
@@ -3668,7 +3668,7 @@ export def --wrapped 'ber' [
 
     mut $update = (
         $force_update or
-        ($env.cy.ber_force_update? | default false) or
+        ($env.cy.ber-force-update? | default false) or
         (($freshness > $cache_stale_refresh) and (not $disable_update))
     )
 
