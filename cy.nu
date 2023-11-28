@@ -3397,30 +3397,6 @@ def 'set-select-from-variants' [
     }
 }
 
-# Force ber to update results with every request
-export def --env 'set-ber-force-update' [
-    value?: bool
-] : nothing -> bool {
-    $env.cy.ber-force-update = (
-        if $value == null {
-            not ($env.cy.ber-force-update? | default false)
-        } else {$value}
-        | print-and-pass
-    )
-}
-
-export def --env 'set-ipfs-download-from' [
-    value?: string
-] {
-    $env.cy.ipfs-download-from = (
-        if $value == null {
-            ['cybernode', 'kubo']
-            | input list
-        } else {$value}
-        | print-and-pass
-    )
-}
-
 export def 'current-links-csv-path' [
     name?: path
 ] : nothing -> path {
