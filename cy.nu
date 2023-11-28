@@ -1895,7 +1895,7 @@ export def --env 'config-new' [
         error make -u {msg: $error_text}
     }
 
-    cprint -c green --before 1 'Select the address to send transactions from:'
+    cprint -c green --before 1 $'Select the address from your ($exec) cli to send transactions from:'
 
     let $address = (
         $addr_table
@@ -1906,14 +1906,6 @@ export def --env 'config-new' [
 
     let $keyring = $addr_table | where address == $address | get keyring.0
 
-    let $config_name = (
-        $addr_table
-        | select address name
-        | transpose -r -d
-        | get $address
-        | $'($in)-($exec)'
-    )
-
     let $passport_nick = (
         passport-get $address
         | get nickname -i
@@ -1923,14 +1915,15 @@ export def --env 'config-new' [
        cprint -c default_italic --before 1 $'Passport nick *($passport_nick)* will be used'
     }
 
-    let $chain_id_def = (if ($exec == 'cyber') {
-            'bostrom'
-        } else {
-            'space-pussy'
-        }
+    let $config_name = (
+        $addr_table
+        | select address name
+        | transpose -rd
+        | get $address
+        | $'($in)($passport_nick | if $in == null {} else {'-' + $in})-($exec)'
     )
 
-    let $chain_id = ($chain_id_def)
+    let $chain_id = if ($exec == 'cyber') { 'bostrom' } else { 'space-pussy' }
 
     let $rpc_def = if ($exec == 'cyber') {
         'https://rpc.bostrom.cybernode.ai:443'
@@ -1951,9 +1944,7 @@ export def --env 'config-new' [
     cprint -c green --before 1 'Select the ipfs service to store particles:'
 
     let $ipfs_storage = (
-        [cybernode, kubo, both]
-        | input list -f
-        | print-and-pass
+        set-cy-setting --output_value_only 'ipfs-storage'
     )
 
     {
