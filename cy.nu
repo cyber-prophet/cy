@@ -3287,12 +3287,13 @@ export def 'create-transaction' [
     --memo: string = 'cy'
     --gas = 200000
     --fee = 2000
+    --timeout_hight = 0
 ] {
     {
         body: {
             messages: [$message],
             memo: $memo,
-            timeout_height: "0",
+            timeout_height: ($height | into string),
             extension_options: [],
             non_critical_extension_options: []
         },
