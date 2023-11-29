@@ -3358,7 +3358,7 @@ export def --env 'set-cy-setting' [
 ] {
     let $key_1 = if $key == null {
         open (cy-path kickstart settings-variants.yaml)
-        | items {|key value| {$key: $value.description}}
+        | items {|key value| {$key: $value.description?}}
         | input list 'Select the setting that you want to change'
         | columns
         | get 0
