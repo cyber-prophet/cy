@@ -1000,9 +1000,7 @@ export def 'dict-neurons-view' [
     } else {}
     | if $df {
         fill non-exist
-        | if ('addresses' in ($in | columns)) {
-            reject addresses # quick fix for failing df conversion
-        } else {}
+        | reject -i addresses # quick fix for failing df conversion
         | to yaml
         | str replace -a 'null' "''" # dataframes errors on `object` type columns (that contains nulls)
         | from yaml
@@ -3007,6 +3005,7 @@ export def 'balances' [
             append ( ^($env.cy.exec) keys list --output json | from json )
         } else {}
         | select name address
+        | uniq-by address
         | if ($address | is-empty) { } else {
             where address in $address
         }
@@ -3309,7 +3308,7 @@ export def 'create-transaction' [
         body: {
             messages: [$message],
             memo: $memo,
-            timeout_height: ($height | into string),
+            timeout_height: ($timeout_hight | into string),
             extension_options: [],
             non_critical_extension_options: []
         },
@@ -3472,7 +3471,7 @@ export def 'query-tx' [
     | if ($in | columns | $in == [update_time]) {
         error-make-cy $'No transaction with hash ($hash) is found'
     } else {
-        reject events
+        reject -i events
     }
 }
 
@@ -3482,9 +3481,7 @@ export def 'query-tx-seq' [
     seq: int
 ] : nothing -> record {
     ber --disable_update [query tx --type=acc_seq $'($neuron)/($seq)']
-    | if 'events' in ($in | columns) {
-        reject events
-    } else {}
+    | reject -i events
 }
 
 # Query account
@@ -4008,7 +4005,7 @@ export def --env 'queue-tasks-monitor' [
         | sort
         | if (is-connected-interval 10min) {
             if ($in | length) == 0 {
-                queue-cids-download 10 --cids_in_run $cids_in_run --threads $threads --quiet;
+                # queue-cids-download 10 --cids_in_run $cids_in_run --threads $threads --quiet;
             } else {
                 par-each -t $threads {
                     |i| queue-execute-task $i
