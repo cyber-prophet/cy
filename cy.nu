@@ -611,7 +611,7 @@ export def 'links-pin-columns' [
 ] : [nothing -> table, table -> table] {
     let $links = (
         $in
-        | default ( links-view -q )
+        | if $in == null {links-view -q} else {}
         | fill non-exist -v null
     )
 
