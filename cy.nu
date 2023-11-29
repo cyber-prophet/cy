@@ -616,12 +616,9 @@ export def 'links-pin-columns' [
     )
 
     let $dict = (
-        $links
-        | reduce -f [] {|it acc|
-            $acc
-            | if $it.from_text? not-in [null ''] { append $it.from_text } else {}
-            | if $it.to_text? not-in [null ''] { append $it.to_text } else {}
-        }
+        $links.from_text?
+        | append $links.to_text?
+        | where $it not-in [null '']
         | if $in == [] {
             cprint 'No columns *"from_text"* or *"to_text"* found. Add at least one of them.' ;
             return
