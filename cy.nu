@@ -6,7 +6,8 @@
 
 use std assert [equal greater]
 use std clip
-use nu-utils [bar, cprint, "str repeat", to-safe-filename, to-number-format, number-col-format, nearest-given-weekday, print-and-pass]
+use nu-utils [ bar, cprint, "str repeat", to-safe-filename, to-number-format, number-col-format,
+    nearest-given-weekday, print-and-pass]
 
 use log
 
@@ -528,9 +529,12 @@ def test-tmps [] {
         links-view --no_timestamp
     ) [
         [from_text, to_text, from, to];
-        [cyber, bostrom, "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV", "QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb"],
-        [cyber-prophet, 🤘, "QmXFUupJCSfydJZ85HQHD8tU1L7CZFErbRdMTBxkAmBJaD", "QmQKvsh8pp6qFk31ch6RydBFeEHi82TjsRP8FEPYQ3jDow"],
-        [tweet, "cy is cool!", "QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx", "QmddL5M8JZiaUDcEHT2LgUnZZGLMTTDEYVKWN1iMLk6PY8"]
+        [cyber, bostrom, "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV",
+            "QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb"],
+        [cyber-prophet, 🤘, "QmXFUupJCSfydJZ85HQHD8tU1L7CZFErbRdMTBxkAmBJaD",
+            "QmQKvsh8pp6qFk31ch6RydBFeEHi82TjsRP8FEPYQ3jDow"],
+        [tweet, "cy is cool!", "QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx",
+            "QmddL5M8JZiaUDcEHT2LgUnZZGLMTTDEYVKWN1iMLk6PY8"]
     ]
 
     links-link-all 'cy testing script'
@@ -538,9 +542,12 @@ def test-tmps [] {
         links-view --no_timestamp
     ) [
         [from_text, to_text, from, to];
-        ["cy testing script", bostrom, "QmdMy9SGd3StRUXoEX4BZQvGsgW6ejn4gMCT727GypSeZx", "QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb"],
-        ["cy testing script", 🤘, "QmdMy9SGd3StRUXoEX4BZQvGsgW6ejn4gMCT727GypSeZx", "QmQKvsh8pp6qFk31ch6RydBFeEHi82TjsRP8FEPYQ3jDow"],
-        ["cy testing script", "cy is cool!", "QmdMy9SGd3StRUXoEX4BZQvGsgW6ejn4gMCT727GypSeZx", "QmddL5M8JZiaUDcEHT2LgUnZZGLMTTDEYVKWN1iMLk6PY8"]
+        ["cy testing script", bostrom, "QmdMy9SGd3StRUXoEX4BZQvGsgW6ejn4gMCT727GypSeZx",
+            "QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb"],
+        ["cy testing script", 🤘, "QmdMy9SGd3StRUXoEX4BZQvGsgW6ejn4gMCT727GypSeZx",
+            "QmQKvsh8pp6qFk31ch6RydBFeEHi82TjsRP8FEPYQ3jDow"],
+        ["cy testing script", "cy is cool!", "QmdMy9SGd3StRUXoEX4BZQvGsgW6ejn4gMCT727GypSeZx",
+            "QmddL5M8JZiaUDcEHT2LgUnZZGLMTTDEYVKWN1iMLk6PY8"]
     ]
 
     config-activate 42gboot+cyber
@@ -1020,7 +1027,9 @@ export def 'dict-neurons-add' [
     let $path_csv = (cy-path graph neurons_dict_tags.csv)
 
     if $input == null {
-        error make {msg: 'you should pipe a list, a table or a dataframe containg `neuron` column to this command'}
+        error make {
+            msg: 'you should pipe a list, a table or a dataframe containg `neuron` column to this command'
+        }
     }
 
     let $candidate = (
@@ -2267,8 +2276,10 @@ export def 'cid-download-async' [
     let $content = (do -i {open ($env.cy.ipfs-files-folder | path join $'($cid).md')})
     let $source = ($source | default $env.cy.ipfs-download-from)
 
+    let $task = $'cid-download ($cid) --source ($source) --info_only ($info_only) --folder "($folder)"'
+
     if ($content == null) or ($content == 'timeout') or $force {
-        queue-task-add $'cid-download ($cid) --source ($source) --info_only ($info_only) --folder '($folder)''
+        queue-task-add $task
         print 'downloading'
     }
 }
@@ -2368,7 +2379,8 @@ def 'cid-download-gateway' [
         (($type | default '') == 'text/plain; charset=utf-8') and (not $info_only)
     ) {
         # to catch response body closed before all bytes were read
-        # {http get -e https://gateway.ipfs.cybernode.ai/ipfs/QmdnSiS36vggN6gHbeeoJUBSUEa7B1xTJTcVR8F92vjTHK | save -f temp/test.md}
+        # {http get -e https://gateway.ipfs.cybernode.ai/ipfs/QmdnSiS36vggN6gHbeeoJUBSUEa7B1xTJTcVR8F92vjTHK
+        # | save -f temp/test.md}
         try {
             http get -e $'($gate_url)($cid)' -m 120 | save -f $file_path
         } catch {
@@ -2435,7 +2447,8 @@ export def 'queue-cids-download' [
     let $filtered_count = ($filtered_files | length)
 
     if ($filtered_files == []) {
-        if not $quiet {print $'There are no files, that was attempted to download for less than ($attempts) times.'}
+        if not $quiet {
+            print $'There are no files, that was attempted to download for less than ($attempts) times.'}
         return
     } else {
         if not $quiet {
@@ -2718,7 +2731,8 @@ export def 'tokens-investmint-status-table' [
     )
 
     if not $quiet {
-        print $'liquid hydrogen availible for investminting: ($hydrogen_liquid | to-number-format --significant_integers 0)'
+        print $'liquid hydrogen availible for investminting: (
+            $hydrogen_liquid | to-number-format --significant_integers 0)'
     }
 
     if $h_liquid {
@@ -3086,7 +3100,9 @@ export def 'tokens-rewards-withdraw' [
     let $address = $neuron | default $env.cy.address
 
     let $tx = (
-        ^($env.cy.exec) tx distribution withdraw-all-rewards --from $address --fees 2000boot --gas 2000000 --output json --yes
+        ^($env.cy.exec) tx distribution withdraw-all-rewards [
+            --from $address --fees 2000boot --gas 2000000 --output json --yes
+        ]
         | from json
     )
 
@@ -3318,7 +3334,7 @@ export def 'tokens-fraction-input' [
 
     while true {
         cprint $'you can enter integer value (char lp)like *4_000_000* or *4000000*(char rp) or percent
-        from your liquid BOOTs (char lp)like *30%*(char rp)'
+            from your liquid BOOTs (char lp)like *30%*(char rp)'
 
         let $input: string = input
 
@@ -3423,7 +3439,7 @@ export def 'ipfs-bootstrap-add-congress' [] : nothing -> nothing {
 # Nodes list for https://rpc.bostrom.cybernode.ai:443
 #
 # 70 peers found
-# persistent_peers = "7ad32f1677ffb11254e7e9b65a12da27a4f877d6@195.201.105.229:36656,d0518ce9881a4b0c5872e5e9b7c4ea8d760dad3f@85.10.207.173:26656"
+# persistent_peers = "7ad32f1677ffb11254e7e9b65a12da27a4f877d6@195.201.105.229:36656,d0518..."
 export def 'validator-generate-persistent-peers-string' [
     node_address?: string
 ] : nothing -> string {
@@ -3574,7 +3590,9 @@ export def 'validator-chooser' [
     query-staking-validators
     | rename -c {tokens: 'delegated_total'}
     | join -l (
-        tokens-delegations-table-get | select validator_address amount | rename operator_address delegated_my
+        tokens-delegations-table-get
+        | select validator_address amount
+        | rename operator_address delegated_my
     ) operator_address operator_address
     | default 0 delegated_my
     | sort-by delegated_my delegated_total -r
@@ -3595,8 +3613,11 @@ def 'test-validator-chooser' [] {
 export def --wrapped 'ber' [
     ...rest
     --exec: string = ''                         # The name of executable
-    --cache_validity_duration: duration = 60min # Sets the cache's valid duration. No updates initiated during this period.
-    --cache_stale_refresh: duration = 7day      # Sets stale cache's usable duration. Triggers background update and returns cache results. If exceeded, requests immediate data update.
+    --cache_validity_duration: duration = 60min # Sets the cache's valid duration.
+                                                # No updates initiated during this period.
+    --cache_stale_refresh: duration = 7day      # Sets stale cache's usable duration.
+                                                # Triggers background update and returns cache results.
+                                                # If exceeded, requests immediate data update.
     --force_update
     --disable_update (-U)
     --quiet                                     # Don't output execution's result
@@ -3711,25 +3732,36 @@ def ber-test [] {
     ) 'record<karma: string, update_time: date>'
     equal (
         ber query bank balances bostrom1quchyywzdxp62dq3rwan8fg35v6j58sjwnfpuu | describe
-    ) 'record<balances: table<denom: string, amount: string>, pagination: record<next_key: nothing, total: string>, update_time: date>'
+    ) ('record<balances: table<denom: string, amount: string>, pagination: record<next_key: ' +
+        'nothing, total: string>, update_time: date>')
     equal (
         ber query bank balances bostrom1cj8j6pc3nda8v708j3s4a6gq2jrnue7j857m9t | describe
-    ) 'record<balances: table<denom: string, amount: string>, pagination: record<next_key: nothing, total: string>, update_time: date>'
+    ) ('record<balances: table<denom: string, amount: string>, pagination: record<next_key: ' +
+        'nothing, total: string>, update_time: date>')
     equal (
         ber query staking delegations bostrom1eg3v42jpwf3d66v6rnrn9hedyd8qvhqy4dt8pc | describe
-    ) 'record<delegation_responses: table<delegation: record<delegator_address: string, validator_address: string, shares: string>, balance: record<denom: string, amount: string>>, pagination: record<next_key: nothing, total: string>, update_time: date>'
+    ) ('record<delegation_responses: table<delegation: record<delegator_address: string, ' +
+        'validator_address: string, shares: string>, balance: record<denom: string, amount: string>>, ' +
+        'pagination: record<next_key: nothing, total: string>, update_time: date>')
     equal (
         ber query staking delegations bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 | describe
-    ) 'record<delegation_responses: table<delegation: record<delegator_address: string, validator_address: string, shares: string>, balance: record<denom: string, amount: string>>, pagination: record<next_key: nothing, total: string>, update_time: date>'
+    ) ('record<delegation_responses: table<delegation: record<delegator_address: string, ' +
+        'validator_address: string, shares: string>, balance: record<denom: string, amount: string>>, ' +
+        'pagination: record<next_key: nothing, total: string>, update_time: date>')
     equal (
         ber query rank top  | describe
-    ) 'record<result: table<particle: string, rank: string>, pagination: record<total: int>, update_time: date>'
+    ) ('record<result: table<particle: string, rank: string>, pagination: record<total: int>, ' +
+        'update_time: date>')
     equal (
         ber query ibc-transfer denom-traces  | describe
-    ) 'record<denom_traces: table<path: string, base_denom: string>, pagination: record<next_key: nothing, total: string>, update_time: date>'
+    ) ('record<denom_traces: table<path: string, base_denom: string>, pagination: record<next_key: ' +
+        'nothing, total: string>, update_time: date>')
     equal (
         ber query liquidity pools --cache_validity_duration 0sec | describe
-    ) 'record<pools: table<id: string, type_id: int, reserve_coin_denoms: list<string>, reserve_account_address: string, pool_coin_denom: string>, pagination: record<next_key: nothing, total: string>, update_time: date>'}
+    ) ('record<pools: table<id: string, type_id: int, reserve_coin_denoms: list<string>, ' +
+        'reserve_account_address: string, pool_coin_denom: string>, pagination: record<next_key: ' +
+        'nothing, total: string>, update_time: date>')
+}
 
 # query neuron addrsss by his nick
 export def 'qnbn' [
@@ -3867,7 +3899,8 @@ def make_default_folders_fn [] {
 
     if ( cy-path mylinks _cyberlinks_archive.csv | path exists | not $in ) {
         'from,to,address,timestamp,txhash'
-        | save (cy-path mylinks _cyberlinks_archive.csv) # underscore is supposed to place the file first in the folder
+        # underscore is supposed to place the file first in the folder
+        | save (cy-path mylinks _cyberlinks_archive.csv)
     }
 }
 
