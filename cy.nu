@@ -79,7 +79,7 @@ export def 'pin-text' [
     --only_hash         # calculate hash only, don't pin anywhere
     --dont_detect_cid   # work with CIDs as regular texts
     --follow_file_path  # check if `text_param` is a valid path, and if yes - try to open it
-] : [string -> string, nothing -> string] {
+]: [string -> string, nothing -> string] {
     let $text = (
         $in
         | default $text_param
@@ -204,7 +204,7 @@ def test_link_texts [] {
 #   to: QmS4ejbuxt7JvN3oYyX85yVfsgRHMPrVzgxukXMvToK5td
 export def 'link-chain' [
     ...rest: string
-] : [nothing -> table] {
+]: [nothing -> table] {
     let $count = ($rest | length)
     if $count < 2 {
         return $'($count) particles were submitted. We need 2 or more'
@@ -238,7 +238,7 @@ export def 'link-files' [
     --disable_append (-D)   # Don't append links to the links table
     --quiet                 # Don't output results page
     --yes (-y)              # Confirm uploading files without request
-] : [nothing -> table, nothing -> nothing] {
+]: [nothing -> table, nothing -> nothing] {
     if (ps | where name =~ ipfs | is-empty) {
         error make {msg: "ipfs service isn't running. Try 'brew services start ipfs'" }
     }
@@ -308,7 +308,7 @@ def test-link-files [] {
 export def 'follow' [
     neuron: string
     --use_local_list_only    # follow neuron locally only
-] : [nothing -> record] {
+]: [nothing -> record] {
     if not (is-neuron $neuron) {
         cprint $"*($neuron)* doesn't look like an address"
         return
@@ -345,7 +345,7 @@ def test-follow [] {
 export def 'tweet' [
     text_to: string
     --disable_send (-D)
-] : [nothing -> record] {
+]: [nothing -> record] {
     # let $cid_from = pin-text 'tweet'
     let $cid_from = 'QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx'
 
@@ -376,7 +376,7 @@ def test-tweet [] {
 }
 
 # Add a random chuck norris cyberlink to the temp table
-def 'link-chuck' [] : [nothing -> nothing] {
+def 'link-chuck' []: [nothing -> nothing] {
     let $quote = (
         http get -e https://api.chucknorris.io/jokes/random
         | get value
@@ -389,7 +389,7 @@ def 'link-chuck' [] : [nothing -> nothing] {
 }
 
 # Add a random quote cyberlink to the temp table
-def 'link-quote' [] : [nothing -> nothing] {
+def 'link-quote' []: [nothing -> nothing] {
     let $quote = (
         http get -e -r https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=text
         | $in + "\n\n" + 'via [forismatic.com](https://forismatic.com)'
@@ -419,7 +419,7 @@ def 'link-quote' [] : [nothing -> nothing] {
 export def 'link-random' [
     n: int = 1 # Number of links to append
     --source: string@'nu-complete-random-sources' = 'forismatic.com'
-] : [nothing -> nothing] {
+]: [nothing -> nothing] {
     1..$n
     | each {|i|
         if $source == 'forismatic.com' {
@@ -455,7 +455,7 @@ export def 'link-random' [
 export def 'links-view' [
     --quiet (-q) # Don't print info
     --no_timestamp
-] : [nothing -> table] {
+]: [nothing -> table] {
     let $filename = (current-links-csv-path)
     let $links = (
         try {
@@ -491,7 +491,7 @@ export def 'links-view' [
 # Append piped-in table to the temp cyberlinks table
 export def 'links-append' [
     --quiet (-q)
-] : [table -> table, table -> nothing] {
+]: [table -> table, table -> nothing, record -> table, record -> nothing] {
     $in
     | upsert timestamp (now-fn)
     | prepend (links-view -q)
@@ -501,7 +501,7 @@ export def 'links-append' [
 # Replace the temp table with piped-in table
 export def 'links-replace' [
     --quiet (-q)
-] : [table -> table, table -> nothing] {
+]: [table -> table, table -> nothing] {
     $in
     | save (current-links-csv-path) --force
 
@@ -509,7 +509,7 @@ export def 'links-replace' [
 }
 
 # Empty the temp cyberlinks table
-export def 'links-clear' [] : [nothing -> nothing] {
+export def 'links-clear' []: [nothing -> nothing] {
     $'from_text,to_text,from,to,timestamp(char nl)'
     | save  --force (current-links-csv-path | backup-and-echo --mv)
 }
@@ -576,7 +576,7 @@ export def 'links-link-all' [
     --dont_replace (-D)     # don't replace the temp cyberlinks table, just output results
     --column (-c): string = 'from'  # a column to use for values ('from' or 'to'). 'from' is default
     --empty             # fill empty cells only
-] : [nothing -> table, table -> table] {
+]: [nothing -> table, table -> table] {
     $in
     | default (links-view -q)
     | if $empty {
@@ -608,7 +608,7 @@ export def 'links-link-all' [
 export def 'links-pin-columns' [
     --dont_replace (-D) # Don't replace the links cyberlinks table
     --threads: int = 3  # A number of threads to use to pin particles
-] : [nothing -> table, table -> table] {
+]: [nothing -> table, table -> table] {
     let $links = (
         $in
         | if $in == null {links-view -q} else {}
@@ -651,7 +651,7 @@ def 'link-exist' [
     from: string
     to: string
     neuron: string
-] : [nothing -> bool] {
+]: [nothing -> bool] {
     (
         do -i {
             ^($env.cy.exec) query rank is-exist $from $to $neuron --output json --node $env.cy.rpc-address
@@ -665,7 +665,7 @@ def 'link-exist' [
 }
 
 # Remove existing cyberlinks from the temp cyberlinks table
-export def 'links-remove-existed' [] : [nothing -> table, nothing -> nothing] {
+export def 'links-remove-existed' []: [nothing -> table, nothing -> nothing] {
     let $links_with_status = (
         links-view -q
         | par-each { |i| $i
@@ -2841,7 +2841,7 @@ export def 'tokens-denoms-decimals-dict' [] {
 export def 'tokens-price-in-h-naive' [
     --all_data
     --height: int = 0
-] : nothing -> table {
+]: nothing -> table {
     let $pools = (
         tokens-pools-table-get --height $height
         | select reserve_coin_amount reserve_account_address reserve_coin_denom
@@ -2941,7 +2941,7 @@ def swap_calc_amount [
     --target_coin_pool_amount (-T): float
     --source_coin_pool_amount (-S): float
     --pool_fee (-f): float = 0.003
-] : noting -> int {
+]: nothing -> int {
     if source_coin_amount == 0 {
         0
     } else {
@@ -3359,7 +3359,7 @@ export def 'tokens-fraction-input' [
 # Set the custom name for links csv table
 export def --env 'set-links-table-name' [
     name: string
-] : nothing -> nothing {
+]: nothing -> nothing {
     $env.cy.links_table_name = $name
 }
 
@@ -3412,7 +3412,7 @@ def 'set-select-from-variants' [
 
 export def 'current-links-csv-path' [
     name?: path
-] : nothing -> path {
+]: nothing -> path {
     $name
     | default ($env.cy.links_table_name?)
     | default 'temp'
@@ -3420,7 +3420,7 @@ export def 'current-links-csv-path' [
 }
 
 # Add the cybercongress node to bootstrap nodes
-export def 'ipfs-bootstrap-add-congress' [] : nothing -> nothing {
+export def 'ipfs-bootstrap-add-congress' []: nothing -> nothing {
     ipfs bootstrap add '/ip4/135.181.19.86/tcp/4001/p2p/12D3KooWNMcnoQynAY9hyi4JxzSu64BsRGcJ9z7vKghqk8sTrpqY'
     print 'check if bootstrap node works by executing commands:'
 
@@ -3438,7 +3438,7 @@ export def 'ipfs-bootstrap-add-congress' [] : nothing -> nothing {
 # persistent_peers = "7ad32f1677ffb11254e7e9b65a12da27a4f877d6@195.201.105.229:36656,d0518..."
 export def 'validator-generate-persistent-peers-string' [
     node_address?: string
-] : nothing -> string {
+]: nothing -> string {
     let $node_address = ($node_address | default $'($env.cy.rpc-address)')
     if $node_address == $env.cy.rpc-address {
         cprint -a 2 $"Nodes list for *($env.cy.rpc-address)*"
@@ -3463,7 +3463,7 @@ export def 'validator-generate-persistent-peers-string' [
 # Query tx by hash
 export def 'query-tx' [
     hash: string
-] : nothing -> record {
+]: nothing -> record {
     ber --error [query tx --type hash $hash]
     | if ($in | columns | $in == [update_time]) {
         error-make-cy $'No transaction with hash ($hash) is found'
@@ -3476,7 +3476,7 @@ export def 'query-tx' [
 export def 'query-tx-seq' [
     neuron: string
     seq: int
-] : nothing -> record {
+]: nothing -> record {
     ber --disable_update [query tx --type=acc_seq $'($neuron)/($seq)']
     | reject -i events
 }
@@ -3486,7 +3486,7 @@ export def 'query-account' [
     neuron: string
     --height: int = 0
     --seq   # return sequence
-] : nothing -> record {
+]: nothing -> record {
     ber query account $neuron [--height $height]
     | if $seq {
         get base_vesting_account.base_account.sequence
@@ -3494,16 +3494,16 @@ export def 'query-account' [
     } else {}
 }
 
-export def 'query-links-max-in-block' [] : nothing -> int {
+export def 'query-links-max-in-block' []: nothing -> int {
     ( query-links-bandwidth-params | get max_block_bandwidth ) / ( query-links-bandwidth-price )
     | into int
 }
 
-def 'query-links-bandwidth-price' [] : nothing -> int {
+def 'query-links-bandwidth-price' []: nothing -> int {
     ber query bandwidth price | get price.dec | into float | $in * 1000 | into int # price in millivolt
 }
 
-def 'query-links-bandwidth-params' [] : nothing -> record {
+def 'query-links-bandwidth-params' []: nothing -> record {
     ber query bandwidth params
     | get params
     | transpose key value
@@ -3542,7 +3542,7 @@ export def 'query-authz' [
 
 export def 'query-links-bandwidth-neuron' [
     neuron?
-] : nothing -> table {
+]: nothing -> table {
     ber query bandwidth neuron ($neuron | default $env.cy.address) --cache_stale_refresh 5min
     | get neuron_bandwidth
     | select max_value remained_value
@@ -3617,7 +3617,7 @@ export def --wrapped 'ber' [
     --quiet                                     # Don't output execution's result
     --no_default_params                         # Don't use default params (like output, chain-id)
     --error                                     # raise error instead of null in case of cli's error
-] : nothing -> record {
+]: nothing -> record {
     if $rest == [] { error make {msg: 'The "ber" function needs arguments'} }
 
     let $executable = if $exec != '' {$exec} else {$env.cy.exec}
@@ -4131,7 +4131,7 @@ def 'confirm' [
     prompt: string
     --default_not (-n): bool = false
     --dont_keep_prompt
-] : nothing -> bool {
+]: nothing -> bool {
     if not $dont_keep_prompt {cprint $prompt}
 
     if $default_not { [no yes] } else { [yes no] }
