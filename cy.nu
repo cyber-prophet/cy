@@ -3870,12 +3870,12 @@ def open_cy_config_toml [] {
 }
 
 def make_default_folders_fn [] {
-    mkdir (cy-path temp)
+    mkdir (cy-path temp ipfs_upload)
+    mkdir (cy-path mylinks)
     mkdir (cy-path backups)
     mkdir (cy-path config)
     mkdir (cy-path graph particles safe)
     mkdir (cy-path export)
-    mkdir (cy-path gephi)
     mkdir (cy-path cache search)
     mkdir (cy-path cache queue_cids_to_download)
     mkdir (cy-path cache queue_cids_dead)
