@@ -2527,7 +2527,7 @@ export def 'query-current-height' [
 export def 'query-rank-karma' [
     neuron?: string
 ] {
-    let $address = $neuron | default $env.cy.address
+    let $address = if $neuron == null {$env.cy.address} else {$neuron}
     ber query rank karma $address
     | default 0 karma
     | into int karma
