@@ -3862,6 +3862,8 @@ def open_cy_config_toml [] {
             'ipfs-download-from': 'gateway'
             'ipfs-storage': 'cybernode'
             'exec': 'cyber'
+            'rpc-address': 'https://rpc.bostrom.cybernode.ai:443'
+            'chain-id': 'bostrom'
         }
         | save $config_path
     }
