@@ -3965,7 +3965,8 @@ def 'backup-and-echo' [
     let $backups_path = (cy-path backups $'(now-fn)($path | path basename)')
 
     if not ( $path | path exists ) {
-        error make {msg: ( cprint --echo $'*($path)* does not exist' )}
+        cprint $'*($path)* does not exist'
+        return $path
     }
 
     if $mv {
