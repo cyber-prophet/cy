@@ -2545,7 +2545,7 @@ export def 'cache-clean-cids-queue' [
         try {
             mv $i $files_dead
         } catch {
-            open $i | save -a (cy-path cache queue_cids_dead/ ($i | path basename))
+            open $i | save -a (cy-path cache queue_cids_dead ($i | path basename))
             rm $i
         }
     }
