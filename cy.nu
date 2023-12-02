@@ -562,7 +562,7 @@ def test-tmps [] {
 # Add the same text particle into the 'from' or 'to' column of the temp cyberlinks table
 #
 # > [[from_text, to_text]; ['cyber-prophet' null] ['tweet' 'cy is cool!']]
-# | cy links-pin-columns | cy links-link-all 'master' --column 'to' --non_empty | to yaml
+# | cy links-pin-columns | cy links-link-all 'master' --column 'to' --empty | to yaml
 # - from_text: cyber-prophet
 #   to_text: master
 #   from: QmXFUupJCSfydJZ85HQHD8tU1L7CZFErbRdMTBxkAmBJaD
@@ -576,25 +576,24 @@ export def 'links-link-all' [
     --dont_replace (-D)     # don't replace the temp cyberlinks table, just output results
     --keep_original         # append results to original links
     --column (-c): string = 'from'  # a column to use for values ('from' or 'to'). 'from' is default
-    --empty             # fill empty cells only
+    --empty                 # fill cids in empty cells only
 ]: [nothing -> table, table -> table] {
     let $links = (inlinks-or-links)
+    let $cid = (pin-text $text)
 
     $links
     | if $empty {
         each {
             if ( $in | get $column -i | is-empty ) {
-                upsert $column (pin-text $text)
+                upsert $column $cid
                 | upsert $'($column)_text' $text
             } else { }
         }
     } else {
-        upsert $column (pin-text $text)
+        upsert $column $cid
         | upsert $'($column)_text' $text
     }
-    | if $keep_original {
-        prepend $links
-    } else {}
+    | if $keep_original { prepend $links } else {}
     | if $dont_replace {} else { links-replace }
 }
 
