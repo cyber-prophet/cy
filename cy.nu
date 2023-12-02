@@ -667,7 +667,11 @@ export def 'links-pin-columns-2' [
     $lookup | each {|i| $i.item | save -r ($temp_ipfs_folder | path join $i.index)}
 
     let $hash_associations = (
-        ipfs add -rn $temp_ipfs_folder
+        if (confirm $'Pin files to local kubo? If `no` is chosen only hashes of files will be calculated.') {
+            ipfs add -r $temp_ipfs_folder
+        } else {
+            ipfs add -rn $temp_ipfs_folder
+        }
         | lines
         | drop
         | parse '{s} {cid} {path}'
@@ -676,22 +680,14 @@ export def 'links-pin-columns-2' [
         | join -l $lookup index
     );
 
-    if (confirm $'Save cids to ($env.cy.ipfs-files-folder)?') {
-        $hash_associations
-        | each {|i| $i.item | save -f ($env.cy.ipfs-files-folder | path join $'($i.cid).md')}
-    }
-
-    if (confirm $'Pin files to local kubo?') {
-        ipfs add -r $temp_ipfs_folder -Q | null
-    }
+    $hash_associations
+    | each {|i| $i.item | save -f ($env.cy.ipfs-files-folder | path join $'($i.cid).md')}
 
     $links
     | reject -i from to
     | join -l ($hash_associations | select cid item | rename from from_text) from_text
     | join -l ($hash_associations | select cid item | rename to to_text) to_text
-    | if not $dont_replace {
-        links-replace
-    } else {}
+    | if $dont_replace {} else { links-replace }
 }
 
 # Check if any of the links in the links table exist
