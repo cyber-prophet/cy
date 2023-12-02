@@ -574,10 +574,13 @@ def test-tmps [] {
 export def 'links-link-all' [
     text: string            # a text to upload to ipfs
     --dont_replace (-D)     # don't replace the temp cyberlinks table, just output results
+    --keep_original         # append results to original links
     --column (-c): string = 'from'  # a column to use for values ('from' or 'to'). 'from' is default
     --empty             # fill empty cells only
 ]: [nothing -> table, table -> table] {
-    inlinks-or-links
+    let $links = (inlinks-or-links)
+
+    $links
     | if $empty {
         each {
             if ( $in | get $column -i | is-empty ) {
@@ -589,6 +592,9 @@ export def 'links-link-all' [
         upsert $column (pin-text $text)
         | upsert $'($column)_text' $text
     }
+    | if $keep_original {
+        prepend $links
+    } else {}
     | if $dont_replace {} else { links-replace }
 }
 
