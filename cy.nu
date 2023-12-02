@@ -637,18 +637,21 @@ export def 'links-pin-columns' [
 
 export def 'links-pin-columns-2' [
     --dont_replace (-D) # Don't replace the links cyberlinks table
-    --threads: int = 3  # A number of threads to use to pin particles
 ]: [nothing -> table, table -> table] {
     let $links = (inlinks-or-links)
 
     let $temp_ipfs_folder = (cy-path temp ipfs_upload | path join (now-fn));
     mkdir $temp_ipfs_folder
 
-    let $links = (links-view)
-
     let $lookup = (
-        $links.from_text?
-        | append $links.to_text?
+        $links
+        | get from_text? to_text?
+        | flatten
+        | where $it != null
+        | if $in == [] {
+            cprint 'No columns *"from_text"* or *"to_text"* found. Add at least one of them.' ;
+            return
+        } else {}
         | uniq
         | enumerate
         | into string index
@@ -658,7 +661,7 @@ export def 'links-pin-columns-2' [
     $lookup | each {|i| $i.item | save -r ($temp_ipfs_folder | path join $i.index)}
 
     let $hash_associations = (
-        if (confirm $'Pin files to local kubo? If `no` is chosen only hashes of files will be calculated.') {
+        if (confirm $'Pin files to local kubo? If `no` only hashes will be calculated.') {
             ipfs add -r $temp_ipfs_folder
         } else {
             ipfs add -rn $temp_ipfs_folder
@@ -666,9 +669,9 @@ export def 'links-pin-columns-2' [
         | lines
         | drop
         | parse '{s} {cid} {path}'
-        | reject s
         | upsert index {|i| $i.path | path basename}
         | join -l $lookup index
+        | select cid item
     );
 
     $hash_associations
@@ -676,8 +679,8 @@ export def 'links-pin-columns-2' [
 
     $links
     | reject -i from to
-    | join -l ($hash_associations | select cid item | rename from from_text) from_text
-    | join -l ($hash_associations | select cid item | rename to to_text) to_text
+    | join -l ($hash_associations | rename from from_text) from_text
+    | join -l ($hash_associations | rename to to_text) to_text
     | if $dont_replace {} else { links-replace }
 }
 
