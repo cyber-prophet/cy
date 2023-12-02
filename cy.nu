@@ -3845,7 +3845,7 @@ export def 'help-cy' [
 ] {
     let $text = (
         open (cy-path cy.nu) --raw
-        | parse -r "(\n(# )(?<desc>.*?)(?:\n#[^\n]*)*\nexport (def|def.env) '(?<command>.*)')"
+        | parse -r "(\n(# )(?<desc>.*?)(?:\n#[^\n]*)*\nexport (def|def --env) '(?<command>.*)')"
         | select command desc
         | upsert command {|row index| ('cy ' + $row.command)}
     )
