@@ -579,22 +579,21 @@ export def 'links-link-all' [
     --empty             # fill empty cells only
 ]: [nothing -> table, table -> table] {
     let $links = (inlinks-or-links)
+    let $cid = (pin-text $text)
 
     $links
     | if $empty {
         each {
             if ( $in | get $column -i | is-empty ) {
-                upsert $column (pin-text $text)
+                upsert $column $cid
                 | upsert $'($column)_text' $text
             } else { }
         }
     } else {
-        upsert $column (pin-text $text)
+        upsert $column $cid
         | upsert $'($column)_text' $text
     }
-    | if $keep_original {
-        prepend $links
-    } else {}
+    | if $keep_original { prepend $links } else {}
     | if $dont_replace {} else { links-replace }
 }
 
