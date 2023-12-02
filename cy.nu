@@ -640,6 +640,60 @@ export def 'links-pin-columns' [
     | if $dont_replace {} else { links-replace }
 }
 
+export def 'links-pin-columns-2' [
+    --dont_replace (-D) # Don't replace the links cyberlinks table
+    --threads: int = 3  # A number of threads to use to pin particles
+]: [nothing -> table, table -> table] {
+    let $links = (
+        $in
+        | if $in == null {links-view -q} else {}
+        | fill non-exist -v null
+    )
+
+    let $temp_ipfs_folder = (cy-path temp ipfs_upload | path join (now-fn));
+    mkdir $temp_ipfs_folder
+
+    let $links = (links-view)
+
+    let $lookup = (
+        $links.from_text?
+        | append $links.to_text?
+        | uniq
+        | enumerate
+        | into string index
+    )
+
+    # Saving ininitial text files
+    $lookup | each {|i| $i.item | save -r ($temp_ipfs_folder | path join $i.index)}
+
+    let $hash_associations = (
+        ipfs add -rn $temp_ipfs_folder
+        | lines
+        | drop
+        | parse '{s} {cid} {path}'
+        | reject s
+        | upsert index {|i| $i.path | path basename}
+        | join -l $lookup index
+    );
+
+    if (confirm $'Save cids to ($env.cy.ipfs-files-folder)?') {
+        $hash_associations
+        | each {|i| $i.item | save -f ($env.cy.ipfs-files-folder | path join $'($i.cid).md')}
+    }
+
+    if (confirm $'Pin files to local kubo?') {
+        ipfs add -r $temp_ipfs_folder -Q | null
+    }
+
+    $links
+    | reject -i from to
+    | join -l ($hash_associations | select cid item | rename from from_text) from_text
+    | join -l ($hash_associations | select cid item | rename to to_text) to_text
+    | if not $dont_replace {
+        links-replace
+    } else {}
+}
+
 # Check if any of the links in the links table exist
 #
 # > let $from = 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufA'
