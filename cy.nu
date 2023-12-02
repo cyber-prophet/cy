@@ -577,8 +577,7 @@ export def 'links-link-all' [
     --column (-c): string = 'from'  # a column to use for values ('from' or 'to'). 'from' is default
     --empty             # fill empty cells only
 ]: [nothing -> table, table -> table] {
-    $in
-    | default (links-view -q)
+    inlinks-or-links
     | if $empty {
         each {
             if ( $in | get $column -i | is-empty ) {
@@ -609,11 +608,7 @@ export def 'links-pin-columns' [
     --dont_replace (-D) # Don't replace the links cyberlinks table
     --threads: int = 3  # A number of threads to use to pin particles
 ]: [nothing -> table, table -> table] {
-    let $links = (
-        $in
-        | if $in == null {links-view -q} else {}
-        | fill non-exist -v null
-    )
+    let $links = (inlinks-or-links)
 
     let $dict = (
         $links.from_text?
@@ -644,11 +639,7 @@ export def 'links-pin-columns-2' [
     --dont_replace (-D) # Don't replace the links cyberlinks table
     --threads: int = 3  # A number of threads to use to pin particles
 ]: [nothing -> table, table -> table] {
-    let $links = (
-        $in
-        | if $in == null {links-view -q} else {}
-        | fill non-exist -v null
-    )
+    let $links = (inlinks-or-links)
 
     let $temp_ipfs_folder = (cy-path temp ipfs_upload | path join (now-fn));
     mkdir $temp_ipfs_folder
@@ -899,6 +890,12 @@ export def 'links-publish' [] {
     | $in // 100
     | seq 0 $in
     | each {links-send-tx}
+}
+
+def 'inlinks-or-links' []: [nothing -> table, table -> table] {
+    $in
+    | if $in == null {links-view -q} else {}
+    | fill non-exist -v null
 }
 
 # Copy a table from the pipe into the clipboard (in tsv format)
