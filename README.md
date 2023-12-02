@@ -278,7 +278,7 @@ Usage:
   ==========================================================
 
 Flags:
-  --source <CompleterWrapper(String, 2014)> -  (default: 'forismatic.com')
+  --source (default: 'forismatic.com')
 
 Parameters:
   n <int>: Number of links to append (optional, default: 1)
@@ -501,7 +501,7 @@ Usage:
   > update-cy {flags}
 
 Flags:
-  --branch <CompleterWrapper(String, 2018)> -  (default: 'dev')
+  --branch (default: 'dev')
 
 Input/output types:
   ╭input┬output╮
@@ -907,7 +907,7 @@ Usage:
 Flags:
   -p, --page <Int> -  (default: 0)
   -r, --results_per_page <Int> -  (default: 10)
-  --search_type <CompleterWrapper(String, 2015)> -  (default: 'search-with-backlinks')
+  --search_type (default: 'search-with-backlinks')
 
 Parameters:
   query <any>:
@@ -1382,3 +1382,4 @@ Input/output types:
   ╰─────┴──────╯
 
 ```
+
