@@ -203,19 +203,19 @@ def test_link_texts [] {
 #   from: QmQLd9KEkw5eLKfr9VwfthiWbuqa9LXhRchWqD4kRPPWEf
 #   to: QmS4ejbuxt7JvN3oYyX85yVfsgRHMPrVzgxukXMvToK5td
 export def 'link-chain' [
-    ...rest: string
-]: [nothing -> table] {
-    let $count = ($rest | length)
+    ...rest:
+]: [nothing -> table, list -> table] {
+    let $elements = ($in | default $rest | flatten)
+    let $count = ($elements | length)
     if $count < 2 {
         return $'($count) particles were submitted. We need 2 or more'
     }
 
-    (
-        0..($count - 2) # The number of cid-paris to iterate through
-        | each {
-            |i| link-texts ($rest | get $i) ($rest | get ($i + 1))
-        }
-    )
+    0..($count - 2) # The number of cid-paris to iterate through
+    | each {
+        |i| {from_text: ($elements | get $i), to_text: ($elements | get ($i + 1)) }
+    }
+    | links-pin-columns-2
 }
 
 # Pin files from the current folder to the local node and append their cyberlinks to the temp table
