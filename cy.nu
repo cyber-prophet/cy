@@ -642,6 +642,7 @@ export def 'links-pin-columns' [
 
 export def 'links-pin-columns-2' [
     --dont_replace (-D) # Don't replace the links cyberlinks table
+    --pin_to_local_ipfs       # Pin to local kubo
 ]: [nothing -> table, table -> table] {
     let $links = (inlinks-or-links)
 
@@ -666,7 +667,7 @@ export def 'links-pin-columns-2' [
     $lookup | each {|i| $i.item | save -r ($temp_ipfs_folder | path join $i.index)}
 
     let $hash_associations = (
-        if (confirm $'Pin files to local kubo? If `no` only hashes will be calculated.') {
+        if ($pin_to_local_ipfs) or (confirm $'Pin files to local kubo? If `no` only hashes will be calculated.') {
             ipfs add -r $temp_ipfs_folder
         } else {
             ipfs add -rn $temp_ipfs_folder
@@ -683,6 +684,8 @@ export def 'links-pin-columns-2' [
     | each {|i| $i.item | save -f ($env.cy.ipfs-files-folder | path join $'($i.cid).md')}
 
     $links
+    | if ($in | columns | 'from_text' not-in $in) {upsert from_text ''} else {}
+    | if ($in | columns | 'to_text' not-in $in) {upsert to_text ''} else {}
     | reject -i from to
     | join -l ($hash_associations | rename from from_text) from_text
     | join -l ($hash_associations | rename to to_text) to_text
