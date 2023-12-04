@@ -720,11 +720,13 @@ def 'link-exist' [
 export def 'links-remove-existed' []: [nothing -> table, nothing -> nothing] {
     let $links_with_status = (
         links-view -q
+        | merge ($in | length | seq 0 $in | wrap index)
         | par-each { |i| $i
             | upsert link_exist {
                 |row| (link-exist  $row.from $row.to $env.cy.address)
             }
         }
+        | sort-by index
     )
 
     let $existed_links = (
