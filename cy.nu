@@ -508,6 +508,29 @@ export def 'links-replace' [
     if (not $quiet) { links-view -q }
 }
 
+# Swap columns from and to
+export def 'links-swap-from-to' [
+    --dont_replace (-D)     # don't replace the temp cyberlinks table, just output results
+    --keep_original         # append results to original links
+]: [nothing -> table, table -> table] {
+    let $input = (inlinks-or-links)
+
+    $input
+    | rename --block {
+        if ($in | str starts-with 'from') {
+            str replace 'from' 'to'
+        } else {
+            str replace 'to' 'from'
+        }
+    }
+    | if $keep_original {
+        prepend $input
+    } else { }
+    | if $dont_replace { } else {
+        links-replace
+    }
+}
+
 # Empty the temp cyberlinks table
 export def 'links-clear' []: [nothing -> nothing] {
     $'from_text,to_text,from,to,timestamp(char nl)'
