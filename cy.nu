@@ -692,6 +692,31 @@ export def 'links-pin-columns-2' [
     | if $dont_replace {} else { links-replace }
 }
 
+export def 'pin-file-or-folder-to-cybernode' [
+    $path: path
+] {
+    $env.cy.ipfs-storage = 'cybernode'
+
+    let $paths = (
+        match ($path | path type) {
+            'dir' => {glob ($path | path join '*')}
+            'file' => {[$path]}
+            _ => {error make {msg: $'($path) is not a dir or a file'}}
+        }
+    )
+
+    let $paths_length = $paths | length
+
+    $paths
+    | enumerate
+    | par-each {|i|
+        open -r $i.item | pin-text;
+        print -n $'(char cr)($i.index)/($paths_length)'
+    }
+
+    print ''
+}
+
 # Check if any of the links in the links table exist
 #
 # > let $from = 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufA'
