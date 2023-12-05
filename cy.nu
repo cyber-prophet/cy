@@ -717,13 +717,22 @@ def 'link-exist' [
 }
 
 # Remove existing cyberlinks from the temp cyberlinks table
-export def 'links-remove-existed' []: [nothing -> table, nothing -> nothing] {
+export def 'links-remove-existed' [
+    --all_links
+]: [nothing -> table, nothing -> nothing] {
     let $links_with_status = (
         links-view -q
+        | if $all_links {} else {
+            print-and-pass {|l|
+                if ($l | length | $in > 100) {
+                    cprint 'Only first 100 links are to be checked. Add the *--all_links* flag to check them all.'
+                }
+            }
+            | first 100 }
         | merge ($in | length | seq 0 $in | wrap index)
         | par-each { |i| $i
             | upsert link_exist {
-                |row| (link-exist  $row.from $row.to $env.cy.address)
+                |row| (link-exist $row.from $row.to $env.cy.address)
             }
         }
         | sort-by index
@@ -731,18 +740,21 @@ export def 'links-remove-existed' []: [nothing -> table, nothing -> nothing] {
 
     let $existed_links = (
         $links_with_status
-        | filter {|x| $x.link_exist}
+        | where link_exist?
     )
 
     let $existed_links_count = ($existed_links | length)
 
     if $existed_links_count > 0 {
-
         cprint $'*($existed_links_count) cyberlinks* was/were already created by *($env.cy.address)*'
-        ($existed_links | select from_text from to_text to | each {|i| print $i})
+
+        ($existed_links | select -i from_text from to_text to | each {|i| print $i})
+
         cprint -c red -a 2 'So they were removed from the temp table!'
 
-        $links_with_status | filter {|x| not $x.link_exist} | links-replace
+        $links_with_status
+        | where link_exist? != true
+        | links-replace
     } else {
         cprint 'There are no cyberlinks in the temp table for the current address exist the cybergraph'
     }
