@@ -631,10 +631,10 @@ export def 'links-pin-columns' [
     $links
     | each {|i| $i
         | if $i.from_text? != null {
-            upsert from ( $dict | get -i $i.from_text )
+            upsert from ( $dict | get -is $i.from_text )
         } else {}
         | if $i.to_text? != null {
-            upsert to ( $dict | get -i $i.to_text )
+            upsert to ( $dict | get -is $i.to_text )
         } else {}
     }
     | if $dont_replace {} else { links-replace }
