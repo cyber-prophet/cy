@@ -843,6 +843,24 @@ def 'transaction-template' [
     }, signatures: [] }
 }
 
+def 'tx-message-investmint' [
+    neuron: string
+    --h_amount: int
+    --resource: string
+    --length: int
+] {
+    {
+        @type: "/cyber.resources.v1beta1.MsgInvestmint",
+        neuron: $neuron,
+        amount: {
+            denom: hydrogen,
+            amount: ($h_amount | int string)
+        },
+        resource: $resource,
+        length: ($length | into string)
+    }
+}
+
 def 'tx-message-links' [
     $neuron
     $links_table: table<from: string, to: string> # [[from, to]; ["", ""]]
