@@ -887,6 +887,32 @@ def 'tx-create' [
     }
 }
 
+def 'tx-sign' [
+    $unsigned_tx_path: path
+] {
+    let $out_path = (cy-path temp tx-signed.json)
+    let $params = (
+        [
+            --from $env.cy.address
+            --chain-id $env.cy.chain-id
+            --node $env.cy.rpc-address
+            --output-document $out_path
+        ]
+        | if $env.cy.keyring-backend? == 'test' {
+            append ['--keyring-backend' 'test']
+        } else {}
+    )
+
+    (
+        ^($env.cy.exec) tx sign $unsigned_tx_path $params
+        | complete
+        | if ($in.exit_code != 0) {
+            error make {msg: 'Error signing the transaction!'}
+        } else {
+            $out_path
+        }
+    )
+}
 def 'tx-sign-and-broadcast' [] {
     let $params = (
         [
