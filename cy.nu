@@ -809,7 +809,9 @@ export def 'links-remove-existed' [
 }
 
 # Create a custom unsigned cyberlinks transaction
-def 'tx-json-create-from-cybelinks' [] {
+def 'tx-json-create-from-cyberlinks' [
+    $links: table
+] {
     let $links = ( $in | select from to | uniq )
 
     tx-message-links $env.cy.address $links
@@ -936,7 +938,7 @@ def 'links-send-tx' [
 
     let $links = $links_param | default (links-view -q | first 100)
 
-    $links | tx-json-create-from-cybelinks
+    tx-json-create-from-cyberlinks $links
 
     let $response = (
         tx-sign-and-broadcast
