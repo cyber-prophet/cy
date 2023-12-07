@@ -903,15 +903,9 @@ def 'tx-sign' [
         } else {}
     )
 
-    (
-        ^($env.cy.exec) tx sign $unsigned_tx_path $params
-        | complete
-        | if ($in.exit_code != 0) {
-            error make {msg: 'Error signing the transaction!'}
-        } else {
-            $out_path
-        }
-    )
+    ^($env.cy.exec) tx sign $unsigned_tx_path $params
+
+    $out_path
 }
 
 def 'tx-broadcast' [
