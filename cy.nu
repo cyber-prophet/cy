@@ -913,6 +913,25 @@ def 'tx-sign' [
         }
     )
 }
+
+def 'tx-broadcast' [
+    $signed_tx_path
+] {
+    (
+        ^($env.cy.exec) tx broadcast $signed_tx_path
+        --broadcast-mode block
+        --output json
+        --node $env.cy.rpc-address
+        | complete
+        | if ($in.exit_code != 0 ) {
+            error make { msg: 'exit code is not 0' }
+        } else {
+            get stdout | from json
+        }
+        | select raw_log code txhash
+    )
+}
+
 def 'tx-sign-and-broadcast' [] {
     let $params = (
         [
