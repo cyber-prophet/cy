@@ -936,8 +936,6 @@ def 'links-send-tx' [
 
     let $links = $links_param | default (links-view -q | first 100)
 
-    let $links_count = ($links | length)
-
     $links | tx-json-create-from-cybelinks
 
     let $response = (
@@ -955,7 +953,7 @@ def 'links-send-tx' [
             links-view -q | skip 100 | links-replace
         }
 
-        {'cy': $'($links_count) cyberlinks should be successfully sent'}
+        {'cy': $'($links | length) cyberlinks should be successfully sent'}
         | merge $response
         | select cy code txhash
 
