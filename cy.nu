@@ -812,11 +812,14 @@ export def 'links-remove-existed' [
 def 'tx-json-create-from-cyberlinks' [
     $links: table
 ] {
-    let $links = ( $in | select from to | uniq )
+    let $links2 = ( $links | select from to | uniq )
+    let $path = (cy-path temp tx-unsigned.json)
 
-    tx-message-links $env.cy.address $links
+    tx-message-links $env.cy.address $links2
     | tx-create $in
-    | save (cy-path temp tx-unsigned.json) --force
+    | save $path --force;
+
+    $path
 }
 
 def 'tx-message-investmint' [
