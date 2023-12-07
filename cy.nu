@@ -810,26 +810,10 @@ export def 'links-remove-existed' [
 
 # Create a custom unsigned cyberlinks transaction
 def 'tx-json-create-from-cybelinks' [] {
-    let $links = (
-        $in
-        | select from to
-        | uniq
-    )
+    let $links = ( $in | select from to | uniq )
 
-    let $transaction_body = (
-        '{"body":{"messages":[
-        {"@type":"/cyber.graph.v1beta1.MsgCyberlink",
-        "neuron":"","links":[{"from":"","to":""}]}
-        ],"memo":"cy","timeout_height":"0",
-        "extension_options":[],"non_critical_extension_options":[]},
-        "auth_info":{"signer_infos":[],"fee":
-        {"amount":[],"gas_limit":"23456789","payer":"","granter":""}},
-        "signatures":[]}' | from json
-    )
-
-    $transaction_body
-    | upsert body.messages.neuron $env.cy.address
-    | upsert body.messages.links $links
+    tx-message-links $env.cy.address $links
+    | tx-create $in
     | save (cy-path temp tx-unsigned.json) --force
 }
 
