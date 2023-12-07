@@ -986,11 +986,10 @@ def 'links-send-tx' [
 
     let $links = $links_param | default (links-view -q | first 100)
 
-    tx-json-create-from-cyberlinks $links
-
     let $response = (
-        tx-sign-and-broadcast
-        | select raw_log code txhash
+        tx-json-create-from-cyberlinks $links
+        | tx-sign $in
+        | tx-broadcast $in
     )
 
     let $filename = (cy-path mylinks _cyberlinks_archive.csv)
