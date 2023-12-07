@@ -868,6 +868,44 @@ def 'tx-message-links' [
     links: $links_table }
 }
 
+def 'tx-create' [
+    message?
+    --memo: string = 'cy'
+    --gas = 23456789
+    --fee = 2000
+    --timeout_height = 0
+] {
+    let msg = (
+        ($message | describe)
+        | if ($in =~ '^list') {
+            $message
+        } else if ($in =~ '^record') {
+            [$message]
+        } else {
+            error make {msg: $'Message should be record or list. Received ($in)'}
+        }
+    )
+
+    {
+        body: {
+            messages: $msg,
+            memo: $memo,
+            timeout_height: ($timeout_height | into string),
+            extension_options: [],
+            non_critical_extension_options: []
+        },
+        auth_info: {
+            signer_infos: [],
+            fee: {
+                amount: [ {denom: boot, amount: ($fee | into string)} ],
+                gas_limit: ($gas | into string),
+                payer: "",
+                granter: ""
+            }
+        }, signatures: []
+    }
+}
+
 def 'tx-sign-and-broadcast' [] {
     let $params = (
         [
