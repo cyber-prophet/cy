@@ -817,32 +817,6 @@ def 'tx-json-create-from-cybelinks' [] {
     | save (cy-path temp tx-unsigned.json) --force
 }
 
-def 'transaction-template' [
-    --memo: string = 'cy'
-    --timeout_height: string = '0'
-    --gas_limit: string = '234567890'
-    --payer: string = ''
-    --granter: string = ''
-]: table -> record {
-    let $messages = $in
-
-    { body: {
-        messages: $messages,
-        memo: $memo,
-        timeout_height: $timeout_height,
-        extension_options: [],
-        non_critical_extension_options: []
-    }, auth_info: {
-        signer_infos: [],
-        fee: {
-            amount: [],
-            gas_limit: $gas_limit,
-            payer: $payer,
-            granter: $granter
-        }
-    }, signatures: [] }
-}
-
 def 'tx-message-investmint' [
     neuron: string
     --h_amount: int
@@ -3442,51 +3416,6 @@ export def 'tokens-investmint-wizzard' [
         $trans_unsigned | save -rf $unsigned
         cyber tx sign $unsigned --from $address --output-document $signed --yes (default-node-params)
         cyber tx broadcast $signed (default-node-params) | from json
-    }
-}
-
-export def 'investmint-message' [
-    --neuron: string
-    --h_amount: int
-    --resource: string
-    --length: int
-] {
-    {
-        @type: "/cyber.resources.v1beta1.MsgInvestmint",
-        neuron: $neuron,
-        amount: {
-            denom: hydrogen,
-            amount: ($h_amount | int string)
-        },
-        resource: $resource,
-        length: ($length | into string)
-    }
-}
-
-export def 'create-transaction' [
-    message: record
-    --memo: string = 'cy'
-    --gas = 200000
-    --fee = 2000
-    --timeout_height = 0
-] {
-    {
-        body: {
-            messages: [$message],
-            memo: $memo,
-            timeout_height: ($timeout_height | into string),
-            extension_options: [],
-            non_critical_extension_options: []
-        },
-        auth_info: {
-            signer_infos: [],
-            fee: {
-                amount: [[denom, amount]; [boot, ($fee | into string)]],
-                gas_limit: ($gas | into string),
-                payer: "",
-                granter: ""
-            }
-        }, signatures: []
     }
 }
 
