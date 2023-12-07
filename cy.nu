@@ -696,7 +696,7 @@ export def 'links-pin-columns-2' [
             ipfs add -rn $temp_ipfs_folder
         }
         | lines
-        | drop
+        | drop # remove the root folder's cid
         | parse '{s} {cid} {path}'
         | upsert index {|i| $i.path | path basename}
         | join -l $lookup index
@@ -778,7 +778,7 @@ export def 'links-remove-existed' [
             }
             | first 100 }
         | merge ($in | length | seq 0 $in | wrap index)
-        | par-each { |i| $i
+        | par-each {|i| $i
             | upsert link_exist {
                 |row| (link-exist $row.from $row.to $env.cy.address)
             }
@@ -3419,13 +3419,13 @@ export def 'create-transaction' [
     --memo: string = 'cy'
     --gas = 200000
     --fee = 2000
-    --timeout_hight = 0
+    --timeout_height = 0
 ] {
     {
         body: {
             messages: [$message],
             memo: $memo,
-            timeout_height: ($timeout_hight | into string),
+            timeout_height: ($timeout_height | into string),
             extension_options: [],
             non_critical_extension_options: []
         },
