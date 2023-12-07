@@ -859,6 +859,15 @@ def 'transaction-template' [
     }, signatures: [] }
 }
 
+def 'tx-message-links' [
+    $neuron
+    $links_table: table<from: string, to: string> # [[from, to]; ["", ""]]
+] {
+    { @type: "/cyber.graph.v1beta1.MsgCyberlink",
+    neuron: $neuron,
+    links: $links_table }
+}
+
 def 'tx-sign-and-broadcast' [] {
     let $params = (
         [
