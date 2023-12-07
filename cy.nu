@@ -920,9 +920,8 @@ def 'tx-broadcast' [
         | if ($in.exit_code != 0 ) {
             error make { msg: 'exit code is not 0' }
         } else {
-            get stdout | from json
+            get stdout | from json | select raw_log code txhash
         }
-        | select raw_log code txhash
     )
 }
 
