@@ -3989,20 +3989,19 @@ def open_cy_config_toml [] {
 }
 
 def make_default_folders_fn [] {
-    mkdir (cy-path temp ipfs_upload)
-    mkdir (cy-path mylinks)
     mkdir (cy-path backups)
-    mkdir (cy-path config)
-    mkdir (cy-path graph particles safe)
-    mkdir (cy-path export)
-    mkdir (cy-path cache search)
-    mkdir (cy-path cache queue_cids_to_download)
-    mkdir (cy-path cache queue_cids_dead)
-    mkdir (cy-path cache queue_tasks_to_run)
-    mkdir (cy-path cache queue_tasks_failed)
     mkdir (cy-path cache cli_out)
     mkdir (cy-path cache jsonl)
+    mkdir (cy-path cache queue_cids_dead)
+    mkdir (cy-path cache queue_cids_to_download)
+    mkdir (cy-path cache queue_tasks_failed)
+    mkdir (cy-path cache queue_tasks_to_run)
+    mkdir (cy-path cache search)
+    mkdir (cy-path config)
+    mkdir (cy-path export)
+    mkdir (cy-path graph particles safe)
     mkdir (cy-path mylinks)
+    mkdir (cy-path temp ipfs_upload)
 
     touch (cy-path graph update.toml)
 
