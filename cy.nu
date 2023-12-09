@@ -925,41 +925,6 @@ def 'tx-broadcast' [
     )
 }
 
-def 'tx-sign-and-broadcast' [] {
-    let $params = (
-        [
-            --from $env.cy.address
-            --chain-id $env.cy.chain-id
-            --node $env.cy.rpc-address
-            --output-document (cy-path temp tx-signed.json)
-        ]
-        | if $env.cy.keyring-backend? == 'test' {
-            append ['--keyring-backend' 'test']
-        } else {}
-    )
-
-    (
-        ^($env.cy.exec) tx sign (cy-path temp tx-unsigned.json) $params
-        | complete
-        | if ($in.exit_code != 0) {
-            error make {msg: 'Error signing the transaction!'}
-        }
-    )
-
-    (
-        ^($env.cy.exec) tx broadcast (cy-path temp tx-signed.json)
-        --broadcast-mode block
-        --output json
-        --node $env.cy.rpc-address
-        | complete
-        | if ($in.exit_code != 0 ) {
-            error make { msg: 'exit code is not 0' }
-        } else {
-            get stdout | from json
-        }
-    )
-}
-
 # Create a tx from the piped in or temp cyberlinks table, sign and broadcast it
 #
 # > cy links-send-tx | to yaml
