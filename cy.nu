@@ -3385,12 +3385,11 @@ export def 'tokens-investmint-wizzard' [
         tokens-investmint-status-table $address
         | print-and-pass
         | window 2 --stride 2
-        | each {|i|
-            $i | reduce -f '' {|a acc|
-                $acc + $'($a.amount)($a.denom) '
-            }
-        | wrap tokens
-        | upsert release_time $i.release_time.0}
+        | each {|i| $i
+            | reduce -f '' {|a acc| $acc + $'($a.amount)($a.denom) '}
+            | wrap tokens
+            | upsert release_time $i.release_time.0
+        }
     )
 
     $env.cy.ber-force-update = false
