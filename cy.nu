@@ -3174,6 +3174,21 @@ export def 'balances' [
     }
 }
 
+export def 'tokens-undelegations' [
+    $neuron?: string
+    --height: int = 0
+    --sum
+] {
+    let $address = $neuron | default $env.cy.address
+
+    ber query staking unbonding-delegations $address
+    | get unbonding_responses
+    | flatten --all
+    | get balance
+    | into int
+    | math sum
+}
+
 export def 'tokens-balance-all' [
     $neuron?: string
     --height: int = 0
