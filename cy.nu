@@ -3977,7 +3977,7 @@ def open_cy_config_toml [] {
             'path': ($nu.home-path | path join cy)
             'ipfs-files-folder': ($nu.home-path | path join cy graph particles safe)
             'ipfs-download-from': 'gateway'
-            'ipfs-storage': 'cybernode'
+            'ipfs-storage': 'both'
             'exec': 'cyber'
             'rpc-address': 'https://rpc.bostrom.cybernode.ai:443'
             'chain-id': 'bostrom'
