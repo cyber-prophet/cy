@@ -458,11 +458,11 @@ export def 'links-view' [
 ]: [nothing -> table] {
     let $filename = (current-links-csv-path)
     let $links = (
-        try {
-            open $filename
-            | if $no_timestamp { reject timestamp } else {}
-        } catch {
-            [[from]; [null]] | first 0
+        $filename
+        | if ($in | path exists) {
+            open | if $no_timestamp { reject timestamp } else {}
+        } else {
+            []
         }
     )
 
