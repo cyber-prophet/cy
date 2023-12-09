@@ -4224,20 +4224,13 @@ def 'fill non-exist' [
     tbl?
     --value_to_replace (-v): any = ''
 ] {
-    let $table = ($in | default $tbl)
+    mut $table = ($in | default $tbl)
 
-    let $cols = (
-        $table
-        | par-each {|i| $i | columns}
-        | flatten
-        | uniq
-        | reduce --fold {} {|i acc|
-            $acc
-            | merge {$i: $value_to_replace}
-        }
-    )
+    for column in ($table | columns) {
+        $table = ($table | default $value_to_replace $column)
+    }
 
-    $table | each {|i| $cols | merge $i}
+    $table
 }
 
 def 'path-exists-safe' [
