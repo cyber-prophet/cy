@@ -942,7 +942,7 @@ def 'links-send-tx' [
         error-make-cy '*$links_param* length is bigger than 100, use links-add'
     }
 
-    let $links = $links_param | default (links-view -q | first 100)
+    let $links = ($links_param | if $in == null {links-view -q | first 100} else {})
 
     let $response = (
         tx-json-create-from-cyberlinks $links
