@@ -2744,7 +2744,7 @@ export def 'tokens-pools-table-get' [
 
     $liquidity_pools
     | get pools
-    | par-each { |b| $b
+    | each {|b| $b
         | upsert balances {|i|
             tokens-balance-get --record $i.reserve_account_address
         }
