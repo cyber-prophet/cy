@@ -3750,6 +3750,7 @@ export def --wrapped 'ber' [
         | append ($sub_commands_and_args)
         | str join '_'
         | str replace -r '--node.*' ''
+        | str trim -c '_'
         | to-safe-filename --suffix '.json'
         | [$env.cy.path cache jsonl $in]
         | path join
@@ -3759,14 +3760,7 @@ export def --wrapped 'ber' [
 
     let $last_data = (
         if ($json_path | path exists) {
-            let $last_file = (open $json_path)
-
-            $last_file
-            | to json -r
-            | $'($in)(char nl)'
-            | save -a -r ($json_path | str replace '.json' '_arch.jsonl')
-
-            $last_file
+            open $json_path
         } else {
             {'update_time': 0}
         }
@@ -3787,7 +3781,8 @@ export def --wrapped 'ber' [
     }
 
     if $update {
-        request-save-output-exec-response $executable $sub_commands_and_args $json_path $error $quiet
+        (request-save-output-exec-response $executable $sub_commands_and_args $json_path $error $quiet
+            --last_data $last_data)
     } else {
         if ($freshness > $cache_validity_duration) {
             queue-task-add -o 2 (
@@ -3806,6 +3801,7 @@ def 'request-save-output-exec-response' [
     json_path: string
     error: bool = false
     quiet: bool = false
+    --last_data: = {'update_time': 0}
 ] {
     log debug $'($executable) ($sub_commands_and_args | str join " ")'
 
@@ -3823,7 +3819,7 @@ def 'request-save-output-exec-response' [
 
     $response
     | to json -r
-    | save -f -r $json_path;
+    | save -fr $json_path;
 
     if ('error' in ($response | columns)) {
         if $error {
@@ -3831,6 +3827,13 @@ def 'request-save-output-exec-response' [
         } else {
             return
         }
+    }
+
+    $last_data
+    | if ($in.update_time | into int) != 0 {
+        to json -r
+        | $'($in)(char nl)'
+        | save -ar ($json_path | str replace '.json' '_arch.jsonl')
     }
 
     if not $quiet {$response}
