@@ -3009,7 +3009,7 @@ export def 'tokens-price-in-h-naive' [
 
 export def 'tokens-in-h-naive' [
     --price # leave price in h column
-] {
+]: table -> table {
     join (tokens-price-in-h-naive) denom denom -l
     | default 0 price_in_h_naive
     | upsert amount_in_h_naive {
@@ -3112,7 +3112,7 @@ export def 'tokens-format' [
         reduce -f $input {|i acc| $acc | merge ($acc | number-col-format $i --decimals 0 --denom 'H')}
     } else {$input}
     # $input
-    | upsert denom_f {|i| if $i.denom_f? != null {$i.denom_f} else {$i.denom}}
+    | upsert denom_f {|i| if $i.denom_f? != '' {$i.denom_f} else {$i.denom}}
     | move denom_f --before ($in | columns | first)
     | move denom --after ($in | columns | last)
     | upsert base_denom {|i| $i.denom_f | split row '/' | get 0 }
