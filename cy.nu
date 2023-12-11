@@ -4194,6 +4194,19 @@ def 'nu-complete keys values' [] {
     cyber keys list --output json | from json | select name address | rename description value
 }
 
+def 'nu-complete-settings-variants' [] {
+    open (cy-path kickstart settings-variants.yaml)
+    | items {|key value| {value: $key, description: $value.description?}}
+}
+
+def 'nu-complete-settings-variant-options' [
+    context: string
+] {
+    open (cy-path kickstart settings-variants.yaml)
+    | get -i ($context | str trim | split row ' ' | last)
+    | get variants
+}
+
 def 'nicks-and-keynames' [] {
     ^$env.cy.exec keys list --output json
     | from json
