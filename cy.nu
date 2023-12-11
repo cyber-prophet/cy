@@ -2951,7 +2951,7 @@ export def 'tokens-ibc-denoms-table' [
         | merge ( caching-function query ibc-transfer denom-trace $"'($i.ibc_hash)'" | get denom_trace )
     }
     | reject ibc_hash
-    | upsert denom_f {
+    | upsert token {
         |i| $i.path         #denom compound
         | str replace -ra '[^-0-9]' ''
         | str trim -c '-'
@@ -2960,7 +2960,7 @@ export def 'tokens-ibc-denoms-table' [
     | sort-by path --natural
     | reject path amount
     | if $full {} else {
-        select denom denom_f
+        select denom token
     }
 }
 
@@ -3113,22 +3113,22 @@ export def 'tokens-format' [
         reduce -f $input {|i acc| $acc | merge ($acc | number-col-format $i --decimals 0 --denom 'H')}
     } else {$input}
     # $input
-    | upsert denom_f {|i| if $i.denom_f? != '' {$i.denom_f} else {$i.denom}}
-    | move denom_f --before ($in | columns | first)
+    | upsert token {|i| if $i.token? != '' {$i.token} else {$i.denom}}
+    | move token --before ($in | columns | first)
     | move denom --after ($in | columns | last)
-    | upsert base_denom {|i| $i.denom_f | split row '/' | get 0 }
+    | upsert base_denom {|i| $i.token | split row '/' | get 0 }
     | join -l (tokens-denoms-decimals-dict) base_denom base_denom
     | default 0 decimals
-    | upsert denom_f {
-        |i| $i.denom_f
-        | str replace $i.base_denom ($i.ticker? | default ($i.denom_f | str upcase))
+    | upsert token {
+        |i| $i.token
+        | str replace $i.base_denom ($i.ticker? | default ($i.token | str upcase))
     }
     | if amount in $columns {
         upsert amount_f {
             |i| $i.amount / (10 ** $i.decimals)
             | to-number-format --integers 9 --decimals 2
         }
-        | move amount_f --after denom_f
+        | move amount_f --after token
     } else {}
     | reject -i base_denom ticker decimals
     | if $clean {reject denom amount} else {}
