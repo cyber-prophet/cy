@@ -1048,7 +1048,7 @@ export def 'passport-get' [
     let $pcontract = 'bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel'
     let $params = ['--node' 'https://rpc.bostrom.cybernode.ai:443' '--output' 'json']
 
-    ber --exec 'cyber' --no_default_params query wasm contract-state smart $pcontract $json $params
+    caching-function --exec 'cyber' --no_default_params query wasm contract-state smart $pcontract $json $params
     | if $in == null {
         if not $quiet {
             cprint --before 1 --after 2 $'No passport for *($address_or_nick)* is found'
@@ -2197,7 +2197,7 @@ def 'search-sync' [
     print $'searching ($env.cy.exec) for ($cid)'
 
     (
-        ber query rank search $cid $page 10
+        caching-function query rank search $cid $page 10
         | get result
         | upsert particle {
             |i| let $particle = (
@@ -2227,7 +2227,7 @@ def 'search-with-backlinks' [
     def search_or_back_request [
         type: string
     ] {
-        ber query rank $type $cid $page $results_per_page
+        caching-function query rank $type $cid $page $results_per_page
         | get -i result
         | if $in == null {
             null
@@ -2292,7 +2292,7 @@ export def search-walk [
     let $cid = (pin-text $query --only_hash)
 
     def serp [$cid: string, page: int] {
-        ber query rank search $cid $page $results_per_page --cache_validity_duration $duration
+        caching-function query rank search $cid $page $results_per_page --cache_validity_duration $duration
         | upsert page $page
     }
 
@@ -2677,7 +2677,7 @@ export def 'query-rank-karma' [
     neuron?: string
 ] {
     let $address = if $neuron == null {$env.cy.address} else {$neuron}
-    ber query rank karma $address
+    caching-function query rank karma $address
     | default 0 karma
     | into int karma
 }
@@ -2704,7 +2704,7 @@ export def 'tokens-balance-get' [
         return null
     }
 
-    ber query bank balances $address [--height $height]
+    caching-function query bank balances $address [--height $height]
     | get balances -i
     | if $in == null {
         return
@@ -2727,7 +2727,7 @@ def 'token-dummy-balance' [] {
 export def 'tokens-supply-get' [
     --height: int = 0
 ] {
-    ber query bank total [--height $height]
+    caching-function query bank total [--height $height]
     | get supply
     | into int amount
     | transpose -idr
@@ -2737,7 +2737,7 @@ export def 'tokens-pools-table-get' [
     --height: int = 0
     --short     # get only basic information
 ] {
-    let $liquidity_pools = (ber query liquidity pools [--height $height])
+    let $liquidity_pools = (caching-function query liquidity pools [--height $height])
 
     if $short { return $liquidity_pools }
 
@@ -2794,7 +2794,7 @@ export def 'tokens-delegations-table-get' [
     --height: int = 0
     --sum
 ] {
-    ber query staking delegations ($address | default $env.cy.address) [--height $height]
+    caching-function query staking delegations ($address | default $env.cy.address) [--height $height]
     | get -i delegation_responses
     | if $in == null {return} else {}
     | each {|i| $i.delegation | merge $i.balance}
@@ -2812,7 +2812,7 @@ export def 'tokens-rewards-get' [
 ] {
     let $address = $neuron | default $env.cy.address
 
-    ber query distribution rewards $address [--height $height]
+    caching-function query distribution rewards $address [--height $height]
     | get total -i
     | if $in == null {return} else {}
     | if $in == [] {return} else {}
@@ -2895,7 +2895,7 @@ export def 'tokens-routed-from' [
     --height: int = 0
 ] {
     let $address = $neuron | default $env.cy.address
-    ber query grid routed-from $address [--height $height]
+    caching-function query grid routed-from $address [--height $height]
     | get -i value
     | if $in == null {return} else { }
     | into int amount
@@ -2907,7 +2907,7 @@ export def 'tokens-routed-to' [
     --height: int = 0
 ] {
     let $address = $neuron | default $env.cy.address
-    ber query grid routed-to $address [--height $height]
+    caching-function query grid routed-to $address [--height $height]
     | get -i value
     | if $in == null {return} else { }
     | into int amount
@@ -2948,7 +2948,7 @@ export def 'tokens-ibc-denoms-table' [
     | upsert ibc_hash {|i| $i.denom | str replace 'ibc/' ''}
     | each {
         |i| $i
-        | merge ( ber query ibc-transfer denom-trace $"'($i.ibc_hash)'" | get denom_trace )
+        | merge ( caching-function query ibc-transfer denom-trace $"'($i.ibc_hash)'" | get denom_trace )
     }
     | reject ibc_hash
     | upsert denom_f {
@@ -3182,7 +3182,7 @@ export def 'tokens-undelegations' [
 ] {
     let $address = $neuron | default $env.cy.address
 
-    ber query staking unbonding-delegations $address
+    caching-function query staking unbonding-delegations $address
     | get unbonding_responses
     | flatten --all
     | get balance
@@ -3381,7 +3381,7 @@ export def 'tokens-investmint-wizzard' [
     $neuron?: string
 ] {
     let $address = $neuron | default $env.cy.address
-    $env.cy.ber-force-update = true
+    $env.cy.caching-function-force-update = true
     let $times = (
         tokens-investmint-status-table $address
         | print-and-pass
@@ -3393,7 +3393,7 @@ export def 'tokens-investmint-wizzard' [
         }
     )
 
-    $env.cy.ber-force-update = false
+    $env.cy.caching-function-force-update = false
     let $h_free = (
         tokens-investmint-status-table $address --h_liquid --quiet
         | if $in in [[] 0] {
@@ -3584,7 +3584,7 @@ export def 'validator-generate-persistent-peers-string' [
 export def 'query-tx' [
     hash: string
 ]: nothing -> record {
-    ber --error [query tx --type hash $hash]
+    caching-function --error [query tx --type hash $hash]
     | if ($in | columns | $in == [update_time]) {
         error-make-cy $'No transaction with hash ($hash) is found'
     } else {
@@ -3597,7 +3597,7 @@ export def 'query-tx-seq' [
     neuron: string
     seq: int
 ]: nothing -> record {
-    ber --disable_update [query tx --type=acc_seq $'($neuron)/($seq)']
+    caching-function --disable_update [query tx --type=acc_seq $'($neuron)/($seq)']
     | reject -i events
 }
 
@@ -3607,7 +3607,7 @@ export def 'query-account' [
     --height: int = 0
     --seq   # return sequence
 ]: nothing -> record {
-    ber query account $neuron [--height $height]
+    caching-function query account $neuron [--height $height]
     | if $seq {
         get base_vesting_account.base_account.sequence
         | into int
@@ -3620,11 +3620,11 @@ export def 'query-links-max-in-block' []: nothing -> int {
 }
 
 def 'query-links-bandwidth-price' []: nothing -> int {
-    ber query bandwidth price | get price.dec | into float | $in * 1000 | into int # price in millivolt
+    caching-function query bandwidth price | get price.dec | into float | $in * 1000 | into int # price in millivolt
 }
 
 def 'query-links-bandwidth-params' []: nothing -> record {
-    ber query bandwidth params
+    caching-function query bandwidth params
     | get params
     | transpose key value
     | into float value
@@ -3651,7 +3651,7 @@ export def 'query-authz' [
 ] {
     $neuron
     | if ($in != null) { } else { $env.cy.address }
-    | ber query authz grants-by-granter $in
+    | caching-function query authz grants-by-granter $in
     | get grants
     | each {|i| $i | merge $i.authorization | reject authorization}
     | upsert expiration {|i| $i.expiration | into datetime}
@@ -3663,7 +3663,7 @@ export def 'query-authz' [
 export def 'query-links-bandwidth-neuron' [
     neuron?
 ]: nothing -> table {
-    ber query bandwidth neuron ($neuron | default $env.cy.address) --cache_stale_refresh 5min
+    caching-function query bandwidth neuron ($neuron | default $env.cy.address) --cache_stale_refresh 5min
     | get neuron_bandwidth
     | select max_value remained_value
     | transpose param links
@@ -3672,7 +3672,7 @@ export def 'query-links-bandwidth-neuron' [
 }
 
 export def 'query-staking-validators' [] {
-    let $vals_1_page = (ber query staking validators --count-total)
+    let $vals_1_page = (caching-function query staking validators --count-total)
 
     let $offset_to_go = (
         $vals_1_page
@@ -3685,7 +3685,7 @@ export def 'query-staking-validators' [] {
 
     let $all_validators = (
         $offset_to_go
-        | each {|i| ber query staking validators --count-total --offset $i | get validators}
+        | each {|i| caching-function query staking validators --count-total --offset $i | get validators}
         | flatten
         | prepend $vals_1_page.validators
     );
@@ -3724,7 +3724,7 @@ def 'test-validator-chooser' [] {
 }
 
 # A wrapper, to cache CLI requests
-export def --wrapped 'ber' [
+export def --wrapped 'caching-function' [
     ...rest
     --exec: string = ''                         # The name of executable
     --cache_validity_duration: duration = 60min # Sets the cache's valid duration.
@@ -3738,7 +3738,7 @@ export def --wrapped 'ber' [
     --no_default_params                         # Don't use default params (like output, chain-id)
     --error                                     # raise error instead of null in case of cli's error
 ]: nothing -> record {
-    if $rest == [] { error make {msg: 'The "ber" function needs arguments'} }
+    if $rest == [] { error make {msg: 'The "caching-function" function needs arguments'} }
 
     let $executable = if $exec != '' {$exec} else {$env.cy.exec}
     let $sub_commands_and_args = (
@@ -3774,7 +3774,7 @@ export def --wrapped 'ber' [
 
     mut $update = (
         $force_update or
-        ($env.cy.ber-force-update? | default false) or
+        ($env.cy.caching-function-force-update? | default false) or
         (($freshness > $cache_stale_refresh) and (not $disable_update))
     )
 
@@ -3789,7 +3789,7 @@ export def --wrapped 'ber' [
     } else {
         if ($freshness > $cache_validity_duration) {
             queue-task-add -o 2 (
-                $'ber --exec ($executable) --force_update [' +
+                $'caching-function --exec ($executable) --force_update [' +
                 ($sub_commands_and_args | str join ' ') +
                 '] | to yaml | lines | first 5 | str join "\n"'
             )
@@ -3843,38 +3843,38 @@ def 'request-save-output-exec-response' [
 }
 
 #[test]
-def ber-test [] {
+def caching-function-test [] {
     equal (
-        ber query rank karma bostrom1smsn8u0h5tlvt3jazf78nnrv54aspged9h2nl9 | describe
+        caching-function query rank karma bostrom1smsn8u0h5tlvt3jazf78nnrv54aspged9h2nl9 | describe
     ) 'record<karma: string, update_time: date>'
     equal (
-        ber query bank balances bostrom1quchyywzdxp62dq3rwan8fg35v6j58sjwnfpuu | describe
+        caching-function query bank balances bostrom1quchyywzdxp62dq3rwan8fg35v6j58sjwnfpuu | describe
     ) ('record<balances: table<denom: string, amount: string>, pagination: record<next_key: ' +
         'nothing, total: string>, update_time: date>')
     equal (
-        ber query bank balances bostrom1cj8j6pc3nda8v708j3s4a6gq2jrnue7j857m9t | describe
+        caching-function query bank balances bostrom1cj8j6pc3nda8v708j3s4a6gq2jrnue7j857m9t | describe
     ) ('record<balances: table<denom: string, amount: string>, pagination: record<next_key: ' +
         'nothing, total: string>, update_time: date>')
     equal (
-        ber query staking delegations bostrom1eg3v42jpwf3d66v6rnrn9hedyd8qvhqy4dt8pc | describe
+        caching-function query staking delegations bostrom1eg3v42jpwf3d66v6rnrn9hedyd8qvhqy4dt8pc | describe
     ) ('record<delegation_responses: table<delegation: record<delegator_address: string, ' +
         'validator_address: string, shares: string>, balance: record<denom: string, amount: string>>, ' +
         'pagination: record<next_key: nothing, total: string>, update_time: date>')
     equal (
-        ber query staking delegations bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 | describe
+        caching-function query staking delegations bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 | describe
     ) ('record<delegation_responses: table<delegation: record<delegator_address: string, ' +
         'validator_address: string, shares: string>, balance: record<denom: string, amount: string>>, ' +
         'pagination: record<next_key: nothing, total: string>, update_time: date>')
     equal (
-        ber query rank top  | describe
+        caching-function query rank top  | describe
     ) ('record<result: table<particle: string, rank: string>, pagination: record<total: int>, ' +
         'update_time: date>')
     equal (
-        ber query ibc-transfer denom-traces  | describe
+        caching-function query ibc-transfer denom-traces  | describe
     ) ('record<denom_traces: table<path: string, base_denom: string>, pagination: record<next_key: ' +
         'nothing, total: string>, update_time: date>')
     equal (
-        ber query liquidity pools --cache_validity_duration 0sec | describe
+        caching-function query liquidity pools --cache_validity_duration 0sec | describe
     ) ('record<pools: table<id: string, type_id: int, reserve_coin_denoms: list<string>, ' +
         'reserve_account_address: string, pool_coin_denom: string>, pagination: record<next_key: ' +
         'nothing, total: string>, update_time: date>')

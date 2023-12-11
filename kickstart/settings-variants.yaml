@@ -1,8 +1,3 @@
-ber-force-update:
-  description: Don't use cached node responses, update results immediately
-  variants:
-  - 'true'
-  - 'false'
 ipfs-download-from:
   description: Choose the source to download IPFS data from
   variants:
@@ -14,3 +9,8 @@ ipfs-storage:
   - kubo
   - cybernode
   - both
+caching-function-force-update:
+  description: Don't use cached node responses, update results immediately
+  variants:
+  - 'true'
+  - 'false'
