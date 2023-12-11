@@ -2987,6 +2987,24 @@ export def 'tokens-denoms-decimals-dict' [] {
     | uniq-by base_denom
 }
 
+# Get info about tokens from the on-chain-registry contract
+#
+# https://github.com/Snedashkovsky/on-chain-registry
+export def 'tokens-info-from-registry' [
+    chain_name: string = 'bostrom'
+] {
+    let $pcontract = 'bostrom1w33tanvadg6fw04suylew9akcagcwngmkvns476wwu40fpq36pms92re6u'
+    let $json = ( {get_assets_by_chain: {chain_name: $chain_name}} | to json -r )
+    let $params = ['--node' 'https://rpc.bostrom.cybernode.ai:443' '--output' 'json']
+
+    caching-function --exec 'cyber' --no_default_params query wasm contract-state smart $pcontract $json $params
+    | get data.assets
+    | upsert denom_units {|i| $i.denom_units?.exponent? | default [0] | math max}
+    | select base symbol denom_units name description
+    | rename denom token
+    | where token != null
+}
+
 export def 'tokens-price-in-h-naive' [
     --all_data
     --height: int = 0
