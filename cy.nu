@@ -3481,21 +3481,26 @@ export def --env 'set-links-table-name' [
 }
 
 export def --env 'set-cy-setting' [
-    key?
-    value?
+    key?: string@nu-complete-settings-variants
+    value?: any@nu-complete-settings-variant-options
     --output_value_only
 ] {
     let $key_1 = if $key == null {
-        open (cy-path kickstart settings-variants.yaml)
-        | items {|key value| {$key: $value.description?}}
+        nu-complete-settings-variants
+        | each {{$in.value: $in.description}}
         | input list 'Select the setting that you want to change'
         | columns
         | get 0
     } else { $key }
 
-    let $value_1 = if $value == null {
-        set-select-from-variants $key_1
-    } else { $value }
+    let $value_1 = (
+        if $value == null {
+            set-select-from-variants $key_1
+        } else { $value }
+        | if ($in in ['true', 'false']) { # input list errors on booleans on 0.87.1
+            into bool
+        } else {}
+    )
 
     if $output_value_only {
         $value_1
@@ -3519,9 +3524,6 @@ def 'set-select-from-variants' [
         | input list
         | if ($in == 'other') {
             input 'type your setting: '
-        } else {}
-        | if ($in in ['true', 'false']) { # input list errors on booleans on 0.87.1
-            into bool
         } else {}
         | print-and-pass
     }
