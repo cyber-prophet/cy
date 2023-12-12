@@ -82,7 +82,7 @@ if ( ipfs swarm peers | complete | get exit_code | $in == 1 ) {
 let $cy_folder = '~/cy'
 
 if (not (open $nu.config-path | lines | find -r '^overlay use .*cy\.nu' | is-empty)) {
-    $"# load Cy on NuShell start(char nl)overlay use '($cy_folder)/cy.nu' -pr (char nl)"
+    $"#💎 load Cy on NuShell start(char nl)overlay use '($cy_folder)/cy.nu' -pr (char nl)"
     | save -a $'($nu.config-path)'
 }
 
