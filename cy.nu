@@ -7,7 +7,7 @@
 use std assert [equal greater]
 use std clip
 use nu-utils [ bar, cprint, "str repeat", to-safe-filename, to-number-format, number-col-format,
-    nearest-given-weekday, print-and-pass]
+    nearest-given-weekday, print-and-pass ]
 
 use log
 
@@ -110,14 +110,14 @@ export def 'pin-text' [
     }
 
     let $cid = (
-        if ($env.cy.ipfs-storage == 'kubo') or ($env.cy.ipfs-storage == 'both') {
+        if $env.cy.ipfs-storage in ['kubo' 'both'] {
             $text
             | ipfs add -Q
             | str trim --char (char nl)
         }
     )
 
-    if ($env.cy.ipfs-storage == 'cybernode') or ($env.cy.ipfs-storage == 'both') {
+    if $env.cy.ipfs-storage in ['cybernode' 'both'] {
         $text
         | curl --silent -X POST -F file=@- 'https://io.cybernode.ai/add'
         | from json
