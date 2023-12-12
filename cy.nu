@@ -53,14 +53,14 @@ export-env {
         | sort
     )
 
-    if $config.dont_use_recommended_nu_settings? != true {
-        $env.config.show_banner = false
-        $env.config.table.trim.methodology = 'truncating'
-        $env.config.completions.algorithm = 'fuzzy'
-        $env.config.completions.quick = false
-    }
-
     make_default_folders_fn
+}
+
+export def --env 'use-recommended-nushell-settings' [] {
+    $env.config.show_banner = false
+    $env.config.table.trim.methodology = 'truncating'
+    $env.config.completions.algorithm = 'fuzzy'
+    $env.config.completions.quick = false
 }
 
 # Pin a text particle
