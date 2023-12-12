@@ -2955,6 +2955,9 @@ export def 'tokens-ibc-denoms-table' [
         |i| $i.path         #denom compound
         | str replace -ra '[^-0-9]' ''
         | str trim -c '-'
+        | if ($in | split row '-' | length | $in > 1) {
+            $in + '🛑'
+        } else {}
         | $'($i.base_denom)/($i.denom | str substring 62..68)/($in)'
     }
     | sort-by path --natural
