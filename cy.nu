@@ -3048,6 +3048,27 @@ export def 'tokens-in-h-naive' [
     | move amount_in_h_naive --before amount
 }
 
+export def 'tokens-in-token-naive' [
+    token: string = 'ATOM'
+    --price # leave price in h column
+]: table -> table {
+    let $input = $in
+    let $denom = (
+        tokens-info-from-registry | select symbol base | transpose -idr | get $token
+    )
+    let $target_denom_price_in_h = (tokens-price-in-h-naive | transpose -idr | get $denom)
+    let $column_name = $'amount_in_($token)_naive'
+
+    $input
+    | if ($in | columns | 'amount_in_h_naive' in $in) {} else {
+        tokens-in-h-naive
+    }
+    | upsert $column_name {
+        |i| $i.amount_in_h_naive / $target_denom_price_in_h
+    }
+    | move $column_name --before amount_in_h_naive
+}
+
 export def 'tokens-in-h-swap-calc' [
     percentage: float = 0.3
 ] {
