@@ -41,19 +41,24 @@ export-env {
     }
 
     let $config = (open_cy_config_toml)
+    let $user_config_path = ($config.path | path join config $'($config.config-name).toml')
 
     $env.cy = (
-        try {
-            $config
-            | merge (
-                open ($config.path | path join config $'($config.config-name).toml')
-            )
-            | sort
-        } catch {
+        if ($user_config_path | path exists) {
+            $config | merge ( open $user_config_path )
+        } else {
             cprint $'A config file was not found. Run *cy config-new*'
             $config
         }
+        | sort
     )
+
+    if $config.dont_use_recommended_nu_settings? != true {
+        $env.config.show_banner = false
+        $env.config.table.trim.methodology = 'truncating'
+        $env.config.completions.algorithm = 'fuzzy'
+        $env.config.completions.quick = false
+    }
 
     make_default_folders_fn
 }
