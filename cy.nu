@@ -3521,6 +3521,7 @@ export def 'tokens-fraction-input' [
     }
 }
 
+# info about props current and past
 export def 'governance-view-props' [
     id?: string@'nu-complete-props'
     --dont_format
@@ -3539,7 +3540,7 @@ export def 'governance-view-props' [
     }
 }
 
-export def 'governance-prop-summary' [] {
+def 'governance-prop-summary' [] {
     let $tally_res = (
         $in
         | get -i final_tally_result
@@ -3549,8 +3550,8 @@ export def 'governance-prop-summary' [] {
     let $98_total = ($tally_res | values | math sum);
 
     $tally_res
-    | {'✅': $in.yes, '❌': ($in.no + $in.no_with_veto), '🦭': $in.abstain}
-    | items {|k v| $'($k):(
+    | {'✅': $in.yes, '❌': $in.no, '🛑': $in.no_with_veto, '🦭': $in.abstain}
+    | items {|k v| $'($k)(
         $v / $98_total * 100
         | to-number-format --denom "%" --decimals 1 --significant_integers 0
     )'}
@@ -4322,6 +4323,7 @@ def 'nu-complete-props' [] {
     let term_size = (term size | get columns)
 
     governance-view-props --dont_format
+    | reverse
     | each {|i| {
         value: $i.proposal_id,
         description: $'($i.content.title | str substring 0..$term_size)($i | governance-prop-summary)'
