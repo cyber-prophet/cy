@@ -3521,6 +3521,43 @@ export def 'tokens-fraction-input' [
     }
 }
 
+export def 'governance-view-props' [
+    id?: string@'nu-complete-props'
+    --dont_format
+] {
+    caching-function query gov proposals
+    | get proposals
+    | if $id != null {where proposal_id == $id} else {}
+    | each {|i| $i
+        | into datetime voting_end_time submit_time deposit_end_time voting_start_time
+        | if $in.status == 'PROPOSAL_STATUS_DEPOSIT_PERIOD' {
+            reject final_tally_result voting_start_time voting_end_time
+        } else {}
+        | if $dont_format { } else {
+            table -e | print $in
+        }
+    }
+}
+
+export def 'governance-prop-summary' [] {
+    let $tally_res = (
+        $in
+        | get -i final_tally_result
+        | if $in == null {return} else {}
+        | into int yes abstain no no_with_veto
+    );
+    let $98_total = ($tally_res | values | math sum);
+
+    $tally_res
+    | {'✅': $in.yes, '❌': ($in.no + $in.no_with_veto), '🦭': $in.abstain}
+    | items {|k v| $'($k):(
+        $v / $98_total * 100
+        | to-number-format --denom "%" --decimals 1 --significant_integers 0
+    )'}
+    | str join '/'
+    | ' | ' + $in
+}
+
 # Set the custom name for links csv table
 export def --env 'set-links-table-name' [
     name: string
@@ -4279,6 +4316,16 @@ def 'nu-complete keys-nicks' [] {
 
 def 'nu-complete-bool' [] {
     [true, false]
+}
+
+def 'nu-complete-props' [] {
+    let term_size = (term size | get columns)
+
+    governance-view-props --dont_format
+    | each {|i| {
+        value: $i.proposal_id,
+        description: $'($i.content.title | str substring 0..$term_size)($i | governance-prop-summary)'
+    }}
 }
 
 # > [{a: 1} {b: 2}] | to nuon
