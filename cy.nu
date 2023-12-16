@@ -1258,11 +1258,6 @@ export def 'dict-neurons-update' [
     | if $passport or $all {
         par-each -t $threads {|i|
             $i | merge (passport-get $i.neuron --quiet)
-            | upsert nick {
-                |b| $b.nickname?
-                | default ''
-                | $in + $'_($b.neuron)'
-            }
         }
     } else {}
     | if $balance {
@@ -1278,7 +1273,18 @@ export def 'dict-neurons-update' [
             $i | merge (query-rank-karma $i.neuron)
         }
     } else {}
-    | upsert update_ts (date now)
+    | par-each {
+        upsert nick {|i|
+            [
+                ($i.my_alias? | if $in in [null ''] {null} else {$in + '_'})
+                ($i.nickname?) # no nickname were parsed
+                '@'
+                ($i.neuron | str substring (-7..))
+            ]
+            | where $it not-in [null '']
+            | str join
+        }
+    }
     | if $dont_save {} else {
         let $input = $in
 
