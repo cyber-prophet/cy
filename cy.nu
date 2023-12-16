@@ -1626,7 +1626,8 @@ export def 'graph-update-particles-parquet' [
     )
 
     (
-        graph-to-particles --include_system
+        graph-links-df --include_contracts
+        | graph-to-particles --include_system
         | dfr join --left $downloaded_particles particle particle
         | dfr with-column (
             $in.content_s
@@ -1904,7 +1905,7 @@ export def 'graph-to-cosmograph' [] {
     | reject index
     | save -f (
         cy-path 'export' $'cybergraph-in-cosmograph(now-fn).csv'
-        | print-and-pass
+        | print-and-pass {|i| cprint $'You can upload the file to *https://cosmograph.app/run* ($i)'}
     )
 }
 
