@@ -1136,19 +1136,19 @@ export def 'passport-set' [
 export def 'dict-neurons-view' [
     --df        # output as a dataframe
     --path      # output path of the dict
-    --tags      # output neurons categories
 ] {
+    let $neurons_tags = (dict-neurons-tags --wide)
+
     (cy-path graph neurons_dict.yaml)
     | if $path {
         return $in
     } else {}
     | if ($in | path exists) {
-        open
-    } else { [[neuron nick];
-        ['bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8' 'maxim_bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8']] }
-    | if $tags {
-        join --outer (dict-neurons-tags --wide) neuron
-    } else {}
+        open $in
+    } else { [[neuron nickname];
+        ['bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8' 'maxim']] }
+    | reject -i ($neurons_tags | columns | where $it != 'neuron')
+    | join --outer ($neurons_tags) neuron
     | if $df {
         fill non-exist
         | reject -i addresses # quick fix for failing df conversion
