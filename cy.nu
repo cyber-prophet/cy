@@ -1057,7 +1057,7 @@ export def 'passport-get' [
     | if $in == null {
         if not $quiet {
             cprint --before 1 --after 2 $'No passport for *($address_or_nick)* is found'
-        }; return {}
+        }; return {nickname: '👤'}
     } else {
         get data
         | merge $in.extension
