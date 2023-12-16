@@ -3015,7 +3015,7 @@ export def 'tokens-info-from-registry' [
     caching-function --exec 'cyber' --no_default_params query wasm contract-state smart $pcontract $json $params
     | get data.assets
     | upsert denom_units {|i| $i.denom_units?.exponent? | default [0] | math max}
-    | select base symbol denom_units name description
+    | select base symbol denom_units name description display traces -i
     | rename denom token
     | where token != null
 }
