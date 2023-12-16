@@ -3061,7 +3061,7 @@ export def 'tokens-in-token-naive' [
 ]: table -> table {
     let $input = $in
     let $denom = (
-        tokens-info-from-registry | select symbol base | transpose -idr | get $token
+        tokens-info-from-registry | select token denom | transpose -idr | get $token
     )
     let $target_denom_price_in_h = (tokens-price-in-h-naive | transpose -idr | get $denom)
     let $column_name = $'amount_in_($token)_naive'
