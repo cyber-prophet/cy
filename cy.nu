@@ -3829,7 +3829,10 @@ export def --wrapped 'caching-function' [
     --quiet                                     # Don't output execution's result
     --no_default_params                         # Don't use default params (like output, chain-id)
     --error                                     # raise error instead of null in case of cli's error
+    --retries: int
 ]: nothing -> record {
+    if ($retries != null) {$env.cy.caching-function-max-retries = $retries}
+
     if $rest == [] { error make {msg: 'The "caching-function" function needs arguments'} }
 
     let $executable = if $exec != '' {$exec} else {$env.cy.exec}
