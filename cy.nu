@@ -3900,7 +3900,15 @@ def 'request-save-output-exec-response' [
 ] {
     log debug $'($executable) ($sub_commands_and_args | str join " ")'
 
-    let $response = (
+    mut $retries = (
+        $env.cy?.caching-function-max-retries?
+        | default 5
+        | $in + 1 # so if we set caching-function-max-retries to 1 only 1 retry would be made
+    )
+
+    mut $response = {}
+
+    let $request = {
         do -i { ^($executable) $sub_commands_and_args }
         | complete
         | if $in.exit_code == 0 {
@@ -3910,7 +3918,18 @@ def 'request-save-output-exec-response' [
         } else {
             {error: $in, update_time: (date now)}
         }
-    )
+    }
+
+    while $retries > 0 {
+        $response = (do $request);
+
+        if $response.error? == null {
+            $retries = 0
+        } else {
+            sleep 2sec;
+            $retries = $retries - 1
+        }
+    }
 
     $response
     | to json -r
