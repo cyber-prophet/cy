@@ -4042,17 +4042,18 @@ def caching-function-test [] {
 
 # query neuron addrsss by his nick
 export def 'qnbn' [
-    ...nicks: string@'nu-complete keys-nicks'
+    ...nicks: string@'nicks-and-keynames'
     --df
     --force_list_output (-f)
 ] {
+    let $dict_nicks = nicks-and-keynames | select value description | rename name neuron
     let $addresses = $nicks | where (is-neuron $it) | wrap neuron
 
     let $neurons = (
         if ($nicks | where (not (is-neuron $it)) | is-empty ) {
             []
         } else {
-            nicks-and-keynames
+            $dict_nicks
             | where name in $nicks
             | select neuron
             | uniq-by neuron
@@ -4353,8 +4354,20 @@ def 'nu-complete-executables' [] {
 }
 
 # Helper function to use addresses for completions in --from parameter
-def 'nu-complete keys values' [] {
-    cyber keys list --output json | from json | select name address | rename description value
+def 'nu-complete key-names' [] {
+    ^$env.cy.exec keys list --output json
+    | from json
+    | select name address
+    | upsert name {|i| $i.name + 🔑}
+    | rename value description
+}
+
+def 'nu-complete dict-nicks' [] {
+    (dict-neurons-view)
+    | select -i nickname neuron
+    | uniq-by nickname
+    | where nickname not-in [null '' '👤']
+    | rename value description
 }
 
 def 'nu-complete-settings-variants' [] {
@@ -4371,23 +4384,8 @@ def 'nu-complete-settings-variant-options' [
 }
 
 def 'nicks-and-keynames' [] {
-    ^$env.cy.exec keys list --output json
-    | from json
-    | select name address
-    | rename name neuron
-    | upsert name {|i| $i.name + 🔑}
-    | append (
-        dict-neurons-view
-        | select -i nickname neuron
-        | rename name neuron
-        | uniq-by name
-    )
-}
-
-def 'nu-complete keys-nicks' [] {
-    nicks-and-keynames
-    | get name
-    | where $it not-in [null '']
+    (nu-complete key-names)
+    | append (nu-complete dict-nicks)
 }
 
 def 'nu-complete-bool' [] {
