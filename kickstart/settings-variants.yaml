@@ -14,3 +14,13 @@ caching-function-force-update:
   variants:
   - 'true'
   - 'false'
+caching-function-max-retries:
+  description: The maximum number of retries in case of an error response
+  variants:
+  - 5
+  - 3
+  - 1
+authz:
+  description: The address to send links from
+  variants:
+  - 'other'
