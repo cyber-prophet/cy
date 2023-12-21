@@ -892,6 +892,26 @@ def 'tx-create' [
     }
 }
 
+def 'tx-authz' [
+    $json_tx_path: path
+] {
+    let $out_path = (cy-path temp tx-unsigned-authz.json)
+
+    let $current_json = (open $json_tx_path)
+
+    $current_json
+    | upsert body.messages.neuron $env.cy.authz
+    | upsert body.messages {|i| [ {
+        "@type": "/cosmos.authz.v1beta1.MsgExec",
+        "grantee": ($current_json | get body.messages.neuron.0)
+        "msgs": $i.body.messages
+    } ] }
+    | to json -r
+    | save -rf $out_path
+
+    $out_path
+}
+
 def 'tx-sign' [
     $unsigned_tx_path: path
 ] {
