@@ -971,6 +971,9 @@ def 'links-send-tx' [
 
     let $response = (
         tx-json-create-from-cyberlinks $links
+        | if ($env.cy.authz? != null) {
+            tx-authz $in
+        } else {}
         | tx-sign $in
         | tx-broadcast $in
     )
