@@ -3775,6 +3775,29 @@ export def 'query-authz' [
     | select -i expired expiration grantee msg ($in | columns)
 }
 
+# Query status of authz grants for address
+#
+# > query-authz-grants-by-grantee bostrom1sgy27lctdrc5egpvc8f02rgzml6hmmvh5wu6xk | to yaml
+# - expired: true
+#   expiration: 2023-05-05 11:43:49 +00:00
+#   granter: bostrom1angqedc8vu2dxa2d2cx7z5jjzm6vjldgtqm005
+#   msg: /cyber.resources.v1beta1.MsgInvestmint
+#   grantee: bostrom1sgy27lctdrc5egpvc8f02rgzml6hmmvh5wu6xk
+#   '@type': /cosmos.authz.v1beta1.GenericAuthorization
+export def 'query-authz-grants-by-grantee' [
+    neuron?
+] {
+    $neuron
+    | if ($in != null) { } else { $env.cy.address }
+    | caching-function query authz grants-by-grantee $in
+    | get grants
+    | each {|i| $i | merge $i.authorization | reject authorization}
+    | upsert expiration {|i| $i.expiration | into datetime}
+    | sort-by expiration
+    | upsert expired {|i| $i.expiration < (date now)}
+    | select -i expired expiration granter msg ($in | columns)
+}
+
 export def 'query-links-bandwidth-neuron' [
     neuron?
 ]: nothing -> table {
