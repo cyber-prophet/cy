@@ -2326,7 +2326,7 @@ export def search-walk [
 ] {
     let $cid = (pin-text $query --only_hash)
 
-    def serp [$cid: string, page: int] {
+    def serp [page: int] {
         caching-function query rank search $cid $page $results_per_page --cache_validity_duration $duration
         | upsert page $page
     }
@@ -2338,7 +2338,7 @@ export def search-walk [
     } {|i|
         {out: $i.result}
         | if ($i.pagination.total / $results_per_page - 1 | math ceil) > $i.page {
-            upsert next (serp $cid ($i.page + 1))
+            upsert next (serp ($i.page + 1))
         } else {}
     }
     | flatten
