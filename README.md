@@ -49,8 +49,9 @@ Open Terminal app on your computer.
    1. curl (if needed)
    1. [cyber](https://github.com/cybercongress/go-cyber)
    1. [pussy](https://github.com/greatweb/space-pussy)
-   1. [ipfs - kubo](https://github.com/ipfs/kubo) app
-   1. [pueue](https://github.com/Nukesor/pueue) app
+   1. [ipfs - kubo](https://github.com/ipfs/kubo)
+   1. [pueue](https://github.com/Nukesor/pueue)
+   2. [rich-cli](https://github.com/Textualize/rich-cli)
    1. [cybundle script](https://github.com/cyber-prophet/homebrew-taps/blob/main/src/cybundle)
 
 4. To continue installation of configs and execute necessary init steps, run: `cybundle`
