@@ -3695,6 +3695,51 @@ export def 'validator-generate-persistent-peers-string' [
     | $'persistent_peers = "($in)"'
 }
 
+# Query all delegators to a specified validator
+export def 'validator-query-delegators' [
+    validator_or_moniker: string@'nu-complete-validators-monikers'
+    --limit: int = 1000
+] {
+    let $validator = (
+        if (is-validator $validator_or_moniker) {
+            $validator_or_moniker
+        } else {
+            nu-complete-validators-monikers
+            | select value description
+            | transpose -idr
+            | get $validator_or_moniker
+        }
+    )
+
+    def res [
+        page: int
+    ] {
+        caching-function query staking delegations-to $validator --limit $limit --page $page
+        | upsert page $page
+        | upsert length {|i| $i.delegation_responses | length}
+    }
+
+    let $start = {
+        delegation_responses: [],
+        page: 0,
+        length: $limit
+    }
+
+    let $closure = {|i|
+        {out: $i.delegation_responses}
+        | if ($i.length == $limit) {
+            upsert next (res ($i.page + 1))
+        } else {}
+    }
+
+    generate $start $closure
+    | flatten
+    | flatten
+    | into int amount
+    | move denom amount --before validator_address
+    | rename neuron
+}
+
 # Query tx by hash
 export def 'query-tx' [
     hash: string
@@ -4126,6 +4171,10 @@ def is-neuron [particle: string] {
     )
 }
 
+def is-validator [test: string] {
+    $test =~ '^(bostrom|pussy)\w{46}$'
+}
+
 def is-connected []  {
     (do -i {http get https://duckduckgo.com/} | describe) == 'raw input'
 }
@@ -4418,6 +4467,10 @@ def 'nu-complete-props' [] {
 def 'nu-complete-authz-types' [] {
     open (cy-path dictionaries tx_message_types.csv)
     | get type
+}
+
+def 'nu-complete-validators-monikers' [ ] {
+    query-staking-validators | select moniker operator_address | rename value description
 }
 
 # > [{a: 1} {b: 2}] | to nuon
