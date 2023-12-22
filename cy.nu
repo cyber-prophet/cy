@@ -1090,8 +1090,8 @@ export def 'passport-get' [
 
 #[test]
 def passport-get-test [] {
-    equal (passport-get bostrom1aypv5wxute0nnhfv44jkhyfkzt7zyrden85tel) {}
-    equal (passport-get bostrom1aypv5wxute0nnhfv44jkhyfkzt7zyrden85ted) {}
+    equal (passport-get bostrom1aypv5wxute0nnhfv44jkhyfkzt7zyrden85tel) {nickname: 👤}
+    equal (passport-get bostrom1aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa) {nickname: 👤} # unexisting address
     equal (passport-get bostrom1de53jgxjfj5n84qzyfd7z44m9wrudygt524v6r | get nickname) 'graphkeeper'
 }
 
