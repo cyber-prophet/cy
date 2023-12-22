@@ -4555,5 +4555,5 @@ export def 'cp-banner' [
   8 8888         8 8888   `8b.   ` 8888     ,88'   8 8888         8 8888        8 8 8888             8 8888
   8 8888         8 8888     `88.    `8888888P'     8 8888         8 8888        8 8 888888888888     8 8888
                                                                                                                    "
-    | ansi gradient --fgstart '0x7FFF00'
+    # | ansi gradient --fgstart '0x7FFF00'
 }
