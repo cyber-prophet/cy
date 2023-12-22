@@ -3219,7 +3219,7 @@ export def 'tokens-format' [
 # hydrogen: 50
 # address: bostrom1aypv5wxute0nnhfv44jkhyfkzt7zyrden85tel
 export def 'balances' [
-    ...address: string@'nu-complete keys values'
+    ...address: string@'nu-complete key-names'
     --test      # Use keyring-backend test (with no password)
 ] {
     let $balances = (
