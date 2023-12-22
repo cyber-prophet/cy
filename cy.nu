@@ -3798,6 +3798,18 @@ export def 'query-authz-grants-by-grantee' [
     | select -i expired expiration granter msg ($in | columns)
 }
 
+export def 'authz-give-grant' [
+    $neuron
+    $message_type: string@"nu-complete-authz-types"
+    $expiration: string@"nu-complete-durations"
+] {
+    (
+        ^$env.cy.exec tx authz grant $neuron generic --msg-type $message_type
+        --from $env.cy.address
+        --expiration (date now | $in + $expiration | format date '%s' | into int)
+    )
+}
+
 export def 'query-links-bandwidth-neuron' [
     neuron?
 ]: nothing -> table {
@@ -4401,6 +4413,11 @@ def 'nu-complete-props' [] {
         value: $i.proposal_id,
         description: $'($i.content.title | str substring 0..$term_size)($i | governance-prop-summary)'
     }}
+}
+
+def 'nu-complete-authz-types' [] {
+    open (cy-path dictionaries tx_message_types.csv)
+    | get type
 }
 
 # > [{a: 1} {b: 2}] | to nuon
