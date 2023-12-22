@@ -1263,20 +1263,20 @@ export def 'dict-neurons-update' [
     --balance               # Update balances data
     --karma                 # Update karma
     --all (-a)              # Update passport, balance, karma
-    --all_neurons           # Update info about all neurons
+    --neurons_from_graph    # Update info for neurons from graph, and not from current dict
     --threads (-t) = 30     # Number of threads to use for downloading
     --dont_save             # Don't update the file on a disk, just output the results
     --quiet (-q)            # Don't output results table
 ] {
-    if $all_neurons {
-        dict-neurons-view
-    } else {
+    if $neurons_from_graph {
         graph-links-df
         | dfr select neuron
         | dfr unique
         | dfr join --left (dict-neurons-view --df) neuron neuron
         | dfr into-nu
         | reject index
+    } else {
+        dict-neurons-view
     }
     | filter {|i| is-neuron $i.neuron}
     | if $passport or $all {
