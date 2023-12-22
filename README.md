@@ -1,22 +1,19 @@
 # Cy
 
-Cy - a [nushell](https://www.nushell.sh/) wrapper, for interacting with cybergraphs.
+Cy - a [nushell](https://www.nushell.sh/) wrapper for `cyber`, `ipfs` and other CLIs for interacting with Cybergraphs.
+
+## Status
+
+Very much WIP. Actively developed.
 
 ## Quick start
 
-If you have cyber cli, nushell, curl installed:
+If you have `cyber` and `nu` installed:
 
 ```nushell
 git clone https://github.com/cyber-prophet/cy; cd cy;
 overlay use cy -pr cy.nu
 ```
-
-## The Goals of Cy:
-
-1. To demonstrate the use cases of cybergraphs and the capabilities of Cyber family blockchains.
-2. To showcase the beauty and power of the Nushell environment and its scripting language.
-3. To aid me in learning cool apps and programming languages.
-
 ## Cyber-family blockchains
 
 Bostrom is the name of the consensus computer that maintains a general-purpose, permissionless informational graph where nodes are CIDs of files in the IPFS network, and edges are Cyberlinks (consisting of source, destination, author, height - records) written into the blockchain. The information written into the blockchain is secured to remain in existence as long as the blockchain is operative. The blockchain is designed with economic incentives that motivate validators to sustain the network. For further information about Cyber blockchains, please refer to [Bostrom Journal.](https://github.com/cyber-prophet/bostrom-journal/blob/manual/BostromJournal001.md)
@@ -1382,4 +1379,3 @@ Input/output types:
   ╰─────┴──────╯
 
 ```
-
