@@ -1250,10 +1250,10 @@ export def 'dict-neurons-tags' [
     open $path_csv
     | if $wide {
         reject timestamp
-        | group-by neuron
-        | values
-        | each { each {|i | {neuron: $i.neuron, $i.category: $i.value}}
-        | reduce -f {} {|i acc | $acc | merge $i}}
+        | uniq-by neuron category
+        | group-by category
+        | items {|k v| $v | reject category | rename neuron $k}
+        | reduce {|i acc| $acc | join --outer $i neuron}
     } else {}
 }
 
