@@ -1249,7 +1249,7 @@ export def 'dict-neurons-tags' [
 
     open $path_csv
     | if $wide {
-        reject timestamp
+        reject -i timestamp
         | uniq-by neuron category
         | group-by category
         | items {|k v| $v | reject category | rename neuron $k}
