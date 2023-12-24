@@ -41,7 +41,7 @@ export-env {
     }
 
     let $config = (open_cy_config_toml)
-    let $user_config_path = ($config.path | path join config $'($config.config-name).toml')
+    let $user_config_path = ($config.path | path join config $'($config.config-name? | default 'dummy').toml')
 
     $env.cy = (
         if ($user_config_path | path exists) {
