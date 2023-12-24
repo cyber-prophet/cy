@@ -3272,6 +3272,7 @@ export def 'tokens-balance-all' [
     $neuron?: string
     --height: int = 0
     --routes: string = 'from'
+    --dont_convert_pools
 ] {
     let $address = $neuron | default $env.cy.address
     let $invstiminted_frozen = (tokens-investmint-status-table $address --sum --quiet)
@@ -3291,7 +3292,9 @@ export def 'tokens-balance-all' [
                 tokens-routed-to $address
             }
         )
-        | tokens-pools-convert-value
+        | if $dont_convert_pools {} else {
+            tokens-pools-convert-value
+        }
         | sort-by amount -r
         | sort-by denom
     )
