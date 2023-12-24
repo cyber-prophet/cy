@@ -3850,7 +3850,7 @@ export def 'query-authz-grants-by-grantee' [
 export def 'authz-give-grant' [
     $neuron
     $message_type: string@"nu-complete-authz-types"
-    $expiration: string@"nu-complete-durations"
+    $expiration: string
 ] {
     (
         ^$env.cy.exec tx authz grant $neuron generic --msg-type $message_type
