@@ -41,7 +41,7 @@ export-env {
     }
 
     let $config = (open_cy_config_toml)
-    let $user_config_path = ($config.path | path join config $'($config.config-name).toml')
+    let $user_config_path = ($config.path | path join config $'($config.config-name? | default 'dummy').toml')
 
     $env.cy = (
         if ($user_config_path | path exists) {
@@ -1242,14 +1242,14 @@ export def 'dict-neurons-tags' [
     if $path { return $path_csv }
 
     if not ($path_csv | path exists) {
-        'neuron,value,category,timestamp'
+        $'neuron,value,category,timestamp(char nl)'
         | save $path_csv;
         return []
     }
 
     open $path_csv
     | if $wide {
-        reject timestamp
+        reject -i timestamp
         | uniq-by neuron category
         | group-by category
         | items {|k v| $v | reject category | rename neuron $k}
