@@ -1281,7 +1281,7 @@ export def 'dict-neurons-update' [
     | filter {|i| is-neuron $i.neuron}
     | if $passport or $all {
         par-each -t $threads {|i|
-            $i | merge (passport-get $i.neuron --quiet)
+            $i | merge (passport-get $i.neuron --quiet | reject -i 'owner')
         }
     } else {}
     | if $balance {
