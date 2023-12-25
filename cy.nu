@@ -2504,7 +2504,7 @@ def 'cid-download-kubo' [
             'empty'
         } else {
             get stdout
-            | file - -I
+            | file - --mime
             | $in + ''
             | str replace (char nl) ''
             | str replace '/dev/stdin: ' ''
