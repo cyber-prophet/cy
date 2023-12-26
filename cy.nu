@@ -1257,6 +1257,22 @@ export def 'dict-neurons-tags' [
     } else {}
 }
 
+export def 'cy-doctor' [] {
+    # fix column names in neurons_dict_tags (change introduced on 20231226)
+    let $dict_n_tags_path = (cy-path graph neurons_dict_tags.csv)
+
+    $dict_n_tags_path
+    | if ($in | path exists) {
+        open
+        | if ($in | columns | 'value' in $in) {
+            rename -c {value: tag}
+            | save -f $dict_n_tags_path;
+
+            print $'($dict_n_tags_path) updated'
+        }
+    }
+}
+
 # Update neurons YAML-dictionary
 export def 'dict-neurons-update' [
     --passport              # Update passport data
