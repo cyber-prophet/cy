@@ -1257,7 +1257,7 @@ export def 'dict-neurons-tags' [
     } else {}
 }
 
-export def 'cy-doctor' [] {
+export def 'doctor' [] {
     # fix column names in neurons_dict_tags (change introduced on 20231226)
     let $dict_n_tags_path = (cy-path graph neurons_dict_tags.csv)
 
@@ -1368,7 +1368,7 @@ export def --env 'graph-download-snapshot' [
 
     let $dict_name = 'neurons_dict.yaml'
     let $dict_path = ($path | path join neurons_dict.yaml)
-    print $''' Downloading ($dict_name)'
+    print '' $'Downloading ($dict_name)'
 
     (
         ipfs cat $'($cur_data_cid)/graph/neurons_dict.yaml'
