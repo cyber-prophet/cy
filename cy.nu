@@ -2063,6 +2063,19 @@ export def 'graph-links-df' [
     } else { }
 }
 
+
+def 'graph-select-standard-columns' [
+    standard_columns: list = [particle_from, particle_to, neuron, height, timestamp]
+    --extra_columns: list = []
+] {
+    let $input = $in
+    let $in_columns = ($input | dfr columns)
+    let $out_columns = ($in_columns | where $it in ($standard_columns | append $extra_columns))
+
+    $input
+    | dfr select $out_columns
+}
+
 def 'graph-open-csv-make-df' [
     path: path
     --datetime
