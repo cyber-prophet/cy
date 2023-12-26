@@ -1243,7 +1243,7 @@ export def 'dict-neurons-tags' [
 
     if not ($path_csv | path exists) {
         [[neuron, tag, category, timestamp];
-        ["bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8", follow, default, (now | debug)]]
+        ["bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8", follow, default, (date now | debug)]]
         | save $path_csv;
     }
 
