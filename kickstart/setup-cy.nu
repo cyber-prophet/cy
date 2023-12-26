@@ -27,11 +27,16 @@ def --env 'confirm' [
         return true
     }
 
-    [yes 'yes for all' no]
+    if ($env.reject_all? | default false) {
+        return false
+    }
+
+    [yes 'yes for all' no 'no for all']
     | if $default_not { $in | reverse } else { }
     | input list (if $dont_keep_prompt {cprint --echo --after 0 $prompt} else {''})
     | if $dont_keep_prompt {} else {print-and-pass}
     | if $in == 'yes for all' {$env.confirm_all = true; 'yes'} else {}
+    | if $in == 'no for all' {$env.reject_all = true; 'no'} else {}
     | $in in [yes]
 }
 
