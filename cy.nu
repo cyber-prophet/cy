@@ -1350,15 +1350,16 @@ export def --env 'graph-download-snapshot' [
     print 'Downloading cyberlinks.csv' ''
     ipfs get $'($cur_data_cid)/graph/cyberlinks_contracts.csv' -o $path
 
-    let $dict_name = neurons_dict.yaml
+    let $dict_name = 'neurons_dict.yaml'
     let $dict_path = ($path | path join neurons_dict.yaml)
     print $'Downloading ($dict_name)' ''
-    ipfs cat $'($cur_data_cid)/graph/neurons_dict.yaml'
-    | save -ra $dict_path
 
-    open $dict_path
-    | uniq-by neuron
-    | save $dict_path
+    (
+        open $dict_path
+        | append ( ipfs cat $'($cur_data_cid)/graph/neurons_dict.yaml' | from yaml)
+        | uniq-by neuron
+        | save -f $dict_path
+    )
 
     print 'Downloading particles zips' ''
     ipfs get $'($cur_data_cid)/graph/particles/' -o $'($path)/particles_arch/'
