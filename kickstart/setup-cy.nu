@@ -81,9 +81,12 @@ if ( ipfs swarm peers | complete | get exit_code | $in == 1 ) {
 
 let $cy_folder = '~/cy'
 
-if (not (open $nu.config-path | lines | find -r '^overlay use .*cy\.nu' | is-empty)) {
+(open $nu.config-path | lines | find -r '^overlay use .*cy\.nu')
+| if ($in | is-empty) {
     $"#💎 load Cy on NuShell start(char nl)overlay use '($cy_folder)/cy.nu' -pr (char nl)"
     | save -a $'($nu.config-path)'
+} else {
+    print $in
 }
 
 print "CY has been downloaded and installed. Now it will launch automatically with Nu."
