@@ -1360,26 +1360,27 @@ export def --env 'graph-download-snapshot' [
         return
     }
 
-    print 'Downloading cyberlinks.csv' ''
+    print '' 'Downloading cyberlinks.csv'
     ipfs get $'($cur_data_cid)/graph/cyberlinks.csv' -o $path
 
-    print 'Downloading cyberlinks.csv' ''
+    print '' 'Downloading cyberlinks.csv'
     ipfs get $'($cur_data_cid)/graph/cyberlinks_contracts.csv' -o $path
 
     let $dict_name = 'neurons_dict.yaml'
     let $dict_path = ($path | path join neurons_dict.yaml)
-    print $'Downloading ($dict_name)' ''
+    print $''' Downloading ($dict_name)'
 
     (
-        ( ipfs cat $'($cur_data_cid)/graph/neurons_dict.yaml' | from yaml)
+        ipfs cat $'($cur_data_cid)/graph/neurons_dict.yaml'
+        | from yaml
         | if ($dict_path | path exists) {
             prepend (open $dict_path)
+            | uniq-by neuron
         } else {}
-        | uniq-by neuron
         | save -f $dict_path
     )
 
-    print 'Downloading particles zips' ''
+    print '' 'Downloading particles zips'
     ipfs get $'($cur_data_cid)/graph/particles/' -o $'($path)/particles_arch/'
 
     let $archives = (ls ($path | path join particles_arch/*.zip) | get name)
