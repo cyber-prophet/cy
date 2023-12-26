@@ -1192,7 +1192,7 @@ def dict-neurons-view-test-dummy [] {
 
 # Add neurons to YAML-dictionary WIP
 export def 'dict-neurons-add' [
-    value: string = ''
+    tag: string = ''
     --category: string = 'default'
 ] {
     let $input = $in
@@ -1223,7 +1223,7 @@ export def 'dict-neurons-add' [
     )
 
     $validated_neurons
-    | upsert value $value
+    | upsert tag $tag
     | upsert category $category
     | upsert timestamp (date now | debug)
     | if ($path_csv | path exists) {
@@ -1242,9 +1242,9 @@ export def 'dict-neurons-tags' [
     if $path { return $path_csv }
 
     if not ($path_csv | path exists) {
-        $'neuron,value,category,timestamp(char nl)'
+        [[neuron, tag, category, timestamp];
+        ["bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8", follow, default, (now | debug)]]
         | save $path_csv;
-        return []
     }
 
     open $path_csv
@@ -1467,8 +1467,8 @@ export def graph-download-missing-particles [
 
     graph-download-links
 
-    let $follow_list = (dict-neurons-tags | where value == follow | get neuron)
-    let $block_list = (dict-neurons-tags | where value == block | get neuron)
+    let $follow_list = (dict-neurons-tags | where tag == follow | get neuron)
+    let $block_list = (dict-neurons-tags | where tag == block | get neuron)
 
     let $particles = (
         graph-links-df
