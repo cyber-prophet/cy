@@ -1993,7 +1993,10 @@ export def 'graph-add-metadata' [
     --full_content
     --include_text_only
 ] {
-    let $links = (graph-links-df)
+    let $links = (
+        graph-links-df
+        | graph-select-standard-columns --extra_columns ['particle']
+    )
     let $p = (
         graph-particles-df
         | if $full_content {
@@ -2011,30 +2014,18 @@ export def 'graph-add-metadata' [
     let $c_out = (
         $links
         | if 'particle_to' in $links_columns {
-            if ('content_s_to' in $links_columns) {
-                dfr drop content_s_to
-            } else {}
-            | dfr join --left $p particle_to particle
+            dfr join --left $p particle_to particle
             | dfr rename content_s content_s_to
         } else {}
         | if 'particle_from' in $links_columns {
-            if ('content_s_from' in $links_columns) {
-                dfr drop content_s_from
-            } else {}
-            | dfr join --left $p particle_from particle
+            dfr join --left $p particle_from particle
             | dfr rename content_s content_s_from
         } else {}
         | if 'particle' in $links_columns {
-            if ('content_s' in $links_columns) {
-                dfr drop content_s
-            } else {}
-            | dfr join --left $p particle particle
+            dfr join --left $p particle particle
         } else {}
         | if 'neuron' in $links_columns {
-            if ('nick' in $links_columns) {
-                dfr drop nick
-            } else {}
-            | dfr join --left (
+            dfr join --left (
                 dict-neurons-view --df
                 | dfr select neuron nick
             ) neuron neuron
