@@ -1355,8 +1355,10 @@ export def --env 'graph-download-snapshot' [
     print $'Downloading ($dict_name)' ''
 
     (
-        open $dict_path
-        | append ( ipfs cat $'($cur_data_cid)/graph/neurons_dict.yaml' | from yaml)
+        ( ipfs cat $'($cur_data_cid)/graph/neurons_dict.yaml' | from yaml)
+        | if ($dict_path | path exists) {
+            prepend (open $dict_path)
+        } else {}
         | uniq-by neuron
         | save -f $dict_path
     )
