@@ -1721,7 +1721,9 @@ export def 'graph-filter-neurons' [
 export def 'graph-append-related' [
     --only_first_neuron (-o)
 ] {
-    let $links_in = $in
+    let $links_in = (
+        $in | graph-select-standard-columns --extra_columns ['link_local_index' 'init-role' 'step']
+    )
     let $columns_in = ($links_in | dfr columns)
     let $step = (
         if 'step' in $columns_in {
