@@ -8,7 +8,8 @@ def --env 'install_if_missing' [
     if ($local_cli_name | default $brew_cli_name | which $in) == [] {
         if (confirm $"You don't have `($brew_cli_name)` app availble now. Would you like to install it via homebrew?") {
             try {
-                brew install $brew_cli_name
+                brew install $brew_cli_name;
+                print ''
             } catch {
                 print $'($brew_cli_name) failed to install.'
             }
