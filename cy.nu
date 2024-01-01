@@ -773,8 +773,9 @@ def 'link-exist' [
 export def 'links-remove-existed' [
     --all_links
 ]: [nothing -> table, nothing -> nothing] {
+    let $links_view = (links-view -q)
     let $links_with_status = (
-        links-view -q
+        $links_view
         | if $all_links {} else {
             print-and-pass {|l|
                 if ($l | length | $in > 100) {
@@ -807,6 +808,9 @@ export def 'links-remove-existed' [
 
         $links_with_status
         | where link_exist? != true
+        | if not $all_links {} else {
+            append ($links_view | skip 100)
+        }
         | links-replace
     } else {
         cprint 'There are no cyberlinks in the temp table for the current address exist the cybergraph'
