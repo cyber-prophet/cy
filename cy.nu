@@ -240,6 +240,7 @@ export def 'link-chain' [
 export def 'link-files' [
     ...files: path        # filenames to add into the local ipfs node
     --link_filenames (-n)   # Add filenames as a from link
+    --include_extension     # Don't cut file extension (works only with --link_filenames)
     --disable_append (-D)   # Don't append links to the links table
     --quiet                 # Don't output results page
     --yes (-y)              # Confirm uploading files without request
@@ -268,7 +269,10 @@ export def 'link-files' [
             | upsert to_text $'pinned_file:($f.from_text)'
             | upsert to (ipfs add $f.from_text -Q | str replace (char nl) '')
             | if ($link_filenames) {
-                upsert from (pin-text $f.from_text)
+                if $include_extension {} else {
+                    upsert from_text { $f.from_text | path parse | get stem }
+                }
+                | upsert from {|i| (pin-text $i.from_text)}
                 | move from --before to
             } else { reject from_text }
         }
