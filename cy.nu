@@ -2003,7 +2003,7 @@ export def 'graph-add-metadata' [
 ] {
     let $links = (
         graph-links-df
-        | graph-select-standard-columns --extra_columns ['particle']
+        | graph-select-standard-columns --extra_columns ['particle', 'link_local_index', 'init-role', 'step']
     )
     let $p = (
         graph-particles-df
