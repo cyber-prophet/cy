@@ -6,7 +6,7 @@ export def main [
     if $callback == null {
         print $input
     } else {
-        do $callback $input
+        print (do $callback $input)
     }
 
     $input
