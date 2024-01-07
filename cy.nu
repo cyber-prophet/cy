@@ -1854,6 +1854,79 @@ export def 'graph-neurons-stats' [] {
     )
 }
 
+# Output graph stats based on piped in or the whole graph
+export def 'graph-stats' [] {
+    let $links = (graph-links-df | dfr with-column (dfr lit a | dfr as dummyc))
+    let $p = (graph-particles-df)
+    let $p2 = ($links | graph-to-particles | graph-add-metadata)
+
+    def dfr_countrows [] {
+        dfr with-column (dfr lit 1) | dfr select literal | dfr sum | dfr into-nu | get literal.0
+    }
+
+    let $n_all_particles = ($p2 | dfr_countrows)
+
+    let $n_missing_particles = ($p2 | dfr filter-with (($in.content_s | dfr is-null) or ($in.content_s =~ '^timeout'))
+        | dfr_countrows)
+
+    let $n_non_text_particles = ($p2 | dfr filter-with ($in.content_s =~ '^"MIME type"')
+        | dfr_countrows)
+
+    let $follows = (
+        [['particle'];['QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx']] # follow
+        | dfr into-df
+        | dfr join --left $links particle particle_from
+        | dfr group-by dummyc
+        | dfr agg [
+            (dfr col timestamp | dfr count | dfr as 'follows')
+        ]
+    )
+
+    let $tweets = (
+        [['particle'];['QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx']] # tweet
+        | dfr into-df
+        | dfr join --left $links particle particle_from
+        | dfr group-by dummyc
+        | dfr agg [
+            (dfr col timestamp | dfr count | dfr as 'tweets')
+        ]
+    )
+
+    (
+        $links
+        | dfr group-by dummyc
+        | dfr agg [
+            (dfr col timestamp | dfr count | dfr as 'links')
+            (dfr col neuron | dfr n-unique | dfr as 'neurons')
+            (dfr col timestamp | dfr min | dfr as 'first_link')
+            (dfr col timestamp | dfr max | dfr as 'last_link')
+        ]
+        | dfr join --left $follows dummyc dummyc
+        | dfr join --left $tweets dummyc dummyc
+        | dfr fill-null 0
+        | dfr into-nu
+        | reject index dummyc
+        | get 0
+        | upsert all_particles $n_all_particles
+        | upsert text_particles ($n_all_particles - $n_missing_particles - $n_non_text_particles)
+        | upsert missing_particles $n_missing_particles
+        | upsert nontext_particles $n_non_text_particles
+        | select -i ($in | columns | prepend [
+            links,
+            neurons,
+            all_particles,
+            text_particles,
+            nontext_particles
+            missing_particles,
+            first_link,
+            last_link,
+            follows,
+            tweets,
+            ]
+        )
+    )
+}
+
 # Export a graph into CSV file for import to Gephi
 export def 'graph-to-gephi' [] {
     let $links = (graph-links-df)
