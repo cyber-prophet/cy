@@ -1573,8 +1573,6 @@ export def 'graph-to-particles' [
     --include_system (-s)   # Include tweets, follow and avatar paritlces
     --include_global        # Include column with global particles' df (that includes content)
     --include_particle_index         # Include local 'particle_index' column
-    --is_first_neuron       # Check if 'neuron' and 'neuron_global' columns are equal
-    --only_first_neuron (-o)
     --cids_only (-c)        # Output one column with CIDs only
     # --init_role             # Output if particle originally was in 'from' or 'to' column
 ] {
