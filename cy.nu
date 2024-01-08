@@ -3875,6 +3875,10 @@ export def 'query-tx' [
     } else {
         reject -i events
     }
+    | print-and-pass {|i| if $i.code == 0 {'Transaction is received! ✅'} else {
+        {$'Transaction is not applied: the code ($i.code?)'}
+    }}
+    | select -i ($in | columns | prepend [height code tx])
 }
 
 # Query tx by acc/seq
