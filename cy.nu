@@ -3618,7 +3618,8 @@ export def 'tokens-investmint-wizzard' [
     let $release_time = (
         $times
         | select release_time tokens
-        | prepend {release_time: (nearest-given-weekday)}
+        | prepend (1..6 | each { {release_time: (nearest-given-weekday --weeks $in)} })
+        | sort-by release_time
         | input list
         | get release_time
         | $in - (date now) | into int
@@ -3637,7 +3638,8 @@ export def 'tokens-investmint-wizzard' [
         let $signed: string = cy-path temp 'tx_investmint_signed.json'
         $trans_unsigned | save -rf $unsigned
         cyber tx sign $unsigned --from $address --output-document $signed --yes (default-node-params)
-        cyber tx broadcast $signed (default-node-params) | from json
+
+        cyber tx broadcast $signed (default-node-params) | from json | select txhash
     }
 }
 
