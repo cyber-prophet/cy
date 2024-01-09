@@ -94,8 +94,20 @@ let $cy_folder = '~/cy'
 | if ($in | is-empty) {
     $"#💎 load Cy on NuShell start(char nl)overlay use '($cy_folder)/cy.nu' -pr (char nl)"
     | save -a $'($nu.config-path)'
-} else {
-    print $in
+}
+
+open $nu.config-path
+| str replace 'show_banner: true' 'show_banner: false'
+| str replace 'show_empty: true' 'show_empty: false'
+| str replace 'methodology: wrapping' 'methodology: truncating'
+| str replace 'header_on_separator: false' 'header_on_separator: true'
+| str replace 'file_format: "plaintext"' 'file_format: "sqlite"'
+| str replace 'quick: true' 'quick: false'
+| str replace 'algorithm: "prefix"' 'algorithm: "fuzzy"'
+| save $nu.config-path
+
+if (open $nu.env-path | lines | where ($it | str starts-with '$env.EDITOR') | length | $in == 0) {
+    (char nl) + '$env.EDITOR = nano' + (char nl) | save -a $nu.env-path)
 }
 
 print "CY has been downloaded and installed. Now it will launch automatically with Nu."
