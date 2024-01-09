@@ -104,7 +104,7 @@ open $nu.config-path
 | str replace 'file_format: "plaintext"' 'file_format: "sqlite"'
 | str replace 'quick: true' 'quick: false'
 | str replace 'algorithm: "prefix"' 'algorithm: "fuzzy"'
-| save $nu.config-path
+| save -f $nu.config-path
 
 if (open $nu.env-path | lines | where ($it | str starts-with '$env.EDITOR') | length | $in == 0) {
     (char nl) + '$env.EDITOR = nano' + (char nl) | save -a $nu.env-path)
