@@ -1,7 +1,4 @@
 # Setup cy
-if ($nu.config-path | path exists | not $in) {config nu --default | save -r $nu.config-path};
-if ($nu.env-path | path exists | not $in) {config env --default | save -r $nu.env-path} # the command to create default config and env
-
 use ../nu-utils/ [cprint print-and-pass]
 
 def --env 'install_if_missing' [
