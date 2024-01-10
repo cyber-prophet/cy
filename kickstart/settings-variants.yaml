@@ -20,6 +20,7 @@ caching-function-max-retries:
   - 5
   - 3
   - 1
+  - 0
 authz:
   description: The address to send links from
   variants:
