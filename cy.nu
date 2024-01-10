@@ -261,7 +261,7 @@ export def 'link-files' [
     )
 
     $'Confirm uploading ($files_col | length) files?'
-    | if $yes or (confirm -n true $in) { } else { return }
+    | if $yes or (confirm --default_not=true $in) { } else { return }
 
     let $results = (
         $files_col
@@ -4636,7 +4636,7 @@ def 'path-exists-safe' [
 
 def 'confirm' [
     prompt: string
-    --default_not (-n): bool = false
+    --default_not (-n)
     --dont_keep_prompt
 ]: nothing -> bool {
     if not $dont_keep_prompt {cprint $prompt}
