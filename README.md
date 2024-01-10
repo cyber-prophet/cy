@@ -6,27 +6,6 @@ Cy - a [nushell](https://www.nushell.sh/) wrapper for `cyber`, `ipfs` and other 
 
 Very much WIP. Actively developed.
 
-## Quick start
-
-If you have `cyber` and `nu` installed:
-
-```nushell
-git clone https://github.com/cyber-prophet/cy; cd cy;
-overlay use -pr cy.nu
-```
-## Cyber-family blockchains
-
-Bostrom is the name of the consensus computer that maintains a general-purpose, permissionless informational graph where nodes are CIDs of files in the IPFS network, and edges are Cyberlinks (consisting of source, destination, author, height - records) written into the blockchain. The information written into the blockchain is secured to remain in existence as long as the blockchain is operative. The blockchain is designed with economic incentives that motivate validators to sustain the network. For further information about Cyber blockchains, please refer to [Bostrom Journal.](https://github.com/cyber-prophet/bostrom-journal/blob/manual/BostromJournal001.md)
-
-## References to the documentation of Cy
-
-I intend to locate all the documentation of Cy in one place to prevent fragmentation of attention.
-
-1. In the comments to its code (`.nu` files of this repository, mainly in [cy.nu](https://github.com/cyber-prophet/cy/blob/dev/cy.nu)).
-2. From the code, the documentation is semi-automatically parsed and written to `.md` documents of this repository (mainly to [README.md](https://github.com/cyber-prophet/cy/blob/dev/README.md)).
-
-The main feedback resource is GitHub [issues](https://github.com/cyber-prophet/cy/issues).
-
 ## Key features of Cy
 
 - Setting different settings for different profiles (RPC endpoints, private keys, networks, etc...)
@@ -36,27 +15,42 @@ The main feedback resource is GitHub [issues](https://github.com/cyber-prophet/c
 - Cyber search in terminal
 - Many more (see list of functions below)
 
-## Install all the neccessary apps using homebrew (Mac, Linux)
+## Installation
+
+### Quick start
+
+If you have `nushell`, `git` and `cyber` CLI-s installed:
+
+```nushell
+git clone https://github.com/cyber-prophet/cy; cd cy;
+overlay use -pr cy.nu
+```
+
+### Install all the neccessary apps using homebrew (Mac, Linux)
 
 Open Terminal app on your computer.
 
 1. Install [brew](https://brew.sh/)
-2. Add a custom tap to your Homebrew: `brew tap cyber-prophet/homebrew-taps`
-3. Install all the dependencies for running Cy: `brew install cybundle; cybundle`
-   This command will install the following software on your computer:
+2. Add a custom tap to your Homebrew, install all the dependencies for running Cy:
 
+```sh
+brew tap cyber-prophet/homebrew-taps; brew install cybundle; cybundle
+```
+
+3. The commands above, upon request, will install the following software on your computer if it is not installed yet:
+
+   1. [cybundle script](https://github.com/cyber-prophet/homebrew-taps/blob/main/src/cybundle)
    1. [nushell](https://www.nushell.sh/) app
-   1. curl (if needed)
+   1. [curl](https://curl.se/)
    1. [cyber](https://github.com/cybercongress/go-cyber)
    1. [pussy](https://github.com/greatweb/space-pussy)
    1. [ipfs - kubo](https://github.com/ipfs/kubo)
    1. [pueue](https://github.com/Nukesor/pueue)
-   2. [rich-cli](https://github.com/Textualize/rich-cli)
-   1. [cybundle script](https://github.com/cyber-prophet/homebrew-taps/blob/main/src/cybundle)
-
-4. To continue installation of configs and execute necessary init steps, run: `cybundle`
+   1. [rich-cli](https://github.com/Textualize/rich-cli)
 
 After installation, you can launch `nu` in your terminal with already configured `cy` in it.
+
+## First steps using Cy
 
 To start using Cy, follow the instructions on your screen. They should include:
 
@@ -72,9 +66,24 @@ By default, it should install Ubuntu on your computer. And when Ubuntu is instal
 proceed with the steps described in the [section of installation for MacOS and Linux](#installation-mac-linux)
 of this manual.
 
+## Cyber-family blockchains
+
+Bostrom is the name of the consensus computer that maintains a general-purpose, permissionless informational graph where nodes are CIDs of files in the IPFS network, and edges are Cyberlinks (consisting of source, destination, author, height - records) written into the blockchain. The information written into the blockchain is secured to remain in existence as long as the blockchain is operative. The blockchain is designed with economic incentives that motivate validators to sustain the network. For further information about Cyber blockchains, please refer to [Bostrom Journal.](https://github.com/cyber-prophet/bostrom-journal/blob/manual/BostromJournal001.md)
+
+## References to the documentation of Cy
+
+I intend to locate all the documentation of Cy in one place to prevent fragmentation of attention.
+
+1. In the comments to its code (`.nu` files of this repository, mainly in [cy.nu](https://github.com/cyber-prophet/cy/blob/dev/cy.nu)).
+2. From the code, the documentation is semi-automatically parsed and written to `.md` documents of this repository (mainly to [README.md](https://github.com/cyber-prophet/cy/blob/dev/README.md)).
+
+The main feedback resource is GitHub [issues](https://github.com/cyber-prophet/cy/issues).
+
+
 ## Commands
 
 ### cy pin-text
+
 ```
   Pin a text particle
 
@@ -112,6 +121,7 @@ Input/output types:
 ```
 
 ### cy link-texts
+
 ```
   Add a 2-texts cyberlink to the temp table
 
@@ -143,6 +153,7 @@ Input/output types:
 ```
 
 ### cy link-chain
+
 ```
   Add a link chain to the temp table
 
@@ -170,6 +181,7 @@ Input/output types:
 ```
 
 ### cy link-files
+
 ```
   Pin files from the current folder to the local node and append their cyberlinks to the temp table
 
@@ -206,6 +218,7 @@ Input/output types:
 ```
 
 ### cy follow
+
 ```
   Create a cyberlink according to semantic construction of following a neuron
 
@@ -229,6 +242,7 @@ Input/output types:
 ```
 
 ### cy tweet
+
 ```
   Add a tweet and send it immediately (unless of disable_send flag)
 
@@ -255,6 +269,7 @@ Input/output types:
 ```
 
 ### cy link-random
+
 ```
   Make a random cyberlink from different APIs (chucknorris.io, forismatic.com)
 
@@ -289,6 +304,7 @@ Input/output types:
 ```
 
 ### cy links-view
+
 ```
   View the temp cyberlinks table
 
@@ -326,6 +342,7 @@ Input/output types:
 ```
 
 ### cy links-append
+
 ```
   Append piped-in table to the temp cyberlinks table
 
@@ -343,6 +360,7 @@ Input/output types:
 ```
 
 ### cy links-replace
+
 ```
   Replace the temp table with piped-in table
 
@@ -360,6 +378,7 @@ Input/output types:
 ```
 
 ### cy links-clear
+
 ```
   Empty the temp cyberlinks table
 
@@ -374,6 +393,7 @@ Input/output types:
 ```
 
 ### cy links-link-all
+
 ```
   Add the same text particle into the 'from' or 'to' column of the temp cyberlinks table
 
@@ -407,6 +427,7 @@ Input/output types:
 ```
 
 ### cy links-pin-columns
+
 ```
   Pin values from column 'text_from' and 'text_to' to an IPFS node and fill according columns with their CIDs
 
@@ -436,6 +457,7 @@ Input/output types:
 ```
 
 ### cy links-remove-existed
+
 ```
   Remove existing cyberlinks from the temp cyberlinks table
 
@@ -450,6 +472,7 @@ Input/output types:
 ```
 
 ### cy links-publish
+
 ```
   Publish all links in the temp table to cybergraph
 
@@ -464,6 +487,7 @@ Input/output types:
 ```
 
 ### cy tsv-copy
+
 ```
   Copy a table from the pipe into the clipboard (in tsv format)
 
@@ -478,6 +502,7 @@ Input/output types:
 ```
 
 ### cy tsv-paste
+
 ```
   Paste a table from the clipboard to stdin (so it can be piped further)
 
@@ -492,6 +517,7 @@ Input/output types:
 ```
 
 ### cy update-cy
+
 ```
   Update Cy to the latest version
 
@@ -509,6 +535,7 @@ Input/output types:
 ```
 
 ### cy passport-get
+
 ```
   Get a passport by providing a neuron's address or nick
 
@@ -539,6 +566,7 @@ Input/output types:
 ```
 
 ### cy passport-set
+
 ```
   Set a passport's particle, data or avatar field for a given nickname
 
@@ -564,6 +592,7 @@ Input/output types:
 ```
 
 ### cy dict-neurons
+
 ```
   Output neurons dict
 
@@ -581,6 +610,7 @@ Input/output types:
 ```
 
 ### cy dict-neurons-add
+
 ```
   Add neurons to YAML-dictionary WIP
 
@@ -595,6 +625,7 @@ Input/output types:
 ```
 
 ### cy dict-neurons-update
+
 ```
   Update neurons YAML-dictionary
 
@@ -619,6 +650,7 @@ Input/output types:
 ```
 
 ### cy graph-download-links
+
 ```
   Download the latest cyberlinks from a hasura cybernode endpoint
 
@@ -633,6 +665,7 @@ Input/output types:
 ```
 
 ### cy graph-to-particles
+
 ```
   Output unique list of particles from piped in cyberlinks table
 
@@ -678,6 +711,7 @@ Input/output types:
 ```
 
 ### cy particles-keep-only-first-neuron
+
 ```
   In the piped in particles df leave only particles appeared for the first time
 
@@ -692,6 +726,7 @@ Input/output types:
 ```
 
 ### cy graph-update-particles-parquet
+
 ```
   Update the 'particles.parquet' file (it inculdes content of text files)
 
@@ -710,6 +745,7 @@ Input/output types:
 ```
 
 ### cy graph-filter-neurons
+
 ```
   Filter the graph to chosen neurons only
 
@@ -727,6 +763,7 @@ Input/output types:
 ```
 
 ### cy graph-append-related
+
 ```
   Append related cyberlinks to the piped in graph
 
@@ -744,6 +781,7 @@ Input/output types:
 ```
 
 ### cy graph-neurons-stats
+
 ```
   Output neurons stats based on piped in or the whole graph
 
@@ -758,6 +796,7 @@ Input/output types:
 ```
 
 ### cy graph-to-gephi
+
 ```
   Export a graph into CSV file for import to Gephi
 
@@ -772,6 +811,7 @@ Input/output types:
 ```
 
 ### cy graph-to-logseq
+
 ```
   Logseq export WIP
 
@@ -786,6 +826,7 @@ Input/output types:
 ```
 
 ### cy graph-to-txt-feed
+
 ```
   Output particles into txt formated feed
 
@@ -800,6 +841,7 @@ Input/output types:
 ```
 
 ### cy graph-to-cosmograph
+
 ```
   Export graph in cosmograph format
 
@@ -814,6 +856,7 @@ Input/output types:
 ```
 
 ### cy graph-add-metadata
+
 ```
   Add content_s and neuron's nicknames columns to piped in or the whole graph df
   > cy graph-filter-neurons maxim_bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
@@ -852,6 +895,7 @@ Input/output types:
 ```
 
 ### cy graph-links-df
+
 ```
   Output a full graph, or pass piped in graph further
 
@@ -879,6 +923,7 @@ Input/output types:
 ```
 
 ### cy config-view
+
 ```
   View a saved JSON config file
 
@@ -896,6 +941,7 @@ Input/output types:
 ```
 
 ### cy search
+
 ```
   Use the built-in node search function in cyber or pussy
 
@@ -918,6 +964,7 @@ Input/output types:
 ```
 
 ### cy cid-get-type-gateway
+
 ```
   Obtain cid info
   > cy cid-get-type-gateway QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV | to yaml
@@ -942,6 +989,7 @@ Input/output types:
 ```
 
 ### cy cid-read-or-download
+
 ```
   Read a CID from the cache, and if the CID is absent - add it into the queue
 
@@ -962,6 +1010,7 @@ Input/output types:
 ```
 
 ### cy cid-download-async
+
 ```
   Add a cid into queue to download asynchronously
 
@@ -985,6 +1034,7 @@ Input/output types:
 ```
 
 ### cy cid-download
+
 ```
   Download cid immediately and mark it in the queue
 
@@ -1007,6 +1057,7 @@ Input/output types:
 ```
 
 ### cy queue-cid-add
+
 ```
   Add a CID to the download queue
 
@@ -1025,6 +1076,7 @@ Input/output types:
 ```
 
 ### cy watch-search-folder
+
 ```
   Watch the queue folder, and if there are updates, request files to download
 
@@ -1039,6 +1091,7 @@ Input/output types:
 ```
 
 ### cy queue-cids-download
+
 ```
   Check the queue for the new CIDs, and if there are any, safely download the text ones
 
@@ -1062,6 +1115,7 @@ Input/output types:
 ```
 
 ### cy cache-clean-cids-queue
+
 ```
   remove from queue CIDs with many attempts
 
@@ -1079,6 +1133,7 @@ Input/output types:
 ```
 
 ### cy cache-clear
+
 ```
   Clear the cache folder
 
@@ -1093,6 +1148,7 @@ Input/output types:
 ```
 
 ### cy query-current-height
+
 ```
   Get a current height for the active network in config
 
@@ -1115,6 +1171,7 @@ Input/output types:
 ```
 
 ### cy query-rank-karma
+
 ```
   Get a karma metric for a given neuron
 
@@ -1135,6 +1192,7 @@ Input/output types:
 ```
 
 ### cy tokens-balance-get
+
 ```
   Get a balance for a given account
 
@@ -1166,6 +1224,7 @@ Input/output types:
 ```
 
 ### cy tokens-supply-get
+
 ```
   Get supply of all tokens in a network
 
@@ -1183,6 +1242,7 @@ Input/output types:
 ```
 
 ### cy tokens-ibc-denoms-table
+
 ```
   Check IBC denoms
 
@@ -1210,6 +1270,7 @@ Input/output types:
 ```
 
 ### cy balances
+
 ```
   Check balances for the keys added to the active CLI
 
@@ -1236,6 +1297,7 @@ Input/output types:
 ```
 
 ### cy tokens-rewards-withdraw
+
 ```
   Withdraw rewards, make stats
 
@@ -1253,6 +1315,7 @@ Input/output types:
 ```
 
 ### cy ipfs-bootstrap-add-congress
+
 ```
   Add the cybercongress node to bootstrap nodes
 
@@ -1267,6 +1330,7 @@ Input/output types:
 ```
 
 ### cy validator-generate-persistent-peers-string
+
 ```
   Dump the peers connected to the given node to the comma-separated 'persistent_peers' list
   Nodes list for https://rpc.bostrom.cybernode.ai:443
@@ -1288,6 +1352,7 @@ Input/output types:
 ```
 
 ### cy query-tx
+
 ```
   Query tx by hash
 
@@ -1305,6 +1370,7 @@ Input/output types:
 ```
 
 ### cy query-tx-seq
+
 ```
   Query tx by acc/seq
 
@@ -1323,6 +1389,7 @@ Input/output types:
 ```
 
 ### cy query-account
+
 ```
   Query account
 
@@ -1344,6 +1411,7 @@ Input/output types:
 ```
 
 ### cy qnbn
+
 ```
   query neuron addrsss by his nick
 
@@ -1365,6 +1433,7 @@ Input/output types:
 ```
 
 ### cy help-cy
+
 ```
   An ordered list of cy commands
 
