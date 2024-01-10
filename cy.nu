@@ -298,7 +298,7 @@ def test-link-files [] {
     ]
 
     let $result = (
-        link-files --link_filenames --yes
+        link-files --link_filenames --yes --include_extension
     )
 
     cd ..;
