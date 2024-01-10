@@ -12,7 +12,7 @@ If you have `cyber` and `nu` installed:
 
 ```nushell
 git clone https://github.com/cyber-prophet/cy; cd cy;
-overlay use cy -pr cy.nu
+overlay use -pr cy.nu
 ```
 ## Cyber-family blockchains
 
