@@ -936,7 +936,7 @@ def 'tx-sign' [
         } else {}
     )
 
-    ^($env.cy.exec) tx sign $unsigned_tx_path $params
+    ^($env.cy.exec) tx sign $unsigned_tx_path ...$params
 
     $out_path
 }
@@ -4151,7 +4151,7 @@ def 'request-save-output-exec-response' [
     mut $response = {}
 
     let $request = {
-        do -i { ^($executable) $sub_commands_and_args }
+        do -i { ^($executable) ...$sub_commands_and_args }
         | complete
         | if $in.exit_code == 0 {
             get stdout
