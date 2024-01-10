@@ -2583,7 +2583,7 @@ export def 'cid-download-async' [
     let $content = (do -i {open ($env.cy.ipfs-files-folder | path join $'($cid).md')})
     let $source = ($source | default $env.cy.ipfs-download-from)
 
-    let $task = $'cid-download ($cid) --source ($source) --info_only ($info_only) --folder "($folder)"'
+    let $task = $'cid-download ($cid) --source ($source) --info_only=($info_only) --folder "($folder)"'
 
     if ($content == null) or ($content == 'timeout') or $force {
         queue-task-add $task
@@ -2595,14 +2595,14 @@ export def 'cid-download-async' [
 export def 'cid-download' [
     cid: string
     --source: string # kubo or gateway
-    --info_only = false # Don't download the file by write a card with filetype and size
+    --info_only # Don't download the file by write a card with filetype and size
     --folder: string
 ] {
     let $folder = ($folder | default $env.cy.ipfs-files-folder)
     let $source = ($source | default $env.cy.ipfs-download-from)
     let $status = match $source {
-        'gateway' => {cid-download-gateway $cid --info_only $info_only --folder $folder}
-        'kubo' => {cid-download-kubo $cid --info_only $info_only --folder $folder}
+        'gateway' => {cid-download-gateway $cid --info_only=$info_only --folder $folder}
+        'kubo' => {cid-download-kubo $cid --info_only=$info_only --folder $folder}
     }
 
     if ($status) in ['text' 'non_text'] {
@@ -2620,7 +2620,7 @@ def 'cid-download-kubo' [
     cid: string
     --timeout = '300s'
     --folder: path
-    --info_only: bool = false # Don't download the file but write a card with filetype and size
+    --info_only # Don't download the file but write a card with filetype and size
 ] {
     log debug $'cid to download ($cid)'
     let $file_path = ($folder | default $env.cy.ipfs-files-folder | path join $'($cid).md')
@@ -2675,7 +2675,7 @@ def 'cid-download-gateway' [
     cid: string
     --gate_url: string = 'https://gateway.ipfs.cybernode.ai/ipfs/'
     --folder: string
-    --info_only: bool = false # Don't download the file by write a card with filetype and size
+    --info_only # Don't download the file by write a card with filetype and size
 ] {
     let $file_path = ($folder | default $'($env.cy.ipfs-files-folder)' | path join $'($cid).md')
     let $meta = (cid-get-type-gateway $cid)
