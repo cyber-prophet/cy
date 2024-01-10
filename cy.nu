@@ -1046,10 +1046,17 @@ export def 'tsv-paste' [] {
     pbpaste | from tsv
 }
 
-# Update Cy to the latest version
+# Update Cy and Nushell to the latest versions
 export def 'update-cy' [
     --branch: string@'nu-complete-git-branches' = 'dev'
 ] {
+    # check if nushell is installed using brew
+    if (brew list nushell | complete | get exit_code | $in == 0) {
+        brew upgrade nushell;
+    } else {
+        cargo install --features=dataframe nu
+    }
+
     cd $env.cy.path;
     git stash
     git checkout $branch
