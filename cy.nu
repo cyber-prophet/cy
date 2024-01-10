@@ -790,7 +790,8 @@ export def 'links-remove-existed' [
         | merge ($in | length | seq 0 $in | wrap index)
         | par-each {|i| $i
             | upsert link_exist {
-                |row| (link-exist $row.from $row.to $env.cy.address)
+                |row| print $row.index;
+                (link-exist $row.from $row.to $env.cy.address)
             }
         }
         | sort-by index
