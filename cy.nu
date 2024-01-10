@@ -2492,7 +2492,7 @@ export def 'search' [
 
 def serp1 [
     results
-    --pretty: bool@'nu-complete-bool' = false
+    --pretty
 ] {
     $results
     | get result
