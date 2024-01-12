@@ -2030,7 +2030,6 @@ export def 'graph-to-txt-feed' [] {
     | reject index
     | do {|i| print ($i | get 0.init-role); $i} $in
     | each {|i| echo_particle_txt $i}
-    | str join (char nl)
 }
 
 # Export piped-in graph to a CSV file in cosmograph format
@@ -4409,14 +4408,14 @@ export def 'echo_particle_txt' [
     if $i.content == null {
         $'⭕️ ($i.timestamp), ($i.nick) - timeout - ($i.particle)'
     } else {
-        $'🟢 ($i.timestamp), ($i.nick)(char nl)($i.content)(char nl)($i.particle)'
+        $'🟢 ($i.timestamp), ($i.nick)(char nl)(char nl)($i.content)(char nl)(char nl)($i.particle)(char nl)(char nl)'
     }
-    | glow -w (80 + $indent)
+    | mdcat -l --columns (80 + $indent) -
     | complete
     | get stdout
     | lines
-    | each {|i| $"(' ' | str repeat $indent)($i)"}
-    | str join (char nl)
+    | each {|i| $"(' ' | str repeat $indent)($i)" | print $in}
+    # | each {|b| $"((ansi grey) + ($i.step + 2 | into string) + (ansi reset) | str repeat $indent)($b)" | print $in}
 }
 
 def 'col-name-reverse' [
