@@ -4411,14 +4411,12 @@ export def 'echo_particle_txt' [
     } else {
         $'🟢 ($i.timestamp), ($i.nick)(char nl)($i.content)(char nl)($i.particle)'
     }
-    | ^rich (
-        [
-            '-w' (80 + $indent)
-            '-'
-            '-d' $'0,0,1,($indent)'
-        ]
-        | if $markdown { append '-m' } else {}
-    )
+    | glow -w (80 + $indent)
+    | complete
+    | get stdout
+    | lines
+    | each {|i| $"(' ' | str repeat $indent)($i)"}
+    | str join (char nl)
 }
 
 def 'col-name-reverse' [
