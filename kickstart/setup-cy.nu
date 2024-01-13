@@ -51,14 +51,17 @@ install_if_missing "mdcat"
 
 if ( '~/.ipfs' | path exists | not $in ) {
     ipfs init
+    sleep 0.5sec
 }
 
 if ( ipfs swarm peers | complete | get exit_code | $in == 1 ) {
     brew services start ipfs
+    sleep 0.5sec
 }
 
 # add cybernode to boostrap
 ipfs bootstrap add '/ip4/135.181.19.86/tcp/4001/p2p/12D3KooWNMcnoQynAY9hyi4JxzSu64BsRGcJ9z7vKghqk8sTrpqY'
+ipfs routing findpeer 12D3KooWNMcnoQynAY9hyi4JxzSu64BsRGcJ9z7vKghqk8sTrpqY
 
 let $cy_folder = '~/cy'
 
