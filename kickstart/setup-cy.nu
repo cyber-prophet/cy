@@ -46,7 +46,7 @@ install_if_missing "pussy"
 install_if_missing "curl"
 install_if_missing "pueue"
 install_if_missing "ipfs"
-install_if_missing "rich-cli" "rich"
+install_if_missing "mdcat"
 # install_if_missing "gum"
 
 # depends_on "atuin"
