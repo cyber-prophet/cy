@@ -828,7 +828,7 @@ export def 'links-remove-existed' [
 
         $links_with_status
         | where link_exist? != true
-        | if not $all_links {} else {
+        | if $all_links {} else {
             append ($links_view | skip 100)
         }
         | links-replace
