@@ -837,6 +837,30 @@ export def 'links-remove-existed' [
     }
 }
 
+# Remove existing links using graph snapshot data
+export def 'links-remove-existed-2' [] {
+    graph-download-links
+
+    let $existing_links = (
+        graph-links-df
+        | dfr filter-with ((dfr col neuron) == $env.cy.address)
+        | dfr select particle_from particle_to
+        | dfr with-column (dfr lit true | dfr as duplicate)
+        | dfr into-lazy
+    );
+
+
+    links-view
+    | dfr into-lazy
+    | dfr join --left $existing_links [from to] [particle_from particle_to]
+    | dfr filter-with (dfr col duplicate | dfr is-null)
+    | dfr collect
+    | dfr into-nu
+    | reject index
+    | links-replace
+}
+
+
 # Create a custom unsigned cyberlinks transaction
 def 'tx-json-create-from-cyberlinks' [
     $links: table
