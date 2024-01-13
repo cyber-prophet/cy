@@ -71,6 +71,7 @@ let $cy_folder = '~/cy'
     | save -a $'($nu.config-path)'
 }
 
+# Change default settings to preffered by Cyber-prophet
 open $nu.config-path
 | str replace 'show_banner: true' 'show_banner: false'
 | str replace 'show_empty: true' 'show_empty: false'
@@ -85,7 +86,7 @@ if (open $nu.env-path | lines | where ($it | str starts-with '$env.EDITOR') | le
     (char nl) + '$env.EDITOR = nano' + (char nl) | save -a $nu.env-path
 }
 
-print "CY has been downloaded and installed. Now it will launch automatically with Nu."
+print "CY has been downloaded and installed. Now it will launch be launched automatically with Nu."
 print "Now nu exits. Execute 'cy config-new' after you relaunch it. Have fun!"
 
 exit
