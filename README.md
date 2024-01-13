@@ -1,4 +1,4 @@
-# Cy
+# Cy💎
 
 Cy - a [nushell](https://www.nushell.sh/) wrapper for `cyber`, `ipfs` and other CLIs for interacting with Cybergraphs.
 
