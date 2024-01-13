@@ -29,7 +29,7 @@ export def check-requirements [] {
 
 export-env {
     # banner2
-    let $tested_versions = ['0.88.1']
+    let $tested_versions = ['0.89.0']
 
     version
     | get version
