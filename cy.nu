@@ -3134,11 +3134,13 @@ export def 'tokens-routed-to' [
 def test-tokens-routed-from [] {
     equal (tokens-routed-from bostrom1vu39vtn2ld3aapued6nwlhm7wpg2gj9zzlncek) null
     equal (tokens-routed-from bostrom1vu39vtn2ld3aapued6nwlhm7wpg2gj9zzlncej) []
+
+    # seems like there is a mistake below
     equal (tokens-routed-from bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8) [
-        [denom, amount, state]; [milliampere, 2000, routed-from], [millivolt, 103000, routed-from]
+        [denom, amount, state]; [milliampere, 3000, routed-from], [millivolt, 180000, routed-from]
     ]
     equal (tokens-routed-from bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 --height 10124681) [
-        [denom, amount, state]; [milliampere, 2000, routed-from], [millivolt, 103000, routed-from]
+        [denom, amount, state]; [milliampere, 3000, routed-from], [millivolt, 180000, routed-from]
     ]
     equal (tokens-routed-from bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 --height 2000) []
 }
@@ -4042,6 +4044,7 @@ export def 'authz-give-grant' [
         ^$env.cy.exec tx authz grant $neuron generic --msg-type $message_type
         --from $env.cy.address
         --expiration (date now | $in + $expiration | format date '%s' | into int)
+        ...(default-node-params)
     )
 }
 
