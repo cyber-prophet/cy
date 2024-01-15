@@ -3599,7 +3599,7 @@ export def 'tokens-delegate-wizzard' [
 
     (
         ^$env.cy.exec tx staking delegate $operator $boots_to_delegate
-        --from $env.cy.address (default-node-params)
+        --from $env.cy.address ...(default-node-params)
     )
 }
 
@@ -3672,7 +3672,7 @@ export def 'tokens-investmint-wizzard' [
 
     let $trans_unsigned = (
         cyber tx resources investmint $h_to_investmint $resource_token $release_time
-        --from $address --fees 2000boot --gas 2000000 (default-node-params) --generate-only
+        --from $address --fees 2000boot --gas 2000000 ...(default-node-params) --generate-only
     )
 
     print ($trans_unsigned | from json | to yaml)
@@ -3681,9 +3681,9 @@ export def 'tokens-investmint-wizzard' [
         let $unsigned = cy-path temp 'tx_investmint_unsigned.json'
         let $signed: string = cy-path temp 'tx_investmint_signed.json'
         $trans_unsigned | save -rf $unsigned
-        cyber tx sign $unsigned --from $address --output-document $signed --yes (default-node-params)
+        cyber tx sign $unsigned --from $address --output-document $signed --yes ...(default-node-params)
 
-        cyber tx broadcast $signed (default-node-params) | from json | select txhash
+        cyber tx broadcast $signed ...(default-node-params) | from json | select txhash
     }
 }
 
