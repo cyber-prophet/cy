@@ -855,7 +855,8 @@ export def 'links-remove-existed-2' [] {
     links-view
     | dfr into-lazy
     | dfr join --left $existing_links [from to] [particle_from particle_to]
-    | dfr filter-with (dfr col duplicate | dfr is-null)
+    | dfr filter-with (dfr col duplicate | dfr is-not-null)
+    | dfr drop duplicate
     | dfr collect
     | dfr into-nu
     | reject index
