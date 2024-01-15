@@ -1057,8 +1057,29 @@ def 'links-send-tx' [
     }
 }
 
+def 'links-prepare-for-publishing' [] {
+    let $links = (inlinks-or-links)
 
-# Publish all links in the temp table to cybergraph
+    let $filtered = (
+        $links
+        | where (is-cid ($it.from? | default ''))
+        | where (is-cid ($it.to? | default ''))
+        | where $it.from != $it.to
+        | uniq-by from to
+    )
+
+    let $filtered_length = $filtered | length
+    let $diff_length = ($links | length) - ($filtered_length)
+    if $diff_length > 0 {
+        cprint $'*($diff_length) links from initial data were removed, because they were obsolete'
+    }
+    if $filtered_length == 0 {
+        error make ( cprint --err_msg $'there are no cyberlinks to publish' )
+    }
+
+    $filtered
+}
+
 export def 'links-publish' [] {
     links-view -q
     | length
