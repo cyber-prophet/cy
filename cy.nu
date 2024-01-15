@@ -367,13 +367,15 @@ export def 'tweet' [
     text_to: string
     --disable_send (-D)
 ]: [nothing -> record] {
-    # let $cid_from = pin-text 'tweet'
-    let $cid_from = 'QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx'
+    let $cid_from = 'QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx' # pin-text 'tweet'
 
     if $disable_send {
         link-texts $cid_from $text_to
     } else {
-        link-texts $cid_from $text_to -D | [$in] | links-send-tx $in
+        set-links-table-name $'tweet_(now-fn)'
+
+        link-texts $cid_from $text_to;
+        links-send-tx
     }
 }
 
