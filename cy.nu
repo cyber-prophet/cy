@@ -1006,18 +1006,8 @@ def 'tx-broadcast' [
 # cy: 2 cyberlinks should be successfully sent
 # code: 0
 # txhash: 9B37FA56D666C2AA15E36CDC507D3677F9224115482ACF8CAF498A246DEF8EB0
-def 'links-send-tx' [
-    $links_param?
-] {
-    if not (is-connected) {
-        error make {msg: 'there is no internet!'}
-    }
-
-    if ($links_param | describe | $in =~ '^(table|list)') and ($links_param | length | $in > 100) {
-        error-make-cy '*$links_param* length is bigger than 100, use links-add'
-    }
-
-    let $links = ($links_param | if $in == null {links-view -q | first 100} else {})
+def 'links-send-tx' [ ] {
+    let $links = links-view -q | first 100
 
     let $response = (
         tx-json-create-from-cyberlinks $links
@@ -1034,9 +1024,7 @@ def 'links-send-tx' [
         | append ( $links | upsert neuron $env.cy.address )
         | save $filename --force
 
-        if ($links_param == null) {
-            links-view -q | skip 100 | links-replace
-        }
+        links-view -q | skip 100 | links-replace
 
         {'cy': $'($links | length) cyberlinks should be successfully sent'}
         | merge $response
