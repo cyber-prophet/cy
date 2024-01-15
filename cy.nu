@@ -601,7 +601,7 @@ def test-tmps [] {
 
     link-random 3
     link-random 3 --source forismatic.com
-    links-remove-existed
+    links-remove-existed-1by1
 
     equal (links-send-tx | get code) 0
 }
@@ -789,7 +789,7 @@ def 'link-exist' [
 }
 
 # Remove existing cyberlinks from the temp cyberlinks table
-export def 'links-remove-existed' [
+export def 'links-remove-existed-1by1' [
     --all_links # check all links in the temp table
 ]: [nothing -> table, nothing -> nothing] {
     let $links_view = (links-view -q)
@@ -847,7 +847,7 @@ export def 'links-remove-existed-2' [] {
         | dfr select particle_from particle_to
         | dfr with-column (dfr lit true | dfr as duplicate)
         | dfr into-lazy
-    );
+    )
 
 
     links-view
@@ -1037,7 +1037,7 @@ def 'links-send-tx' [ ] {
             error-make-cy --unspanned 'Increase your *Volts* balance or wait time.'
         }
         if $response.raw_log =~ 'your cyberlink already exists' {
-            error-make-cy --unspanned 'Use *cy links-remove-existed*'
+            error-make-cy --unspanned 'Use *cy links-remove-existed-2*'
         }
 
         cprint 'The transaction might be not sent.'
