@@ -693,7 +693,7 @@ export def 'links-pin-columns-2' [
 ]: [nothing -> table, table -> table] {
     let $links = (inlinks-or-links)
 
-    let $temp_ipfs_folder = (cy-path temp ipfs_upload | path join (now-fn));
+    let $temp_ipfs_folder = (cy-path temp ipfs_upload | path join (now-fn))
     mkdir $temp_ipfs_folder
 
     let $lookup = (
@@ -712,6 +712,8 @@ export def 'links-pin-columns-2' [
 
     # Saving ininitial text files
     $lookup | each {|i| $i.item | save -r ($temp_ipfs_folder | path join $i.index)}
+
+    cprint $'temp files saved to a local directory *($temp_ipfs_folder)*'
 
     let $hash_associations = (
         if ($pin_to_local_ipfs) or (confirm $'Pin files to local kubo? If `no` only hashes will be calculated.') {
