@@ -1102,7 +1102,9 @@ export def 'update-cy' [
     if (brew list nushell | complete | get exit_code | $in == 0) {
         brew upgrade nushell;
     } else {
-        cargo install --features=dataframe nu
+        if (which cargo | length | $in > 0) {
+            cargo install --features=dataframe nu
+        }
     }
 
     cd $env.cy.path;
