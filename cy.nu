@@ -220,7 +220,7 @@ def test_link_texts [] {
 #   from: QmQLd9KEkw5eLKfr9VwfthiWbuqa9LXhRchWqD4kRPPWEf
 #   to: QmS4ejbuxt7JvN3oYyX85yVfsgRHMPrVzgxukXMvToK5td
 export def 'link-chain' [
-    ...rest:
+    ...rest: string # consecutive particles to cyberlink in a linkchain
 ]: [nothing -> table, list -> table] {
     let $elements = ($in | default $rest | flatten)
     let $count = ($elements | length)
@@ -364,8 +364,8 @@ def test-follow [] {
 # from: QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx
 # to: QmWm9pmmz66cq41t1vtZWoRz5xmHSmoKCrrgdP9adcpoZK
 export def 'tweet' [
-    text_to: string
-    --disable_send (-D)
+    text_to: string # text to tweet
+    --disable_send (-D) # don't send tweet immideately, but put it into the temp table
 ]: [nothing -> record] {
     let $cid_from = 'QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx' # pin-text 'tweet'
 
@@ -441,7 +441,7 @@ def 'link-quote' []: [nothing -> nothing] {
 # ==========================================================
 export def 'link-random' [
     n: int = 1 # Number of links to append
-    --source: string@'nu-complete-random-sources' = 'forismatic.com'
+    --source: string@'nu-complete-random-sources' = 'forismatic.com' # choose the source to take random links from
 ]: [nothing -> nothing] {
     1..$n
     | each {|i|
@@ -477,13 +477,14 @@ export def 'link-random' [
 #   timestamp: 20230702-113842
 export def 'links-view' [
     --quiet (-q) # Don't print info
-    --no_timestamp
+    --no_timestamp # Don't output a timestamps column
 ]: [nothing -> table] {
     let $filename = (current-links-csv-path)
     let $links = (
         $filename
         | if ($in | path exists) {
-            open | if $no_timestamp { reject timestamp } else {}
+            open
+            | if $no_timestamp { reject timestamp } else {}
         } else {
             []
         }
@@ -516,7 +517,7 @@ export def 'links-view' [
 
 # Append piped-in table to the temp cyberlinks table
 export def 'links-append' [
-    --quiet (-q)
+    --quiet (-q) # don't output the resulted temp links table
 ]: [table -> table, table -> nothing, record -> table, record -> nothing] {
     $in
     | upsert timestamp (now-fn)
@@ -526,7 +527,7 @@ export def 'links-append' [
 
 # Replace the temp table with piped-in table
 export def 'links-replace' [
-    --quiet (-q)
+    --quiet (-q) # don't output the resulted temp links table
 ]: [table -> table, table -> nothing] {
     $in
     | save (current-links-csv-path) --force
@@ -742,7 +743,7 @@ export def 'links-pin-columns-2' [
 }
 
 export def 'pin-file-or-folder-to-cybernode' [
-    $path: path
+    $path: path # the path to a folder or a file to pin
 ] {
     $env.cy.ipfs-storage = 'cybernode'
 
@@ -774,9 +775,9 @@ export def 'pin-file-or-folder-to-cybernode' [
 # > cy link-exist $from $to $neuron
 # false
 def 'link-exist' [
-    from: string
-    to: string
-    neuron: string
+    from: string # particle from
+    to: string # particle to
+    neuron: string # neuron to check
 ]: [nothing -> bool] {
     (
         do -i {
@@ -792,7 +793,7 @@ def 'link-exist' [
 
 # Remove existing cyberlinks from the temp cyberlinks table
 export def 'links-remove-existed' [
-    --all_links
+    --all_links # check all links in the temp table
 ]: [nothing -> table, nothing -> nothing] {
     let $links_view = (links-view -q)
     let $links_with_status = (
@@ -1098,7 +1099,7 @@ export def 'tsv-paste' [] {
 
 # Update Cy and Nushell to the latest versions
 export def 'update-cy' [
-    --branch: string@'nu-complete-git-branches' = 'dev'
+    --branch: string@'nu-complete-git-branches' = 'dev' # the branch to get updates from
 ] {
     # check if nushell is installed using brew
     if (brew list nushell | complete | get exit_code | $in == 0) {
@@ -1145,7 +1146,7 @@ export def 'passport-get' [
     ( caching-function query wasm contract-state smart $pcontract $json $params
         --retries 0 --exec 'cyber' --no_default_params )
     | if $in == null {
-        if not $quiet {
+        if not $quiet { # to change for using $env
             cprint --before 1 --after 2 $'No passport for *($address_or_nick)* is found'
         }; return {nickname: '👤'}
     } else {
@@ -1256,10 +1257,10 @@ def dict-neurons-view-test-dummy [] {
     equal (dict-neurons-view --path) (cy-path graph neurons_dict.yaml)
 }
 
-# Add neurons to YAML-dictionary WIP
+# Add piped in neurons to YAML-dictionary with tag and category
 export def 'dict-neurons-add' [
-    tag: string = ''
-    --category: string = 'default'
+    tag: string = ''    # tag to add to neuron
+    --category: string = 'default' # category of tag to write to dict
 ] {
     let $input = $in
     let $desc = ($input | describe)
@@ -1300,6 +1301,7 @@ export def 'dict-neurons-add' [
     | save -ra $path_csv
 }
 
+# Ouput dict-neurons tags
 export def 'dict-neurons-tags' [
     --path      # return the path of tags file
     --wide      # return wide table with categories as columns
@@ -1323,6 +1325,7 @@ export def 'dict-neurons-tags' [
     } else {}
 }
 
+# Fix some problems of cy (for example caused by updates)
 export def 'doctor' [] {
     # fix column names in neurons_dict_tags (change introduced on 20231226)
     let $dict_n_tags_path = (cy-path graph neurons_dict_tags.csv)
@@ -1540,9 +1543,10 @@ def graph-download-links-test-dummy [] {
     equal (graph-download-links; null) null
 }
 
+# download particles missing from local cache for followed neurons or the whole graph
 export def graph-download-missing-particles [
     --dont_update_parquet
-    --whole_graph
+    --whole_graph # download particles for whole graph
 ] {
     if not $dont_update_parquet {
         graph-update-particles-parquet
@@ -1599,7 +1603,7 @@ export def graph-download-missing-particles [
 
 # filter system particles out
 def 'gp-filter-out-system-particles' [
-    column = 'particle'
+    column = 'particle' # the column to look for system cids
 ] {
     dfr filter-with ( (dfr col $column) | dfr is-in (system_cids) | dfr expr-not )
 }
@@ -1699,8 +1703,7 @@ export def 'graph-to-particles' [
     )
 }
 # In the piped in particles df leave only particles appeared for the first time
-export def 'particles-keep-only-first-neuron' [
-] {
+export def 'particles-keep-only-first-neuron' [ ] {
     dfr join -s '_global' (
         graph-particles-df
         | dfr select particle neuron
