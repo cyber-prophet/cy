@@ -510,9 +510,6 @@ export def 'links-view' [
     | if 'to_text' in $links_columns {
         into string to_text
     } else {}
-    | if ($in | columns | 'from' in $in) and ($in | columns | 'to' in $in) {
-        where $it.from != $it.to
-    } else {}
 }
 
 # Append piped-in table to the temp cyberlinks table
