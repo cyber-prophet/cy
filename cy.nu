@@ -1167,13 +1167,13 @@ def passport-get-test [] {
 # > cy passport-set QmZSbGCBAPpqwXHSbUkn4P2RHiL2nRjv7BGFP4vVjcYKHd
 # The particle field for maxim should be successfuly set to QmZSbGCBAPpqwXHSbUkn4P2RHiL2nRjv7BGFP4vVjcYKHd
 export def 'passport-set' [
-    particle: string
+    cid: string                     # cid to set
     nickname?                       # Provide a passport's nickname. If null - the nick from config will be used.
     --field: string = 'particle'    # A passport's field to set: particle, data, new_avatar
     --verbose                       # Show the node's response
 ] {
-    if not (is-cid $particle) {
-        print $"($particle) doesn't look like a cid"
+    if not (is-cid $cid) {
+        print $"($cid) doesn't look like a cid"
         return
     }
 
@@ -1191,7 +1191,7 @@ export def 'passport-set' [
         } else {}
     )
 
-    let $json = $'{"update_data":{"nickname":"($nick)","($field)":"($particle)"}}'
+    let $json = $'{"update_data":{"nickname":"($nick)","($field)":"($cid)"}}'
 
     let $pcontract = 'bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel'
 
@@ -1214,11 +1214,11 @@ export def 'passport-set' [
             | upsert raw_log {|i| $i.raw_log | from json}
             | select raw_log code txhash
         } else {
-            cprint $'The *($field)* field for *($nick)* should be successfuly set to *($particle)*'
+            cprint $'The *($field)* field for *($nick)* should be successfuly set to *($cid)*'
         }
     } else {
-        cprint $'The particle might not be set. You can check it with the command
-        "*cy passport-get ($nick) | get ($field) | $in == ($particle)*"'
+        cprint $'The cid might not be set. You can check it with the command
+        "*cy passport-get ($nick) | get ($field) | $in == ($cid)*"'
     }
 }
 
