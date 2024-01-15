@@ -1080,13 +1080,12 @@ def 'links-prepare-for-publishing' [] {
     $filtered
 }
 
+# Publish all links from the temp table to cybergraph
 export def 'links-publish' [] {
     links-view -q
+    | links-prepare-for-publishing
+    | links-replace
     | length
-    | if $in == 0 {
-        error make ( cprint --err_msg $'
-        there are no cyberlinks in the *(current-links-csv-path)* file' )
-    } else { }
     | $in // 100
     | seq 0 $in
     | each {links-send-tx}
