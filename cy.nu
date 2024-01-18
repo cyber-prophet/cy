@@ -795,15 +795,18 @@ export def 'links-remove-existed-1by1' [
     --all_links # check all links in the temp table
 ]: [nothing -> table, nothing -> nothing] {
     let $links_view = (links-view -q)
+    let $links_per_trans = (value-or-def-setting --dont_set_env links-per-transaction)
+
     let $links_with_status = (
         $links_view
         | if $all_links {} else {
             print-and-pass {|l|
-                if ($l | length | $in > 100) {
-                    cprint 'Only first 100 links are to be checked. Add the *--all_links* flag to check them all.'
+                if ($l | length | $in > $links_per_trans) {
+                    cprint $'Only first ($links_per_trans) links are to be checked.
+                        Add the *--all_links* flag to check them all.'
                 }
             }
-            | first 100 }
+            | first $links_per_trans }
         | merge ($in | length | seq 0 $in | wrap index)
         | par-each {|i| $i
             | upsert link_exist {
@@ -831,7 +834,7 @@ export def 'links-remove-existed-1by1' [
         $links_with_status
         | where link_exist? != true
         | if $all_links {} else {
-            append ($links_view | skip 100)
+            append ($links_view | skip $links_per_trans)
         }
         | links-replace
     } else {
