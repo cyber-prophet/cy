@@ -3833,6 +3833,29 @@ def 'set-select-from-variants' [
     }
 }
 
+def --env 'value-or-def-setting' [
+    field
+    value?
+    --dont_set_env
+] {
+    let $out = (
+        $value
+        | if $in != null {} else {
+            $env.cy | get -i $field
+        }
+        | if $in != null {} else {
+            open (cy-path kickstart settings-variants.yaml)
+            | get -i $field | get -i variants.0
+        }
+    )
+
+    if not $dont_set_env {
+        $env.cy = ($env.cy | upsert $field $out)
+    }
+
+    $out
+}
+
 def 'current-links-csv-path' [
     name?: path
 ]: nothing -> path {
