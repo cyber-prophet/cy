@@ -1,27 +1,54 @@
+exec:
+  description: the name of executable
+  variants:
+  - cyber
+  - pussy
+  - other
+chain-id:
+  description: the chain-id param
+  variants:
+  - bostrom
+  - space-pussy
+  - other
+rpc-address:
+  description: the node's rpc address
+  variants:
+  - https://rpc.bostrom.cybernode.ai:443
+  - https://rpc.space-pussy.cybernode.ai:443
+  - other
 ipfs-download-from:
-  description: Choose the source to download IPFS data from
+  description: the source to download IPFS data from
   variants:
   - kubo
   - cybernode
 ipfs-storage:
-  description: Choose the destination to upload IPFS data to
+  description: the destination to upload IPFS data to
   variants:
   - kubo
   - cybernode
   - both
 caching-function-force-update:
-  description: Don't use cached node responses, update results immediately
+  description: don't use cached node responses, update results immediately
   variants:
   - 'true'
   - 'false'
 caching-function-max-retries:
-  description: The maximum number of retries in case of an error response
+  description: the maximum number of retries in case of an error response
   variants:
   - 5
   - 3
   - 1
   - 0
 authz:
-  description: The address to send links from
+  description: the address to send links from
   variants:
   - 'other'
+links-per-transaction:
+  description: the number of links to fit in one transaction
+  variants:
+  - 10
+  - 25
+  - 50
+  - 75
+  - 100
+  - other
