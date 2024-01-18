@@ -1008,7 +1008,9 @@ def 'tx-broadcast' [
 # code: 0
 # txhash: 9B37FA56D666C2AA15E36CDC507D3677F9224115482ACF8CAF498A246DEF8EB0
 def 'links-send-tx' [ ] {
-    let $links = links-view -q | first 100
+    let $links = links-view -q | first (
+        value-or-def-setting links-per-transaction
+    )
 
     let $response = (
         tx-json-create-from-cyberlinks $links
@@ -1025,7 +1027,9 @@ def 'links-send-tx' [ ] {
         | append ( $links | upsert neuron $env.cy.address )
         | save $filename --force
 
-        links-view -q | skip 100 | links-replace
+        links-view -q | skip (
+            value-or-def-setting links-per-transaction
+        ) | links-replace
 
         {'cy': $'($links | length) cyberlinks should be successfully sent'}
         | merge $response
@@ -1070,12 +1074,14 @@ def 'links-prepare-for-publishing' [] {
 }
 
 # Publish all links from the temp table to cybergraph
-export def 'links-publish' [] {
+export def 'links-publish' [
+    --links_per_trans: int
+] {
     links-view -q
     | links-prepare-for-publishing
     | links-replace
     | length
-    | $in // 100
+    | $in // (value-or-def-setting links-per-transaction $links_per_trans)
     | seq 0 $in
     | each {links-send-tx}
 }
