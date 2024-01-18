@@ -3833,7 +3833,7 @@ def 'set-select-from-variants' [
     }
 }
 
-export def 'current-links-csv-path' [
+def 'current-links-csv-path' [
     name?: path
 ]: nothing -> path {
     $name
