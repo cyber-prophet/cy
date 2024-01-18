@@ -3931,17 +3931,26 @@ export def 'validator-query-delegators' [
 # Query tx by hash
 export def 'query-tx' [
     hash: string
+    --full_info # display all columns of a transaction
 ]: nothing -> record {
+    def trans_status [i] {
+        if $i.code == 0 {'Transaction has been processed! ✅'} else {
+            $'Transaction has been rejected: the code ($i.code?)'}
+    }
+
     caching-function --error [query tx --type hash $hash]
     | if ($in | columns | $in == [update_time]) {
         error-make-cy $'No transaction with hash ($hash) is found'
     } else {
         reject -i events
     }
-    | print-and-pass {|i| if $i.code == 0 {'Transaction is received! ✅'} else {
-        {$'Transaction is not applied: the code ($i.code?)'}
-    }}
-    | select -i ($in | columns | prepend [height code tx])
+    | print-and-pass {|i| trans_status $i}
+    | if $full_info {
+        select -i ($in | columns | prepend [height code logs tx txhash])
+    } else {
+        select height code logs
+    }
+    | upsert trans_staus {|i| trans_status $i}
 }
 
 # Query tx by acc/seq
