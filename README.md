@@ -46,7 +46,7 @@ brew tap cyber-prophet/homebrew-taps; brew install cybundle; cybundle
    1. [pussy](https://github.com/greatweb/space-pussy)
    1. [ipfs - kubo](https://github.com/ipfs/kubo)
    1. [pueue](https://github.com/Nukesor/pueue)
-   1. [rich-cli](https://github.com/Textualize/rich-cli)
+   1. [mdcat](https://github.com/swsnr/mdcat)
 
 After installation, you can launch `nu` in your terminal with already configured `cy` in it.
 
