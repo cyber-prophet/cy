@@ -730,11 +730,16 @@ export def 'links-pin-columns-2' [
     );
 
     $hash_associations
-    | each {|i| $i.item | save -f ($env.cy.ipfs-files-folder | path join $'($i.cid).md')}
+    | each {|i|
+        let $path = ($env.cy.ipfs-files-folder | path join $'($i.cid).md')
+        if ($path | path exists | not $in) {
+            $i.item | save $path
+        }
+    }
 
     $links
-    | if ($in | columns | 'from_text' not-in $in) {upsert from_text ''} else {}
-    | if ($in | columns | 'to_text' not-in $in) {upsert to_text ''} else {}
+    | default '' from_text
+    | default '' to_text
     | reject -i from to
     | join -l ($hash_associations | rename from from_text) from_text
     | join -l ($hash_associations | rename to to_text) to_text
