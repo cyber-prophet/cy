@@ -19,7 +19,7 @@ def --env 'install_if_missing' [
 
 def --env 'confirm' [
     prompt: string
-    --default_not (-n): bool = false
+    --default_not (-n)
     --dont_keep_prompt
 ] : nothing -> bool {
     if not $dont_keep_prompt {cprint $prompt}
@@ -86,7 +86,7 @@ if (open $nu.env-path | lines | where ($it | str starts-with '$env.EDITOR') | le
     (char nl) + '$env.EDITOR = nano' + (char nl) | save -a $nu.env-path
 }
 
-print "CY has been downloaded and installed. Now it will launch be launched automatically with Nu."
+print "Cy has been downloaded and installed. Now it will be launched automatically with Nu."
 print "Now nu exits. Execute 'cy config-new' after you relaunch it. Have fun!"
 
 exit
