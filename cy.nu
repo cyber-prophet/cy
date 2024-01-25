@@ -1072,7 +1072,7 @@ def 'links-prepare-for-publishing' [] {
     let $filtered_length = $filtered | length
     let $diff_length = ($links | length) - ($filtered_length)
     if $diff_length > 0 {
-        cprint $'*($diff_length) links from initial data were removed, because they were obsolete'
+        cprint $'*($diff_length)* links from initial data were removed, because they were obsolete'
     }
     if $filtered_length == 0 {
         error make ( cprint --err_msg $'there are no cyberlinks to publish' )
