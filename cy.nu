@@ -759,8 +759,6 @@ export def 'links-pin-columns-2' [
     }
 
     $links
-    | default '' from_text
-    | default '' to_text
     | reject -i from to
     | join -l ($hash_associations | rename from from_text) from_text
     | join -l ($hash_associations | rename to to_text) to_text
