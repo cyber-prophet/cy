@@ -1006,7 +1006,17 @@ def 'tx-sign' [
         } else {}
     )
 
-    ^($env.cy.exec) tx sign $unsigned_tx_path ...$params
+    let $response = (
+        do {^($env.cy.exec) tx sign $unsigned_tx_path ...$params}
+        | complete
+    )
+
+    if $response.exit_code != 0 {
+        $response.stderr
+        | lines
+        | first
+        | error make --unspanned {msg: $in}
+    }
 
     $out_path
 }
