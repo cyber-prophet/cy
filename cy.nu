@@ -690,22 +690,33 @@ export def 'links-pin-columns' [
 export def 'links-pin-columns-2' [
     --dont_replace (-D) # Don't replace the links cyberlinks table
     --pin_to_local_ipfs       # Pin to local kubo
+    --dont_detect_cid         # work with CIDs as regular texts
+    --dont_save_particle_in_cache # don't save particles to local cache in cid.md file
 ]: [nothing -> table, table -> table] {
     let $links = (inlinks-or-links)
 
     let $temp_ipfs_folder = (cy-path temp ipfs_upload | path join (now-fn))
     mkdir $temp_ipfs_folder
 
-    let $lookup = (
-        $links
-        | get from_text? to_text?
-        | flatten
+    let $groups = (
+        $links.from_text?
+        | append $links.to_text?
         | where $it != null
         | if $in == [] {
             cprint 'No columns *"from_text"* or *"to_text"* found. Add at least one of them.' ;
             return
         } else {}
         | uniq
+        | if $dont_detect_cid {} else {
+            group-by {if (is-cid $in) {'cid'} else {'not-cid'}}
+        }
+    )
+
+    let $lookup = (
+        $groups
+        | if $dont_detect_cid {} else {
+            get not-cid
+        }
         | enumerate
         | into string index
     )
@@ -715,7 +726,7 @@ export def 'links-pin-columns-2' [
 
     cprint $'temp files saved to a local directory *($temp_ipfs_folder)*'
 
-    let $hash_associations = (
+    mut $hash_associations = (
         if ($pin_to_local_ipfs) or (confirm $'Pin files to local kubo? If `no` only hashes will be calculated.') {
             ipfs add -r $temp_ipfs_folder
         } else {
@@ -729,12 +740,22 @@ export def 'links-pin-columns-2' [
         | select cid item
     );
 
-    $hash_associations
-    | each {|i|
-        let $path = ($env.cy.ipfs-files-folder | path join $'($i.cid).md')
-        if ($path | path exists | not $in) {
-            $i.item | save $path
+    if not $dont_save_particle_in_cache {
+        $hash_associations
+        | each {|i|
+            let $path = ($env.cy.ipfs-files-folder | path join $'($i.cid).md')
+            if ($path | path exists | not $in) {
+                $i.item | save $path
+            }
         }
+    }
+
+    if ((not $dont_detect_cid) and ($groups.cid? != null)) {
+        $hash_associations = (
+            $groups.cid | wrap cid
+            | merge ($groups.cid | wrap item)
+            | append $hash_associations
+        )
     }
 
     $links
