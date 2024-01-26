@@ -1077,10 +1077,10 @@ def 'links-send-tx' [ ] {
 
         if $response.raw_log == 'not enough personal bandwidth' {
             print (query-links-bandwidth-neuron $env.cy.address)
-            error-make-cy --unspanned 'Increase your *Volts* balance or wait time.'
+            error make --unspanned {msg: (cprint --echo 'Increase your *Volts* balance or wait time.')}
         }
         if $response.raw_log =~ 'your cyberlink already exists' {
-            error-make-cy --unspanned 'Use *cy links-remove-existed-2*'
+            error make --unspanned {msg: (cprint --echo 'Use *cy links-remove-existed-2*')}
         }
 
         cprint 'The transaction might be not sent.'
@@ -3703,7 +3703,7 @@ export def 'tokens-investmint-wizzard' [
     let $h_free = (
         tokens-investmint-status-table $address --h_liquid --quiet
         | if $in in [[] 0] {
-            error-make-cy $'no liquid hydrogen on *($address)* address'
+            error make {msg: (cprint --echo $'no liquid hydrogen on *($address)* address')}
         } else {}
     )
     let $h_to_investmint = (tokens-fraction-menu $h_free --denom hydrogen --bins_list [0.5 1 0.2])
@@ -4006,7 +4006,7 @@ export def 'query-tx' [
 
     caching-function --error [query tx --type hash $hash]
     | if ($in | columns | $in == [update_time]) {
-        error-make-cy $'No transaction with hash ($hash) is found'
+        error make {msg: (cprint --echo $'No transaction with hash ($hash) is found')}
     } else {
         reject -i events
     }
@@ -4774,14 +4774,6 @@ def 'confirm' [
     | input list (if $dont_keep_prompt {cprint --echo --after 0 $prompt} else {''})
     | if $dont_keep_prompt {} else {print-and-pass}
     | $in in [yes]
-}
-
-def 'error-make-cy' [
-    msg: string
-    --unspanned (-u) # remove the origin label from the error
-] {
-    {msg: (cprint --echo $msg)}
-    | error make --unspanned $in
 }
 
 def 'cy-path' [
