@@ -3741,9 +3741,9 @@ export def 'tokens-investmint-wizzard' [
         let $unsigned = cy-path temp 'tx_investmint_unsigned.json'
         let $signed: string = cy-path temp 'tx_investmint_signed.json'
         $trans_unsigned | save -rf $unsigned
-        cyber tx sign $unsigned --from $address --output-document $signed --yes ...(default-node-params)
+        ^($env.cy.exec) tx sign $unsigned --from $address --output-document $signed --yes ...(default-node-params)
 
-        cyber tx broadcast $signed ...(default-node-params) | from json | select txhash
+        ^($env.cy.exec) tx broadcast $signed ...(default-node-params) | from json | select txhash
     }
 }
 
