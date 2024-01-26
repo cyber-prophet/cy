@@ -4787,8 +4787,8 @@ def 'error-make-cy' [
 def 'cy-path' [
     ...segments: string
 ]: nothing -> path {
-    [$env.cy.path]
-    | append $segments
+    $segments
+    | prepend $env.cy.path
     | path join
 }
 
