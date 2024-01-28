@@ -1551,26 +1551,31 @@ def get_links_hasura [
     | get data.cyberlinks
 }
 
+def graph_csv_get_last_height [
+    path_csv: path
+] {
+    if ($path_csv | path exists) {
+        (open $path_csv -r | lines | first)
+        | append (tail -n 1 ($path_csv))
+        | str join (char nl)
+        | from csv
+        | get height.0
+        | into int
+    } else {
+        (graph_columns | str join ',') + (char nl) # csv headers
+        | save -r $path_csv;
+
+        0
+    }
+}
+
 # Download the latest cyberlinks from a hasura cybernode endpoint
     filename: string = 'cyberlinks.csv'
 export def 'graph-receive-new-links' [
 ] {
     let $path_csv = (cy-path graph $filename)
+    let $last_height = (graph_csv_get_last_height $path_csv)
 
-    let $last_height = (
-        if ($path_csv | path exists) {
-            (open $path_csv -r | lines | first)
-            | append (tail -n 1 ($path_csv))
-            | str join (char nl)
-            | from csv
-            | get height.0
-            | into int
-        } else {
-            (graph_columns | str join ',') + (char nl) # csv headers
-            | save -r $path_csv;
-            0
-        }
-    )
 
     for $mult in 0.. {
         let $links = ( get_links_hasura $last_height $mult )
