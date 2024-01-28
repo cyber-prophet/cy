@@ -1551,6 +1551,26 @@ def get_links_hasura [
     | get data.cyberlinks
 }
 
+def 'get_links_clickhouse' [
+    height: int
+    multiplier: int
+    --chunk_size: int = 10000
+] {
+    let $url = (value-or-def-setting 'indexer-clickhouse-endpoint')
+    let $auth = (value-or-def-setting 'indexer-clickhouse-auth')
+
+    $'SELECT particle_from, particle_to, neuron, height, timestamp
+        FROM spacebox.cyberlink
+        WHERE height > ($height)
+        ORDER BY height
+        LIMIT ($chunk_size)
+        OFFSET ($chunk_size * $multiplier)
+        FORMAT TSVWithNames'
+    | curl -s $url -H 'Accept-Encoding: gzip' -u $auth --data-binary @-
+    | gunzip -c
+    | from tsv
+}
+
 def graph_csv_get_last_height [
     path_csv: path
 ] {
