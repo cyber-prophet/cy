@@ -4743,6 +4743,10 @@ def 'nu-complete-validators-monikers' [ ] {
     query-staking-validators | select moniker operator_address | rename value description
 }
 
+def 'nu-complete-graph-csv-files' [] {
+    glob (cy-path graph '*.csv') | path basename
+}
+
 # > [{a: 1} {b: 2}] | to nuon
 # [{a: 1}, {b: 2}]
 #
