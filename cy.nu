@@ -1590,20 +1590,31 @@ def graph_csv_get_last_height [
 }
 
 # Download the latest cyberlinks from a hasura cybernode endpoint
-    filename: string = 'cyberlinks.csv'
 export def 'graph-receive-new-links' [
+    filename: string@'nu-complete-graph-csv-files' = 'cyberlinks.csv' # graph csv filename in the 'cy/graph' folder
+    --source: string@'nu-complete-graph-provider' = 'hasura'
 ] {
     let $path_csv = (cy-path graph $filename)
     let $last_height = (graph_csv_get_last_height $path_csv)
 
+    mut $new_links_count = 0
 
     for $mult in 0.. {
-        let $links = ( get_links_hasura $last_height $mult )
+        let $links = (
+            if $source == 'hasura' {
+                get_links_hasura $last_height $mult
+            } else if $source == 'clickhouse' {
+                get_links_clickhouse $last_height $mult
+            }
+        )
+
+        $new_links_count += ($links | length)
 
         if $links != [] {
-            $links | to csv --noheaders | save -r -a $path_csv
+            $links | to csv --noheaders | save -ra $path_csv
+
             print -n $'(char cr)Since the last update (char lp)which was on ($last_height
-                ) height(char rp) ($mult * 1000 + ($links | length)) cyberlinks recieved!'
+                ) height(char rp) ($new_links_count) cyberlinks recieved!'
         } else {
             break
         }
