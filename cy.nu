@@ -868,7 +868,7 @@ export def 'links-remove-existed-1by1' [
 
 # Remove existing links using graph snapshot data
 export def 'links-remove-existed-2' [] {
-    graph-download-links
+    graph-append-links-hasura
 
     let $existing_links = (
         graph-links-df
@@ -1534,9 +1534,9 @@ def graph-download-snapshot-test-dummy [] {
 }
 
 # Download the latest cyberlinks from a hasura cybernode endpoint
-export def 'graph-download-links' [] {
     let $graphql_api = "https://titan.cybernode.ai/graphql/v1/graphql"
     let $path_csv = (cy-path graph cyberlinks.csv)
+export def 'graph-append-links-hasura' [
     let $columns = ['particle_from' 'particle_to' 'neuron' 'height' 'timestamp']
 
     def get_links_query [
@@ -1583,8 +1583,8 @@ export def 'graph-download-links' [] {
 }
 
 #[test]
-def graph-download-links-test-dummy [] {
-    equal (graph-download-links; null) null
+def graph-append-links-hasura-test-dummy [] {
+    equal (graph-append-links-hasura; null) null
 }
 
 # download particles missing from local cache for followed neurons or the whole graph
@@ -1596,7 +1596,7 @@ export def graph-download-missing-particles [
         graph-update-particles-parquet
     }
 
-    graph-download-links
+    graph-append-links-hasura
 
     let $follow_list = (dict-neurons-tags | where tag == follow | get neuron)
     let $block_list = (dict-neurons-tags | where tag == block | get neuron)
