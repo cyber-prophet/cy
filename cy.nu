@@ -4747,6 +4747,10 @@ def 'nu-complete-graph-csv-files' [] {
     glob (cy-path graph '*.csv') | path basename
 }
 
+def 'nu-complete-graph-provider' [] {
+    ['hasura' 'clickhouse']
+}
+
 # > [{a: 1} {b: 2}] | to nuon
 # [{a: 1}, {b: 2}]
 #
