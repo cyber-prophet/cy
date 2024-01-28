@@ -1535,7 +1535,6 @@ def graph-download-snapshot-test-dummy [] {
 
 # Download the latest cyberlinks from a hasura cybernode endpoint
 export def 'graph-append-links-hasura' [
-    graphql_api: string = 'https://titan.cybernode.ai/graphql/v1/graphql'
     filename: string = 'cyberlinks.csv'
 ] {
     let $path_csv = (cy-path graph $filename)
@@ -1545,10 +1544,13 @@ export def 'graph-append-links-hasura' [
         height: int
         multiplier: int
         --chunk_size: int = 1000
+        --graphql_api: string = 'https://titan.cybernode.ai/graphql/v1/graphql'
     ] {
         $"{cyberlinks\(limit: ($chunk_size), offset: ($multiplier * $chunk_size), order_by: {height: asc},
             where: {height: {_gt: ($height)}}) {($columns | str join ' ')}}"
         | {'query': $in}
+        | http post -t application/json $graphql_api $in
+        | get data.cyberlinks
     }
 
     let $last_height = (
@@ -1567,10 +1569,8 @@ export def 'graph-append-links-hasura' [
     )
 
     for $mult in 0.. {
-        let $links = (
-            http post -t application/json $graphql_api (get_links_query $last_height $mult)
-            | get data.cyberlinks
-        );
+        let $links = ( get_links_query $last_height $mult )
+
         if $links != [] {
             $links | to csv --noheaders | save -r -a $path_csv
             print -n $'(char cr)Since the last update (char lp)which was on ($last_height
