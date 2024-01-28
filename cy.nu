@@ -1533,6 +1533,10 @@ def graph-download-snapshot-test-dummy [] {
     equal (graph-download-snapshot; null) null
 }
 
+def graph_columns [] {
+    ['particle_from' 'particle_to' 'neuron' 'height' 'timestamp']
+}
+
 # Download the latest cyberlinks from a hasura cybernode endpoint
     filename: string = 'cyberlinks.csv'
 export def 'graph-receive-new-links' [
