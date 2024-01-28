@@ -42,7 +42,7 @@ caching-function-max-retries:
 authz:
   description: the address to send links from
   variants:
-  - 'other'
+  - other
 links-per-transaction:
   description: the number of links to fit in one transaction
   variants:

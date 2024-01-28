@@ -1628,7 +1628,7 @@ def graph-receive-new-links-test-dummy [] {
 }
 
 # download particles missing from local cache for followed neurons or the whole graph
-export def graph-download-missing-particles [
+export def 'graph-download-missing-particles' [
     --dont_update_parquet
     --whole_graph # download particles for whole graph
 ] {
