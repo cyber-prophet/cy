@@ -1534,33 +1534,33 @@ def graph-download-snapshot-test-dummy [] {
 }
 
 # Download the latest cyberlinks from a hasura cybernode endpoint
-    let $graphql_api = "https://titan.cybernode.ai/graphql/v1/graphql"
-    let $path_csv = (cy-path graph cyberlinks.csv)
 export def 'graph-append-links-hasura' [
+    graphql_api: string = 'https://titan.cybernode.ai/graphql/v1/graphql'
+    filename: string = 'cyberlinks.csv'
+] {
+    let $path_csv = (cy-path graph $filename)
     let $columns = ['particle_from' 'particle_to' 'neuron' 'height' 'timestamp']
 
     def get_links_query [
-        height
-        multiplier
+        height: int
+        multiplier: int
+        --chunk_size: int = 1000
     ] {
-        let $chunk_size = 1000
-
         $"{cyberlinks\(limit: ($chunk_size), offset: ($multiplier * $chunk_size), order_by: {height: asc},
-        where: {height: {_gte: ($height)}}) {($columns | str join ' ')}}"
+            where: {height: {_gt: ($height)}}) {($columns | str join ' ')}}"
         | {'query': $in}
     }
 
     let $last_height = (
         if ($path_csv | path exists) {
-            'a,b,c,height,t'
+            (open $path_csv -r | lines | first)
             | append (tail -n 1 ($path_csv))
             | str join (char nl)
             | from csv
             | get height.0
             | into int
-            | $in + 1
         } else {
-            $'($columns | str join ',')(char nl)' # csv headers
+            ($columns | str join ',') + (char nl) # csv headers
             | save -r $path_csv;
             0
         }
