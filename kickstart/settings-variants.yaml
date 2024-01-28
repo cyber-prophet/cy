@@ -52,3 +52,16 @@ links-per-transaction:
   - 75
   - 100
   - other
+indexer-graphql-endpoint:
+  description: hasura graphql indexer endpoint to get cyberlinks from
+  variants:
+  - 'https://titan.cybernode.ai/graphql/v1/graphql'
+  - other
+indexer-clickhouse-endpoint:
+  description: clickhouse indexer endpoint to get cyberlinks from
+  variants:
+  - other
+indexer-clickhouse-auth:
+  description: 'clickhouse indexer user:password string'
+  variants:
+  - other
