@@ -29,11 +29,13 @@ ipfs-storage:
   - both
 caching-function-force-update:
   description: don't use cached node responses, update results immediately
+  type: bool
   variants:
   - 'true'
   - 'false'
 caching-function-max-retries:
   description: the maximum number of retries in case of an error response
+  type: int
   variants:
   - 5
   - 3
@@ -45,6 +47,7 @@ authz:
   - other
 links-per-transaction:
   description: the number of links to fit in one transaction
+  type: int
   variants:
   - 10
   - 25
@@ -64,4 +67,12 @@ indexer-clickhouse-endpoint:
 indexer-clickhouse-auth:
   description: 'clickhouse indexer user:password string'
   variants:
+  - other
+indexer-clickhouse-chunksize:
+  description: 'clickhouse how many links should be in one batch request'
+  type: int
+  variants:
+  - 10000
+  - 100000
+  - 500000
   - other
