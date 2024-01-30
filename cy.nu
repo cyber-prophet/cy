@@ -3916,27 +3916,37 @@ def 'set-select-from-variants' [
     }
 }
 
-    field
 def --env 'value-env-default' [
+    key
     value?
     --dont_set_env
 ] {
-    let $out = (
+    let $val_ref = (
         $value
         | if $in != null {} else {
-            $env.cy | get -i $field
+            $env.cy | get -i $key
         }
         | if $in != null {} else {
-            open (cy-path kickstart settings-variants.yaml)
-            | get -i $field | get -i variants.0
+            let $key_record = (
+                open (cy-path kickstart settings-variants.yaml)
+                | get -i $key
+            )
+
+            let $def_value = $key_record | get -i variants.0
+
+            match $key_record.type? {
+                'int' => {$def_value | into int}
+                'datetime' => {$def_value | into datetime}
+                _ => {$def_value | into string}
+            }
         }
     )
 
     if not $dont_set_env {
-        $env.cy = ($env.cy | upsert $field $out)
+        $env.cy = ($env.cy | upsert $key $val_ref)
     }
 
-    $out
+    $val_ref
 }
 
 def 'current-links-csv-path' [
