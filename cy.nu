@@ -3899,14 +3899,14 @@ export def --env 'set-cy-setting' [
 def 'set-select-from-variants' [
     $key
 ] {
-    let $option = open (cy-path kickstart settings-variants.yaml) | get -i $key
+    let $key_record = open (cy-path kickstart settings-variants.yaml) | get -i $key
 
-    if $option == null {
+    if $key_record == null {
         input 'type your setting: '
     } else {
-        cprint -h green $'*($key): ($option.description?)*'
+        cprint -h green $'*($key): ($key_record.description?)*'
 
-        $option
+        $key_record
         | get variants
         | input list
         | if ($in == 'other') {
