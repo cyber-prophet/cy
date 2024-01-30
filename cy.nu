@@ -1554,10 +1554,10 @@ def get_links_hasura [
 def 'get_links_clickhouse' [
     height: int
     multiplier: int
-    --chunk_size: int = 10000
 ] {
     let $url = (value-or-def-setting 'indexer-clickhouse-endpoint')
     let $auth = (value-or-def-setting 'indexer-clickhouse-auth')
+    let $chunk_size = (value-or-def-setting 'indexer-clickhouse-chunksize')
 
     $'SELECT particle_from, particle_to, neuron, height, timestamp
         FROM spacebox.cyberlink
