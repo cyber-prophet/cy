@@ -1613,7 +1613,7 @@ export def 'graph-receive-new-links' [
         if $links != [] {
             $links | to csv --noheaders | save -ra $path_csv
 
-            print -n $'(char cr)Since the last update (char lp)which was on ($last_height
+            cprint -a 0 $'(char cr)Since the last update (char lp)which was on ($last_height
                 ) height(char rp) ($new_links_count) cyberlinks recieved!'
         } else {
             break
