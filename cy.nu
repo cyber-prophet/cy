@@ -6,7 +6,7 @@
 
 use std assert [equal greater]
 use nu-utils [ bar, cprint, "str repeat", to-safe-filename, to-number-format, number-col-format,
-    nearest-given-weekday, print-and-pass, clip ]
+    nearest-given-weekday, print-and-pass, clip, confirm ]
 
 use std log
 
@@ -4819,19 +4819,6 @@ def 'path-exists-safe' [
     path_to_check
 ] {
     try { $path_to_check | path exists } catch {false}
-}
-
-def 'confirm' [
-    prompt: string
-    --default_not (-n)
-    --dont_keep_prompt
-]: nothing -> bool {
-    if not $dont_keep_prompt {cprint $prompt}
-
-    if $default_not { [no yes] } else { [yes no] }
-    | input list (if $dont_keep_prompt {cprint --echo --after 0 $prompt} else {''})
-    | if $dont_keep_prompt {} else {print-and-pass}
-    | $in in [yes]
 }
 
 def 'cy-path' [

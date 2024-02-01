@@ -1,5 +1,6 @@
 export module "bar.nu"
 export module "clip.nu"
+export module "confirm.nu"
 export module "cprint.nu"
 export module "nearest-given-weekday.nu"
 export module "number-col-format.nu"
