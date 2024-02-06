@@ -6,7 +6,7 @@
 
 use std assert [equal greater]
 use nu-utils [ bar, cprint, "str repeat", to-safe-filename, to-number-format, number-col-format,
-    nearest-given-weekday, print-and-pass, clip, confirm ]
+    nearest-given-weekday, print-and-pass, clip, confirm, bar, normalize ]
 
 use std log
 
@@ -1284,6 +1284,11 @@ export def 'dict-neurons-view' [
         ['bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8' 'maxim']] }
     | reject -i ($neurons_tags | columns | where $it != 'neuron')
     | join --outer ($neurons_tags) neuron
+    | if $karma_bar {
+        normalize karma
+        | upsert karma_norm_bar {|i| bar $i.karma_norm --width ('karma_norm_bar' | str length)}
+        | move karma_norm karma_norm_bar --after karma
+    } else {}
     | if $df {
         fill non-exist
         | reject -i addresses # quick fix for failing df conversion
@@ -1421,7 +1426,7 @@ export def 'dict-neurons-update' [
             )
         }
     } else {}
-    | if $karma or $all {
+    | if $karma or $all { # kamra_norm is calculated below
         par-each -t $threads {|i|
             $i | merge (query-rank-karma $i.neuron)
         }
