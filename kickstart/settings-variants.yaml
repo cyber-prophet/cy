@@ -63,10 +63,12 @@ indexer-graphql-endpoint:
 indexer-clickhouse-endpoint:
   description: clickhouse indexer endpoint to get cyberlinks from
   variants:
+  - 'https://index.bostrom.bronbro.io:443?enable_http_compression=1'
   - other
 indexer-clickhouse-auth:
   description: 'clickhouse indexer user:password string'
   variants:
+  - 'bronbro:spac3b0x'
   - other
 indexer-clickhouse-chunksize:
   description: 'clickhouse how many links should be in one batch request'
