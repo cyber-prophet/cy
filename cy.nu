@@ -29,7 +29,7 @@ export def check-requirements [] {
 
 export-env {
     # banner2
-    let $tested_versions = ['0.89.0']
+    let $tested_versions = ['0.90.1']
 
     version
     | get version
@@ -1271,6 +1271,7 @@ export def 'passport-set' [
 export def 'dict-neurons-view' [
     --df        # output as a dataframe
     --path      # output path of the dict
+    --karma_bar # output karma bar
 ] {
     let $neurons_tags = (dict-neurons-tags --wide)
 
