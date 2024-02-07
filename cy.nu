@@ -4798,7 +4798,7 @@ def 'nu-complete-validators-monikers' [ ] {
 }
 
 def 'nu-complete-graph-csv-files' [] {
-    glob (cy-path graph '*.csv') | path basename
+    ls (cy-path graph '*.csv') | sort-by modified -r | get name | path basename
 }
 
 def 'nu-complete-graph-provider' [] {
