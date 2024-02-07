@@ -759,7 +759,7 @@ export def 'links-pin-columns-2' [
     }
 
     $links
-    | reject -i from to
+    | reject -i from to # if text_from or text_to are absent, the resulting table is empty. Mabye use default?
     | join -l ($hash_associations | rename from from_text) from_text
     | join -l ($hash_associations | rename to to_text) to_text
     | if $dont_replace {} else { links-replace }
@@ -1604,6 +1604,8 @@ export def 'graph-receive-new-links' [
     let $last_height = (graph_csv_get_last_height $path_csv)
 
     mut $new_links_count = 0
+
+    cprint $'Downloading using ($source)'
 
     for $mult in 0.. {
         let $links = (
