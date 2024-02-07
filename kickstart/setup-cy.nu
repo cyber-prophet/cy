@@ -63,6 +63,10 @@ if ( ipfs swarm peers | complete | get exit_code | $in == 1 ) {
 ipfs bootstrap add '/ip4/135.181.19.86/tcp/4001/p2p/12D3KooWNMcnoQynAY9hyi4JxzSu64BsRGcJ9z7vKghqk8sTrpqY'
 ipfs routing findpeer 12D3KooWNMcnoQynAY9hyi4JxzSu64BsRGcJ9z7vKghqk8sTrpqY
 
+if (brew list ipfs | complete | get exit_code | $in == 0) {
+    brew upgrade ipfs;
+}
+
 let $cy_folder = '~/cy'
 
 (open $nu.config-path | lines | find -r '^overlay use .*cy\.nu')
