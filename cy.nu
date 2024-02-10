@@ -1876,6 +1876,17 @@ export def 'graph-filter-neurons' [
     | dfr join ( $links ) neuron neuron
 }
 
+# Filter the graph to keep or exclude links from contracts
+export def 'graph-filter-contracts' [
+    --exclude
+] {
+    graph-links-df
+    | dfr filter-with (
+        $in.neuron =~ '.{64}'
+        | if $exclude {dfr not} else {}
+    )
+}
+
 # Append related cyberlinks to the piped in graph
 export def 'graph-append-related' [
     --only_first_neuron (-o)
