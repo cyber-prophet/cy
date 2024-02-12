@@ -2316,6 +2316,28 @@ def 'graph-open-csv-make-df' [
 export def 'graph-particles-df' [] {
     let $p = (dfr open (cy-path graph particles.parquet))
     $p
+export def 'particles-filter-by-type' [
+    --exclude
+    --media
+    --timeout
+] {
+    let $input = $in
+    let $filter_regex = (
+        if $media {
+            '"MIME'
+        } else {}
+        | if $timeout {
+            append 'timeout'
+        } else {}
+        | str join '|'
+        | '^' + $in
+    )
+
+    $input
+    | dfr filter-with (
+        $in.content_s =~ $filter_regex
+        | if $exclude {dfr not} else {}
+    )
 }
 
 # Create a config JSON to set env variables, to use them as parameters in cyber cli
