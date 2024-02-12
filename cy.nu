@@ -2314,8 +2314,19 @@ def 'graph-open-csv-make-df' [
 }
 
 export def 'graph-particles-df' [] {
-    let $p = (dfr open (cy-path graph particles.parquet))
-    $p
+    (cy-path graph particles.parquet)
+    | if ($in | path exists) {
+        dfr open $in
+    } else {
+        cprint `particles.parquet doesn't exist. Use *graph-update-particles-parquet*`
+
+        [ [index, particle, neuron, height, timestamp, content_s];
+        [0, "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV", "bostrom1ymprf45c44rp9k0g2r84w2tjhsq7kalv98rgpt",
+        490, "2021-11-05 14:11:41", "cyber|QK3oufV"]
+        ] | dfr into-df
+    }
+}
+
 export def 'particles-filter-by-type' [
     --exclude
     --media
