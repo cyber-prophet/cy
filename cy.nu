@@ -2026,12 +2026,12 @@ export def 'graph-stats' [] {
     let $n_links_unique = ($links | dfr into-lazy | dfr unique --subset [particle_from particle_to] | dfr collect
         | dfr_countrows)
 
-    let $n_all_particles = ($p2 | dfr_countrows)
+    let $n_particles_unique = ($p2 | dfr_countrows)
 
-    let $n_missing_particles = ($p2 | dfr filter-with (($in.content_s | dfr is-null) or ($in.content_s =~ '^timeout'))
+    let $n_particles_missing = ($p2 | dfr filter-with (($in.content_s | dfr is-null) or ($in.content_s =~ '^timeout'))
         | dfr_countrows)
 
-    let $n_non_text_particles = ($p2 | dfr filter-with ($in.content_s =~ '^"MIME type"')
+    let $n_particles_non_text = ($p2 | dfr filter-with ($in.content_s =~ '^"MIME type"')
         | dfr_countrows)
 
     let $follows = (
@@ -2065,13 +2065,13 @@ export def 'graph-stats' [] {
         | reject index dummyc
         | get 0
         | upsert links_unique $n_links_unique
-        | upsert all_particles $n_all_particles
-        | upsert text_particles ($n_all_particles - $n_missing_particles - $n_non_text_particles)
-        | upsert missing_particles $n_missing_particles
-        | upsert nontext_particles $n_non_text_particles
+        | upsert particles_unique $n_particles_unique
+        # | upsert particles_text ($n_particles_unique - $n_particles_missing - $n_particles_non_text)
+        # | upsert particles_missing $n_particles_missing
+        # | upsert particles_nontext $n_particles_non_text
         | upsert follows $follows
         | upsert tweets $tweets
-        | move first_link last_link follows tweets --after nontext_particles
+        | move first_link last_link follows tweets --after particles_unique
     )
 }
 
