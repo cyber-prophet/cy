@@ -2270,16 +2270,31 @@ export def 'graph-links-df' [
     --exclude_system    # exclude system particles in from column (tweet, follow, avatar)
     --include_contracts # include links from contracts (including passport)
 ] {
-    $in
-    | if ($not_in or ($in | describe | $in == 'nothing')) {
+    let $input = $in
+
+    let $df = (
+        $input
+        | if ($not_in or ($in | describe | $in == 'nothing')) {
+            graph-open-csv-make-df (cy-path graph cyberlinks.csv)
+        } else if ($in | describe | $in =~ '^table') {
+            dfr into-df
+        } else if ($in | describe | $in == 'dataframe') { } else {
+            error make {msg:'unknown input'}
+        }
+    )
+
+    let $df_columns = ($df | dfr columns)
+
+    $df
+    | if (
+        ($df_columns | where $it in [particle_from particle_to neuron] | length | $in == 3)
+        or ($df_columns | 'particle' in $in)
+    ) { } else {
+        let $cols = ($df_columns | where $it in [particle_from particle_to neuron])
+
         graph-open-csv-make-df (cy-path graph cyberlinks.csv)
-    } else {}
-    | if $include_contracts {
-        dfr append -c (
-            graph-open-csv-make-df (cy-path graph cyberlinks_contracts.csv)
-        )
-        | dfr sort-by height
-    } else {}
+        | dfr join --inner $df $cols $cols
+    }
     | if $exclude_system {
         dfr into-lazy
         | gp-filter-out-system-particles particle_from
