@@ -1811,17 +1811,41 @@ export def 'graph-update-particles-parquet' [
 ] {
     let $parquet_path = cy-path graph particles.parquet
     let $particles_folder = $env.cy.ipfs-files-folder
+    let $all_particles = (
+        graph-links-df
+        | graph-to-particles
+        | graph-add-metadata
+        | dfr select [particle neuron height timestamp content_s]
+    )
+
+    let $particles_wanted = (
+        $all_particles
+        | particles-filter-by-type --timeout
+    )
 
     if not $quiet {
         cprint $'Cy is updating ($parquet_path). It will take a coulple of minutes.'
     }
 
+    let $particles_on_disk = (glob ($particles_folder | path join '*.md') | path basename)
+
+    let $particles_to_open = (
+        $particles_wanted
+        | dfr select particle
+        | dfr into-nu
+        | get particle
+        | each {|i| $i + '.md'}
+        | where $it in $particles_on_disk
+        | wrap name
+    )
+
+    # so I want to make particles parquet update make incremental
+
     let $downloaded_particles = (
-        ls -s $particles_folder # I use ls instead of glob to have the filesize column
-        | reject modified type
-        | upsert content {
+        $particles_to_open
+        | upsert content_s {
             |i| open -r ($particles_folder | path join $i.name)
-            | str substring -g 0..4000
+            | str substring -g 0..160
         }
         | dfr into-df
         | dfr with-column (
@@ -1830,17 +1854,15 @@ export def 'graph-update-particles-parquet' [
         )
         | dfr rename name particle
         | dfr with-column (
-            $in.content
+            $in.content_s
             | dfr str-slice 0 -l 150
             | dfr replace-all -p (char nl) -r '⏎'
-            | dfr rename content content_s
         )
-        | dfr drop content
     )
 
     (
-        graph-links-df --include_contracts
-        | graph-to-particles --include_system
+        $particles_wanted
+        | dfr drop 'content_s'
         | dfr join --left $downloaded_particles particle particle
         | dfr with-column (
             $in.content_s
@@ -1855,6 +1877,11 @@ export def 'graph-update-particles-parquet' [
             dfr concat-str '|' [(dfr col content_s) (dfr col short_cid)]
         )
         | dfr drop short_cid
+        | dfr append -c (
+            $all_particles
+            | particles-filter-by-type --exclude --timeout
+        )
+        | dfr sort-by height
         | dfr to-parquet ($parquet_path | backup-and-echo --mv)
         | print ($in | get 0 -i)
     )
