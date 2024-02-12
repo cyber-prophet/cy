@@ -1530,7 +1530,7 @@ export def --env 'graph-download-snapshot' [
 
     if (not $disable_update_parquet) {
         print 'Updating particles parquet'
-        graph-update-particles-parquet --full_content
+        graph-update-particles-parquet
     }
 }
 
@@ -1807,7 +1807,6 @@ export def 'particles-keep-only-first-neuron' [ ] {
 
 # Update the 'particles.parquet' file (it inculdes content of text files)
 export def 'graph-update-particles-parquet' [
-    --full_content  # include column with full content of particles
     --quiet (-q)    # don't print info about the saved parquet file
 ] {
     let $parquet_path = cy-path graph particles.parquet
@@ -1836,9 +1835,7 @@ export def 'graph-update-particles-parquet' [
             | dfr replace-all -p (char nl) -r '⏎'
             | dfr rename content content_s
         )
-        | if $full_content {} else {
-            dfr drop content
-        }
+        | dfr drop content
     )
 
     (
@@ -2176,7 +2173,7 @@ export def 'graph-to-txt-feed' [] {
     | graph-append-related --only_first_neuron
     | graph-to-particles
     | particles-keep-only-first-neuron
-    | graph-add-metadata --full_content
+    | graph-add-metadata
     # | dfr filter-with ($in.content_s | dfr is-null | dfr not)
     | dfr sort-by [link_local_index height]
     | dfr drop content_s neuron
@@ -2220,24 +2217,14 @@ export def 'graph-to-cosmograph' [] {
 #   content_s_from: avatar
 #   content_s_to: '"MIME type" = "image/svg+xml"'
 #   nick: maxim_bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
-export def 'graph-add-metadata' [
-    --full_content
-    --include_text_only
-] {
+export def 'graph-add-metadata' [] {
     let $links = (
         graph-links-df
         | graph-select-standard-columns --extra_columns ['particle', 'link_local_index', 'init-role', 'step']
     )
     let $p = (
         graph-particles-df
-        | if $full_content {
-            dfr select particle content_s content
-        } else {
-            dfr select particle content_s
-        }
-        | if $include_text_only {
-            dfr filter-with (($in | dfr select content_s) =~ '"MIME|^timeout' | dfr not)
-        } else { }
+        | dfr select particle content_s
     )
 
     let $links_columns = ($links | dfr columns)
@@ -4607,7 +4594,7 @@ export def 'echo_particle_txt' [
     if $i.content == null {
         $'⭕️ ($i.timestamp), ($i.nick) - timeout - ($i.particle)'
     } else {
-        $'🟢 ($i.timestamp), ($i.nick)(char nl)(char nl)($i.content)(char nl)(char nl)($i.particle)(char nl)(char nl)'
+        $'🟢 ($i.timestamp), ($i.nick)(char nl)(char nl)($i.content_s)(char nl)(char nl)($i.particle)(char nl)(char nl)'
     }
     | mdcat -l --columns (80 + $indent) -
     | complete
