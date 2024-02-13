@@ -1808,6 +1808,7 @@ export def 'particles-keep-only-first-neuron' [ ] {
 # Update the 'particles.parquet' file (it inculdes content of text files)
 export def 'graph-update-particles-parquet' [
     --quiet (-q)    # don't print info about the saved parquet file
+    --all           # re-read all downloaded particles
 ] {
     let $parquet_path = cy-path graph particles.parquet
     let $particles_folder = $env.cy.ipfs-files-folder
@@ -1820,7 +1821,9 @@ export def 'graph-update-particles-parquet' [
 
     let $particles_wanted = (
         $all_particles
-        | particles-filter-by-type --timeout
+        | if $all {} else {
+            particles-filter-by-type --timeout
+        }
     )
 
     if not $quiet {
@@ -1831,15 +1834,12 @@ export def 'graph-update-particles-parquet' [
 
     let $particles_to_open = (
         $particles_wanted
-        | dfr select particle
+        | dfr with-column ((dfr concat-str '.' [(dfr col particle) (dfr lit 'md')]) | dfr as name)
+        | dfr join ($particles_on_disk | wrap name | dfr into-df) name name
+        | dfr select name
         | dfr into-nu
-        | get particle
-        | each {|i| $i + '.md'}
-        | where $it in $particles_on_disk
-        | wrap name
+        | select name
     )
-
-    # so I want to make particles parquet update make incremental
 
     let $downloaded_particles = (
         $particles_to_open
@@ -1877,10 +1877,12 @@ export def 'graph-update-particles-parquet' [
             dfr concat-str '|' [(dfr col content_s) (dfr col short_cid)]
         )
         | dfr drop short_cid
-        | dfr append -c (
-            $all_particles
-            | particles-filter-by-type --exclude --timeout
-        )
+        | if $all {} else {
+            dfr append -c (
+                $all_particles
+                | particles-filter-by-type --exclude --timeout
+            )
+        }
         | dfr sort-by height
         | dfr to-parquet ($parquet_path | backup-and-echo --mv)
         | print ($in | get 0 -i)
