@@ -1678,8 +1678,7 @@ export def 'graph-download-missing-particles' [
         }
         | graph-to-particles
         | graph-add-metadata
-        | dfr filter-with (($in.content_s | dfr is-null) or ($in.content_s =~ '^timeout'))
-        # | dfr filter-with (((dfr col content_s) | dfr is-in ['timeout']))
+        | particles-filter-by-type --exclude --timeout
         | print-and-pass
         | dfr select particle
         | dfr into-nu
@@ -1866,7 +1865,7 @@ export def 'graph-update-particles-parquet' [
         | dfr join --left $downloaded_particles particle particle
         | dfr with-column (
             $in.content_s
-            | dfr fill-null timeout
+            | dfr fill-null 'timeout|'
         )
         | dfr with-column ( # short name to make content_s unique
             $in.particle
@@ -2057,8 +2056,7 @@ export def 'graph-stats' [] {
 
     let $n_particles_unique = ($p2 | dfr_countrows)
 
-    let $n_particles_missing = ($p2 | dfr filter-with (($in.content_s | dfr is-null) or ($in.content_s =~ '^timeout'))
-        | dfr_countrows)
+    let $n_particles_missing = ($p2 | particles-filter-by-type --exclude --timeout | dfr_countrows)
 
     let $n_particles_non_text = ($p2 | dfr filter-with ($in.content_s =~ '^"MIME type"')
         | dfr_countrows)
@@ -2271,7 +2269,7 @@ export def 'graph-add-metadata' [] {
         | if 'particle' in $links_columns {
             dfr join --left $p particle particle
         } else {}
-        | dfr fill-null 'timeout'
+        | dfr fill-null 'timeout|'
         | dfr drop height
         | dfr append $links.height
         | if 'neuron' in $links_columns {
@@ -2385,7 +2383,7 @@ export def 'particles-filter-by-type' [
             '"MIME'
         } else {}
         | if $timeout {
-            append 'timeout'
+            append 'timeout\|'
         } else {}
         | str join '|'
         | '^' + $in
