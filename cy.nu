@@ -2036,7 +2036,7 @@ export def 'graph-neurons-stats' [] {
         | dfr join --left $follows neuron neuron
         | dfr join --left $tweets neuron neuron
         | dfr fill-null 0
-        | dfr join --left ( dict-neurons-view --df ) neuron neuron
+        | dfr join --left ( dict-neurons-view --df --karma_bar) neuron neuron
         | dfr select ($in | dfr columns | prepend [nickname links_count last_link] | uniq)
     )
 }
