@@ -2350,7 +2350,7 @@ def 'graph-open-csv-make-df' [
     path: path
     --datetime
 ] {
-    dfr open $path
+    dfr open $path --schema {particle_from: str, particle_to: str, neuron: str, height: i64, timestamp: str}
     | if $datetime {
         dfr with-column (
             $in.timestamp
