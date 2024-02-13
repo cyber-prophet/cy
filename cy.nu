@@ -2271,6 +2271,9 @@ export def 'graph-add-metadata' [] {
         | if 'particle' in $links_columns {
             dfr join --left $p particle particle
         } else {}
+        | dfr fill-null 'timeout'
+        | dfr drop height
+        | dfr append $links.height
         | if 'neuron' in $links_columns {
             dfr join --left (
                 dict-neurons-view --df
