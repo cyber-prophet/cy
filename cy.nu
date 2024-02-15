@@ -1958,7 +1958,8 @@ export def 'graph-append-related' [
         | dfr select particle link_local_index init-role step
         | dfr rename particle $'particle_($from_or_to)'
         | dfr join (
-            graph-links-df --not_in --exclude_system
+            graph-links-df --not_in
+            | gp-filter-out-system-particles particle_from
             | dfr into-lazy
         ) $'particle_($from_or_to)' $'particle_($from_or_to)'
         | dfr with-column [
@@ -2298,7 +2299,6 @@ export def 'graph-add-metadata' [] {
 export def 'graph-links-df' [
     --not_in            # don't catch pipe in
     --exclude_system    # exclude system particles in from column (tweet, follow, avatar)
-    --include_contracts # include links from contracts (including passport)
 ] {
     let $input = $in
 
@@ -2314,21 +2314,16 @@ export def 'graph-links-df' [
     )
 
     let $df_columns = ($df | dfr columns)
+    let $existing_graph_columns = ($df_columns | where $it in [particle_from particle_to neuron])
 
     $df
     | if (
-        ($df_columns | where $it in [particle_from particle_to neuron] | length | $in == 3)
-        or ($df_columns | 'particle' in $in)
+        ($existing_graph_columns | length | $in == 3)
+        or ('particle' in $df_columns)
     ) { } else {
-        let $cols = ($df_columns | where $it in [particle_from particle_to neuron])
-
         graph-open-csv-make-df (cy-path graph cyberlinks.csv)
-        | dfr join --inner $df $cols $cols
+        | dfr join --inner $df $existing_graph_columns $existing_graph_columns
     }
-    | if $exclude_system {
-        dfr into-lazy
-        | gp-filter-out-system-particles particle_from
-    } else { }
 }
 
 
