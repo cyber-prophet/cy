@@ -78,3 +78,9 @@ indexer-clickhouse-chunksize:
   - 100000
   - 500000
   - other
+cyberlinks-csv-table:
+  description: the name for cyberlinks csv to use by default in graph functions
+  type: string
+  variants:
+  - cyberlinks.csv
+  - other
