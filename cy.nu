@@ -1597,10 +1597,11 @@ def graph_csv_get_last_height [
 
 # Download the latest cyberlinks from a hasura cybernode endpoint
 export def 'graph-receive-new-links' [
-    filename: string@'nu-complete-graph-csv-files' = 'cyberlinks.csv' # graph csv filename in the 'cy/graph' folder
+    filename?: string@'nu-complete-graph-csv-files' # graph csv filename in the 'cy/graph' folder
     --source: string@'nu-complete-graph-provider' = 'hasura'
 ] {
-    let $path_csv = (cy-path graph $filename)
+    let $cyberlinks_path = (set-or-get-env-or-def cyberlinks-csv-table $filename)
+    let $path_csv = (cy-path graph $cyberlinks_path)
     let $last_height = (graph_csv_get_last_height $path_csv)
 
     mut $new_links_count = 0
