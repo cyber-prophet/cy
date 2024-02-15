@@ -819,7 +819,7 @@ export def 'links-remove-existed-1by1' [
     --all_links # check all links in the temp table
 ]: [nothing -> table, nothing -> nothing] {
     let $links_view = (links-view -q)
-    let $links_per_trans = (value-env-default --dont_set_env links-per-transaction)
+    let $links_per_trans = (set-or-get-env-or-def --dont_set_env links-per-transaction)
 
     let $links_with_status = (
         $links_view
@@ -1046,7 +1046,7 @@ def 'tx-broadcast' [
 # txhash: 9B37FA56D666C2AA15E36CDC507D3677F9224115482ACF8CAF498A246DEF8EB0
 def 'links-send-tx' [ ] {
     let $links = links-view -q | first (
-        value-env-default links-per-transaction
+        set-or-get-env-or-def links-per-transaction
     )
 
     let $response = (
@@ -1065,7 +1065,7 @@ def 'links-send-tx' [ ] {
         | save $filename --force
 
         links-view -q | skip (
-            value-env-default links-per-transaction
+            set-or-get-env-or-def links-per-transaction
         ) | links-replace
 
         {'cy': $'($links | length) cyberlinks should be successfully sent'}
@@ -1118,7 +1118,7 @@ export def 'links-publish' [
     | links-prepare-for-publishing
     | links-replace
     | length
-    | $in // (value-env-default links-per-transaction $links_per_trans)
+    | $in // (set-or-get-env-or-def links-per-transaction $links_per_trans)
     | seq 0 $in
     | each {links-send-tx}
 }
@@ -1548,7 +1548,7 @@ def get_links_hasura [
     multiplier: int
     --chunk_size: int = 1000
 ] {
-    let $graphql_api = (value-env-default 'indexer-graphql-endpoint')
+    let $graphql_api = (set-or-get-env-or-def 'indexer-graphql-endpoint')
 
     $"{cyberlinks\(limit: ($chunk_size), offset: ($multiplier * $chunk_size), order_by: {height: asc},
         where: {height: {_gt: ($height)}}) {(graph_columns | str join ' ')}}"
@@ -1561,9 +1561,9 @@ def 'get_links_clickhouse' [
     height: int
     multiplier: int
 ] {
-    let $url = (value-env-default 'indexer-clickhouse-endpoint')
-    let $auth = (value-env-default 'indexer-clickhouse-auth')
-    let $chunk_size = (value-env-default 'indexer-clickhouse-chunksize')
+    let $url = (set-or-get-env-or-def 'indexer-clickhouse-endpoint')
+    let $auth = (set-or-get-env-or-def 'indexer-clickhouse-auth')
+    let $chunk_size = (set-or-get-env-or-def 'indexer-clickhouse-chunksize')
 
     $'SELECT particle_from, particle_to, neuron, height, timestamp
         FROM spacebox.cyberlink
@@ -2303,7 +2303,7 @@ export def 'graph-links-df' [
 ] {
     let $input = $in
     let $input_type = ($input | describe)
-    let $cyberlinks_path = (value-env-default cyberlinks-csv-table $filename)
+    let $cyberlinks_path = (set-or-get-env-or-def cyberlinks-csv-table $filename)
 
     if ($not_in or ($input_type == 'nothing')) {
         return (graph-open-csv-make-df (cy-path graph $cyberlinks_path))
@@ -4002,7 +4002,8 @@ def 'set-select-from-variants' [
     }
 }
 
-def --env 'value-env-default' [
+# set env a variable from argument, or get it's value, or get default
+def --env 'set-or-get-env-or-def' [
     key
     value?
     --dont_set_env
