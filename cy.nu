@@ -2297,31 +2297,38 @@ export def 'graph-add-metadata' [] {
 #   height: 490
 #   timestamp: 2021-11-05
 export def 'graph-links-df' [
+    filename?: string@'nu-complete-graph-csv-files' # graph csv filename in the 'cy/graph' folder or a path to the graph
     --not_in            # don't catch pipe in
     --exclude_system    # exclude system particles in from column (tweet, follow, avatar)
 ] {
     let $input = $in
+    let $input_type = ($input | describe)
+    let $cyberlinks_path = (value-env-default cyberlinks-csv-table $filename)
+
+    if ($not_in or ($input_type == 'nothing')) {
+        return (graph-open-csv-make-df (cy-path graph $cyberlinks_path))
+    }
 
     let $df = (
         $input
-        | if ($not_in or ($in | describe | $in == 'nothing')) {
-            graph-open-csv-make-df (cy-path graph cyberlinks.csv)
-        } else if ($in | describe | $in =~ '^table') {
+        | if ($input_type =~ '^table') {
             dfr into-df
-        } else if ($in | describe | $in == 'dataframe') { } else {
-            error make {msg:'unknown input'}
+        } else if ($input_type == 'dataframe') {
+        } else {
+            error make {msg:$'unknown input ($input_type)'}
         }
     )
 
     let $df_columns = ($df | dfr columns)
     let $existing_graph_columns = ($df_columns | where $it in [particle_from particle_to neuron])
 
-    $df
-    | if (
+    if (
         ($existing_graph_columns | length | $in == 3)
         or ('particle' in $df_columns)
-    ) { } else {
-        graph-open-csv-make-df (cy-path graph cyberlinks.csv)
+    ) {
+        $df
+    } else {
+        graph-open-csv-make-df (cy-path graph $cyberlinks_path)
         | dfr join --inner $df $existing_graph_columns $existing_graph_columns
     }
 }
