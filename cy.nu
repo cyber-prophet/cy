@@ -4930,8 +4930,12 @@ def 'nu-complete-validators-monikers' [ ] {
     query-staking-validators | select moniker operator_address | rename value description
 }
 
-def 'nu-complete-graph-csv-files' [] {
-    ls (cy-path graph '*.csv') | sort-by modified -r | get name | path basename
+export def 'nu-complete-graph-csv-files' [] {
+    ls -s (cy-path graph '*.csv')
+    | sort-by modified -r
+    | select name size
+    | upsert size {|i| $i.size | into string}
+    | rename value description
 }
 
 def 'nu-complete-graph-provider' [] {
