@@ -2094,7 +2094,7 @@ export def 'graph-stats' [] {
 
     let $n_particles_unique = ($p2 | dfr_countrows)
 
-    let $n_particles_not_downloaded = ($p2 | particles-filter-by-type --exclude --timeout | dfr_countrows)
+    let $n_particles_not_downloaded = ($p2 | particles-filter-by-type --timeout | dfr_countrows)
 
     let $n_particles_non_text = ($p2 | dfr filter-with ($in.content_s =~ '^"MIME type"')
         | dfr_countrows)
