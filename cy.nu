@@ -1700,6 +1700,26 @@ def 'gp-filter-out-system-particles' [
     dfr filter-with ( (dfr col $column) | dfr is-in (system_cids) | dfr expr-not )
 }
 
+export def 'graph-merge' [
+    second_df
+] {
+    dfr join $second_df [particle_from particle_to neuron] [particle_from particle_to neuron] --outer
+    | dfr with-column (
+        dfr when ((dfr col height) | dfr is-null) 'b'
+        | dfr when ((dfr col height_x) | dfr is-null) 'a'
+        | dfr otherwise 'ab' | dfr as status
+    )
+    | dfr with-column (
+        dfr when ((dfr col height) | dfr is-null) (dfr col height_x)
+        | dfr otherwise (dfr col height) | dfr as height
+    )
+    | dfr with-column (
+        dfr when ((dfr col timestamp) | dfr is-null) (dfr col timestamp_x)
+        | dfr otherwise (dfr col timestamp) | dfr as timestamp
+    )
+    | dfr drop height_x timestamp_x
+}
+
 # Output unique list of particles from piped in cyberlinks table
 #
 # > cy graph-to-particles --include_global | dfr into-nu | first 2 | to yaml
