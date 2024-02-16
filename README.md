@@ -83,7 +83,6 @@ The main feedback resource is GitHub [issues](https://github.com/cyber-prophet/c
 ## Commands
 
 ### cy pin-text
-
 ```
   Pin a text particle
 
@@ -109,19 +108,20 @@ Flags:
   --only_hash - calculate hash only, don't pin anywhere
   --dont_detect_cid - work with CIDs as regular texts
   --follow_file_path - check if `text_param` is a valid path, and if yes - try to open it
+  --dont_save_particle_in_cache - don't save particle to local cache in cid.md file
 
 Parameters:
   text_param <string>:  (optional)
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭──input──┬─output─╮
+  │ string  │ string │
+  │ nothing │ string │
+  ╰──input──┴─output─╯
 
 ```
 
 ### cy link-texts
-
 ```
   Add a 2-texts cyberlink to the temp table
 
@@ -146,14 +146,13 @@ Parameters:
   text_to <string>:
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy link-chain
-
 ```
   Add a link chain to the temp table
 
@@ -171,17 +170,17 @@ Usage:
     to: QmS4ejbuxt7JvN3oYyX85yVfsgRHMPrVzgxukXMvToK5td
 
 Parameters:
-  ...rest <string>:
+  ...rest <string>: consecutive particles to cyberlink in a linkchain
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭───input───┬─output─╮
+  │ nothing   │ table  │
+  │ list<any> │ table  │
+  ╰───input───┴─output─╯
 
 ```
 
 ### cy link-files
-
 ```
   Pin files from the current folder to the local node and append their cyberlinks to the temp table
 
@@ -203,6 +202,7 @@ Usage:
 
 Flags:
   -n, --link_filenames - Add filenames as a from link
+  --include_extension - Don't cut file extension (works only with --link_filenames)
   -D, --disable_append - Don't append links to the links table
   --quiet - Don't output results page
   -y, --yes - Confirm uploading files without request
@@ -211,19 +211,19 @@ Parameters:
   ...files <path>: filenames to add into the local ipfs node
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭──input──┬─output──╮
+  │ nothing │ table   │
+  │ nothing │ nothing │
+  ╰──input──┴─output──╯
 
 ```
 
 ### cy follow
-
 ```
   Create a cyberlink according to semantic construction of following a neuron
 
 Usage:
-  > follow <neuron>
+  > follow {flags} <neuron>
 
   > cy follow bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8 | to yaml
   from_text: QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx
@@ -231,18 +231,20 @@ Usage:
   from: QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx
   to: QmYwEKZimUeniN7CEAfkBRHCn4phJtNoNJxnZXEAhEt3af
 
+Flags:
+  --use_local_list_only - follow neuron locally only
+
 Parameters:
   neuron <string>:
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭──input──┬─output─╮
+  │ nothing │ record │
+  ╰──input──┴─output─╯
 
 ```
 
 ### cy tweet
-
 ```
   Add a tweet and send it immediately (unless of disable_send flag)
 
@@ -256,20 +258,19 @@ Usage:
   to: QmWm9pmmz66cq41t1vtZWoRz5xmHSmoKCrrgdP9adcpoZK
 
 Flags:
-  -D, --disable_send -
+  -D, --disable_send - don't send tweet immideately, but put it into the temp table
 
 Parameters:
-  text_to <string>:
+  text_to <string>: text to tweet
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭──input──┬─output─╮
+  │ nothing │ record │
+  ╰──input──┴─output─╯
 
 ```
 
 ### cy link-random
-
 ```
   Make a random cyberlink from different APIs (chucknorris.io, forismatic.com)
 
@@ -291,20 +292,19 @@ Usage:
   ==========================================================
 
 Flags:
-  --source (default: 'forismatic.com')
+  --source <CompleterWrapper(String, 1895)> - choose the source to take random links from (default: 'forismatic.com')
 
 Parameters:
   n <int>: Number of links to append (optional, default: 1)
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭──input──┬─output──╮
+  │ nothing │ nothing │
+  ╰──input──┴─output──╯
 
 ```
 
 ### cy links-view
-
 ```
   View the temp cyberlinks table
 
@@ -332,17 +332,16 @@ Usage:
 
 Flags:
   -q, --quiet - Don't print info
-  --no_timestamp -
+  --no_timestamp - Don't output a timestamps column
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭──input──┬─output─╮
+  │ nothing │ table  │
+  ╰──input──┴─output─╯
 
 ```
 
 ### cy links-append
-
 ```
   Append piped-in table to the temp cyberlinks table
 
@@ -350,17 +349,19 @@ Usage:
   > links-append {flags}
 
 Flags:
-  -q, --quiet -
+  -q, --quiet - don't output the resulted temp links table
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input──┬─output──╮
+  │ table  │ table   │
+  │ table  │ nothing │
+  │ record │ table   │
+  │ record │ nothing │
+  ╰─input──┴─output──╯
 
 ```
 
 ### cy links-replace
-
 ```
   Replace the temp table with piped-in table
 
@@ -368,17 +369,36 @@ Usage:
   > links-replace {flags}
 
 Flags:
-  -q, --quiet -
+  -q, --quiet - don't output the resulted temp links table
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output──╮
+  │ table │ table   │
+  │ table │ nothing │
+  ╰─input─┴─output──╯
+
+```
+
+### cy links-swap-from-to
+```
+  Swap columns from and to
+
+Usage:
+  > links-swap-from-to {flags}
+
+Flags:
+  -D, --dont_replace - don't replace the temp cyberlinks table, just output results
+  --keep_original - append results to original links
+
+Input/output types:
+  ╭──input──┬─output─╮
+  │ nothing │ table  │
+  │ table   │ table  │
+  ╰──input──┴─output─╯
 
 ```
 
 ### cy links-clear
-
 ```
   Empty the temp cyberlinks table
 
@@ -386,14 +406,13 @@ Usage:
   > links-clear
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭──input──┬─output──╮
+  │ nothing │ nothing │
+  ╰──input──┴─output──╯
 
 ```
 
 ### cy links-link-all
-
 ```
   Add the same text particle into the 'from' or 'to' column of the temp cyberlinks table
 
@@ -401,7 +420,7 @@ Usage:
   > links-link-all {flags} <text>
 
   > [[from_text, to_text]; ['cyber-prophet' null] ['tweet' 'cy is cool!']]
-  | cy links-pin-columns | cy links-link-all 'master' --column 'to' --non_empty | to yaml
+  | cy links-pin-columns | cy links-link-all 'master' --column 'to' --empty | to yaml
   - from_text: cyber-prophet
     to_text: master
     from: QmXFUupJCSfydJZ85HQHD8tU1L7CZFErbRdMTBxkAmBJaD
@@ -413,21 +432,22 @@ Usage:
 
 Flags:
   -D, --dont_replace - don't replace the temp cyberlinks table, just output results
+  --keep_original - append results to original links
   -c, --column <String> - a column to use for values ('from' or 'to'). 'from' is default (default: 'from')
-  --non_empty - fill non-empty only
+  --empty - fill cids in empty cells only
 
 Parameters:
   text <string>: a text to upload to ipfs
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭──input──┬─output─╮
+  │ nothing │ table  │
+  │ table   │ table  │
+  ╰──input──┴─output─╯
 
 ```
 
 ### cy links-pin-columns
-
 ```
   Pin values from column 'text_from' and 'text_to' to an IPFS node and fill according columns with their CIDs
 
@@ -450,44 +470,63 @@ Flags:
   --threads <Int> - A number of threads to use to pin particles (default: 3)
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭──input──┬─output─╮
+  │ nothing │ table  │
+  │ table   │ table  │
+  ╰──input──┴─output─╯
 
 ```
 
-### cy links-remove-existed
-
+### cy links-remove-existed-1by1
 ```
   Remove existing cyberlinks from the temp cyberlinks table
 
 Usage:
-  > links-remove-existed
+  > links-remove-existed-1by1 {flags}
+
+Flags:
+  --all_links - check all links in the temp table
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭──input──┬─output──╮
+  │ nothing │ table   │
+  │ nothing │ nothing │
+  ╰──input──┴─output──╯
+
+```
+
+### cy links-remove-existed-2
+```
+  Remove existing links using graph snapshot data
+
+Usage:
+  > links-remove-existed-2
+
+Input/output types:
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy links-publish
-
 ```
-  Publish all links in the temp table to cybergraph
+  Publish all links from the temp table to cybergraph
 
 Usage:
-  > links-publish
+  > links-publish {flags}
+
+Flags:
+  --links_per_trans <Int> -
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy tsv-copy
-
 ```
   Copy a table from the pipe into the clipboard (in tsv format)
 
@@ -495,14 +534,13 @@ Usage:
   > tsv-copy
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy tsv-paste
-
 ```
   Paste a table from the clipboard to stdin (so it can be piped further)
 
@@ -510,32 +548,30 @@ Usage:
   > tsv-paste
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy update-cy
-
 ```
-  Update Cy to the latest version
+  Update Cy and Nushell to the latest versions
 
 Usage:
   > update-cy {flags}
 
 Flags:
-  --branch (default: 'dev')
+  --branch <CompleterWrapper(String, 1899)> - the branch to get updates from (default: 'dev')
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy passport-get
-
 ```
   Get a passport by providing a neuron's address or nick
 
@@ -559,19 +595,18 @@ Parameters:
   address_or_nick <string>: Name of passport or neuron's address
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy passport-set
-
 ```
   Set a passport's particle, data or avatar field for a given nickname
 
 Usage:
-  > passport-set {flags} <particle> (nickname)
+  > passport-set {flags} <cid> (nickname)
 
   > cy passport-set QmZSbGCBAPpqwXHSbUkn4P2RHiL2nRjv7BGFP4vVjcYKHd
   The particle field for maxim should be successfuly set to QmZSbGCBAPpqwXHSbUkn4P2RHiL2nRjv7BGFP4vVjcYKHd
@@ -581,51 +616,88 @@ Flags:
   --verbose - Show the node's response
 
 Parameters:
-  particle <string>:
+  cid <string>: cid to set
   nickname <any>: Provide a passport's nickname. If null - the nick from config will be used. (optional)
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
-### cy dict-neurons
-
+### cy dict-neurons-view
 ```
   Output neurons dict
 
 Usage:
-  > dict-neurons {flags}
+  > dict-neurons-view {flags}
 
 Flags:
   --df - output as a dataframe
+  --path - output path of the dict
+  --karma_bar - output karma bar
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy dict-neurons-add
-
 ```
-  Add neurons to YAML-dictionary WIP
+  Add piped in neurons to YAML-dictionary with tag and category
 
 Usage:
-  > dict-neurons-add
+  > dict-neurons-add {flags} (tag)
+
+Flags:
+  --category <String> - category of tag to write to dict (default: 'default')
+
+Parameters:
+  tag <string>: tag to add to neuron (optional, default: '')
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
+
+```
+
+### cy dict-neurons-tags
+```
+  Ouput dict-neurons tags
+
+Usage:
+  > dict-neurons-tags {flags}
+
+Flags:
+  --path - return the path of tags file
+  --wide - return wide table with categories as columns
+
+Input/output types:
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
+
+```
+
+### cy doctor
+```
+  Fix some problems of cy (for example caused by updates)
+
+Usage:
+  > doctor
+
+Input/output types:
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy dict-neurons-update
-
 ```
   Update neurons YAML-dictionary
 
@@ -637,35 +709,95 @@ Flags:
   --balance - Update balances data
   --karma - Update karma
   -a, --all - Update passport, balance, karma
-  --all_neurons - Update info about all neurons
+  --neurons_from_graph - Update info for neurons from graph, and not from current dict
   -t, --threads <Int> - Number of threads to use for downloading (default: 30)
   --dont_save - Don't update the file on a disk, just output the results
   -q, --quiet - Don't output results table
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
-### cy graph-download-links
+### cy graph-download-snapshot
+```
+  Download a snapshot of cybergraph by graphkeeper
 
+Usage:
+  > graph-download-snapshot {flags}
+
+Flags:
+  -D, --disable_update_parquet - Don't update the particles parquet file
+
+Input/output types:
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
+
+```
+
+### cy graph-receive-new-links
 ```
   Download the latest cyberlinks from a hasura cybernode endpoint
 
 Usage:
-  > graph-download-links
+  > graph-receive-new-links {flags} (filename)
+
+Flags:
+  --source (default: 'hasura')
+
+Parameters:
+  filename <string>: graph csv filename in the 'cy/graph' folder (optional)
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
+
+```
+
+### cy graph-download-missing-particles
+```
+  download particles missing from local cache for followed neurons or the whole graph
+
+Usage:
+  > graph-download-missing-particles {flags}
+
+Flags:
+  --dont_update_parquet -
+  --whole_graph - download particles for whole graph
+
+Input/output types:
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
+
+```
+
+### cy graph-merge
+```
+  merge two graphs together, add the `source` column
+
+Usage:
+  > graph-merge {flags} <df2>
+
+Flags:
+  --source_a <String> -  (default: 'a')
+  --source_b <String> -  (default: 'b')
+
+Parameters:
+  df2 <any>:
+
+Input/output types:
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy graph-to-particles
-
 ```
   Output unique list of particles from piped in cyberlinks table
 
@@ -698,20 +830,17 @@ Flags:
   -s, --include_system - Include tweets, follow and avatar paritlces
   --include_global - Include column with global particles' df (that includes content)
   --include_particle_index - Include local 'particle_index' column
-  --is_first_neuron - Check if 'neuron' and 'neuron_global' columns are equal
-  -o, --only_first_neuron -
   -c, --cids_only - Output one column with CIDs only
 --init_role             # Output if particle originally was in 'from' or 'to' column
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy particles-keep-only-first-neuron
-
 ```
   In the piped in particles df leave only particles appeared for the first time
 
@@ -719,14 +848,13 @@ Usage:
   > particles-keep-only-first-neuron
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy graph-update-particles-parquet
-
 ```
   Update the 'particles.parquet' file (it inculdes content of text files)
 
@@ -734,18 +862,17 @@ Usage:
   > graph-update-particles-parquet {flags}
 
 Flags:
-  --full_content - include column with full content of particles
   -q, --quiet - don't print info about the saved parquet file
+  --all - re-read all downloaded particles
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy graph-filter-neurons
-
 ```
   Filter the graph to chosen neurons only
 
@@ -756,14 +883,30 @@ Parameters:
   ...neurons_nicks <string>:
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
+
+```
+
+### cy graph-filter-contracts
+```
+  Filter the graph to keep or exclude links from contracts
+
+Usage:
+  > graph-filter-contracts {flags}
+
+Flags:
+  --exclude -
+
+Input/output types:
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy graph-append-related
-
 ```
   Append related cyberlinks to the piped in graph
 
@@ -774,14 +917,13 @@ Flags:
   -o, --only_first_neuron -
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy graph-neurons-stats
-
 ```
   Output neurons stats based on piped in or the whole graph
 
@@ -789,14 +931,27 @@ Usage:
   > graph-neurons-stats
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
+
+```
+
+### cy graph-stats
+```
+  Output graph stats based on piped in or the whole graph
+
+Usage:
+  > graph-stats
+
+Input/output types:
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy graph-to-gephi
-
 ```
   Export a graph into CSV file for import to Gephi
 
@@ -804,14 +959,13 @@ Usage:
   > graph-to-gephi
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy graph-to-logseq
-
 ```
   Logseq export WIP
 
@@ -819,14 +973,13 @@ Usage:
   > graph-to-logseq
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy graph-to-txt-feed
-
 ```
   Output particles into txt formated feed
 
@@ -834,34 +987,32 @@ Usage:
   > graph-to-txt-feed
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy graph-to-cosmograph
-
 ```
-  Export graph in cosmograph format
+  Export piped-in graph to a CSV file in cosmograph format
 
 Usage:
   > graph-to-cosmograph
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy graph-add-metadata
-
 ```
   Add content_s and neuron's nicknames columns to piped in or the whole graph df
   > cy graph-filter-neurons maxim_bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
 Usage:
-  > graph-add-metadata {flags}
+  > graph-add-metadata
 
   | cy graph-add-metadata | dfr into-nu | first 2 | to yaml
   - index: 0
@@ -883,24 +1034,19 @@ Usage:
     content_s_to: '"MIME type" = "image/svg+xml"'
     nick: maxim_bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
 
-Flags:
-  --full_content -
-  --include_text_only -
-
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy graph-links-df
-
 ```
   Output a full graph, or pass piped in graph further
 
 Usage:
-  > graph-links-df {flags}
+  > graph-links-df {flags} (filename)
 
   > cy graph-links-df | dfr into-nu | first 1 | to yaml
   - index: 0
@@ -913,17 +1059,32 @@ Usage:
 Flags:
   --not_in - don't catch pipe in
   --exclude_system - exclude system particles in from column (tweet, follow, avatar)
-  --include_contracts - include links from contracts (including passport)
+
+Parameters:
+  filename <string>: graph csv filename in the 'cy/graph' folder or a path to the graph (optional)
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
+
+```
+
+### cy config-new
+```
+  Create a config JSON to set env variables, to use them as parameters in cyber cli
+
+Usage:
+  > config-new
+
+Input/output types:
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy config-view
-
 ```
   View a saved JSON config file
 
@@ -934,14 +1095,50 @@ Parameters:
   config_name <string>: --quiet (-q) (optional)
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
+
+```
+
+### cy config-save
+```
+  Save the piped-in JSON into config file
+
+Usage:
+  > config-save {flags} <config_name>
+
+Flags:
+  --inactive - Don't activate current config
+
+Parameters:
+  config_name <string>:
+
+Input/output types:
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
+
+```
+
+### cy config-activate
+```
+  Activate the config JSON
+
+Usage:
+  > config-activate (config_name)
+
+Parameters:
+  config_name <string>:  (optional)
+
+Input/output types:
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy search
-
 ```
   Use the built-in node search function in cyber or pussy
 
@@ -957,14 +1154,13 @@ Parameters:
   query <any>:
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy cid-get-type-gateway
-
 ```
   Obtain cid info
   > cy cid-get-type-gateway QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV | to yaml
@@ -982,14 +1178,13 @@ Parameters:
   cid <string>:
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy cid-read-or-download
-
 ```
   Read a CID from the cache, and if the CID is absent - add it into the queue
 
@@ -1003,14 +1198,13 @@ Parameters:
   cid <string>:
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy cid-download-async
-
 ```
   Add a cid into queue to download asynchronously
 
@@ -1027,14 +1221,13 @@ Parameters:
   cid <string>:
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy cid-download
-
 ```
   Download cid immediately and mark it in the queue
 
@@ -1050,14 +1243,13 @@ Parameters:
   cid <string>:
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy queue-cid-add
-
 ```
   Add a CID to the download queue
 
@@ -1066,17 +1258,16 @@ Usage:
 
 Parameters:
   cid <string>:
-  symbol <string>:  (optional, default: '+')
+  symbol <string>:  (optional, default: '')
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy watch-search-folder
-
 ```
   Watch the queue folder, and if there are updates, request files to download
 
@@ -1084,14 +1275,13 @@ Usage:
   > watch-search-folder
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy queue-cids-download
-
 ```
   Check the queue for the new CIDs, and if there are any, safely download the text ones
 
@@ -1108,14 +1298,13 @@ Parameters:
   attempts <int>: limit a number of previous download attempts for cids in queue (optional, default: 0)
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy cache-clean-cids-queue
-
 ```
   remove from queue CIDs with many attempts
 
@@ -1126,14 +1315,13 @@ Parameters:
   attempts <int>: limit a number of previous download attempts for cids in queue (optional, default: 15)
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy cache-clear
-
 ```
   Clear the cache folder
 
@@ -1141,14 +1329,13 @@ Usage:
   > cache-clear
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy query-current-height
-
 ```
   Get a current height for the active network in config
 
@@ -1164,14 +1351,13 @@ Parameters:
   exec <string>:  (optional)
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy query-rank-karma
-
 ```
   Get a karma metric for a given neuron
 
@@ -1185,14 +1371,13 @@ Parameters:
   neuron <string>:  (optional)
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy tokens-balance-get
-
 ```
   Get a balance for a given account
 
@@ -1217,14 +1402,13 @@ Parameters:
   neuron <string>:  (optional)
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy tokens-supply-get
-
 ```
   Get supply of all tokens in a network
 
@@ -1235,14 +1419,13 @@ Flags:
   --height <Int> -  (default: 0)
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy tokens-ibc-denoms-table
-
 ```
   Check IBC denoms
 
@@ -1263,14 +1446,32 @@ Flags:
   --full - return all the columns
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
+
+```
+
+### cy tokens-info-from-registry
+```
+  Get info about tokens from the on-chain-registry contract
+
+Usage:
+  > tokens-info-from-registry (chain_name)
+
+  https://github.com/Snedashkovsky/on-chain-registry
+
+Parameters:
+  chain_name <string>:  (optional, default: 'bostrom')
+
+Input/output types:
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy balances
-
 ```
   Check balances for the keys added to the active CLI
 
@@ -1290,14 +1491,13 @@ Parameters:
   ...address <string>:
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy tokens-rewards-withdraw
-
 ```
   Withdraw rewards, make stats
 
@@ -1308,14 +1508,50 @@ Parameters:
   neuron <string>:  (optional)
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
+
+```
+
+### cy governance-view-props
+```
+  info about props current and past
+
+Usage:
+  > governance-view-props {flags} (id)
+
+Flags:
+  --dont_format -
+
+Parameters:
+  id <string>:  (optional)
+
+Input/output types:
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
+
+```
+
+### cy set-links-table-name
+```
+  Set the custom name for links csv table
+
+Usage:
+  > set-links-table-name <name>
+
+Parameters:
+  name <string>:
+
+Input/output types:
+  ╭──input──┬─output──╮
+  │ nothing │ nothing │
+  ╰──input──┴─output──╯
 
 ```
 
 ### cy ipfs-bootstrap-add-congress
-
 ```
   Add the cybercongress node to bootstrap nodes
 
@@ -1323,14 +1559,13 @@ Usage:
   > ipfs-bootstrap-add-congress
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭──input──┬─output──╮
+  │ nothing │ nothing │
+  ╰──input──┴─output──╯
 
 ```
 
 ### cy validator-generate-persistent-peers-string
-
 ```
   Dump the peers connected to the given node to the comma-separated 'persistent_peers' list
   Nodes list for https://rpc.bostrom.cybernode.ai:443
@@ -1339,38 +1574,59 @@ Usage:
 
 
   70 peers found
-  persistent_peers = "7ad32f1677ffb11254e7e9b65a12da27a4f877d6@195.201.105.229:36656,d0518ce9881a4b0c5872e5e9b7c4ea8d760dad3f@85.10.207.173:26656"
+  persistent_peers = "7ad32f1677ffb11254e7e9b65a12da27a4f877d6@195.201.105.229:36656,d0518..."
 
 Parameters:
   node_address <string>:  (optional)
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭──input──┬─output─╮
+  │ nothing │ string │
+  ╰──input──┴─output─╯
+
+```
+
+### cy validator-query-delegators
+```
+  Query all delegators to a specified validator
+
+Usage:
+  > validator-query-delegators {flags} <validator_or_moniker>
+
+Flags:
+  --limit <Int> -  (default: 1000)
+
+Parameters:
+  validator_or_moniker <string>:
+
+Input/output types:
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy query-tx
-
 ```
   Query tx by hash
 
 Usage:
-  > query-tx <hash>
+  > query-tx {flags} <hash>
+
+Flags:
+  --full_info - display all columns of a transaction
 
 Parameters:
   hash <string>:
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭──input──┬─output─╮
+  │ nothing │ record │
+  ╰──input──┴─output─╯
 
 ```
 
 ### cy query-tx-seq
-
 ```
   Query tx by acc/seq
 
@@ -1382,14 +1638,13 @@ Parameters:
   seq <int>:
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭──input──┬─output─╮
+  │ nothing │ record │
+  ╰──input──┴─output─╯
 
 ```
 
 ### cy query-account
-
 ```
   Query account
 
@@ -1404,14 +1659,69 @@ Parameters:
   neuron <string>:
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭──input──┬─output─╮
+  │ nothing │ record │
+  ╰──input──┴─output─╯
+
+```
+
+### cy query-authz-grants-by-granter
+```
+  Query status of authz grants for address
+
+Usage:
+  > query-authz-grants-by-granter (neuron)
+
+  > query-authz-grants-by-granter (qnbn bb🔑) | first 2 | to yaml
+  - expired: true
+    expiration: 2023-04-25 05:40:44 +00:00
+    grantee: bostrom1yrv70gskxcn04xu03rpywd044gvz9l0mmhad2d
+    msg: /cosmos.distribution.v1beta1.MsgWithdrawDelegatorReward
+    granter: bostrom1mcslqq8ghtuf6xu987qtk64shy6rd86a2xtwu8
+    '@type': /cosmos.authz.v1beta1.GenericAuthorization
+  - expired: true
+    expiration: 2023-04-25 05:42:25 +00:00
+    grantee: bostrom1yrv70gskxcn04xu03rpywd044gvz9l0mmhad2d
+    msg: /cosmos.staking.v1beta1.MsgDelegate
+    granter: bostrom1mcslqq8ghtuf6xu987qtk64shy6rd86a2xtwu8
+    '@type': /cosmos.authz.v1beta1.GenericAuthorization
+
+Parameters:
+  neuron <any>:  (optional)
+
+Input/output types:
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
+
+```
+
+### cy query-authz-grants-by-grantee
+```
+  Query status of authz grants for address
+
+Usage:
+  > query-authz-grants-by-grantee (neuron)
+
+  > query-authz-grants-by-grantee bostrom1sgy27lctdrc5egpvc8f02rgzml6hmmvh5wu6xk | to yaml
+  - expired: true
+    expiration: 2023-05-05 11:43:49 +00:00
+    granter: bostrom1angqedc8vu2dxa2d2cx7z5jjzm6vjldgtqm005
+    msg: /cyber.resources.v1beta1.MsgInvestmint
+    grantee: bostrom1sgy27lctdrc5egpvc8f02rgzml6hmmvh5wu6xk
+    '@type': /cosmos.authz.v1beta1.GenericAuthorization
+
+Parameters:
+  neuron <any>:  (optional)
+
+Input/output types:
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy qnbn
-
 ```
   query neuron addrsss by his nick
 
@@ -1426,14 +1736,13 @@ Parameters:
   ...nicks <string>:
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
 
 ### cy help-cy
-
 ```
   An ordered list of cy commands
 
@@ -1444,8 +1753,9 @@ Flags:
   -m, --to_md - export table as markdown
 
 Input/output types:
-  ╭input┬output╮
-  │ any │ any  │
-  ╰─────┴──────╯
+  ╭─input─┬─output─╮
+  │ any   │ any    │
+  ╰─input─┴─output─╯
 
 ```
+

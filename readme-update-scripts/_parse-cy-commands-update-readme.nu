@@ -1,5 +1,5 @@
-overlay hide cy
-overlay use ~/cy/cy.nu -pr
+overlay hide cy_no_prefix
+overlay use ~/cy/cy.nu -pr as cy
 
 rm 'help_output.md' -f
 
