@@ -1700,14 +1700,30 @@ def 'gp-filter-out-system-particles' [
     dfr filter-with ( (dfr col $column) | dfr is-in (system_cids) | dfr expr-not )
 }
 
+# merge two graphs together, add the `source` column
 export def 'graph-merge' [
-    second_df
+    df2
+    --source_a: string = 'a'
+    --source_b: string = 'b'
 ] {
-    dfr join $second_df [particle_from particle_to neuron] [particle_from particle_to neuron] --outer
+    let $input = if ($in | dfr columns | 'source' in $in) { } else {
+        dfr with-column (dfr lit $source_a | dfr as source)
+    }
+
+    let $df2_st = (
+        $df2
+        | if ($df2 | dfr columns | 'source' in $in) { } else {
+            dfr with-column (dfr lit $source_b | dfr as source)
+        }
+    )
+
+    $input
+    | dfr join $df2_st [particle_from particle_to neuron] [particle_from particle_to neuron] --outer
     | dfr with-column (
-        dfr when ((dfr col height) | dfr is-null) 'b'
-        | dfr when ((dfr col height_x) | dfr is-null) 'a'
-        | dfr otherwise 'ab' | dfr as status
+        dfr when ((dfr col source) | dfr is-null) (dfr col source_x)
+        | dfr when ((dfr col source_x) | dfr is-null) (dfr col source)
+        | dfr otherwise (dfr concat-str '-' [(dfr col source) (dfr col source_x)])
+        | dfr as source
     )
     | dfr with-column (
         dfr when ((dfr col height) | dfr is-null) (dfr col height_x)
@@ -1717,7 +1733,7 @@ export def 'graph-merge' [
         dfr when ((dfr col timestamp) | dfr is-null) (dfr col timestamp_x)
         | dfr otherwise (dfr col timestamp) | dfr as timestamp
     )
-    | dfr drop height_x timestamp_x
+    | dfr drop height_x timestamp_x source_x
 }
 
 # Output unique list of particles from piped in cyberlinks table
