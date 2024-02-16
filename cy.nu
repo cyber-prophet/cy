@@ -2094,7 +2094,7 @@ export def 'graph-stats' [] {
 
     let $n_particles_unique = ($p2 | dfr_countrows)
 
-    let $n_particles_missing = ($p2 | particles-filter-by-type --exclude --timeout | dfr_countrows)
+    let $n_particles_not_downloaded = ($p2 | particles-filter-by-type --exclude --timeout | dfr_countrows)
 
     let $n_particles_non_text = ($p2 | dfr filter-with ($in.content_s =~ '^"MIME type"')
         | dfr_countrows)
@@ -2136,20 +2136,23 @@ export def 'graph-stats' [] {
         | dfr agg [
             (dfr col neuron | dfr n-unique | dfr as 'neurons')
             (dfr col timestamp | dfr count | dfr as 'links')
-            (dfr col timestamp | dfr min | dfr as 'first_link')
-            (dfr col timestamp | dfr max | dfr as 'last_link')
+            (dfr col timestamp | dfr min | dfr as 'first')
+            (dfr col timestamp | dfr max | dfr as 'last')
         ]
         | dfr into-nu
         | reject index dummyc
         | get 0
-        | upsert links_unique $n_links_unique
-        | upsert particles_unique $n_particles_unique
-        # | upsert particles_text ($n_particles_unique - $n_particles_missing - $n_particles_non_text)
-        # | upsert particles_missing $n_particles_missing
-        # | upsert particles_nontext $n_particles_non_text
-        | upsert follows $follows
-        | upsert tweets $tweets
-        | move first_link last_link follows tweets --after particles_unique
+        | {links: $in}
+        | upsert neurons {|i| $i.links.neurons}
+        | move neurons --before links
+        | reject links.neurons
+        | upsert links.unique $n_links_unique
+        | upsert links.follows $follows
+        | upsert links.tweets $tweets
+        | upsert particles.unique $n_particles_unique
+        | upsert particles.text ($n_particles_unique - $n_particles_not_downloaded - $n_particles_non_text)
+        | upsert particles.nontext $n_particles_non_text
+        | upsert particles.not_downloaded $n_particles_not_downloaded
         | merge $stats_by_source
     )
 }
