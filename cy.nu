@@ -2117,6 +2117,19 @@ export def 'graph-stats' [] {
         | dfr_countrows
     )
 
+    let $stats_by_source = (
+        if ($links | dfr columns | 'source' in $in) {
+            $links
+            | dfr group-by source
+            | dfr agg [(dfr col source | dfr count | dfr as source_count)]
+            | dfr sort-by source
+            | dfr into-nu
+            | reject index
+            | transpose -idr
+            | {source: $in}
+        } else {{}}
+    )
+
     (
         $links
         | dfr group-by dummyc
@@ -2137,6 +2150,7 @@ export def 'graph-stats' [] {
         | upsert follows $follows
         | upsert tweets $tweets
         | move first_link last_link follows tweets --after particles_unique
+        | merge $stats_by_source
     )
 }
 
