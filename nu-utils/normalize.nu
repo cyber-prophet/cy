@@ -16,7 +16,6 @@ export def main [
     for column in $column_names {
         let $max_value = (
             $table
-            | into float karma # karma is too big
             | get $column
             | where ($it | describe | $in in ['int' 'float'])
             | math max

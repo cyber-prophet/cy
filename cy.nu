@@ -1286,7 +1286,9 @@ export def 'dict-neurons-view' [
     | reject -i ($neurons_tags | columns | where $it != 'neuron')
     | join --outer ($neurons_tags) neuron
     | if $karma_bar {
-        normalize karma
+        default 0 karma
+        | into float karma
+        | normalize karma
         | upsert karma_norm_bar {|i| bar $i.karma_norm --width ('karma_norm_bar' | str length)}
         | move karma_norm karma_norm_bar --after karma
     } else {}
