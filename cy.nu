@@ -3609,7 +3609,7 @@ export def 'tokens-format' [
     | if amount in $columns {
         upsert amount_f {
             |i| $i.amount / (10 ** $i.decimals)
-            | to-number-format --integers 9 --decimals 2
+            | to-number-format --integers 9 --decimals 0
         }
         | move amount_f --after token
     } else {}
