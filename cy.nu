@@ -3180,13 +3180,13 @@ export def 'tokens-pools-table-get' [
 
     if $short { return $liquidity_pools }
 
-    let $supply = (tokens-supply-get)
+    let $supply = (tokens-supply-get --height $height)
 
     $liquidity_pools
     | get pools
     | each {|b| $b
         | upsert balances {|i|
-            tokens-balance-get --record $i.reserve_account_address
+            tokens-balance-get --height $height --record $i.reserve_account_address
         }
     }
     | where balances != (token-dummy-balance | transpose -idr)
