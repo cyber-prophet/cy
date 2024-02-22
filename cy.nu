@@ -1679,7 +1679,7 @@ export def 'graph-download-missing-particles' [
         }
         | graph-to-particles
         | graph-add-metadata
-        | particles-filter-by-type --exclude --timeout
+        | particles-filter-by-type --timeout
         | print-and-pass
         | dfr select particle
         | dfr into-nu
