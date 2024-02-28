@@ -4669,8 +4669,10 @@ def --env is-connected-interval [
 
 def open_cy_config_toml [] {
     let $config_path = ($nu.home-path | path join .cy_config.toml)
-    if not ($config_path | path exists) {
-        {
+    if ($config_path | path exists) {
+        open $config_path
+    } else {
+        let $config = {
             'path': ($nu.home-path | path join cy)
             'ipfs-files-folder': ($nu.home-path | path join cy graph particles safe)
             'ipfs-download-from': 'gateway'
@@ -4679,10 +4681,10 @@ def open_cy_config_toml [] {
             'rpc-address': 'https://rpc.bostrom.cybernode.ai:443'
             'chain-id': 'bostrom'
         }
-        | save $config_path
-    }
 
-    open $config_path
+        $config | save $config_path
+        $config
+    }
 }
 
 def make_default_folders_fn [] {
