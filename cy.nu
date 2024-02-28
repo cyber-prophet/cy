@@ -1459,16 +1459,20 @@ export def 'dict-neurons-update' [
     | if $quiet { null } else { }
 }
 
-# Download a snapshot of cybergraph by graphkeeper
+# Download a snapshot of cybergraph
 export def --env 'graph-download-snapshot' [
     --disable_update_parquet (-D)   # Don't update the particles parquet file
+    --neuron: string = 'graphkeeper'
 ] {
     make_default_folders_fn
 
     set-cy-setting caching-function-force-update 'true'
-    let $cur_data_cid = (passport-get graphkeeper | get data -i)
+    let $cur_data_cid = (passport-get $neuron | get data -i)
     set-cy-setting caching-function-force-update 'false'
-    let $path = (cy-path graph)
+    let $path = (cy-path graph $neuron)
+
+    mkdir $path
+
     let $update_info = (
         $path
         | path join update.toml
@@ -1484,8 +1488,8 @@ export def --env 'graph-download-snapshot' [
     print '' 'Downloading cyberlinks.csv'
     ipfs get $'($cur_data_cid)/graph/cyberlinks.csv' -o $path
 
-    print '' 'Downloading cyberlinks.csv'
-    ipfs get $'($cur_data_cid)/graph/cyberlinks_contracts.csv' -o $path
+    # print '' 'Downloading cyberlinks.csv'
+    # ipfs get $'($cur_data_cid)/graph/cyberlinks_contracts.csv' -o $path
 
     let $dict_name = 'neurons_dict.yaml'
     let $dict_path = ($path | path join neurons_dict.yaml)
@@ -1530,10 +1534,10 @@ export def --env 'graph-download-snapshot' [
 
     cprint $'The graph data has been downloaded to the *"($path)"* directory'
 
-    if (not $disable_update_parquet) {
-        print 'Updating particles parquet'
-        graph-update-particles-parquet
-    }
+    # if (not $disable_update_parquet) {
+    #     print 'Updating particles parquet'
+    #     graph-update-particles-parquet
+    # }
 }
 
 #[test]
