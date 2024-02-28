@@ -4599,14 +4599,11 @@ export def 'crypto-prices' [] {
 export def 'help-cy' [
     --to_md (-m) # export table as markdown
 ] {
-    let $text = (
-        open (cy-path cy.nu) --raw
-        | parse -r "(\n(# )(?<desc>.*?)(?:\n#[^\n]*)*\nexport (def|def --env) '(?<command>.*)')"
-        | select command desc
-        | upsert command {|row index| ('cy ' + $row.command)}
-    )
-
-    $text
+    cy-path cy.nu
+    | open --raw
+    | parse -r "(\n(# )(?<desc>.*?)(?:\n#[^\n]*)*\nexport (def|def --env) '(?<command>.*)')"
+    | select command desc
+    | upsert command {|row index| ('cy ' + $row.command)}
     | if $to_md { to md } else { }
 }
 
