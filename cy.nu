@@ -2285,6 +2285,7 @@ export def 'graph-to-cosmograph' [] {
 }
 
 # Add content_s and neuron's nicknames columns to piped in or the whole graph df
+#
 # > cy graph-filter-neurons maxim_bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
 # | cy graph-add-metadata | dfr into-nu | first 2 | to yaml
 # - index: 0
@@ -2790,6 +2791,7 @@ def search-test-dummy [] {
 }
 
 # Obtain cid info
+#
 # > cy cid-get-type-gateway QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV | to yaml
 # type: text/plain; charset=utf-8
 # size: '5'
@@ -3169,6 +3171,11 @@ def 'token-dummy-balance' [] {
 }
 
 # Get supply of all tokens in a network
+#
+# > tokens-supply-get | select boot hydrogen milliampere | to yaml
+# boot: 1187478088996451
+# hydrogen: 320740400170941
+# milliampere: 9760366733
 export def 'tokens-supply-get' [
     --height: int = 0
 ] {
@@ -4724,7 +4731,7 @@ def 'default-node-params' [] {
 
 # echo particle for publishing
 export def 'echo_particle_txt' [
-    i
+    i: string
     --markdown (-m)
 ] {
     let $indent = ($i.step | into int | $in * 4 | $in + 12)
