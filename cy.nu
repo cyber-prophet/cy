@@ -558,7 +558,7 @@ export def 'links-swap-from-to' [
 # Empty the temp cyberlinks table
 export def 'links-clear' []: [nothing -> nothing] {
     $'from_text,to_text,from,to,timestamp(char nl)'
-    | save  --force (current-links-csv-path | backup-and-echo --mv)
+    | save --force (current-links-csv-path | backup-and-echo --mv)
 }
 
 #[test]
@@ -2071,7 +2071,7 @@ export def 'graph-neurons-stats' [] {
         $links
         | dfr group-by neuron
         | dfr agg [
-            (dfr col timestamp | dfr count  | dfr as 'links_count')
+            (dfr col timestamp | dfr count | dfr as 'links_count')
             (dfr col timestamp | dfr min | dfr as 'first_link')
             (dfr col timestamp | dfr max | dfr as 'last_link')
         ]
@@ -2217,7 +2217,7 @@ export def 'graph-to-gephi' [] {
         | dfr into-nu
         | reject index
         | move id label cid --before height
-        | save  -f (cy-path export !gephi_particles.csv)
+        | save -f (cy-path export !gephi_particles.csv)
     )
 }
 
@@ -4555,11 +4555,11 @@ def caching-function-test [] {
         'validator_address: string, shares: string>, balance: record<denom: string, amount: string>>, ' +
         'pagination: record<next_key: nothing, total: string>, update_time: date>')
     equal (
-        caching-function query rank top  | describe
+        caching-function query rank top | describe
     ) ('record<result: table<particle: string, rank: string>, pagination: record<total: int>, ' +
         'update_time: date>')
     equal (
-        caching-function query ibc-transfer denom-traces  | describe
+        caching-function query ibc-transfer denom-traces | describe
     ) ('record<denom_traces: table<path: string, base_denom: string>, pagination: record<next_key: ' +
         'nothing, total: string>, update_time: date>')
     equal (
