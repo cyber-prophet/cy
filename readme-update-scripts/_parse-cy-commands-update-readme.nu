@@ -7,7 +7,7 @@ cy help-cy
 | get command
 | drop
 | each {|i| $"parse_help '($i)' \(($i) --help\);"}
-| prepend 'source help_parser.nu'
+| prepend "use parse_help.nu parse_help\n"
 | save -f cy-commands.nu
 
 source cy-commands.nu

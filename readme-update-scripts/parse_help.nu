@@ -1,4 +1,4 @@
-def parse_help [
+export def parse_help [
     command
     input
 ] {
@@ -15,14 +15,14 @@ def parse_help [
 
     $input_lines
     | skip until {|i| $i =~ Flags}
-    | prepend ( $first_part | skip 2 )
+    | prepend ( $first_part | skip 2 | each {|i| $'  ($i)'})
     | prepend (
         $input_lines
         | skip until {|i| $i =~ Usage}
         | take until {|i| $i =~ Flags}
     )
     | prepend ( $first_part | take 2 )
-    | prepend $"### ($command)\n```"
+    | prepend $"### ($command)\n\n```"
     | append "```\n\n"
     | str join "\n"
     | ansi strip

@@ -1,4 +1,4 @@
-# This script updates Readme with the latest version of command annotatations in cy.nu
+# This script updates the README with the latest version of command annotations in cy.nu
 
 let readme = (open ~/cy/README.md | lines)
 
@@ -18,7 +18,7 @@ $readme
 | append (open -r help_output.md)
 | str join (char nl)
 | str replace -ram ' +$' ''
-| str replace -ra '<CompleterWrapper.*> -  ' ''
+| str replace -ra '<CompleterWrapper.*>\s+-\s+' ''
 | save ~/cy/README.md -fr
 
 print "success!"
