@@ -1357,6 +1357,7 @@ export def 'dict-neurons-add' [
 export def 'dict-neurons-tags' [
     --path      # return the path of tags file
     --wide      # return wide table with categories as columns
+    --timestamp # output the timestamp of the last neuron's update
 ] {
     let $path_csv = (cy-path graph neurons_dict_tags.csv)
     if $path { return $path_csv }
@@ -1364,7 +1365,8 @@ export def 'dict-neurons-tags' [
     if not ($path_csv | path exists) {
         [[neuron, tag, category, timestamp];
         ["bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8", follow, default, (date now | debug)]]
-        | save $path_csv;
+        | if $timestamp {} else {reject -i timestamp}
+        | save $path_csv
     }
 
     open $path_csv
