@@ -1192,7 +1192,7 @@ export def 'passport-get' [
     | if $in == null {
         if not $quiet { # to change for using $env
             cprint --before 1 --after 2 $'No passport for *($address_or_nick)* is found'
-        }; return {nickname: '👤'}
+        }; return {nickname: '☸︎'}
     } else {
         get data
         | merge $in.extension
@@ -1202,8 +1202,8 @@ export def 'passport-get' [
 
 #[test]
 def passport-get-test [] {
-    equal (passport-get bostrom1aypv5wxute0nnhfv44jkhyfkzt7zyrden85tel) {nickname: 👤}
-    equal (passport-get bostrom1aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa) {nickname: 👤} # unexisting address
+    equal (passport-get bostrom1aypv5wxute0nnhfv44jkhyfkzt7zyrden85tel) {nickname: ☸︎}
+    equal (passport-get bostrom1aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa) {nickname: ☸︎} # unexisting address
     equal (passport-get bostrom1de53jgxjfj5n84qzyfd7z44m9wrudygt524v6r | get nickname) 'graphkeeper'
 }
 
@@ -4896,7 +4896,7 @@ def 'nu-complete dict-nicks' [] {
     (dict-neurons-view)
     | select -i nickname neuron
     | uniq-by nickname
-    | where nickname not-in [null '' '👤']
+    | where nickname not-in [null '' '☸︎']
     | rename value description
 }
 
