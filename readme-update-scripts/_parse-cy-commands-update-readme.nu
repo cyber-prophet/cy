@@ -12,6 +12,19 @@ scope modules
 | each {|i| $"parse_help 'cy ($i)' \(cy ($i) --help\);"}
 | prepend "use ~/cy/cy.nu; use parse_help.nu\n\n"
 | str join "\n"
-| nu --env-config table_env_test.nu -c $in
+| nu --env-config env-table-settings.nu -c $in
 
-nu -n release.nu
+# This script updates the README with the latest version of command annotations in cy.nu
+
+let readme = (open ~/cy/README.md | lines)
+
+$readme
+| take until {|i| $i == "## Commands"}
+| append "## Commands\n"
+| append (open -r help_output.md)
+| str join (char nl)
+| str replace -ram ' +$' ''
+| str replace -ra '<CompleterWrapper.*>\s+-\s+' ''
+| save ~/cy/README.md -fr
+
+print "success!"
