@@ -9,8 +9,9 @@ scope modules
 | sort-by decl_id
 | get name
 | skip
-| each {|i| $"parse_help 'cy ($i)' \(cy ($i) --help\);"}
-| prepend "use ~/cy/cy.nu; use parse_help.nu\n\n"
+| each {|i| $"parse_help 'cy ($i)' \(help '($i)'\);"}
+| prepend "use ~/cy/cy.nu"
+| prepend (view source 'parse_help')
 | str join "\n"
 | nu --env-config env-table-settings.nu -c $in
 
@@ -28,3 +29,37 @@ $readme
 | save ~/cy/README.md -fr
 
 print "success!"
+
+
+def parse_help [
+    command
+    input
+] {
+    let $input_lines = (
+        $input
+        | default ''
+        | lines
+        | where $it !~ 'Display the help message for this command'
+    )
+    let $first_part = (
+        $input_lines
+        | take until {|i| $i =~ 'Usage'}
+        | each {|i| $'  ($i)'}
+    )
+
+    $input_lines
+    | skip until {|i| $i =~ Flags}
+    | prepend ( $first_part | skip 2 )
+    | prepend (
+        $input_lines
+        | skip until {|i| $i =~ Usage}
+        | take until {|i| $i =~ Flags}
+    )
+    | prepend ( $first_part | take 2 )
+    | prepend $"### ($command)\n\n```"
+    | append "```\n\n"
+    | str join "\n"
+    | ansi strip
+    | str replace "Flags:\n\n" ""
+    | save -a 'help_output.md'
+}
