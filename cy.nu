@@ -14,7 +14,7 @@ export def main [] { help-cy }
 # export def cy [] { help-cy }
 
 # Check if all necessary dependencies are installed
-export def check-requirements [] {
+export def check-requirements []: nothing -> nothing {
 
     ['ipfs', 'rich', 'curl', 'cyber', 'pussy']
     | each {
@@ -55,7 +55,7 @@ export-env {
     make_default_folders_fn
 }
 
-export def --env 'use-recommended-nushell-settings' [] {
+export def --env 'use-recommended-nushell-settings' []: nothing -> nothing {
     $env.config.show_banner = false
     $env.config.table.trim.methodology = 'truncating'
     $env.config.completions.algorithm = 'fuzzy'
@@ -171,7 +171,7 @@ export def 'link-texts' [
     text_from: string
     text_to: string
     --disable_append (-D) # Disable adding the cyberlink into the temp table
-    --quiet (-q) # Don't output the cyberlink record after executing the command
+    --quiet (-q)        # Don't output a cyberlink record after executing the command
     --only_hash         # calculate hash only, don't pin anywhere
     --dont_detect_cid   # work with CIDs as regular texts
     --follow_file_path  # check if `text_param` is a valid path, and if yes - try to open it
@@ -250,8 +250,8 @@ export def 'link-chain' [
 #   to: QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 # > cd ..; rm -r linkfilestest
 export def 'link-files' [
-    ...files: path        # filenames to add into the local ipfs node
-    --link_filenames (-n)   # Add filenames as a from link
+    ...files: path          # filenames to pin to the local ipfs node
+    --link_filenames (-n)   # Add filenames as a `from` link
     --include_extension     # Don't cut file extension (works only with --link_filenames)
     --disable_append (-D)   # Don't append links to the links table
     --quiet                 # Don't output results page
@@ -327,8 +327,8 @@ def test-link-files [] {
 # from: QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx
 # to: QmYwEKZimUeniN7CEAfkBRHCn4phJtNoNJxnZXEAhEt3af
 export def 'follow' [
-    neuron: string
-    --use_local_list_only    # follow neuron locally only
+    neuron: string          # neuron's address to follow
+    --use_local_list_only   # follow a neuron locally only
 ]: [nothing -> record] {
     if not (is-neuron $neuron) {
         cprint $"*($neuron)* doesn't look like an address"
