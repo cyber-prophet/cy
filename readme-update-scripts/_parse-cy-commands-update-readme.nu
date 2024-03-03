@@ -1,14 +1,17 @@
-overlay hide cy_no_prefix
-overlay use ~/cy/cy.nu -pr as cy
+# overlay hide cy_no_prefix
+use ~/cy/cy.nu
 
 rm 'help_output.md' -f
 
-cy help-cy
-| get command
-| drop
-| each {|i| $"parse_help '($i)' \(($i) --help\);"}
-| prepend "use parse_help.nu parse_help\n"
-| save -f cy-commands.nu
+scope modules
+| where name == 'cy'
+| get commands.0
+| sort-by decl_id
+| get name
+| skip
+| each {|i| $"parse_help 'cy ($i)' \(cy ($i) --help\);"}
+| prepend "use ~/cy/cy.nu; use parse_help.nu\n\n"
+| str join "\n"
+| nu --env-config table_env_test.nu -c $in
 
-source cy-commands.nu
-source release.nu
+nu -n release.nu

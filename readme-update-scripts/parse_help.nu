@@ -1,9 +1,10 @@
-export def parse_help [
+export def main [
     command
     input
 ] {
     let $input_lines = (
         $input
+        | default ''
         | lines
         | where $it !~ 'Display the help message for this command'
     )
@@ -15,7 +16,7 @@ export def parse_help [
 
     $input_lines
     | skip until {|i| $i =~ Flags}
-    | prepend ( $first_part | skip 2 | each {|i| $'  ($i)'})
+    | prepend ( $first_part | skip 2 )
     | prepend (
         $input_lines
         | skip until {|i| $i =~ Usage}

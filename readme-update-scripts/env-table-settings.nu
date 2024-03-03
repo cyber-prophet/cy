@@ -1,0 +1,1 @@
+$env.config.table = {mode: rounded, index_mode: auto, show_empty: false, padding: {left: 1, right: 1}, trim: {methodology: truncating, wrapping_try_keep_words: false, truncating_suffix: ...}, header_on_separator: true}
