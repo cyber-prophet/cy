@@ -13,20 +13,6 @@ use std log
 export def main [] { help-cy }
 # export def cy [] { help-cy }
 
-# Check if all necessary dependencies are installed
-export def check-requirements []: nothing -> nothing {
-
-    ['ipfs', 'rich', 'curl', 'cyber', 'pussy']
-    | each {
-        if (which ($in) | is-empty) {
-            $'($in) is missing'
-        }
-    }
-    | if ($in | is-empty) {
-        'all required apps are installed'
-    }
-}
-
 export-env {
     # banner2
     let $tested_versions = ['0.90.1']
@@ -53,13 +39,6 @@ export-env {
     )
 
     make_default_folders_fn
-}
-
-export def --env 'use-recommended-nushell-settings' []: nothing -> nothing {
-    $env.config.show_banner = false
-    $env.config.table.trim.methodology = 'truncating'
-    $env.config.completions.algorithm = 'fuzzy'
-    $env.config.completions.quick = false
 }
 
 # Pin a text particle
@@ -4852,6 +4831,27 @@ export def 'queue-execute-task' [
     }
     ^rm -f $task_path;
     log debug $'run ($command)'
+}
+
+# Check if all necessary dependencies are installed
+export def check-requirements []: nothing -> nothing {
+
+    ['ipfs', 'rich', 'curl', 'cyber', 'pussy']
+    | each {
+        if (which ($in) | is-empty) {
+            $'($in) is missing'
+        }
+    }
+    | if ($in | is-empty) {
+        'all required apps are installed'
+    }
+}
+
+export def --env 'use-recommended-nushell-settings' []: nothing -> nothing {
+    $env.config.show_banner = false
+    $env.config.table.trim.methodology = 'truncating'
+    $env.config.completions.algorithm = 'fuzzy'
+    $env.config.completions.quick = false
 }
 
 def 'nu-complete-random-sources' [] {
