@@ -2266,6 +2266,20 @@ export def 'graph-to-cosmograph' [] {
     )
 }
 
+# Export piped-in graph into graphviz format
+export def 'graph-to-graphviz' [
+    --options: string = ''
+] {
+    graph-add-metadata --escape-quotes
+    | dfr select 'content_s_from' 'content_s_to'
+    | $in.content_s_from + ' -> ' + $in.content_s_to + ';'
+    | dfr into-nu
+    | rename index links
+    | get links
+    | str join (char nl)
+    | "digraph G {\n" + $options + "\n" + $in + "\n}"
+}
+
 # Add content_s and neuron's nicknames columns to piped in or the whole graph df
 #
 # > cy graph-filter-neurons maxim_bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
