@@ -2269,17 +2269,34 @@ export def 'graph-to-cosmograph' [] {
 # Export piped-in graph into graphviz format
 export def 'graph-to-graphviz' [
     --options: string = ''
+    --preset: string@nu-complete-graphviz-presets = ''
 ] {
-    graph-add-metadata --escape-quotes
-    | dfr select 'content_s_from' 'content_s_to'
-    | $in.content_s_from + ' -> ' + $in.content_s_to + ';'
-    | dfr into-nu
-    | rename index links
-    | get links
-    | str join (char nl)
-    | "digraph G {\n" + $options + "\n" + $in + "\n}"
+    let $graph = (
+        graph-add-metadata --escape-quotes
+        | dfr select 'content_s_from' 'content_s_to'
+        | $in.content_s_from + ' -> ' + $in.content_s_to + ';'
+        | dfr into-nu
+        | rename index links
+        | get links
+        | str join (char nl)
+        | "digraph G {\n" + $options + "\n" + $in + "\n}"
+    )
+
+    if $preset == '' { $graph } else {
+        let $filename = date now
+            | format date "%Y%m%d_%H%M%S"
+            | cy-path export $'graphviz_($preset)_($in).svg'
+
+        let $params = ['-Tsvg' $'-o($filename)']
+
+        $graph | ^($preset) ...$params
+        $filename
+    }
 }
 
+def 'nu-complete-graphviz-presets' [] {
+    [ 'sfdp', 'dot' ]
+}
 # Add content_s and neuron's nicknames columns to piped in or the whole graph df
 #
 # > cy graph-filter-neurons maxim_bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
