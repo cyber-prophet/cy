@@ -1747,7 +1747,6 @@ export def 'graph-merge' [
 export def 'graph-to-particles' [
     --from                  # Use only particles from the 'from' column
     --to                    # Use only particles from the 'to' column
-    --include_system (-s)   # Include tweets, follow and avatar paritlces
     --include_global        # Include column with global particles' df (that includes content)
     --include_particle_index         # Include local 'particle_index' column
     --cids_only (-c)        # Output one column with CIDs only
@@ -1799,9 +1798,6 @@ export def 'graph-to-particles' [
             dfr sort-by [height]
         }
         | dfr unique --subset [particle]
-        | if not $include_system {
-            gp-filter-out-system-particles
-        } else {}
         | if $cids_only {
             dfr select particle
         } else {
@@ -1974,7 +1970,7 @@ export def 'graph-append-related' [
         --step: int
     ] {
         $links
-        | graph-to-particles --include_system
+        | graph-to-particles
         | if $only_first_neuron {
             particles-keep-only-first-neuron
         } else {}
