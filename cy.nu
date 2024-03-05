@@ -2288,7 +2288,9 @@ export def 'graph-to-cosmograph' [] {
 #   content_s_from: avatar
 #   content_s_to: '"MIME type" = "image/svg+xml"'
 #   nick: maxim_bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
-export def 'graph-add-metadata' [] {
+export def 'graph-add-metadata' [
+    --escape-quotes
+] {
     let $links = (
         graph-links-df
         | graph-select-standard-columns --extra_columns ['particle', 'link_local_index', 'init-role', 'step']
@@ -2296,6 +2298,13 @@ export def 'graph-add-metadata' [] {
     let $p = (
         graph-particles-df
         | dfr select particle content_s
+        | if $escape_quotes {
+            dfr with-column (
+                $in.content_s
+                | dfr replace-all --pattern '"' --replace '\"'
+                | dfr replace-all --pattern '^(.*)$' --replace '"$1"'
+            )
+        } else {}
     )
 
     let $links_columns = ($links | dfr columns)
