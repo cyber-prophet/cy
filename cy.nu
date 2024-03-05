@@ -2355,7 +2355,7 @@ export def 'graph-links-df' [
         $input
         | if ($input_type =~ '^table') {
             dfr into-df
-        } else if ($input_type == 'dataframe') {
+        } else if ($input_type in ['dataframe' 'lazyframe']) {
         } else {
             error make {msg:$'unknown input ($input_type)'}
         }
