@@ -1681,10 +1681,15 @@ export def 'graph-download-missing-particles' [
 }
 
 # filter system particles out
-def 'gp-filter-out-system-particles' [
+export def 'graph-filter-system-particles' [
     column = 'particle' # the column to look for system cids
+    --exclude
 ] {
-    dfr filter-with ( (dfr col $column) | dfr is-in (system_cids) | dfr expr-not )
+    dfr filter-with (
+        (dfr col $column)
+        | dfr is-in (system_cids)
+        | if $exclude {dfr expr-not} else {}
+    )
 }
 
 # merge two graphs together, add the `source` column
@@ -1747,7 +1752,6 @@ export def 'graph-merge' [
 export def 'graph-to-particles' [
     --from                  # Use only particles from the 'from' column
     --to                    # Use only particles from the 'to' column
-    --exclude_system (-S)   # Include tweets, follow and avatar paritlces
     --include_global        # Include column with global particles' df (that includes content)
     --include_particle_index         # Include local 'particle_index' column
     --cids_only (-c)        # Output one column with CIDs only
@@ -1799,9 +1803,6 @@ export def 'graph-to-particles' [
             dfr sort-by [height]
         }
         | dfr unique --subset [particle]
-        | if $exclude_system {
-            gp-filter-out-system-particles
-        } else {}
         | if $cids_only {
             dfr select particle
         } else {
@@ -1983,7 +1984,7 @@ export def 'graph-append-related' [
         | dfr rename particle $'particle_($from_or_to)'
         | dfr join (
             graph-links-df --not_in
-            | gp-filter-out-system-particles particle_from
+            | graph-filter-system-particles particle_from --exclude
             | dfr into-lazy
         ) $'particle_($from_or_to)' $'particle_($from_or_to)'
         | dfr with-column [
