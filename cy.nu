@@ -15,7 +15,7 @@ export def main [] { help-cy }
 
 export-env {
     # banner2
-    let $tested_versions = ['0.90.1']
+    let $tested_versions = ['0.91.0']
 
     version
     | get version
@@ -872,7 +872,7 @@ export def 'links-remove-existed-2' [] {
 
 # Create a custom unsigned cyberlinks transaction
 def 'tx-json-create-from-cyberlinks' [
-    $links: table
+    $links # removed type definition for the case of empty tables
 ] {
     let $links2 = ( $links | select from to | uniq )
     let $path = (cy-path temp tx-unsigned.json)
@@ -1262,8 +1262,8 @@ export def 'dict-neurons-view' [
         open $in
     } else { [[neuron nickname];
         ['bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8' 'maxim']] }
-    | reject -i ($neurons_tags | columns | where $it != 'neuron')
-    | join --outer ($neurons_tags) neuron
+    | reject -i ...($neurons_tags | columns | where $it != 'neuron')
+    | join --outer $neurons_tags neuron
     | if $karma_bar {
         default 0 karma
         | into float karma
@@ -1489,7 +1489,7 @@ export def --env 'graph-download-snapshot' [
     print '' 'Downloading particles zips'
     ipfs get $'($cur_data_cid)/graph/particles/' -o $'($path)/particles_arch/'
 
-    let $archives = (ls ($path | path join particles_arch/*.zip) | get name)
+    let $archives = (ls ($path | path join particles_arch/*.zip | into glob) | get name)
     let $last_archive = (
         $update_info
         | get -i last_archive
@@ -3563,7 +3563,7 @@ export def 'tokens-in-h-swap-calc' [
     | fill non-exist 0.0
     | rename -c {h_out_amount: $'amount_in_h_swap($percent_formatted)'}
     # | rename -c {source_amount: $'amount_source($percent_formatted)'}
-    | reject -i [
+    | reject -i ...[
         hydrogen reserve_coin_denom reserve_coin_amount h_out_price price_in_h_naive source_amount
     ]
 }
@@ -3831,7 +3831,7 @@ export def 'rewards-withdraw-tx-analyse' [
         ) validator_address validator_address
         | reject delegator_address shares denom
         | rename validator delegated
-        | select -i moniker delegated commission rewards jailed ($in | columns)
+        | select -i moniker delegated commission rewards jailed ...($in | columns)
         | where delegated > 0
         | join ($rewards | where denom == boot) -l validator validator
         | upsert percent {|i| ($i.rewards / $i.delegated) }
@@ -4238,7 +4238,7 @@ export def 'query-tx' [
     }
     | print-and-pass {|i| trans_status $i}
     | if $full_info {
-        select -i ($in | columns | prepend [height code logs tx txhash])
+        select -i ...($in | columns | prepend [height code logs tx txhash])
     } else {
         select height code logs
     }
@@ -4310,7 +4310,7 @@ export def 'query-authz-grants-by-granter' [
     | upsert expiration {|i| $i.expiration | into datetime}
     | sort-by expiration
     | upsert expired {|i| $i.expiration < (date now)}
-    | select -i expired expiration grantee msg ($in | columns)
+    | select -i expired expiration grantee msg ...($in | columns)
 }
 
 # Query status of authz grants for address
@@ -4333,7 +4333,7 @@ export def 'query-authz-grants-by-grantee' [
     | upsert expiration {|i| $i.expiration | into datetime}
     | sort-by expiration
     | upsert expired {|i| $i.expiration < (date now)}
-    | select -i expired expiration granter msg ($in | columns)
+    | select -i expired expiration granter msg ...($in | columns)
 }
 
 export def 'authz-give-grant' [
@@ -4986,7 +4986,7 @@ def 'nu-complete-validators-monikers' [ ] {
 }
 
 export def 'nu-complete-graph-csv-files' [] {
-    ls -s (cy-path graph '*.csv')
+    ls -s (cy-path graph '*.csv' | into glob)
     | sort-by modified -r
     | select name size
     | upsert size {|i| $i.size | into string}
