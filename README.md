@@ -206,13 +206,13 @@ Usage:
 
 Flags:
   -n, --link_filenames - Add filenames as a `from` link
-  --include_extension - Don't cut file extension (works only with --link_filenames)
+  --include_extension - Include a file extension (works only with `--link_filenames`)
   -D, --disable_append - Don't append links to the links table
   --quiet - Don't output results page
   -y, --yes - Confirm uploading files without request
 
 Parameters:
-  ...files <path>: filenames to pin to the local ipfs node
+  ...files <path>: filenames of files to pin to the local ipfs node
 
 Input/output types:
   ╭──input──┬─output──╮
@@ -339,7 +339,7 @@ Usage:
     timestamp: 20230702-113842
 
 Flags:
-  -q, --quiet - Don't print info
+  -q, --quiet - Disable informational messages
   --no_timestamp - Don't output a timestamps column
 
 Input/output types:
@@ -358,7 +358,7 @@ Usage:
   > links-append {flags}
 
 Flags:
-  -q, --quiet - don't output the resulted temp links table
+  -q, --quiet - suppress output the resulted temp links table
 
 Input/output types:
   ╭─input──┬─output──╮
@@ -379,7 +379,7 @@ Usage:
   > links-replace {flags}
 
 Flags:
-  -q, --quiet - don't output the resulted temp links table
+  -q, --quiet - suppress output the resulted temp links table
 
 Input/output types:
   ╭─input─┬─output──╮
@@ -398,7 +398,7 @@ Usage:
   > links-swap-from-to {flags}
 
 Flags:
-  -D, --dont_replace - don't replace the temp cyberlinks table, just output results
+  -D, --dont_replace - output results only, without modifiying the links table
   --keep_original - append results to original links
 
 Input/output types:
@@ -570,7 +570,7 @@ Usage:
   > links-publish {flags}
 
 Flags:
-  --links_per_trans <Int> -
+  --links_per_trans <Int>
 
 Input/output types:
   ╭input┬output╮
@@ -646,7 +646,7 @@ Usage:
   particle: QmRumrGFrqxayDpySEkhjZS1WEtMyJcfXiqeVsngqig3ak
 
 Flags:
-  --quiet -
+  --quiet
 
 Parameters:
   address_or_nick <string>: Name of passport or neuron's address
@@ -834,8 +834,29 @@ Usage:
   > graph-download-missing-particles {flags}
 
 Flags:
-  --dont_update_parquet -
+  --dont_update_parquet
   --whole_graph - download particles for whole graph
+
+Input/output types:
+  ╭input┬output╮
+  │ any │ any  │
+  ╰─────┴──────╯
+
+```
+
+### cy graph-filter-system-particles
+
+```
+  filter system particles out
+
+Usage:
+  > graph-filter-system-particles {flags} (column)
+
+Flags:
+  --exclude
+
+Parameters:
+  column <string>: the column to look for system cids (optional, default: 'particle')
 
 Input/output types:
   ╭input┬output╮
@@ -897,11 +918,10 @@ Usage:
 Flags:
   --from - Use only particles from the 'from' column
   --to - Use only particles from the 'to' column
-  -s, --include_system - Include tweets, follow and avatar paritlces
   --include_global - Include column with global particles' df (that includes content)
   --include_particle_index - Include local 'particle_index' column
   -c, --cids_only - Output one column with CIDs only
---init_role             # Output if particle originally was in 'from' or 'to' column
+--init_role # Output if particle originally was in 'from' or 'to' column
 
 Input/output types:
   ╭input┬output╮
@@ -934,7 +954,7 @@ Usage:
   > graph-update-particles-parquet {flags}
 
 Flags:
-  -q, --quiet - don't print info about the saved parquet file
+  -q, --quiet - Disable informational messages about the saved parquet file
   --all - re-read all downloaded particles
 
 Input/output types:
@@ -971,7 +991,7 @@ Usage:
   > graph-filter-contracts {flags}
 
 Flags:
-  --exclude -
+  --exclude
 
 Input/output types:
   ╭input┬output╮
@@ -989,7 +1009,7 @@ Usage:
   > graph-append-related {flags}
 
 Flags:
-  -o, --only_first_neuron -
+  -o, --only_first_neuron
 
 Input/output types:
   ╭input┬output╮
@@ -1088,13 +1108,32 @@ Input/output types:
 
 ```
 
+### cy graph-to-graphviz
+
+```
+  Export piped-in graph into graphviz format
+
+Usage:
+  > graph-to-graphviz {flags}
+
+Flags:
+  --options <String> -  (default: '')
+  --preset (default: '')
+
+Input/output types:
+  ╭input┬output╮
+  │ any │ any  │
+  ╰─────┴──────╯
+
+```
+
 ### cy graph-add-metadata
 
 ```
   Add content_s and neuron's nicknames columns to piped in or the whole graph df
 
 Usage:
-  > graph-add-metadata
+  > graph-add-metadata {flags}
 
   > cy graph-filter-neurons maxim_bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
   | cy graph-add-metadata | dfr into-nu | first 2 | to yaml
@@ -1116,6 +1155,9 @@ Usage:
     content_s_from: avatar
     content_s_to: '"MIME type" = "image/svg+xml"'
     nick: maxim_bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
+
+Flags:
+  --escape-quotes
 
 Input/output types:
   ╭input┬output╮
@@ -1174,9 +1216,9 @@ Usage:
   > particles-filter-by-type {flags}
 
 Flags:
-  --exclude -
-  --media -
-  --timeout -
+  --exclude
+  --media
+  --timeout
 
 Input/output types:
   ╭input┬output╮
@@ -1314,7 +1356,7 @@ Usage:
 
 Flags:
   --gate_url <String> -  (default: 'https://gateway.ipfs.cybernode.ai/ipfs/')
-  --to_csv -
+  --to_csv
 
 Parameters:
   cid <string>:
@@ -1377,10 +1419,10 @@ Usage:
   > cid-download-async {flags} <cid>
 
 Flags:
-  -f, --force -
+  -f, --force
   --source <String> - kubo or gateway
   --info_only - Don't download the file by write a card with filetype and size
-  --folder <String> -
+  --folder <String>
 
 Parameters:
   cid <string>:
@@ -1402,8 +1444,8 @@ Usage:
 
 Flags:
   --source <String> - kubo or gateway
-  --info_only - Don't download the file by write a card with filetype and size
-  --folder <String> -
+  --info_only - Generates a card with the specified filetype and size instead of downloading the file
+  --folder <Filepath> - Folder path to save the file
 
 Parameters:
   cid <string>:
@@ -1459,7 +1501,7 @@ Usage:
 
 Flags:
   --info - don't download data, just check queue
-  --quiet - don't print information
+  --quiet - Disable informational messagesrmation
   --threads <Int> - a number of threads to use for downloading (default: 15)
   --cids_in_run <Int> - a number of files to download in one command run. 0 - means all (default) (default: 0)
 
@@ -1520,7 +1562,7 @@ Usage:
   chain_id: bostrom
 
 Parameters:
-  exec <string>:  (optional)
+  exec <string>: executable to use for the query (optional)
 
 Input/output types:
   ╭input┬output╮
@@ -1541,7 +1583,7 @@ Usage:
   karma: 852564186396
 
 Parameters:
-  neuron <string>:  (optional)
+  neuron <string>: an address of a neuron (optional)
 
 Input/output types:
   ╭input┬output╮
@@ -1569,11 +1611,11 @@ Usage:
     amount: 7023
 
 Flags:
-  --height <Int> -  (default: 0)
-  --record -
+  --height <Int> - a height to request a state on (default: 0)
+  --record - output the results as a record
 
 Parameters:
-  neuron <string>:  (optional)
+  neuron <string>: an address of a neuron (optional)
 
 Input/output types:
   ╭input┬output╮
@@ -1596,7 +1638,7 @@ Usage:
   milliampere: 9760366733
 
 Flags:
-  --height <Int> -  (default: 0)
+  --height <Int> - a height to request a state on (default: 0)
 
 Input/output types:
   ╭input┬output╮
@@ -1612,7 +1654,7 @@ Usage:
   > tokens-pools-table-get {flags}
 
 Flags:
-  --height <Int> -  (default: 0)
+  --height <Int> - a height to request a state on (default: 0)
   --short - get only basic information
 
 Input/output types:
@@ -1629,7 +1671,7 @@ Usage:
   > tokens-pools-convert-value {flags}
 
 Flags:
-  --height <Int> -  (default: 0)
+  --height <Int> - a height to request a state on (default: 0)
 
 Input/output types:
   ╭input┬output╮
@@ -1645,8 +1687,8 @@ Usage:
   > tokens-delegations-table-get {flags} (address)
 
 Flags:
-  --height <Int> -  (default: 0)
-  --sum -
+  --height <Int> - a height to request a state on (default: 0)
+  --sum
 
 Parameters:
   address <string>:  (optional)
@@ -1665,8 +1707,8 @@ Usage:
   > tokens-rewards-get {flags} (neuron)
 
 Flags:
-  --height <Int> -  (default: 0)
-  --sum -
+  --height <Int> - a height to request a state on (default: 0)
+  --sum
 
 Parameters:
   neuron <string>:  (optional)
@@ -1687,8 +1729,8 @@ Usage:
 Flags:
   --h_liquid - retrun amount of liquid H
   --quiet - don't print amount of H liquid
-  --height <Int> -  (default: 0)
-  --sum -
+  --height <Int> - a height to request a state on (default: 0)
+  --sum
 
 Parameters:
   neuron <string>:  (optional)
@@ -1707,7 +1749,7 @@ Usage:
   > tokens-routed-from {flags} (neuron)
 
 Flags:
-  --height <Int> -  (default: 0)
+  --height <Int> - a height to request a state on (default: 0)
 
 Parameters:
   neuron <string>:  (optional)
@@ -1726,7 +1768,7 @@ Usage:
   > tokens-routed-to {flags} (neuron)
 
 Flags:
-  --height <Int> -  (default: 0)
+  --height <Int> - a height to request a state on (default: 0)
 
 Parameters:
   neuron <string>:  (optional)
@@ -1806,8 +1848,8 @@ Usage:
   > tokens-price-in-h-naive {flags}
 
 Flags:
-  --all_data -
-  --height <Int> -  (default: 0)
+  --all_data
+  --height <Int> - a height to request a state on (default: 0)
 
 Input/output types:
   ╭──input──┬output─╮
@@ -1917,11 +1959,11 @@ Usage:
   > tokens-undelegations {flags} ($neuron)
 
 Flags:
-  --height <Int> -  (default: 0)
-  --sum -
+  --height <Int> - a height to request a state on (default: 0)
+  --sum
 
 Parameters:
-  $neuron <string>:  (optional)
+  $neuron <string>: an address of a neuron (optional)
 
 Input/output types:
   ╭input┬output╮
@@ -1937,12 +1979,12 @@ Usage:
   > tokens-balance-all {flags} ($neuron)
 
 Flags:
-  --height <Int> -  (default: 0)
+  --height <Int> - a height to request a state on (default: 0)
   --routes <String> -  (default: 'from')
-  --dont_convert_pools -
+  --dont_convert_pools
 
 Parameters:
-  $neuron <string>:  (optional)
+  $neuron <string>: an address of a neuron (optional)
 
 Input/output types:
   ╭input┬output╮
@@ -1976,7 +2018,7 @@ Usage:
   > tokens-rewards-withdraw (neuron)
 
 Parameters:
-  neuron <string>:  (optional)
+  neuron <string>: an address of a neuron (optional)
 
 Input/output types:
   ╭input┬output╮
@@ -1992,7 +2034,7 @@ Usage:
   > rewards-withdraw-tx-analyse <tx_hash>
 
 Parameters:
-  tx_hash <string>:
+  tx_hash <string>: a hash of a transaction to check
 
 Input/output types:
   ╭input┬output╮
@@ -2008,7 +2050,7 @@ Usage:
   > tokens-delegate-wizzard ($neuron)
 
 Parameters:
-  $neuron <string>:  (optional)
+  $neuron <string>: an address of a neuron (optional)
 
 Input/output types:
   ╭input┬output╮
@@ -2024,7 +2066,7 @@ Usage:
   > tokens-investmint-wizzard ($neuron)
 
 Parameters:
-  $neuron <string>:  (optional)
+  $neuron <string>: an address of a neuron (optional)
 
 Input/output types:
   ╭input┬output╮
@@ -2041,7 +2083,7 @@ Usage:
 
 Flags:
   --dust_to_leave <Int> - the amount of token to leave for paing fee (default: 50000)
-  --denom <String> -  (default: '')
+  --denom <String> - a denom of a token (default: '')
   --yes - proceed without confirmation
 
 Input/output types:
@@ -2060,10 +2102,10 @@ Usage:
   > governance-view-props {flags} (id)
 
 Flags:
-  --dont_format -
+  --dont_format - don't format proposals
 
 Parameters:
-  id <string>:  (optional)
+  id <string>: id of a proposal to check (optional)
 
 Input/output types:
   ╭input┬output╮
@@ -2081,7 +2123,7 @@ Usage:
   > set-links-table-name <name>
 
 Parameters:
-  name <string>:
+  name <string>: a name for a temporary cyberlinks table file
 
 Input/output types:
   ╭──input──┬─output──╮
@@ -2097,7 +2139,7 @@ Usage:
   > set-cy-setting {flags} (key) (value)
 
 Flags:
-  --output_value_only -
+  --output_value_only
 
 Parameters:
   key <string>:  (optional)
@@ -2129,10 +2171,12 @@ Input/output types:
 
 ```
   Dump the peers connected to the given node to the comma-separated 'persistent_peers' list
-  Nodes list for https://rpc.bostrom.cybernode.ai:443
+
 Usage:
   > validator-generate-persistent-peers-string (node_address)
 
+  > validator-generate-persistent-peers-string https://rpc.bostrom.cybernode.ai:443
+  Nodes list for https://rpc.bostrom.cybernode.ai:443
 
   70 peers found
   persistent_peers = "7ad32f1677ffb11254e7e9b65a12da27a4f877d6@195.201.105.229:36656,d0518..."
@@ -2217,7 +2261,7 @@ Usage:
   > query-account {flags} <neuron>
 
 Flags:
-  --height <Int> -  (default: 0)
+  --height <Int> - a height to request a state on (default: 0)
   --seq - return sequence
 
 Parameters:
@@ -2266,7 +2310,7 @@ Usage:
     '@type': /cosmos.authz.v1beta1.GenericAuthorization
 
 Parameters:
-  neuron <any>:  (optional)
+  neuron <any>: an address of a neuron (optional)
 
 Input/output types:
   ╭input┬output╮
@@ -2292,7 +2336,7 @@ Usage:
     '@type': /cosmos.authz.v1beta1.GenericAuthorization
 
 Parameters:
-  neuron <any>:  (optional)
+  neuron <any>: an address of a neuron (optional)
 
 Input/output types:
   ╭input┬output╮
@@ -2308,7 +2352,7 @@ Usage:
   > authz-give-grant <$neuron> <$message_type> <$expiration>
 
 Parameters:
-  $neuron <any>:
+  $neuron <any>: an address of a neuron
   $message_type <string>:
   $expiration <duration>:
 
@@ -2326,7 +2370,7 @@ Usage:
   > query-links-bandwidth-neuron (neuron)
 
 Parameters:
-  neuron <any>:  (optional)
+  neuron <any>: an address of a neuron (optional)
 
 Input/output types:
   ╭──input──┬output─╮
@@ -2355,7 +2399,7 @@ Usage:
   > validator-chooser {flags}
 
 Flags:
-  --only_my_validators -
+  --only_my_validators
 
 Input/output types:
   ╭input┬output╮
@@ -2379,12 +2423,12 @@ No updates initiated during this period. (default: 1hr)
   --cache_stale_refresh <Duration> - Sets stale cache's usable duration.
 Triggers background update and returns cache results.
 If exceeded, requests immediate data update. (default: 1wk)
-  --force_update -
-  -U, --disable_update -
+  --force_update
+  -U, --disable_update
   --quiet - Don't output execution's result
   --no_default_params - Don't use default params (like output, chain-id)
   --error - raise error instead of null in case of cli's error
-  --retries <Int> -
+  --retries <Int>
 
 Parameters:
   ...rest <any>:
@@ -2405,8 +2449,8 @@ Usage:
   > qnbn {flags} ...(nicks)
 
 Flags:
-  --df -
-  -f, --force_list_output -
+  --df
+  -f, --force_list_output
 
 Parameters:
   ...nicks <string>:
@@ -2458,7 +2502,7 @@ Usage:
   > echo_particle_txt {flags} <i>
 
 Flags:
-  -m, --markdown -
+  -m, --markdown
 
 Parameters:
   i <string>:
