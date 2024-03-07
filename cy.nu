@@ -1,8 +1,8 @@
-# Cy - a tool for interactions with cybergraphs
+# Cy - a tool for interacting with Cybergraphs
 # https://github.com/cyber-prophet/cy
 #
 # Use:
-# > overlay use ~/cy/cy.nu -p -r
+# > overlay use -pr ~/cy/cy.nu
 
 use std assert [equal greater]
 use nu-utils [ bar, cprint, "str repeat", to-safe-filename, to-number-format, number-col-format,
