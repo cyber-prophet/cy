@@ -3233,7 +3233,7 @@ export def 'tokens-pools-table-get' [
     }
     | where balances != (token-dummy-balance | transpose -idr)
     | upsert balances {
-        |i| $i.balances | select $i.reserve_coin_denoms # keep only pool's tokens
+        |i| $i.balances | select ...$i.reserve_coin_denoms # keep only pool's tokens
     }
     | reject reserve_coin_denoms
     | upsert pool_coin_amount_total {
