@@ -5007,13 +5007,13 @@ def 'fill non-exist' [
     tbl?
     --value_to_replace (-v): any = ''
 ] {
-    mut $table = ($in | default $tbl)
-
-    for column in ($table | columns) {
-        $table = ($table | default $value_to_replace $column)
-    }
+    let $table = ($in | default $tbl)
 
     $table
+    | columns
+    | reduce -f $table {|column acc|
+        $acc | default $value_to_replace $column
+    }
 }
 
 def 'path-exists-safe' [
