@@ -41,6 +41,16 @@ caching-function-max-retries:
   - 3
   - 1
   - 0
+caching-function-cache_stale_refresh:
+  description: Sets stale cache's usable duration. If exceeded, requests immediate data update.
+  type: duration
+  variants:
+  - 7day
+  - 2min
+  - 10min
+  - 1hr
+  - 12hr
+  - 1day
 authz:
   description: the address to send links from
   variants:

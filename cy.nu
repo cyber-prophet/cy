@@ -4428,9 +4428,9 @@ export def --wrapped 'caching-function' [
     --exec: string = '' # The name of executable
     --cache_validity_duration: duration = 60min # Sets the cache's valid duration.
                                                 # No updates initiated during this period.
-    --cache_stale_refresh: duration = 7day # Sets stale cache's usable duration.
-                                                # Triggers background update and returns cache results.
-                                                # If exceeded, requests immediate data update.
+    --cache_stale_refresh: duration # Sets stale cache's usable duration.
+                                    # Triggers background update and returns cache results.
+                                    # If exceeded, requests immediate data update.
     --force_update
     --disable_update (-U)
     --quiet # Don't output execution's result
@@ -4439,6 +4439,7 @@ export def --wrapped 'caching-function' [
     --retries: int
 ]: nothing -> record {
     if ($retries != null) {$env.cy.caching-function-max-retries = $retries}
+    let $cache_stale_refresh = set-or-get-env-or-def caching-function-cache_stale_refresh $cache_stale_refresh
 
     if $rest == [] { error make {msg: 'The "caching-function" function needs arguments'} }
 
