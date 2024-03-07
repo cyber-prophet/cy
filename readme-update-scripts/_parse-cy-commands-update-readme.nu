@@ -25,6 +25,7 @@ $readme
 | append (open -r help_output.md)
 | str join (char nl)
 | str replace -ram ' +$' ''
+| str replace -ram ' +- *$' ''
 | str replace -ra '<CompleterWrapper.*>\s+-\s+' ''
 | save ~/cy/README.md -fr
 
