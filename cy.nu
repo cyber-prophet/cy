@@ -4120,6 +4120,7 @@ def --env 'set-or-get-env-or-def' [
             match $key_record.type? {
                 'int' => {$def_value | into int}
                 'datetime' => {$def_value | into datetime}
+                'duration' => {$def_value | into duration}
                 _ => {$def_value | into string}
             }
         }
