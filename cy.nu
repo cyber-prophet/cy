@@ -4770,6 +4770,7 @@ export def 'echo_particle_txt' [
     | get stdout
     | lines
     | each {|i| $"(' ' | str repeat $indent)($i)" | print $in}
+    | null
     # | each {|b| $"((ansi grey) + ($i.step + 2 | into string) + (ansi reset) | str repeat $indent)($b)" | print $in}
 }
 
