@@ -59,9 +59,9 @@ export-env {
 # QmcDUZon6VQLR3gjAvSKnudSVQ2RbGXUtFFV8mR6zHZK8F
 export def 'pin-text' [
     text_param?: string
-    --only_hash         # calculate hash only, don't pin anywhere
-    --dont_detect_cid   # work with CIDs as regular texts
-    --follow_file_path  # check if `text_param` is a valid path, and if yes - try to open it
+    --only_hash # calculate hash only, don't pin anywhere
+    --dont_detect_cid # work with CIDs as regular texts
+    --follow_file_path # check if `text_param` is a valid path, and if yes - try to open it
     --dont_save_particle_in_cache # don't save particle to local cache in cid.md file
 ]: [string -> string, nothing -> string] {
     let $text = (
@@ -150,10 +150,10 @@ export def 'link-texts' [
     text_from: string
     text_to: string
     --disable_append (-D) # Disable adding the cyberlink into the temp table
-    --quiet (-q)        # Don't output a cyberlink record after executing the command
-    --only_hash         # calculate hash only, don't pin anywhere
-    --dont_detect_cid   # work with CIDs as regular texts
-    --follow_file_path  # check if `text_param` is a valid path, and if yes - try to open it
+    --quiet (-q) # Don't output a cyberlink record after executing the command
+    --only_hash # calculate hash only, don't pin anywhere
+    --dont_detect_cid # work with CIDs as regular texts
+    --follow_file_path # check if `text_param` is a valid path, and if yes - try to open it
 ] [nothing -> record, nothing -> nothing] {
     $env.cy.pin_text_only_hash = ($env.cy.pin_text_only_hash? | default false ) or $only_hash
     $env.cy.pin_text_dont_detect_cid = ($env.cy.pin_text_dont_detect_cid? | default false ) or $dont_detect_cid
@@ -229,12 +229,12 @@ export def 'link-chain' [
 #   to: QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 # > cd ..; rm -r linkfilestest
 export def 'link-files' [
-    ...files: path          # filenames to pin to the local ipfs node
-    --link_filenames (-n)   # Add filenames as a `from` link
-    --include_extension     # Don't cut file extension (works only with --link_filenames)
-    --disable_append (-D)   # Don't append links to the links table
-    --quiet                 # Don't output results page
-    --yes (-y)              # Confirm uploading files without request
+    ...files: path # filenames of files to pin to the local ipfs node
+    --link_filenames (-n) # Add filenames as a `from` link
+    --include_extension # Include a file extension (works only with `--link_filenames`)
+    --disable_append (-D) # Don't append links to the links table
+    --quiet # Don't output results page
+    --yes (-y) # Confirm uploading files without request
 ]: [nothing -> table, nothing -> nothing] {
     if (ps | where name =~ ipfs | is-empty) {
         error make {msg: "ipfs service isn't running. Try 'brew services start ipfs'" }
@@ -306,8 +306,8 @@ def test-link-files [] {
 # from: QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx
 # to: QmYwEKZimUeniN7CEAfkBRHCn4phJtNoNJxnZXEAhEt3af
 export def 'follow' [
-    neuron: string          # neuron's address to follow
-    --use_local_list_only   # follow a neuron locally only
+    neuron: string # neuron's address to follow
+    --use_local_list_only # follow a neuron locally only
 ]: [nothing -> record] {
     if not (is-neuron $neuron) {
         cprint $"*($neuron)* doesn't look like an address"
@@ -455,7 +455,7 @@ export def 'link-random' [
 #   to: QmWoxYsWYuTP4E2xaQHr3gUZZTBC7HdNDVhis1BK9X3qjX
 #   timestamp: 20230702-113842
 export def 'links-view' [
-    --quiet (-q) # Don't print info
+    --quiet (-q) # Disable informational messages
     --no_timestamp # Don't output a timestamps column
 ]: [nothing -> table] {
     let $filename = (current-links-csv-path)
@@ -493,7 +493,7 @@ export def 'links-view' [
 
 # Append piped-in table to the temp cyberlinks table
 export def 'links-append' [
-    --quiet (-q) # don't output the resulted temp links table
+    --quiet (-q) # suppress output the resulted temp links table
 ]: [table -> table, table -> nothing, record -> table, record -> nothing] {
     $in
     | upsert timestamp (now-fn)
@@ -503,7 +503,7 @@ export def 'links-append' [
 
 # Replace the temp table with piped-in table
 export def 'links-replace' [
-    --quiet (-q) # don't output the resulted temp links table
+    --quiet (-q) # suppress output the resulted temp links table
 ]: [table -> table, table -> nothing] {
     $in
     | save (current-links-csv-path) --force
@@ -513,8 +513,8 @@ export def 'links-replace' [
 
 # Swap columns from and to
 export def 'links-swap-from-to' [
-    --dont_replace (-D)     # don't replace the temp cyberlinks table, just output results
-    --keep_original         # append results to original links
+    --dont_replace (-D) # output results only, without modifiying the links table
+    --keep_original # append results to original links
 ]: [nothing -> table, table -> table] {
     let $input = (inlinks-or-links)
 
@@ -598,11 +598,11 @@ def test-tmps [] {
 #   from: QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx
 #   to: QmddL5M8JZiaUDcEHT2LgUnZZGLMTTDEYVKWN1iMLk6PY8
 export def 'links-link-all' [
-    text: string            # a text to upload to ipfs
-    --dont_replace (-D)     # don't replace the temp cyberlinks table, just output results
-    --keep_original         # append results to original links
-    --column (-c): string = 'from'  # a column to use for values ('from' or 'to'). 'from' is default
-    --empty                 # fill cids in empty cells only
+    text: string # a text to upload to ipfs
+    --dont_replace (-D) # don't replace the temp cyberlinks table, just output results
+    --keep_original # append results to original links
+    --column (-c): string = 'from' # a column to use for values ('from' or 'to'). 'from' is default
+    --empty # fill cids in empty cells only
 ]: [nothing -> table, table -> table] {
     let $links = (inlinks-or-links)
     let $cid = (pin-text $text)
@@ -637,7 +637,7 @@ export def 'links-link-all' [
 #   to: QmddL5M8JZiaUDcEHT2LgUnZZGLMTTDEYVKWN1iMLk6PY8
 export def 'links-pin-columns' [
     --dont_replace (-D) # Don't replace the links cyberlinks table
-    --threads: int = 3  # A number of threads to use to pin particles
+    --threads: int = 3 # A number of threads to use to pin particles
 ]: [nothing -> table, table -> table] {
     let $links = (inlinks-or-links)
 
@@ -668,8 +668,8 @@ export def 'links-pin-columns' [
 
 export def 'links-pin-columns-2' [
     --dont_replace (-D) # Don't replace the links cyberlinks table
-    --pin_to_local_ipfs       # Pin to local kubo
-    --dont_detect_cid         # work with CIDs as regular texts
+    --pin_to_local_ipfs # Pin to local kubo
+    --dont_detect_cid # work with CIDs as regular texts
     --dont_save_particle_in_cache # don't save particles to local cache in cid.md file
 ]: [nothing -> table, table -> table] {
     let $links = (inlinks-or-links)
@@ -1191,10 +1191,10 @@ def passport-get-test [] {
 # > cy passport-set QmZSbGCBAPpqwXHSbUkn4P2RHiL2nRjv7BGFP4vVjcYKHd
 # The particle field for maxim should be successfuly set to QmZSbGCBAPpqwXHSbUkn4P2RHiL2nRjv7BGFP4vVjcYKHd
 export def 'passport-set' [
-    cid: string                     # cid to set
-    nickname?                       # Provide a passport's nickname. If null - the nick from config will be used.
-    --field: string = 'particle'    # A passport's field to set: particle, data, new_avatar
-    --verbose                       # Show the node's response
+    cid: string # cid to set
+    nickname? # Provide a passport's nickname. If null - the nick from config will be used.
+    --field: string = 'particle' # A passport's field to set: particle, data, new_avatar
+    --verbose # Show the node's response
 ] {
     if not (is-cid $cid) {
         print $"($cid) doesn't look like a cid"
@@ -1248,8 +1248,8 @@ export def 'passport-set' [
 
 # Output neurons dict
 export def 'dict-neurons-view' [
-    --df        # output as a dataframe
-    --path      # output path of the dict
+    --df # output as a dataframe
+    --path # output path of the dict
     --karma_bar # output karma bar
 ] {
     let $neurons_tags = (dict-neurons-tags --wide)
@@ -1290,7 +1290,7 @@ def dict-neurons-view-test-dummy [] {
 
 # Add piped in neurons to YAML-dictionary with tag and category
 export def 'dict-neurons-add' [
-    tag: string = ''    # tag to add to neuron
+    tag: string = '' # tag to add to neuron
     --category: string = 'default' # category of tag to write to dict
 ] {
     let $input = $in
@@ -1334,8 +1334,8 @@ export def 'dict-neurons-add' [
 
 # Ouput dict-neurons tags
 export def 'dict-neurons-tags' [
-    --path      # return the path of tags file
-    --wide      # return wide table with categories as columns
+    --path # return the path of tags file
+    --wide # return wide table with categories as columns
     --timestamp # output the timestamp of the last neuron's update
 ] {
     let $path_csv = (cy-path graph neurons_dict_tags.csv)
@@ -1377,14 +1377,14 @@ export def 'doctor' [] {
 
 # Update neurons YAML-dictionary
 export def 'dict-neurons-update' [
-    --passport              # Update passport data
-    --balance               # Update balances data
-    --karma                 # Update karma
-    --all (-a)              # Update passport, balance, karma
-    --neurons_from_graph    # Update info for neurons from graph, and not from current dict
-    --threads (-t) = 30     # Number of threads to use for downloading
-    --dont_save             # Don't update the file on a disk, just output the results
-    --quiet (-q)            # Don't output results table
+    --passport # Update passport data
+    --balance # Update balances data
+    --karma # Update karma
+    --all (-a) # Update passport, balance, karma
+    --neurons_from_graph # Update info for neurons from graph, and not from current dict
+    --threads (-t) = 30 # Number of threads to use for downloading
+    --dont_save # Don't update the file on a disk, just output the results
+    --quiet (-q) # Don't output results table
 ] {
     if $neurons_from_graph {
         graph-links-df
@@ -1442,7 +1442,7 @@ export def 'dict-neurons-update' [
 
 # Download a snapshot of cybergraph
 export def --env 'graph-download-snapshot' [
-    --disable_update_parquet (-D)   # Don't update the particles parquet file
+    --disable_update_parquet (-D) # Don't update the particles parquet file
     --neuron: string = 'graphkeeper'
 ] {
     make_default_folders_fn
@@ -1750,12 +1750,12 @@ export def 'graph-merge' [
 #   size: 11
 #   content_s: fuckgoogle!
 export def 'graph-to-particles' [
-    --from                  # Use only particles from the 'from' column
-    --to                    # Use only particles from the 'to' column
-    --include_global        # Include column with global particles' df (that includes content)
-    --include_particle_index         # Include local 'particle_index' column
-    --cids_only (-c)        # Output one column with CIDs only
-    # --init_role             # Output if particle originally was in 'from' or 'to' column
+    --from # Use only particles from the 'from' column
+    --to # Use only particles from the 'to' column
+    --include_global # Include column with global particles' df (that includes content)
+    --include_particle_index # Include local 'particle_index' column
+    --cids_only (-c) # Output one column with CIDs only
+    # --init_role # Output if particle originally was in 'from' or 'to' column
 ] {
     let $links = ( graph-links-df | dfr into-lazy )
 
@@ -1781,7 +1781,7 @@ export def 'graph-to-particles' [
         | dfr rename particle_from particle
         | dfr drop particle_to
         | dfr with-column (dfr lit 'a' | dfr as 'init-role')
-        | dfr fetch 0  # Create dummy dfr to have something to appended to
+        | dfr fetch 0 # Create dummy dfr to have something to appended to
     )
 
     (
@@ -1831,8 +1831,8 @@ export def 'particles-keep-only-first-neuron' [ ] {
 
 # Update the 'particles.parquet' file (it inculdes content of text files)
 export def 'graph-update-particles-parquet' [
-    --quiet (-q)    # don't print info about the saved parquet file
-    --all           # re-read all downloaded particles
+    --quiet (-q) # Disable informational messages about the saved parquet file
+    --all # re-read all downloaded particles
 ] {
     let $parquet_path = cy-path graph particles.parquet
     let $particles_folder = $env.cy.ipfs-files-folder
@@ -2057,7 +2057,7 @@ export def 'graph-neurons-stats' [] {
             (dfr col timestamp | dfr min | dfr as 'first_link')
             (dfr col timestamp | dfr max | dfr as 'last_link')
         ]
-        | dfr sort-by links_count --reverse [true]  # cygraph neurons activity
+        | dfr sort-by links_count --reverse [true] # cygraph neurons activity
         | dfr join --left $followers neuron neuron
         | dfr join --left $follows neuron neuron
         | dfr join --left $tweets neuron neuron
@@ -2381,8 +2381,8 @@ export def 'graph-add-metadata' [
 #   timestamp: 2021-11-05
 export def 'graph-links-df' [
     filename?: string@'nu-complete-graph-csv-files' # graph csv filename in the 'cy/graph' folder or a path to the graph
-    --not_in            # don't catch pipe in
-    --exclude_system    # exclude system particles in from column (tweet, follow, avatar)
+    --not_in # don't catch pipe in
+    --exclude_system # exclude system particles in from column (tweet, follow, avatar)
 ] {
     let $input = $in
     let $input_type = ($input | describe)
@@ -2826,7 +2826,7 @@ export def 'cid-get-type-gateway' [
         curl -s -I -m 120 $'($gate_url)($cid)'
         | lines
         | skip 1
-        | append 'dummy: dummy'   # otherwise it returns list in the end
+        | append 'dummy: dummy' # otherwise it returns list in the end
         | parse '{header}: {value}'
         | transpose -d -r -i
     )
@@ -2861,7 +2861,7 @@ export def log_row_csv [
 # Read a CID from the cache, and if the CID is absent - add it into the queue
 export def 'cid-read-or-download' [
     cid: string
-    --full  # output full text of a particle
+    --full # output full text of a particle
 ] {
     ($env.cy.ipfs-files-folder | path join $'($cid).md')
     | if ($in | path exists) {
@@ -2901,8 +2901,8 @@ export def 'cid-download-async' [
 export def 'cid-download' [
     cid: string
     --source: string # kubo or gateway
-    --info_only # Don't download the file by write a card with filetype and size
-    --folder: string
+    --info_only # Generates a card with the specified filetype and size instead of downloading the file
+    --folder: path # Folder path to save the file
 ] {
     let $folder = ($folder | default $env.cy.ipfs-files-folder)
     let $source = ($source | default $env.cy.ipfs-download-from)
@@ -2925,8 +2925,8 @@ export def 'cid-download' [
 def 'cid-download-kubo' [
     cid: string
     --timeout = '300s'
-    --folder: path
-    --info_only # Don't download the file but write a card with filetype and size
+    --folder: path # Folder path to save the file
+    --info_only # # Generates a card with the specified filetype and size instead of downloading the file
 ] {
     log debug $'cid to download ($cid)'
     let $file_path = ($folder | default $env.cy.ipfs-files-folder | path join $'($cid).md')
@@ -3034,10 +3034,10 @@ export def 'watch-search-folder' [] {
 
 # Check the queue for the new CIDs, and if there are any, safely download the text ones
 export def 'queue-cids-download' [
-    attempts: int = 0       # limit a number of previous download attempts for cids in queue
-    --info                  # don't download data, just check queue
-    --quiet                 # don't print information
-    --threads: int = 15     # a number of threads to use for downloading
+    attempts: int = 0 # limit a number of previous download attempts for cids in queue
+    --info # don't download data, just check queue
+    --quiet # Disable informational messagesrmation
+    --threads: int = 15 # a number of threads to use for downloading
     --cids_in_run: int = 0 # a number of files to download in one command run. 0 - means all (default)
 ] {
     let $files = ls -s (cy-path cache queue_cids_to_download)
@@ -3097,7 +3097,7 @@ export def 'queue-cids-download' [
 
 # remove from queue CIDs with many attempts
 export def 'cache-clean-cids-queue' [
-    attempts: int = 15      # limit a number of previous download attempts for cids in queue
+    attempts: int = 15 # limit a number of previous download attempts for cids in queue
 ] {
     let $files = ls (cy-path cache queue_cids_to_download)
     let $files_dead = cy-path cache queue_cids_dead
@@ -3128,7 +3128,7 @@ export def 'cache-clear' [] {
 # time: 2023-07-11T11:37:40.708298734Z
 # chain_id: bostrom
 export def 'query-current-height' [
-    exec?: string@'nu-complete-executables'
+    exec?: string@'nu-complete-executables' # executable to use for the query
 ] {
     let $exec = ($exec | default $env.cy.exec)
 
@@ -3143,7 +3143,7 @@ export def 'query-current-height' [
 # > cy query-rank-karma bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 | to yaml
 # karma: 852564186396
 export def 'query-rank-karma' [
-    neuron?: string
+    neuron?: string # an address of a neuron
 ] {
     let $address = if $neuron == null {$env.cy.address} else {$neuron}
     caching-function query rank karma $address
@@ -3163,9 +3163,9 @@ export def 'query-rank-karma' [
 # - denom: millivolt
 #   amount: 7023
 export def 'tokens-balance-get' [
-    neuron?: string
-    --height: int = 0
-    --record
+    neuron?: string # an address of a neuron
+    --height: int = 0 # a height to request a state on
+    --record # output the results as a record
 ] {
     let $address = $neuron | default $env.cy.address
     if not (is-neuron $address) {
@@ -3199,7 +3199,7 @@ def 'token-dummy-balance' [] {
 # hydrogen: 320740400170941
 # milliampere: 9760366733
 export def 'tokens-supply-get' [
-    --height: int = 0
+    --height: int = 0 # a height to request a state on
 ] {
     caching-function query bank total [--height $height]
     | get supply
@@ -3208,8 +3208,8 @@ export def 'tokens-supply-get' [
 }
 
 export def 'tokens-pools-table-get' [
-    --height: int = 0
-    --short     # get only basic information
+    --height: int = 0 # a height to request a state on
+    --short # get only basic information
 ] {
     let $liquidity_pools = (caching-function query liquidity pools [--height $height])
 
@@ -3241,7 +3241,7 @@ export def 'tokens-pools-table-get' [
 }
 
 export def 'tokens-pools-convert-value' [
-    --height: int = 0
+    --height: int = 0 # a height to request a state on
 ] {
     let $in_table = $in
 
@@ -3265,7 +3265,7 @@ export def 'tokens-pools-convert-value' [
 
 export def 'tokens-delegations-table-get' [
     address?: string
-    --height: int = 0
+    --height: int = 0 # a height to request a state on
     --sum
 ] {
     caching-function query staking delegations ($address | default $env.cy.address) [--height $height]
@@ -3281,7 +3281,7 @@ export def 'tokens-delegations-table-get' [
 
 export def 'tokens-rewards-get' [
     neuron?: string
-    --height: int = 0
+    --height: int = 0 # a height to request a state on
     --sum
 ] {
     let $address = $neuron | default $env.cy.address
@@ -3299,9 +3299,9 @@ export def 'tokens-rewards-get' [
 
 export def 'tokens-investmint-status-table' [
     neuron?: string
-    --h_liquid      # retrun amount of liquid H
-    --quiet         # don't print amount of H liquid
-    --height: int = 0
+    --h_liquid # retrun amount of liquid H
+    --quiet # don't print amount of H liquid
+    --height: int = 0 # a height to request a state on
     --sum
 ] {
     let $address = $neuron | default $env.cy.address
@@ -3360,13 +3360,13 @@ export def 'tokens-investmint-status-table' [
         | if $sum {
             tokens-sum --state investminting
         } else {}
-        | append null   # if no investmint slots are busy, the command should return a list
+        | append null # if no investmint slots are busy, the command should return a list
     }
 }
 
 export def 'tokens-routed-from' [
     neuron?: string
-    --height: int = 0
+    --height: int = 0 # a height to request a state on
 ] {
     let $address = $neuron | default $env.cy.address
     caching-function query grid routed-from $address [--height $height]
@@ -3378,7 +3378,7 @@ export def 'tokens-routed-from' [
 
 export def 'tokens-routed-to' [
     neuron?: string
-    --height: int = 0
+    --height: int = 0 # a height to request a state on
 ] {
     let $address = $neuron | default $env.cy.address
     caching-function query grid routed-to $address [--height $height]
@@ -3428,7 +3428,7 @@ export def 'tokens-ibc-denoms-table' [
     }
     | reject ibc_hash
     | upsert token {
-        |i| $i.path         #denom compound
+        |i| $i.path #denom compound
         | str replace -ra '[^-0-9]' ''
         | str trim -c '-'
         | if ($in | split row '-' | length | $in > 1) {
@@ -3486,7 +3486,7 @@ export def 'tokens-info-from-registry' [
 
 export def 'tokens-price-in-h-naive' [
     --all_data
-    --height: int = 0
+    --height: int = 0 # a height to request a state on
 ]: nothing -> table {
     let $pools = (
         tokens-pools-table-get --height $height
@@ -3661,7 +3661,7 @@ export def 'tokens-format' [
 # address: bostrom1aypv5wxute0nnhfv44jkhyfkzt7zyrden85tel
 export def 'balances' [
     ...address: string@'nu-complete key-names'
-    --test      # Use keyring-backend test (with no password)
+    --test # Use keyring-backend test (with no password)
 ] {
     let $balances = (
         ^($env.cy.exec) keys list --output json --keyring-backend test | from json
@@ -3694,8 +3694,8 @@ export def 'balances' [
 }
 
 export def 'tokens-undelegations' [
-    $neuron?: string
-    --height: int = 0
+    $neuron?: string # an address of a neuron
+    --height: int = 0 # a height to request a state on
     --sum
 ] {
     let $address = $neuron | default $env.cy.address
@@ -3709,8 +3709,8 @@ export def 'tokens-undelegations' [
 }
 
 export def 'tokens-balance-all' [
-    $neuron?: string
-    --height: int = 0
+    $neuron?: string # an address of a neuron
+    --height: int = 0 # a height to request a state on
     --routes: string = 'from'
     --dont_convert_pools
 ] {
@@ -3776,7 +3776,7 @@ def 'tokens-minus' [
 
 # Withdraw rewards, make stats
 export def 'tokens-rewards-withdraw' [
-    neuron?: string
+    neuron?: string # an address of a neuron
 ] {
     let $address = $neuron | default $env.cy.address
 
@@ -3799,7 +3799,7 @@ export def 'tokens-rewards-withdraw' [
 }
 
 export def 'rewards-withdraw-tx-analyse' [
-    tx_hash: string
+    tx_hash: string # a hash of a transaction to check
 ] {
     let $tx = query-tx $tx_hash
 
@@ -3843,7 +3843,7 @@ export def 'rewards-withdraw-tx-analyse' [
 }
 
 export def 'tokens-delegate-wizzard' [
-    $neuron?: string
+    $neuron?: string # an address of a neuron
 ] {
     let $address = $neuron | default $env.cy.address
     let $boots_liquid: int = (
@@ -3899,7 +3899,7 @@ def tokens-fraction-menu [
 }
 
 export def 'tokens-investmint-wizzard' [
-    $neuron?: string
+    $neuron?: string # an address of a neuron
 ] {
     let $address = $neuron | default $env.cy.address
     $env.cy.caching-function-force-update = true
@@ -3964,7 +3964,7 @@ export def 'tokens-investmint-wizzard' [
 
 export def 'tokens-fraction-input' [
     --dust_to_leave: int = 50_000 # the amount of token to leave for paing fee
-    --denom: string = ''
+    --denom: string = '' # a denom of a token
     --yes # proceed without confirmation
 ] {
     let $tokens = $in - $dust_to_leave
@@ -3999,8 +3999,8 @@ export def 'tokens-fraction-input' [
 
 # info about props current and past
 export def 'governance-view-props' [
-    id?: string@'nu-complete-props'
-    --dont_format
+    id?: string@'nu-complete-props' # id of a proposal to check
+    --dont_format # don't format proposals
 ] {
     caching-function query gov proposals
     | get proposals
@@ -4011,7 +4011,7 @@ export def 'governance-view-props' [
             reject final_tally_result voting_start_time voting_end_time
         } else {}
         | if $dont_format { } else {
-            table -e | print $in
+            table -e | print
         }
     }
 }
@@ -4037,7 +4037,7 @@ def 'governance-prop-summary' [] {
 
 # Set the custom name for links csv table
 export def --env 'set-links-table-name' [
-    name: string
+    name: string # a name for a temporary cyberlinks table file
 ]: nothing -> nothing {
     $env.cy.links_table_name = $name
 }
@@ -4147,6 +4147,8 @@ export def 'ipfs-bootstrap-add-congress' []: nothing -> nothing {
 }
 
 # Dump the peers connected to the given node to the comma-separated 'persistent_peers' list
+#
+# > validator-generate-persistent-peers-string https://rpc.bostrom.cybernode.ai:443
 # Nodes list for https://rpc.bostrom.cybernode.ai:443
 #
 # 70 peers found
@@ -4257,8 +4259,8 @@ export def 'query-tx-seq' [
 # Query account
 export def 'query-account' [
     neuron: string
-    --height: int = 0
-    --seq   # return sequence
+    --height: int = 0 # a height to request a state on
+    --seq # return sequence
 ]: nothing -> record {
     caching-function query account $neuron [--height $height]
     | if $seq {
@@ -4300,7 +4302,7 @@ def 'query-links-bandwidth-params' []: nothing -> record {
 #   granter: bostrom1mcslqq8ghtuf6xu987qtk64shy6rd86a2xtwu8
 #   '@type': /cosmos.authz.v1beta1.GenericAuthorization
 export def 'query-authz-grants-by-granter' [
-    neuron?
+    neuron? # an address of a neuron
 ] {
     $neuron
     | if ($in != null) { } else { $env.cy.address }
@@ -4323,7 +4325,7 @@ export def 'query-authz-grants-by-granter' [
 #   grantee: bostrom1sgy27lctdrc5egpvc8f02rgzml6hmmvh5wu6xk
 #   '@type': /cosmos.authz.v1beta1.GenericAuthorization
 export def 'query-authz-grants-by-grantee' [
-    neuron?
+    neuron? # an address of a neuron
 ] {
     $neuron
     | if ($in != null) { } else { $env.cy.address }
@@ -4337,7 +4339,7 @@ export def 'query-authz-grants-by-grantee' [
 }
 
 export def 'authz-give-grant' [
-    $neuron
+    $neuron # an address of a neuron
     $message_type: string@"nu-complete-authz-types"
     $expiration: duration
 ] {
@@ -4350,7 +4352,7 @@ export def 'authz-give-grant' [
 }
 
 export def 'query-links-bandwidth-neuron' [
-    neuron?
+    neuron? # an address of a neuron
 ]: nothing -> table {
     caching-function query bandwidth neuron ($neuron | default $env.cy.address) --cache_stale_refresh 5min
     | get neuron_bandwidth
@@ -4415,17 +4417,17 @@ def 'test-validator-chooser' [] {
 # A wrapper, to cache CLI requests
 export def --wrapped 'caching-function' [
     ...rest
-    --exec: string = ''                         # The name of executable
+    --exec: string = '' # The name of executable
     --cache_validity_duration: duration = 60min # Sets the cache's valid duration.
                                                 # No updates initiated during this period.
-    --cache_stale_refresh: duration = 7day      # Sets stale cache's usable duration.
+    --cache_stale_refresh: duration = 7day # Sets stale cache's usable duration.
                                                 # Triggers background update and returns cache results.
                                                 # If exceeded, requests immediate data update.
     --force_update
     --disable_update (-U)
-    --quiet                                     # Don't output execution's result
-    --no_default_params                         # Don't use default params (like output, chain-id)
-    --error                                     # raise error instead of null in case of cli's error
+    --quiet # Don't output execution's result
+    --no_default_params # Don't use default params (like output, chain-id)
+    --error # raise error instead of null in case of cli's error
     --retries: int
 ]: nothing -> record {
     if ($retries != null) {$env.cy.caching-function-max-retries = $retries}
@@ -4434,7 +4436,7 @@ export def --wrapped 'caching-function' [
 
     let $executable = if $exec != '' {$exec} else {$env.cy.exec}
     let $sub_commands_and_args = (
-        $rest | flatten | flatten         # to recieve params as a list from passport-get
+        $rest | flatten | flatten # to recieve params as a list from passport-get
         | if $no_default_params {} else {
             append (default-node-params)
         }
@@ -4748,7 +4750,7 @@ def 'system_cids' [] {
 def 'default-node-params' [] {
     [
         '--node' $env.cy.rpc-address
-        '--chain-id' $env.cy.chain-id   # todo chainid to choose
+        '--chain-id' $env.cy.chain-id # todo chainid to choose
         '--output' 'json'
     ]
 }
