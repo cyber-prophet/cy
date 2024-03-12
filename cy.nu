@@ -1131,7 +1131,7 @@ export def 'update-cy' [
         }
     }
 
-    cd $env.cy.path;
+    cd (cy-path)
     git stash
     git checkout $branch
     git pull
@@ -1818,6 +1818,7 @@ export def 'graph-to-particles' [
         | dfr collect
     )
 }
+
 # In the piped in particles df leave only particles appeared for the first time
 export def 'particles-keep-only-first-neuron' [ ] {
     dfr join -s '_global' (
@@ -2214,7 +2215,7 @@ export def 'graph-to-logseq' [
         | print-and-pass
     )
 
-    let $path = ($env.cy.path) | path join export $'logseq_(date now | date format "%Y-%m-%d_%H-%M-%S")'
+    let $path = cy-path export $'logseq_(date now | date format "%Y-%m-%d_%H-%M-%S")'
     mkdir ($path | path join pages)
     mkdir ($path | path join journals)
 
