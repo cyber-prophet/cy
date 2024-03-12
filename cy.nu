@@ -5037,11 +5037,23 @@ def 'path-exists-safe' [
 }
 
 def 'cy-path' [
-    ...segments: string
+    ...folders: string # folders to add to cy path
+    --create_missing # if the resulted path doesn't exist - create it
+    --file: string # a filename to use as a last segment of the path
 ]: nothing -> path {
-    $segments
-    | prepend ($env.cy?.path? | default '~/cy/' | path expand)
+    $env.cy?.path?
+    | default ($nu.home-path | path join 'cy')
+    | append $folders
     | path join
+    | path expand
+    | if $create_missing {
+        if not ($in | path exists) {
+            let $input = $in; mkdir $input; $input
+        } else {}
+    } else {}
+    | if $file != null {
+        path join $file
+    } else {}
 }
 
 export def 'cp-banner' [
