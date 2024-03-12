@@ -108,7 +108,7 @@ export def 'pin-text' [
     if not $dont_save_particle_in_cache {
         let $path = ($env.cy.ipfs-files-folder | path join $'($cid).md')
 
-        if ($path | path exists | not $in) {
+        if not ($path | path exists) {
             $text | save -r $path
         }
     }
@@ -674,8 +674,7 @@ export def 'links-pin-columns-2' [
 ]: [nothing -> table, table -> table] {
     let $links = (inlinks-or-links)
 
-    let $temp_ipfs_folder = (cy-path temp ipfs_upload | path join (now-fn))
-    mkdir $temp_ipfs_folder
+    let $temp_ipfs_folder = cy-path temp ipfs_upload (now-fn) --create_missing
 
     let $groups = (
         $links.from_text?
@@ -723,7 +722,7 @@ export def 'links-pin-columns-2' [
         $hash_associations
         | each {|i|
             let $path = ($env.cy.ipfs-files-folder | path join $'($i.cid).md')
-            if ($path | path exists | not $in) {
+            if not ($path | path exists) {
                 $i.item | save $path
             }
         }
@@ -1450,9 +1449,7 @@ export def --env 'graph-download-snapshot' [
     set-cy-setting caching-function-force-update 'true'
     let $cur_data_cid = (passport-get $neuron | get data -i)
     set-cy-setting caching-function-force-update 'false'
-    let $path = (cy-path graph $neuron)
-
-    mkdir $path
+    let $path = (cy-path --create_missing graph $neuron)
 
     let $update_info = (
         $path
@@ -1506,11 +1503,15 @@ export def --env 'graph-download-snapshot' [
         }
     )
 
+    let $path_toml = $path | path join update.toml
     (
-        try {open ($path | path join update.toml)} catch {{}}
+        $path_toml
+        | if ($in | path exists) {
+            open
+        } else {{}}
         | upsert 'last_cid' $cur_data_cid
         | upsert 'last_archive' ($archives | last)
-        | save -f ($path | path join update.toml)
+        | save -f $path_toml
     )
 
     cprint $'The graph data has been downloaded to the *"($path)"* directory'
@@ -2215,7 +2216,7 @@ export def 'graph-to-logseq' [
         | print-and-pass
     )
 
-    let $path = cy-path export $'logseq_(date now | date format "%Y-%m-%d_%H-%M-%S")'
+    let $path = cy-path export $'logseq_(now-fn)'
     mkdir ($path | path join pages)
     mkdir ($path | path join journals)
 
@@ -2284,9 +2285,7 @@ export def 'graph-to-graphviz' [
     )
 
     if $preset == '' { $graph } else {
-        let $filename = date now
-            | format date "%Y%m%d_%H%M%S"
-            | cy-path export $'graphviz_($preset)_($in).svg'
+        let $filename = cy-path export $'graphviz_($preset)_(now-fn).svg'
 
         let $params = ['-Tsvg' $'-o($filename)']
 
@@ -2624,7 +2623,7 @@ export def --env 'config-save' [
     $in_config
     | upsert config-name ($filename2 | path parse | get stem)
     | upsert config-path ($filename2)
-    | if (not $inactive) {
+    | if not $inactive {
         config-activate
     } else {}
     | print-and-pass
@@ -4704,8 +4703,8 @@ def open_cy_config_toml [] {
         open $config_path
     } else {
         {
-            'path': ($nu.home-path | path join cy)
-            'ipfs-files-folder': ($nu.home-path | path join cy graph particles safe)
+            'path': (cy-path)
+            'ipfs-files-folder': (cy-path cy graph particles safe)
             'ipfs-download-from': 'gateway'
             'ipfs-storage': 'both'
             'exec': 'cyber'
@@ -4717,27 +4716,27 @@ def open_cy_config_toml [] {
 }
 
 def make_default_folders_fn [] {
-    mkdir (cy-path backups)
-    mkdir (cy-path cache cli_out)
-    mkdir (cy-path cache jsonl)
-    mkdir (cy-path cache queue_cids_dead)
-    mkdir (cy-path cache queue_cids_to_download)
-    mkdir (cy-path cache queue_tasks_failed)
-    mkdir (cy-path cache queue_tasks_to_run)
-    mkdir (cy-path cache search)
-    mkdir (cy-path config)
-    mkdir (cy-path export)
-    mkdir (cy-path graph particles safe)
-    mkdir (cy-path mylinks)
-    mkdir (cy-path temp ipfs_upload)
+    cy-path --create_missing backups
+    cy-path --create_missing cache cli_out
+    cy-path --create_missing cache jsonl
+    cy-path --create_missing cache queue_cids_dead
+    cy-path --create_missing cache queue_cids_to_download
+    cy-path --create_missing cache queue_tasks_failed
+    cy-path --create_missing cache queue_tasks_to_run
+    cy-path --create_missing cache search
+    cy-path --create_missing config
+    cy-path --create_missing export
+    cy-path --create_missing graph particles safe
+    cy-path --create_missing mylinks
+    cy-path --create_missing temp ipfs_upload
 
     touch (cy-path graph update.toml)
 
-    if ( current-links-csv-path | path exists | not $in ) {
+    if not (current-links-csv-path | path exists) {
         'from,to' | save (current-links-csv-path)
     }
 
-    if ( cy-path mylinks _cyberlinks_archive.csv | path exists | not $in ) {
+    if not (cy-path mylinks _cyberlinks_archive.csv | path exists) {
         'from,to,address,timestamp,txhash'
         # underscore is supposed to place the file first in the folder
         | save (cy-path mylinks _cyberlinks_archive.csv)
