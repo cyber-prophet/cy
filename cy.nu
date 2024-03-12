@@ -5040,7 +5040,7 @@ def 'cy-path' [
     ...segments: string
 ]: nothing -> path {
     $segments
-    | prepend $env.cy.path
+    | prepend ($env.cy?.path? | default '~/cy/' | path expand)
     | path join
 }
 
