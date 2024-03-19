@@ -2951,7 +2951,7 @@ def 'cid-download-kubo' [
     if ($type =~ '^empty') {
         return 'not found'
     } else if (
-        ($type =~ '(text/plain)|(ASCII text)|(Unicode text, UTF-8)|(very short file)') and (not $info_only)
+        $type =~ '(text/plain|ASCII text|Unicode text, UTF-8|very short file)' and not $info_only
      ) {
         if (
             ipfs get --progress=false --timeout $timeout -o $file_path $cid
@@ -2987,7 +2987,7 @@ def 'cid-download-gateway' [
     --folder: string
     --info_only # Don't download the file by write a card with filetype and size
 ] {
-    let $file_path = ($folder | default $'($env.cy.ipfs-files-folder)' | path join $'($cid).md')
+    let $file_path = ($folder | default $env.cy.ipfs-files-folder | path join $'($cid).md')
     let $meta = (cid-get-type-gateway $cid)
     let $type = ($meta | get -i type)
     let $size = ($meta | get -i size)
@@ -3629,9 +3629,7 @@ export def 'tokens-format' [
 
     let $columns = $input | columns
 
-    $columns
-    | where $it =~ 'amount_in_h'
-    | if ($in | length | $in > 0) {
+    if ($columns | where $it =~ 'amount_in_h' | length) > 0 {
         reduce -f $input {|i acc| $acc | merge ($acc | number-col-format $i --decimals 0 --denom 'H')}
     } else {$input}
     # $input
@@ -4463,6 +4461,7 @@ export def --wrapped 'caching-function' [
 
     let $last_data = (
         if ($json_path | path exists) {
+            # use debug here print $json_path
             open $json_path
         } else {
             {'update_time': 0}
