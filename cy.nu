@@ -55,14 +55,14 @@ export-env {
 # > cy pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV'
 # QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 #
-# > cy pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV' --dont_detect_cid
+# > cy pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV' --ignore_cid
 # QmcDUZon6VQLR3gjAvSKnudSVQ2RbGXUtFFV8mR6zHZK8F
 export def 'pin-text' [
     text_param?: string
     --only_hash # calculate hash only, don't pin anywhere
-    --dont_detect_cid # work with CIDs as regular texts
+    --ignore_cid # work with CIDs as regular texts
     --follow_file_path # check if `text_param` is a valid path, and if yes - try to open it
-    --dont_save_particle_in_cache # don't save particle to local cache in cid.md file
+    --skip_save_particle_in_cache # don't save particle to local cache in cid.md file
 ]: [string -> string, nothing -> string] {
     let $text = (
         $in
@@ -77,7 +77,7 @@ export def 'pin-text' [
         } else {}
     )
 
-    if not ($env.cy.pin_text_dont_detect_cid? | default false | $in or $dont_detect_cid) {
+    if not ($env.cy.pin_text_ignore_cid? | default false | $in or $ignore_cid) {
         if (is-cid $text) { return $text }
     }
 
@@ -105,7 +105,7 @@ export def 'pin-text' [
         } else { $cid }
     )
 
-    if not $dont_save_particle_in_cache {
+    if not $skip_save_particle_in_cache {
         let $path = ($env.cy.ipfs-files-folder | path join $'($cid).md')
 
         if not ($path | path exists) {
@@ -123,7 +123,7 @@ def test_pin_text_1 [] {
     equal (pin-text 'cyber') 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV'
     equal (pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV') 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV'
     equal (
-        pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV' --dont_detect_cid
+        pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV' --ignore_cid
     ) 'QmcDUZon6VQLR3gjAvSKnudSVQ2RbGXUtFFV8mR6zHZK8F'
 }
 
@@ -152,11 +152,11 @@ export def 'link-texts' [
     --disable_append (-D) # Disable adding the cyberlink into the temp table
     --quiet (-q) # Don't output a cyberlink record after executing the command
     --only_hash # calculate hash only, don't pin anywhere
-    --dont_detect_cid # work with CIDs as regular texts
+    --ignore_cid # work with CIDs as regular texts
     --follow_file_path # check if `text_param` is a valid path, and if yes - try to open it
 ] [nothing -> record, nothing -> nothing] {
     $env.cy.pin_text_only_hash = ($env.cy.pin_text_only_hash? | default false ) or $only_hash
-    $env.cy.pin_text_dont_detect_cid = ($env.cy.pin_text_dont_detect_cid? | default false ) or $dont_detect_cid
+    $env.cy.pin_text_ignore_cid = ($env.cy.pin_text_ignore_cid? | default false ) or $ignore_cid
     $env.cy.pin_text_follow_file_path = ($env.cy.pin_text_follow_file_path? | default false ) or $follow_file_path
 
     let $row = {
@@ -423,11 +423,11 @@ export def 'link-random' [
     --source: string@'nu-complete-random-sources' = 'forismatic.com' # choose the source to take random links from
 ]: [nothing -> nothing] {
     1..$n
-    | each {|i|
-        if $source == 'forismatic.com' {
-            link-quote
-        } else {
-            link-chuck
+    | each {
+        match $source {
+            'forismatic.com' => { link-quote }
+            'chucknorris.io' => { link-chuck }
+            _ => {error make {msg: $'unkown source ($source)'}}
         }
     };
 
@@ -463,7 +463,7 @@ export def 'links-view' [
         $filename
         | if ($in | path exists) {
             open
-            | if $no_timestamp { reject timestamp } else {}
+            | if $no_timestamp { reject timestamp -i } else {}
         } else {
             []
         }
@@ -669,8 +669,8 @@ export def 'links-pin-columns' [
 export def 'links-pin-columns-2' [
     --dont_replace (-D) # Don't replace the links cyberlinks table
     --pin_to_local_ipfs # Pin to local kubo
-    --dont_detect_cid # work with CIDs as regular texts
-    --dont_save_particle_in_cache # don't save particles to local cache in cid.md file
+    --ignore_cid # work with CIDs as regular texts
+    --skip_save_particle_in_cache # don't save particles to local cache in cid.md file
 ]: [nothing -> table, table -> table] {
     let $links = (inlinks-or-links)
 
@@ -679,20 +679,20 @@ export def 'links-pin-columns-2' [
     let $groups = (
         $links.from_text?
         | append $links.to_text?
-        | where $it != null
+        | where $it not-in [null '']
         | if $in == [] {
             cprint 'No columns *"from_text"* or *"to_text"* found. Add at least one of them.' ;
             return
         } else {}
         | uniq
-        | if $dont_detect_cid {} else {
+        | if $ignore_cid {} else {
             group-by {if (is-cid $in) {'cid'} else {'not-cid'}}
         }
     )
 
     let $lookup = (
         $groups
-        | if $dont_detect_cid {} else {
+        | if $ignore_cid {} else {
             get not-cid
         }
         | enumerate
@@ -718,7 +718,7 @@ export def 'links-pin-columns-2' [
         | select cid item
     );
 
-    if not $dont_save_particle_in_cache {
+    if not $skip_save_particle_in_cache {
         $hash_associations
         | each {|i|
             let $path = ($env.cy.ipfs-files-folder | path join $'($i.cid).md')
@@ -728,7 +728,7 @@ export def 'links-pin-columns-2' [
         }
     }
 
-    if ((not $dont_detect_cid) and ($groups.cid? != null)) {
+    if ((not $ignore_cid) and ($groups.cid? != null)) {
         $hash_associations = (
             $groups.cid | wrap cid
             | merge ($groups.cid | wrap item)
@@ -894,7 +894,7 @@ def 'tx-message-investmint' [
         neuron: $neuron,
         amount: {
             denom: hydrogen,
-            amount: ($h_amount | int string)
+            amount: ($h_amount | into string)
         },
         resource: $resource,
         length: ($length | into string)
@@ -1251,14 +1251,14 @@ export def 'dict-neurons-view' [
     --path # output path of the dict
     --karma_bar # output karma bar
 ] {
-    let $neurons_tags = (dict-neurons-tags --wide)
+    let $neurons_tags = dict-neurons-tags --wide
 
-    (cy-path graph neurons_dict.yaml)
+    cy-path graph neurons_dict.yaml
     | if $path {
         return $in
     } else {}
     | if ($in | path exists) {
-        open $in
+        open
     } else { [[neuron nickname];
         ['bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8' 'maxim']] }
     | reject -i ...($neurons_tags | columns | where $it != 'neuron')
@@ -1293,8 +1293,8 @@ export def 'dict-neurons-add' [
     --category: string = 'default' # category of tag to write to dict
 ] {
     let $input = $in
-    let $desc = ($input | describe)
-    let $path_csv = (cy-path graph neurons_dict_tags.csv)
+    let $desc = $input | describe
+    let $path_csv = cy-path graph neurons_dict_tags.csv
 
     if $input == null {
         error make {
@@ -1447,16 +1447,16 @@ export def --env 'graph-download-snapshot' [
     make_default_folders_fn
 
     set-cy-setting caching-function-force-update 'true'
-    let $cur_data_cid = (passport-get $neuron | get data -i)
+    let $cur_data_cid = passport-get $neuron | get data -i
     set-cy-setting caching-function-force-update 'false'
-    let $path = (cy-path --create_missing graph $neuron)
+    let $path = cy-path --create_missing graph $neuron
 
     let $update_info = (
         $path
         | path join update.toml
         | if ($in | path exists) {open} else {{}}
     )
-    let $last_data_cid = ($update_info | get -i last_cid)
+    let $last_data_cid = $update_info | get -i last_cid
 
     if ($last_data_cid == $cur_data_cid) {
         print 'no updates found'
@@ -4093,7 +4093,7 @@ def 'set-select-from-variants' [
     }
 }
 
-# set env a variable from argument, or get it's value, or get default
+# Sets, retrieves, or defaults an environment variable based on input, without setting it if specified.
 def --env 'set-or-get-env-or-def' [
     key
     value?
@@ -4132,7 +4132,7 @@ def 'current-links-csv-path' [
     name?: path
 ]: nothing -> path {
     $name
-    | default ($env.cy.links_table_name?)
+    | default ($env.cy?.links_table_name?)
     | default 'temp'
     | cy-path mylinks $'($in).csv'
 }
@@ -4159,7 +4159,7 @@ export def 'ipfs-bootstrap-add-congress' []: nothing -> nothing {
 export def 'validator-generate-persistent-peers-string' [
     node_address?: string
 ]: nothing -> string {
-    let $node_address = ($node_address | default $'($env.cy.rpc-address)')
+    let $node_address = ($node_address | default $env.cy.rpc-address)
     if $node_address == $env.cy.rpc-address {
         cprint -a 2 $"Nodes list for *($env.cy.rpc-address)*"
     }
@@ -4170,8 +4170,7 @@ export def 'validator-generate-persistent-peers-string' [
 
     $peers
     | each {
-        |i| $i
-        | get node_info.id remote_ip node_info.listen_addr
+        get node_info.id remote_ip node_info.listen_addr
     }
     | each {
         |i| $'($i.0)@($i.1):($i.2 | split row ":" | last)'
@@ -4657,7 +4656,7 @@ def 'banner2' [] {
 }
 
 def is-cid [particle: string] {
-    ($particle =~ '^Qm\w{44}$')
+    $particle =~ '^Qm\w{44}$'
 }
 
 def is-neuron [particle: string] {
@@ -4949,7 +4948,7 @@ def 'nu-complete key-names' [] {
 }
 
 def 'nu-complete dict-nicks' [] {
-    (dict-neurons-view)
+    dict-neurons-view
     | select -i nickname neuron
     | uniq-by nickname
     | where nickname not-in [null '' '?']
@@ -4970,7 +4969,7 @@ def 'nu-complete-settings-variant-options' [
 }
 
 def 'nicks-and-keynames' [] {
-    (nu-complete key-names)
+    nu-complete key-names
     | append (nu-complete dict-nicks)
 }
 
