@@ -1233,6 +1233,10 @@ export def 'passport-set' [
         } else {}
     )
 
+    if $verbose {
+        print $'^cyber tx wasm execute ($pcontract) ($json) ($params | str join " ")'
+    }
+
     do -i {
         ^cyber tx wasm execute $pcontract $json ...$params
     } | complete
