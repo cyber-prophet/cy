@@ -1226,6 +1226,7 @@ export def 'passport-set' [
             '--yes'
             '--broadcast-mode' 'block'
             '--gas' '23456789'
+            '--chain-id' 'bostrom'
         ]
         | if $env.cy?.keyring-backend? == 'test' {
             append ['--keyring-backend' 'test']
