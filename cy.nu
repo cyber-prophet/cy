@@ -4700,7 +4700,7 @@ def open_cy_config_toml [] {
     if ($config_path | path exists) {
         open $config_path
     } else {
-        {
+        let $config = {
             'path': (cy-path)
             'ipfs-files-folder': (cy-path cy graph particles safe)
             'ipfs-download-from': 'gateway'
@@ -4709,7 +4709,9 @@ def open_cy_config_toml [] {
             'rpc-address': 'https://rpc.bostrom.cybernode.ai:443'
             'chain-id': 'bostrom'
         }
-        | tee {to toml | save -r $config_path}
+        $config | save  $config_path
+
+        $config
     }
 }
 
