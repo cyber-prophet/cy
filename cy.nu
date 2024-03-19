@@ -1228,7 +1228,7 @@ export def 'passport-set' [
     ]
 
     do -i {
-        ^cyber tx wasm execute $pcontract $json $params
+        ^cyber tx wasm execute $pcontract $json ...$params
     } | complete
     | if $in.exit_code == 0 {
         if $verbose {
