@@ -4709,7 +4709,7 @@ def open_cy_config_toml [] {
             'rpc-address': 'https://rpc.bostrom.cybernode.ai:443'
             'chain-id': 'bostrom'
         }
-        | tee {save $config_path}
+        | tee {to toml | save -r $config_path}
     }
 }
 
