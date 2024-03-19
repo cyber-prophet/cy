@@ -1218,14 +1218,20 @@ export def 'passport-set' [
 
     let $pcontract = 'bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel'
 
-    let $params = [
-        '--from' $env.cy.address
-        '--node' 'https://rpc.bostrom.cybernode.ai:443'
-        '--output' 'json'
-        '--yes'
-        '--broadcast-mode' 'block'
-        '--gas' '23456789'
-    ]
+    let $params = (
+        [
+            '--from' $env.cy.address
+            '--node' 'https://rpc.bostrom.cybernode.ai:443'
+            '--output' 'json'
+            '--yes'
+            '--broadcast-mode' 'block'
+            '--gas' '23456789'
+        ]
+        | if $env.cy?.keyring-backend? == 'test' {
+            append ['keyring-backend' 'test']
+            | flatten
+        } else {}
+    )
 
     do -i {
         ^cyber tx wasm execute $pcontract $json ...$params
