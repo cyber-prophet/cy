@@ -1228,7 +1228,7 @@ export def 'passport-set' [
             '--gas' '23456789'
         ]
         | if $env.cy?.keyring-backend? == 'test' {
-            append ['keyring-backend' 'test']
+            append ['--keyring-backend' 'test']
             | flatten
         } else {}
     )
