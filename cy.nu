@@ -5051,7 +5051,7 @@ def 'cy-path' [
     --create_missing # if the resulted path doesn't exist - create it
     --file: string # a filename to use as a last segment of the path
 ]: nothing -> path {
-    $env.cy?.path?
+    $env | get -i cy.path
     | default ($nu.home-path | path join 'cy')
     | append $folders
     | path join
