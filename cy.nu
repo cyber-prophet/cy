@@ -781,7 +781,7 @@ def 'link-exist' [
     neuron: string # neuron to check
 ]: [nothing -> bool] {
     (
-        do -i {
+        do {
             ^($env.cy.exec) query rank is-exist $from $to $neuron --output json --node $env.cy.rpc-address
         } | complete
         | if $in.exit_code == 0 {
@@ -1238,7 +1238,7 @@ export def 'passport-set' [
         print $'^cyber tx wasm execute ($pcontract) ($json) ($params | str join " ")'
     }
 
-    do -i {
+    do {
         ^cyber tx wasm execute $pcontract $json ...$params
     } | complete
     | if $in.exit_code == 0 {
@@ -2741,7 +2741,7 @@ def 'search-auto-refresh' [
     print $'searching ($env.cy.exec) for ($cid)'
 
     let $out = (
-        do -i {(
+        do {(
             ^($env.cy.exec) query rank search $cid $page $results_per_page
             --output json --node $env.cy.rpc-address
         )} | complete
@@ -4526,7 +4526,7 @@ def 'request-save-output-exec-response' [
     mut $response = {}
 
     let $request = {
-        do -i { ^($executable) ...$sub_commands_and_args }
+        do { ^($executable) ...$sub_commands_and_args }
         | complete
         | if $in.exit_code == 0 {
             get stdout
@@ -4883,7 +4883,7 @@ export def 'queue-execute-task' [
     let $command = (open $task_path)
 
     let $results = (
-        do -i { nu --config $nu.config-path --env-config $nu.env-path $task_path }
+        do { nu --config $nu.config-path --env-config $nu.env-path $task_path }
         | complete
     )
 
