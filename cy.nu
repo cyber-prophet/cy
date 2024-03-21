@@ -1117,27 +1117,6 @@ export def 'tsv-paste' [] {
     pbpaste | from tsv
 }
 
-# Update Cy and Nushell to the latest versions
-export def 'update-cy' [
-    --branch: string@'nu-complete-git-branches' = 'dev' # the branch to get updates from
-] {
-    # check if nushell is installed using brew
-    if (brew list nushell | complete | get exit_code | $in == 0) {
-        brew upgrade nushell;
-    } else {
-        if (which cargo | length | $in > 0) {
-            cargo install --features=dataframe nu
-        }
-    }
-
-    cd (cy-path)
-    git stash
-    git checkout $branch
-    git pull
-    git stash pop
-    cd -
-}
-
 # Get a passport by providing a neuron's address or nick
 #
 # > cy passport-get cyber-prophet | to yaml
@@ -4645,6 +4624,27 @@ export def 'qnbn' [
 
 export def 'crypto-prices' [] {
     http get 'https://api.coincap.io/v2/assets' | get data
+}
+
+# Update Cy and Nushell to the latest versions
+export def 'update-cy' [
+    --branch: string@'nu-complete-git-branches' = 'dev' # the branch to get updates from
+] {
+    # check if nushell is installed using brew
+    if (brew list nushell | complete | get exit_code | $in == 0) {
+        brew upgrade nushell;
+    } else {
+        if (which cargo | length | $in > 0) {
+            cargo install --features=dataframe nu
+        }
+    }
+
+    cd (cy-path)
+    git stash
+    git checkout $branch
+    git pull
+    git stash pop
+    cd -
 }
 
 # An ordered list of cy commands
