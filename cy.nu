@@ -4499,7 +4499,13 @@ export def --wrapped 'caching-function' [
         if ($freshness > $cache_validity_duration) {
             queue-task-add -o 2 (
                 $'caching-function --exec ($executable) --force_update [' +
-                ($sub_commands_and_args | str join ' ') +
+                (
+                    $sub_commands_and_args
+                    | each {
+                        str replace -a '"' '\"' | $'"($in)"'
+                    }
+                    | str join ' '
+                ) +
                 '] | to yaml | lines | first 5 | str join "\n"'
             )
         };
