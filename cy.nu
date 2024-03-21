@@ -1920,7 +1920,7 @@ export def 'graph-update-particles-parquet' [
                 | particles-filter-by-type --exclude --timeout
             )
         }
-        | dfr sort-by height
+        | dfr sort-by height particle
         | dfr to-parquet ($parquet_path | backup-and-echo --mv)
         | print ($in | get 0 -i)
     )
