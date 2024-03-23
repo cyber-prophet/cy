@@ -3002,7 +3002,11 @@ def 'cid-download-gateway' [
         # {http get -e https://gateway.ipfs.cybernode.ai/ipfs/QmdnSiS36vggN6gHbeeoJUBSUEa7B1xTJTcVR8F92vjTHK
         # | save -f temp/test.md}
         try {
-            http get -e $'($gate_url)($cid)' -m 120 | save -f $file_path
+            http get -e $'($gate_url)($cid)' -m 120
+            | if ($in | str contains '<head><title>502 Bad Gateway</title></head>') {
+                return 'not found'
+            } else {}
+            | save -f $file_path
         } catch {
             return 'not found'
         }
