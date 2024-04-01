@@ -1,4 +1,5 @@
 use cprint.nu
+use print-and-pass.nu
 
 export def main [
     prompt: string
