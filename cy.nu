@@ -914,7 +914,7 @@ def 'tx-create' [
     message?
     --memo: string = 'cy'
     --gas = 23456789
-    --fee = 2000
+    --fee = 0
     --timeout_height = 0
 ] {
     let msg = (
