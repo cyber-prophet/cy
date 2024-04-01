@@ -971,7 +971,7 @@ def 'tx-authz' [
 def 'tx-sign' [
     $unsigned_tx_path: path
 ] {
-    let $out_path = (cy-path temp tx-signed.json)
+    let $out_path = ($unsigned_tx_path | path-modify --suffix 'signed')
     let $params = (
         [
             --from $env.cy.address
@@ -4352,12 +4352,17 @@ export def 'authz-give-grant' [
     $message_type: string@"nu-complete-authz-types"
     $expiration: duration
 ] {
+    let $path = cy-path temp transactions --file $'($env.cy.address)-authz-(now-fn).json'
     (
         ^$env.cy.exec tx authz grant $neuron generic --msg-type $message_type
         --from $env.cy.address
         --expiration (date now | $in + $expiration | format date '%s' | into int)
+        --generate-only
         ...(default-node-params)
-    )
+    ) | save $path
+
+    tx-sign $path
+    | tx-broadcast $in
 }
 
 export def 'query-links-bandwidth-neuron' [
@@ -4749,7 +4754,7 @@ def open_cy_config_toml [] {
     }
 }
 
-def make_default_folders_fn [] {
+export def make_default_folders_fn [] {
     cy-path --create_missing backups
     cy-path --create_missing cache cli_out
     cy-path --create_missing cache jsonl
@@ -4763,6 +4768,7 @@ def make_default_folders_fn [] {
     cy-path --create_missing graph particles safe
     cy-path --create_missing mylinks
     cy-path --create_missing temp ipfs_upload
+    cy-path --create_missing temp transactions
 
     touch (cy-path graph update.toml)
 
