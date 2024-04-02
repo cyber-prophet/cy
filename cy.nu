@@ -67,7 +67,7 @@ export def 'pin-text' [
         | default $text_param
         | into string
         | if (
-            $env.cy.pin_text_follow_file_path? | default false | $in or $follow_file_path
+            $env.cy.pin_text_follow_file_path? == true or $follow_file_path
         ) and (
             path-exists-safe $in
         ) {
@@ -75,11 +75,11 @@ export def 'pin-text' [
         } else {}
     )
 
-    if not ($env.cy.pin_text_ignore_cid? | default false | $in or $ignore_cid) {
+    if not ($env.cy.pin_text_ignore_cid? == true or $ignore_cid) {
         if (is-cid $text) { return $text }
     }
 
-    if ($env.cy.pin_text_only_hash? | default false | $in or $only_hash) {
+    if ($env.cy.pin_text_only_hash? == true or $only_hash) {
         $text
         | ipfs add -Q --only-hash
         | str trim --char (char nl)
