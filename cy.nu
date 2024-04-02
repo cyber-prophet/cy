@@ -4130,6 +4130,19 @@ def --env 'set-or-get-env-or-def' [
     $val_ref
 }
 
+def match-type [
+    $type?
+]: any -> any {
+    let $def_value = $in
+    match $type {
+        'int' => {$def_value | into int}
+        'datetime' => {$def_value | into datetime}
+        'duration' => {$def_value | into duration}
+        'bool' => {$def_value | into bool}
+        _ => {$def_value | into string}
+    }
+}
+
 def 'current-links-csv-path' [
     name?: path
 ]: nothing -> path {
@@ -4750,7 +4763,7 @@ def open_cy_config_toml [] {
     }
 }
 
-export def make_default_folders_fn [] {
+export def make_default_folders_fn []: nothing -> nothing {
     cy-path --create_missing backups
     cy-path --create_missing cache cli_out
     cy-path --create_missing cache jsonl
