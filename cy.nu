@@ -36,7 +36,7 @@ export-env {
 
     $env.cy = ($config | merge $user_config)
 
-    make_default_folders_fn
+    make-default-folders-fn
 }
 
 # Pin a text particle
@@ -1434,7 +1434,7 @@ export def --env 'graph-download-snapshot' [
     --disable_update_parquet (-D) # Don't update the particles parquet file
     --neuron: string = 'graphkeeper'
 ] {
-    make_default_folders_fn
+    make-default-folders-fn
 
     set-cy-setting caching-function-force-update 'true'
     let $cur_data_cid = passport-get $neuron | get data -i
@@ -2480,7 +2480,7 @@ export def --env 'config-new' [
     # config_name?: string@'nu-complete-config-names'
 ] {
     print (check-requirements)
-    make_default_folders_fn
+    make-default-folders-fn
 
     cprint -c green 'Choose the name of executable:'
     let $exec = (nu-complete-executables | input list -f | print-and-pass)
@@ -3116,7 +3116,7 @@ export def 'cache-clean-cids-queue' [
 # Clear the cache folder
 export def 'cache-clear' [] {
     cy-path cache | backup-and-echo
-    make_default_folders_fn
+    make-default-folders-fn
 }
 
 # Get a current height for the active network in config
@@ -4754,7 +4754,7 @@ def default_settings []: nothing -> record {
     | reduce -f {} {|i acc| $acc | merge $i}
 }
 
-export def make_default_folders_fn []: nothing -> nothing {
+export def make-default-folders-fn []: nothing -> nothing {
     cy-path --create_missing backups
     cy-path --create_missing cache cli_out
     cy-path --create_missing cache jsonl
