@@ -4755,7 +4755,16 @@ def open_cy_config_toml [] {
         $config | save  $config_path
 
         $config
+def default_settings []: nothing -> record {
+    open (cy-path kickstart settings-variants.yaml)
+    | items {|k v|
+        $v.variants.0 # the first variant in the list is the default one
+        | if $in == other { {} } else {
+            match-type $v.type?
+            | wrap $k
+        }
     }
+    | reduce -f {} {|i acc| $acc | merge $i}
 }
 
 export def make_default_folders_fn []: nothing -> nothing {
