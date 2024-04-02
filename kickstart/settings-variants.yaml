@@ -31,8 +31,8 @@ caching-function-force-update:
   description: don't use cached node responses, update results immediately
   type: bool
   variants:
-  - 'true'
-  - 'false'
+  - false
+  - true
 caching-function-max-retries:
   description: the maximum number of retries in case of an error response
   type: int
