@@ -25,18 +25,16 @@ export-env {
         using brew, you can update it with the command *brew upgrade nushell*'
     }
 
-    let $config = (open_cy_config_toml)
-    let $user_config_path = ($config.path | path join config $'($config.config-name? | default 'dummy').toml')
+    let $config = open_cy_config_toml
 
-    $env.cy = (
-        if ($user_config_path | path exists) {
-            $config | merge ( open $user_config_path )
-        } else {
+    let $user_config = $config.path
+        | path join config $'($config.config-name).toml'
+        | if ($in | path exists) { open } else {
             cprint $'A config file was not found. Run *cy config-new*'
-            $config
+            {}
         }
-        | sort
-    )
+
+    $env.cy = ($config | merge $user_config)
 
     make_default_folders_fn
 }
