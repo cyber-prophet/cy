@@ -4738,23 +4738,18 @@ def --env is-connected-interval [
     }
 }
 
-def open_cy_config_toml [] {
-    let $config_path = ($nu.home-path | path join .cy_config.toml)
-    if ($config_path | path exists) {
-        open $config_path
-    } else {
-        let $config = {
-            'path': (cy-path)
-            'ipfs-files-folder': (cy-path cy graph particles safe)
-            'ipfs-download-from': 'gateway'
-            'ipfs-storage': 'both'
-            'exec': 'cyber'
-            'rpc-address': 'https://rpc.bostrom.cybernode.ai:443'
-            'chain-id': 'bostrom'
-        }
-        $config | save  $config_path
+def open_cy_config_toml []: nothing -> record {
+    let $config = $nu.home-path
+        | path join .cy_config.toml
+        | if ($in | path exists) { open } else { {} }
 
-        $config
+    default_settings
+    | merge $config
+    | default (cy-path) path
+    | default (cy-path cy graph particles safe) ipfs-files-folder
+    | default no-config-set config-name
+}
+
 def default_settings []: nothing -> record {
     open (cy-path kickstart settings-variants.yaml)
     | items {|k v|
