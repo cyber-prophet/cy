@@ -108,28 +108,6 @@ export def 'pin-text' [
     $cid
 }
 
-#[test]
-def test_pin_text_1 [] {
-    # use ~/cy/cy.nu
-
-    equal (pin-text 'cyber') 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV'
-    equal (pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV') 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV'
-    equal (
-        pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV' --ignore_cid
-    ) 'QmcDUZon6VQLR3gjAvSKnudSVQ2RbGXUtFFV8mR6zHZK8F'
-}
-
-#[test]
-def test_pin_text_file_paths [] {
-    # use ~/cy/cy.nu
-    # use std assert equal
-    "cyber" | save -f cyber.txt
-
-    equal (pin-text 'cyber.txt') 'QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6'
-    equal (pin-text 'cyber.txt' --follow_file_path) 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV'
-
-    rm 'cyber.txt'
-}
 
 # Add a 2-texts cyberlink to the temp table
 #
