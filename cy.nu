@@ -21,8 +21,8 @@ export-env {
     | get version
     | if $in not-in $tested_versions {
         cprint $'This version of Cy was tested on ($tested_versions), and you have ($in).
-        We suggest you to use one of the tested versions. If you installed *nushell*
-        using brew, you can update it with the command *brew upgrade nushell*'
+            We suggest you to use one of the tested versions. If you installed *nushell*
+            using brew, you can update it with the command *brew upgrade nushell*'
     }
 
     let $config = open_cy_config_toml
@@ -63,6 +63,7 @@ export def 'pin-text' [
     --skip_save_particle_in_cache # don't save particle to local cache in cid.md file
 ]: [string -> string, nothing -> string] {
     let $input = $in
+
     let $text = $text_param
         | default $input
         | into string
@@ -232,8 +233,7 @@ export def 'link-files' [
         error make {msg: "ipfs service isn't running. Try 'brew services start ipfs'" }
     }
 
-    let $files_col = (
-        $files
+    let $files_col = $files
         | if $in == [] {
             ls
             | where type == file
@@ -241,13 +241,11 @@ export def 'link-files' [
             | where $it not-in ['desktop.ini' '.DS_Store']
         } else { }
         | wrap from_text
-    )
 
     $'Confirm uploading ($files_col | length) files?'
-    | if $yes or (confirm --default_not=true $in) { } else { return }
+    | if $yes or (confirm --default_not $in) { } else { return }
 
-    let $results = (
-        $files_col
+    let $results = $files_col
         | par-each {|f| $f
             | upsert to_text $'pinned_file:($f.from_text)'
             | upsert to (ipfs add $f.from_text -Q | str replace (char nl) '')
@@ -259,7 +257,6 @@ export def 'link-files' [
                 | move from --before to
             } else { reject from_text }
         }
-    )
 
     if not $disable_append { $results | links-append --quiet }
     if not $quiet { $results }
@@ -450,19 +447,17 @@ export def 'links-view' [
     --quiet (-q) # Disable informational messages
     --no_timestamp # Don't output a timestamps column
 ]: [nothing -> table] {
-    let $filename = (current-links-csv-path)
-    let $links = (
-        $filename
+    let $filename = current-links-csv-path
+    let $links = $filename
         | if ($in | path exists) {
             open
             | if $no_timestamp { reject timestamp -i } else {}
         } else {
             []
         }
-    )
 
     if (not $quiet) {
-        let $links_count = ($links | length)
+        let $links_count = $links | length
 
         if $links_count == 0 {
             cprint $'The temp cyberlinks table *($filename)* is empty.
@@ -472,7 +467,7 @@ export def 'links-view' [
         }
     }
 
-    let $links_columns = ($links | columns)
+    let $links_columns = $links | columns
 
     $links
     | if 'from_text' in $links_columns {
@@ -487,8 +482,7 @@ export def 'links-view' [
 export def 'links-append' [
     --quiet (-q) # suppress output the resulted temp links table
 ]: [table -> table, table -> nothing, record -> table, record -> nothing] {
-    $in
-    | upsert timestamp (now-fn)
+    upsert timestamp (now-fn)
     | prepend (links-view -q)
     | if $quiet { links-replace -q } else { links-replace }
 }
@@ -497,8 +491,7 @@ export def 'links-append' [
 export def 'links-replace' [
     --quiet (-q) # suppress output the resulted temp links table
 ]: [table -> table, table -> nothing] {
-    $in
-    | save (current-links-csv-path) --force
+    save (current-links-csv-path) --force
 
     if (not $quiet) { links-view -q }
 }
@@ -508,7 +501,7 @@ export def 'links-swap-from-to' [
     --dont_replace (-D) # output results only, without modifiying the links table
     --keep_original # append results to original links
 ]: [nothing -> table, table -> table] {
-    let $input = (inlinks-or-links)
+    let $input = inlinks-or-links
 
     $input
     | rename --block {
@@ -2948,7 +2941,7 @@ def 'cid-download-kubo' [
         }
     } else {
         do -i {
-            ipfs dag stat $cid --enc json --timeout $timeout | from json
+            ^ipfs dag stat $cid --enc json --timeout $timeout | from json
         }
         | default {'Size': null}
         | merge {'MIME type': ($type | split row ';' | get -i 0)}
