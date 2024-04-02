@@ -62,18 +62,15 @@ export def 'pin-text' [
     --follow_file_path # check if `text_param` is a valid path, and if yes - try to open it
     --skip_save_particle_in_cache # don't save particle to local cache in cid.md file
 ]: [string -> string, nothing -> string] {
-    let $text = (
-        $in
-        | default $text_param
+    let $input = $in
+    let $text = $text_param
+        | default $input
         | into string
         | if (
             $env.cy.pin_text_follow_file_path? == true or $follow_file_path
         ) and (
             path-exists-safe $in
-        ) {
-            open
-        } else {}
-    )
+        ) { open } else {}
 
     if not ($env.cy.pin_text_ignore_cid? == true or $ignore_cid) {
         if (is-cid $text) { return $text }
@@ -86,21 +83,18 @@ export def 'pin-text' [
         | return $in
     }
 
-    mut $cid = (
+    let $cid = (
         if $env.cy.ipfs-storage in ['kubo' 'both'] {
             $text
             | ipfs add -Q
             | str trim --char (char nl)
         }
-    )
-
-    $cid = (
-        if $env.cy.ipfs-storage in ['cybernode' 'both'] {
+        | if $env.cy.ipfs-storage in ['cybernode' 'both'] {
             $text
             | curl --silent -X POST -F file=@- 'https://io.cybernode.ai/add'
             | from json
             | get cid
-        } else { $cid }
+        } else { }
     )
 
     if not $skip_save_particle_in_cache {
