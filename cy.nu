@@ -872,9 +872,9 @@ export def 'links-remove-existed-2' [] {
 # Create a custom unsigned cyberlinks transaction
 def 'tx-json-create-from-cyberlinks' [
     $links # removed type definition for the case of empty tables
-] {
+]: table -> path {
     let $links2 = ( $links | select from to | uniq )
-    let $path = (cy-path temp tx-unsigned.json)
+    let $path = cy-path temp transactions --file $'($env.cy.address)-(now-fn)-cyberlink-unsigned.json'
 
     tx-message-links $env.cy.address $links2
     | tx-create $in
@@ -916,7 +916,7 @@ def 'tx-create' [
     --gas = 23456789
     --fee = 0
     --timeout_height = 0
-] {
+]: [record -> record, list -> record] {
     let msg = (
         ($message | describe)
         | if ($in =~ '^list') {
@@ -948,10 +948,9 @@ def 'tx-create' [
     }
 }
 
-def 'tx-authz' [
-    $json_tx_path: path
-] {
-    let $out_path = (cy-path temp tx-unsigned-authz.json)
+def 'tx-authz' [ ]: path -> path {
+    let $json_tx_path = $in
+    let $out_path = $json_tx_path | path-modify --suffix 'authz'
 
     let $current_json = (open $json_tx_path)
 
@@ -968,9 +967,8 @@ def 'tx-authz' [
     $out_path
 }
 
-def 'tx-sign' [
-    $unsigned_tx_path: path
-] {
+def 'tx-sign' [ ]: path -> path {
+    let $unsigned_tx_path = $in
     let $out_path = ($unsigned_tx_path | path-modify --suffix 'signed')
     let $params = (
         [
@@ -999,21 +997,18 @@ def 'tx-sign' [
     $out_path
 }
 
-def 'tx-broadcast' [
-    $signed_tx_path
-] {
-    (
-        ^($env.cy.exec) tx broadcast $signed_tx_path
+def 'tx-broadcast' []: path -> record {
+    ^($env.cy.exec) tx broadcast $in ...[
         --broadcast-mode block
         --output json
         --node $env.cy.rpc-address
-        | complete
-        | if ($in.exit_code != 0 ) {
-            error make { msg: 'exit code is not 0' }
-        } else {
-            get stdout | from json | select raw_log code txhash
-        }
-    )
+    ]
+    | complete
+    | if ($in.exit_code != 0 ) {
+        error make { msg: 'exit code is not 0' }
+    } else {
+        get stdout | from json | select raw_log code txhash
+    }
 }
 
 # Create a tx from the piped in or temp cyberlinks table, sign and broadcast it
@@ -1030,10 +1025,10 @@ def 'links-send-tx' [ ] {
     let $response = (
         tx-json-create-from-cyberlinks $links
         | if ($env.cy.authz? != null) {
-            tx-authz $in
+            tx-authz
         } else {}
-        | tx-sign $in
-        | tx-broadcast $in
+        | tx-sign
+        | tx-broadcast
     )
 
     let $filename = (cy-path mylinks _cyberlinks_archive.csv)
@@ -4361,8 +4356,9 @@ export def 'authz-give-grant' [
         ...(default-node-params)
     ) | save $path
 
-    tx-sign $path
-    | tx-broadcast $in
+    $path
+    | tx-sign
+    | tx-broadcast
 }
 
 export def 'query-links-bandwidth-neuron' [
