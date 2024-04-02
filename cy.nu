@@ -4112,14 +4112,9 @@ def --env 'set-or-get-env-or-def' [
                 | get -i $key
             )
 
-            let $def_value = $key_record | get -i variants.0
-
-            match $key_record.type? {
-                'int' => {$def_value | into int}
-                'datetime' => {$def_value | into datetime}
-                'duration' => {$def_value | into duration}
-                _ => {$def_value | into string}
-            }
+            $key_record
+            | get -i variants.0
+            | match-type $key_record.type?
         }
     )
 
