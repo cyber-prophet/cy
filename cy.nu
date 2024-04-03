@@ -2692,13 +2692,16 @@ export def 'search' [
     --results_per_page (-r): int = 10
     --search_type: string@'nu-complete-search-functions' = 'search-with-backlinks'
 ] {
-    # todo `use match`
-    if $search_type == 'search-with-backlinks' {
-        search-with-backlinks $query --page $page --results_per_page $results_per_page
-    } else if $search_type == 'search-auto-refresh' {
-        search-auto-refresh $query --page $page --results_per_page $results_per_page
-    } else if $search_type == 'search-sync' {
-        search-sync $query --page $page --results_per_page $results_per_page
+    match $search_type {
+        'search-with-backlinks' => {
+            search-with-backlinks $query --page $page --results_per_page $results_per_page
+        }
+        'search-auto- =>refresh' => {
+            search-auto-refresh $query --page $page --results_per_page $results_per_page
+        }
+        'search-sync' => {
+            search-sync $query --page $page --results_per_page $results_per_page
+        }
     }
 }
 
