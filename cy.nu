@@ -1087,7 +1087,7 @@ export def 'message-send' [
     $neuron: string
     $message: string
     --amount: string = 1boot
-    --from: string = ''
+    --from: string
 ] {
     let $from = ($from | default $env.cy.address)
 
