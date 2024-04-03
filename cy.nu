@@ -511,6 +511,7 @@ export def 'links-swap-from-to' [
             str replace 'to' 'from'
         }
     }
+    | select -i from_text to_text from to ...($in | columns) # use it here for rearranging
     | if $keep_original {
         prepend $input
     } else { }
