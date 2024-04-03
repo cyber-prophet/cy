@@ -772,16 +772,13 @@ def 'link-exist' [
     to: string # particle to
     neuron: string # neuron to check
 ]: [nothing -> bool] {
-    (
-        do {
-            ^($env.cy.exec) query rank is-exist $from $to $neuron --output json --node $env.cy.rpc-address
-        } | complete
-        | if $in.exit_code == 0 {
-            get stdout | from json | get 'exist'
-        } else {
-            false
-        }
-    )
+    ^($env.cy.exec) query rank is-exist $from $to $neuron --output json --node $env.cy.rpc-address
+    | complete
+    | if $in.exit_code == 0 {
+        get stdout | from json | get 'exist'
+    } else {
+        false
+    }
 }
 
 # Remove existing cyberlinks from the temp cyberlinks table
@@ -975,7 +972,7 @@ def 'tx-sign' [ ]: path -> path {
     )
 
     let $response = (
-        do {^($env.cy.exec) tx sign $unsigned_tx_path ...$params}
+        ^($env.cy.exec) tx sign $unsigned_tx_path ...$params
         | complete
     )
 
@@ -1217,9 +1214,8 @@ export def 'passport-set' [
         print $'^cyber tx wasm execute ($pcontract) ($json) ($params | str join " ")'
     }
 
-    do {
-        ^cyber tx wasm execute $pcontract $json ...$params
-    } | complete
+    ^cyber tx wasm execute $pcontract $json ...$params
+    | complete
     | if $in.exit_code == 0 {
         if $verbose {
             get stdout
@@ -2719,12 +2715,10 @@ def 'search-auto-refresh' [
 
     print $'searching ($env.cy.exec) for ($cid)'
 
-    let $out = (
-        do {(
-            ^($env.cy.exec) query rank search $cid $page $results_per_page
-            --output json --node $env.cy.rpc-address
-        )} | complete
-    )
+    let $out = ^($env.cy.exec) query rank search $cid $page $results_per_page ...[
+            --output json
+            --node $env.cy.rpc-address
+        ] | complete
 
     let $results = if $out.exit_code == 0 {
         $out.stdout | from json
@@ -2925,7 +2919,7 @@ def 'cid-download-kubo' [
     log debug $'cid to download ($cid)'
     let $file_path = ($folder | default $env.cy.ipfs-files-folder | path join $'($cid).md')
     let $type = (
-        do {^ipfs cat --timeout $timeout -l 400 $cid}
+        ^ipfs cat --timeout $timeout -l 400 $cid
         | complete
         | if ($in == null) or ($in.exit_code == 1) {
             'empty'
@@ -4529,7 +4523,7 @@ def 'request-save-output-exec-response' [
     mut $response = {}
 
     let $request = {
-        do { ^($executable) ...$sub_commands_and_args }
+        ^($executable) ...$sub_commands_and_args
         | complete
         | if $in.exit_code == 0 {
             get stdout
@@ -4912,7 +4906,7 @@ export def 'queue-execute-task' [
     let $command = (open $task_path)
 
     let $results = (
-        do { nu --config $nu.config-path --env-config $nu.env-path $task_path }
+        ^nu --config $nu.config-path --env-config $nu.env-path $task_path
         | complete
     )
 
