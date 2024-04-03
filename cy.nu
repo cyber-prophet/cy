@@ -4339,6 +4339,8 @@ export def --wrapped 'caching-function' [
 ]: nothing -> record {
     if ($retries != null) {$env.cy.caching-function-max-retries = $retries}
 
+    let $rest = $rest | each {into string}
+
     let $cache_stale_refresh = set-or-get-env-or-def caching-function-cache_stale_refresh $cache_stale_refresh
 
     if $rest == [] { error make {msg: 'The "caching-function" function needs arguments'} }
