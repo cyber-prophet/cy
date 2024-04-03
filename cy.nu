@@ -147,9 +147,9 @@ export def 'link-texts' [
     --ignore_cid # work with CIDs as regular texts
     --follow_file_path # check if `text_param` is a valid path, and if yes - try to open it
 ] [nothing -> record, nothing -> nothing] {
-    $env.cy.pin_text_only_hash = ($env.cy.pin_text_only_hash? | default false ) or $only_hash
-    $env.cy.pin_text_ignore_cid = ($env.cy.pin_text_ignore_cid? | default false ) or $ignore_cid
-    $env.cy.pin_text_follow_file_path = ($env.cy.pin_text_follow_file_path? | default false ) or $follow_file_path
+    if $only_hash {$env.cy.pin_text_only_hash = true}
+    if $ignore_cid {$env.cy.pin_text_ignore_cid = true}
+    if $follow_file_path {$env.cy.pin_text_follow_file_path = true}
 
     let $row = {
         'from_text': $text_from
