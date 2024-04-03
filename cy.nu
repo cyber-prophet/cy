@@ -2168,7 +2168,7 @@ export def 'graph-to-txt-feed' [] {
     | dfr drop content_s neuron
     | dfr into-nu
     | reject index
-    | do {|i| print ($i | get 0.init-role); $i} $in
+    | tee {print $in.0.init-role}
     | each {|i| echo_particle_txt $i}
 }
 
