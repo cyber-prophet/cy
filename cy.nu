@@ -62,10 +62,7 @@ export def 'pin-text' [
     --follow_file_path # check if `text_param` is a valid path, and if yes - try to open it
     --skip_save_particle_in_cache # don't save particle to local cache in cid.md file
 ]: [string -> string, nothing -> string] {
-    let $input = $in
-
-    let $text = $text_param
-        | default $input
+    let $text = param-or-input $text_param
         | into string
         | if (
             $env.cy.pin_text_follow_file_path? == true or $follow_file_path
@@ -337,7 +334,8 @@ def test-follow [] {
 export def 'tweet' [
     text_to: string # text to tweet
     --disable_send (-D) # don't send tweet immideately, but put it into the temp table
-]: [nothing -> record] {
+]: [nothing -> record, string -> record] {
+    let $text_to = param-or-input $text_to
     let $cid_from = 'QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx' # pin-text 'tweet'
 
     if $disable_send {
