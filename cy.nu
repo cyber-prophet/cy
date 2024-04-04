@@ -84,8 +84,7 @@ export def 'pin-text' [
         | return $in
     }
 
-    let $cid = (
-        if $env.cy.ipfs-storage in ['kubo' 'both'] {
+    let $cid = if $env.cy.ipfs-storage in ['kubo' 'both'] {
             $text
             | ipfs add -Q
             | str trim --char (char nl)
@@ -94,9 +93,11 @@ export def 'pin-text' [
             $text
             | curl --silent -X POST -F file=@- 'https://io.cybernode.ai/add'
             | from json
-            | get cid
+            | get cid -i
+            | if $in == null {
+                error make {msg: "cybernode didn't respond with cid. Check your internet" }
+            } else {}
         } else { }
-    )
 
     if not $skip_save_particle_in_cache {
         let $path = ($env.cy.ipfs-files-folder | path join $'($cid).md')
@@ -3667,13 +3668,13 @@ export def 'tokens-sum' [
     | sort-by amount -r
     | group-by denom
     | values
-    | each {
-        |i| {}
+    | each {|i|
+        {}
         | upsert denom $i.denom.0
         | upsert amount ($i.amount | into float | math sum | into int)
         | upsert state (
             if $state == '-' {
-                $i.state? | default null | uniq | str join '+'
+                $i.state? | uniq | str join '+'
             } else {
                 $state
             }
