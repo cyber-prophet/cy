@@ -15,7 +15,7 @@ export def main [] { help-cy }
 
 export-env {
     # banner2
-    let $tested_versions = ['0.91.0']
+    let $tested_versions = ['0.92.0']
 
     version
     | get version
