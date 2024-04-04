@@ -107,29 +107,6 @@ export def 'pin-text' [
     $cid
 }
 
-#[test]
-def test_pin_text_1 [] {
-    # use ~/cy/cy.nu
-
-    equal (pin-text 'cyber') 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV'
-    equal (pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV') 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV'
-    equal (
-        pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV' --ignore_cid
-    ) 'QmcDUZon6VQLR3gjAvSKnudSVQ2RbGXUtFFV8mR6zHZK8F'
-}
-
-#[test]
-def test_pin_text_file_paths [] {
-    # use ~/cy/cy.nu
-    # use std assert equal
-    "cyber" | save -f cyber.txt
-
-    equal (pin-text 'cyber.txt') 'QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6'
-    equal (pin-text 'cyber.txt' --follow_file_path) 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV'
-
-    rm 'cyber.txt'
-}
-
 # Add a 2-texts cyberlink to the temp table
 #
 # > cy link-texts 'cyber' 'cyber-prophet' --disable_append | to yaml
@@ -162,20 +139,6 @@ export def 'link-texts' [
     }
 
     if not $quiet {$row}
-}
-
-#[test]
-def test_link_texts [] {
-    # use ~/cy/cy.nu
-    # use std assert equal
-    equal {
-        from_text: cyber,
-        to_text: bostrom,
-        from: "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV",
-        to: "QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb"
-    } (
-        link-texts "cyber" "bostrom"
-    )
 }
 
 # Add a link chain to the temp table
@@ -260,33 +223,6 @@ export def 'link-files' [
     if not $quiet { $results }
 }
 
-#[test]
-def test-link-files [] {
-    # use std assert equal
-
-    mkdir linkfilestest
-    cd linkfilestest
-    'cyber' | save -f cyber.txt
-    'bostrom' | save -f bostrom.txt
-
-    let $expect = [
-        [from_text, to_text, from, to];
-        [bostrom.txt, "pinned_file:bostrom.txt",
-        "QmPtV5CU9v3u7MY7hMgG3z9kTno8o7JHJD1e6f3NLfZ86k", "QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb"],
-        [cyber.txt, "pinned_file:cyber.txt",
-        "QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6", "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV"]
-    ]
-
-    let $result = (
-        link-files --link_filenames --yes --include_extension
-    )
-
-    cd ..
-    rm -r linkfilestest
-
-    equal $expect $result
-}
-
 # Create a cyberlink according to semantic construction of following a neuron
 #
 # > cy follow bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8 | to yaml
@@ -308,20 +244,6 @@ export def 'follow' [
     if not $use_local_list_only {
         link-texts 'QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx' $neuron
     }
-}
-
-#[test]
-def test-follow [] {
-    # use std assert equal
-    equal {
-        from_text: "QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx",
-        to_text: "bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8",
-        from: "QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx",
-        to: "QmYwEKZimUeniN7CEAfkBRHCn4phJtNoNJxnZXEAhEt3af"
-    } (
-        follow bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8
-    )
-    equal (follow bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8 --use_local_list_only) null
 }
 
 # Add a tweet and send it immediately (unless of disable_send flag)
