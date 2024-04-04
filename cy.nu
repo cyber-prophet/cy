@@ -4852,6 +4852,13 @@ export def --env 'use-recommended-nushell-settings' []: nothing -> nothing {
     $env.config.completions.quick = false
 }
 
+def 'param-or-input' [
+    param?
+] {
+    let $input = $in
+    $param | default $input
+}
+
 def 'nu-complete-random-sources' [] {
     ['chucknorris.io' 'forismatic.com']
 }
