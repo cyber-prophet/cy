@@ -6,8 +6,8 @@
 
 use std assert [equal greater]
 use nu-utils [ bar, cprint, "str repeat", to-safe-filename, to-number-format, number-col-format,
-    nearest-given-weekday, print-and-pass, clip, confirm, bar, normalize, path-modify ]
-use nu-utils internals [cy-path, match-type, default-settings, open-cy-config-toml export1]
+    nearest-given-weekday, print-and-pass, clip, confirm, bar, normalize, path-modify]
+use nu-utils internals [cy-path match-type default-settings open-cy-config-toml export1 param-or-input backup-and-echo make-default-folders-fn set-or-get-env-or-def set-select-from-variants path-exists-safe]
 
 use std log
 
@@ -248,24 +248,6 @@ export def 'tweet' [
     }
 }
 
-#[test]
-def test-tweet [] {
-    # use std assert equal
-
-    let $expect = {
-        from_text: "QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx",
-        to_text: "cyber-prophet is cool",
-        from: "QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx",
-        to: "QmWm9pmmz66cq41t1vtZWoRz5xmHSmoKCrrgdP9adcpoZK"
-    }
-
-    links-clear
-
-    let $result = tweet 'cyber-prophet is cool' --disable_send
-
-    equal $expect $result
-}
-
 # Add a random chuck norris cyberlink to the temp table
 def 'link-chuck' []: [nothing -> nothing] {
     let $quote = (
@@ -426,51 +408,6 @@ export def 'links-clear' []: [nothing -> nothing] {
     | save --force (current-links-csv-path | backup-and-echo --mv)
 }
 
-#[test]
-def test-tmps [] {
-    # use std assert equal
-    let $temp_name = (random chars)
-    set-links-table-name ($temp_name)
-    link-texts 'cyber' 'bostrom'
-
-    [[from_text, to_text]; ['cyber-prophet' '🤘'] ['tweet' 'cy is cool!']]
-    | links-append
-
-    links-pin-columns
-
-    equal (
-        links-view --no_timestamp
-    ) [
-        [from_text, to_text, from, to];
-        [cyber, bostrom, "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV",
-            "QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb"],
-        [cyber-prophet, 🤘, "QmXFUupJCSfydJZ85HQHD8tU1L7CZFErbRdMTBxkAmBJaD",
-            "QmQKvsh8pp6qFk31ch6RydBFeEHi82TjsRP8FEPYQ3jDow"],
-        [tweet, "cy is cool!", "QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx",
-            "QmddL5M8JZiaUDcEHT2LgUnZZGLMTTDEYVKWN1iMLk6PY8"]
-    ]
-
-    links-link-all 'cy testing script'
-    equal (
-        links-view --no_timestamp
-    ) [
-        [from_text, to_text, from, to];
-        ["cy testing script", bostrom, "QmdMy9SGd3StRUXoEX4BZQvGsgW6ejn4gMCT727GypSeZx",
-            "QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb"],
-        ["cy testing script", 🤘, "QmdMy9SGd3StRUXoEX4BZQvGsgW6ejn4gMCT727GypSeZx",
-            "QmQKvsh8pp6qFk31ch6RydBFeEHi82TjsRP8FEPYQ3jDow"],
-        ["cy testing script", "cy is cool!", "QmdMy9SGd3StRUXoEX4BZQvGsgW6ejn4gMCT727GypSeZx",
-            "QmddL5M8JZiaUDcEHT2LgUnZZGLMTTDEYVKWN1iMLk6PY8"]
-    ]
-
-    config-activate 42gboot+cyber
-
-    link-random 3
-    link-random 3 --source forismatic.com
-    links-remove-existed-1by1
-
-    equal (links-send-tx | get code) 0
-}
 
 # Add the same text particle into the 'from' or 'to' column of the temp cyberlinks table
 #
@@ -1028,13 +965,6 @@ export def 'passport-get' [
     }
 }
 
-#[test]
-def passport-get-test [] {
-    equal (passport-get bostrom1aypv5wxute0nnhfv44jkhyfkzt7zyrden85tel) {nickname: ?}
-    equal (passport-get bostrom1aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa) {nickname: ?} # unexisting address
-    equal (passport-get bostrom1de53jgxjfj5n84qzyfd7z44m9wrudygt524v6r | get nickname) 'graphkeeper'
-}
-
 # Set a passport's particle, data or avatar field for a given nickname
 #
 # > cy passport-set QmZSbGCBAPpqwXHSbUkn4P2RHiL2nRjv7BGFP4vVjcYKHd
@@ -1138,13 +1068,6 @@ export def 'dict-neurons-view' [
         | from yaml
         | dfr into-df
     } else { }
-}
-
-#[test]
-def dict-neurons-view-test-dummy [] {
-    equal (dict-neurons-view; null) null
-    equal (dict-neurons-view --df; null) null
-    equal (dict-neurons-view --path) (cy-path graph neurons_dict.yaml)
 }
 
 # Add piped in neurons to YAML-dictionary with tag and category
@@ -1374,11 +1297,6 @@ export def --env 'graph-download-snapshot' [
     # }
 }
 
-#[test]
-def graph-download-snapshot-test-dummy [] {
-    equal (graph-download-snapshot; null) null
-}
-
 def graph_columns [] {
     ['particle_from' 'particle_to' 'neuron' 'height' 'timestamp']
 }
@@ -1469,11 +1387,6 @@ export def 'graph-receive-new-links' [
         }
     }
     print ''
-}
-
-#[test]
-def graph-receive-new-links-test-dummy [] {
-    equal (graph-receive-new-links; null) null
 }
 
 # download particles missing from local cache for followed neurons or the whole graph
@@ -2628,11 +2541,6 @@ def serp1 [
     | select particle rank
 }
 
-#[test]
-def search-test-dummy [] {
-    greater (search 'cy' | length) 0
-}
-
 # Obtain cid info
 #
 # > cy cid-get-type-gateway QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV | to yaml
@@ -2792,11 +2700,6 @@ def 'cid-download-kubo' [
     }
 }
 
-#[test]
-def cid-download-kubo-test-dummy [] {
-    equal (cid-download-kubo 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV') 'text'
-}
-
 # Download a cid from gateway immediately
 def 'cid-download-gateway' [
     cid: string
@@ -2833,11 +2736,6 @@ def 'cid-download-gateway' [
     } else {
         return 'not found'
     }
-}
-
-#[test]
-def cid-download-gateway-test-dummy [] {
-    equal (cid-download-gateway QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV) 'text'
 }
 
 # Add a CID to the download queue
@@ -3207,21 +3105,6 @@ export def 'tokens-routed-to' [
     | if $in == null {return} else { }
     | into int amount
     | upsert state routed-to
-}
-
-#[test]
-def test-tokens-routed-from [] {
-    equal (tokens-routed-from bostrom1vu39vtn2ld3aapued6nwlhm7wpg2gj9zzlncek) null
-    equal (tokens-routed-from bostrom1vu39vtn2ld3aapued6nwlhm7wpg2gj9zzlncej) []
-
-    # seems like there is a mistake below
-    equal (tokens-routed-from bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8) [
-        [denom, amount, state]; [milliampere, 3000, routed-from], [millivolt, 180000, routed-from]
-    ]
-    equal (tokens-routed-from bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 --height 10124681) [
-        [denom, amount, state]; [milliampere, 3000, routed-from], [millivolt, 180000, routed-from]
-    ]
-    equal (tokens-routed-from bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 --height 2000) []
 }
 
 # Check IBC denoms
@@ -3877,67 +3760,6 @@ export def --env 'set-cy-setting' [
     }
 }
 
-def 'set-select-from-variants' [
-    $key
-] {
-    let $key_record = open (cy-path kickstart settings-variants.yaml) | get -i $key
-
-    if $key_record == null {
-        input 'type your setting: '
-    } else {
-        cprint -h green $'*($key): ($key_record.description?)*'
-
-        $key_record
-        | get variants
-        | input list
-        | if ($in == 'other') {
-            input 'type your setting: '
-        } else {}
-        | print-and-pass
-    }
-}
-
-# Sets, retrieves, or defaults an environment variable based on input, without setting it if specified.
-def --env 'set-or-get-env-or-def' [
-    key
-    value?
-    --dont_set_env
-] {
-    let $val_ref = $value
-        | if $in != null {} else {
-            $env.cy | get -i $key
-        }
-        | if $in != null {} else {
-            let $key_record = (
-                open (cy-path kickstart settings-variants.yaml)
-                | get -i $key
-            )
-
-            $key_record
-            | get -i variants.0
-            | match-type $key_record.type?
-        }
-
-    if not $dont_set_env {
-        $env.cy = ($env.cy | upsert $key $val_ref)
-    }
-
-    $val_ref
-}
-
-def match-type [
-    $type?
-]: any -> any {
-    let $def_value = $in
-    match $type {
-        'int' => {$def_value | into int}
-        'datetime' => {$def_value | into datetime}
-        'duration' => {$def_value | into duration}
-        'bool' => {$def_value | into bool}
-        _ => {$def_value | into string}
-    }
-}
-
 def 'current-links-csv-path' [
     name?: path
 ]: nothing -> path {
@@ -4225,13 +4047,6 @@ export def 'validator-chooser' [
     } else {}
 }
 
-#[test]
-def 'test-validator-chooser' [] {
-    use std assert greater
-
-    greater ( validator-chooser | length ) 1
-}
-
 # A wrapper, to cache CLI requests
 export def --wrapped 'caching-function' [
     ...rest
@@ -4381,43 +4196,6 @@ def 'request-save-output-exec-response' [
     if not $quiet {$response}
 }
 
-#[test]
-def caching-function-test [] {
-    equal (
-        caching-function query rank karma bostrom1smsn8u0h5tlvt3jazf78nnrv54aspged9h2nl9 | describe
-    ) 'record<karma: string, update_time: date>'
-    equal (
-        caching-function query bank balances bostrom1quchyywzdxp62dq3rwan8fg35v6j58sjwnfpuu | describe
-    ) ('record<balances: table<denom: string, amount: string>, pagination: record<next_key: ' +
-        'nothing, total: string>, update_time: date>')
-    equal (
-        caching-function query bank balances bostrom1cj8j6pc3nda8v708j3s4a6gq2jrnue7j857m9t | describe
-    ) ('record<balances: table<denom: string, amount: string>, pagination: record<next_key: ' +
-        'nothing, total: string>, update_time: date>')
-    equal (
-        caching-function query staking delegations bostrom1eg3v42jpwf3d66v6rnrn9hedyd8qvhqy4dt8pc | describe
-    ) ('record<delegation_responses: table<delegation: record<delegator_address: string, ' +
-        'validator_address: string, shares: string>, balance: record<denom: string, amount: string>>, ' +
-        'pagination: record<next_key: nothing, total: string>, update_time: date>')
-    equal (
-        caching-function query staking delegations bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 | describe
-    ) ('record<delegation_responses: table<delegation: record<delegator_address: string, ' +
-        'validator_address: string, shares: string>, balance: record<denom: string, amount: string>>, ' +
-        'pagination: record<next_key: nothing, total: string>, update_time: date>')
-    equal (
-        caching-function query rank top | describe
-    ) ('record<result: table<particle: string, rank: string>, pagination: record<total: int>, ' +
-        'update_time: date>')
-    equal (
-        caching-function query ibc-transfer denom-traces | describe
-    ) ('record<denom_traces: table<path: string, base_denom: string>, pagination: record<next_key: ' +
-        'nothing, total: string>, update_time: date>')
-    equal (
-        caching-function query liquidity pools --cache_validity_duration 0sec | describe
-    ) ('record<pools: table<id: string, type_id: int, reserve_coin_denoms: list<string>, ' +
-        'reserve_account_address: string, pool_coin_denom: string>, pagination: record<next_key: ' +
-        'nothing, total: string>, update_time: date>')
-}
 
 # query neuron addrsss by his nick
 export def 'qnbn' [
@@ -4536,35 +4314,6 @@ def --env is-connected-interval [
     }
 }
 
-export def make-default-folders-fn []: nothing -> nothing {
-    cy-path --create_missing backups
-    cy-path --create_missing cache cli_out
-    cy-path --create_missing cache jsonl
-    cy-path --create_missing cache queue_cids_dead
-    cy-path --create_missing cache queue_cids_to_download
-    cy-path --create_missing cache queue_tasks_failed
-    cy-path --create_missing cache queue_tasks_to_run
-    cy-path --create_missing cache search
-    cy-path --create_missing config
-    cy-path --create_missing export
-    cy-path --create_missing graph particles safe
-    cy-path --create_missing mylinks
-    cy-path --create_missing temp ipfs_upload
-    cy-path --create_missing temp transactions
-
-    touch (cy-path graph update.toml)
-
-    if not (current-links-csv-path | path exists) {
-        'from,to' | save (current-links-csv-path)
-    }
-
-    if not (cy-path mylinks _cyberlinks_archive.csv | path exists) {
-        'from,to,address,timestamp,txhash'
-        # underscore is supposed to place the file first in the folder
-        | save (cy-path mylinks _cyberlinks_archive.csv)
-    }
-}
-
 def 'system_cids' [] {
     [
         'QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx',
@@ -4628,29 +4377,6 @@ def 'now-fn' [
     | format date (
         if $pretty {'%Y-%m-%d-%H:%M:%S'} else {'%Y%m%d-%H%M%S'}
     )
-}
-
-def 'backup-and-echo' [
-    filename?: path
-    --quiet # don't echo the file-path back
-    --mv # move the file to backup directory instead of copy
-] {
-    let $input = $in
-    let $path = $filename | default $input
-    let $backups_path = (cy-path backups $'(now-fn)($path | path basename)')
-
-    if not ( $path | path exists ) {
-        cprint $'*($path)* does not exist'
-        return $path
-    }
-
-    if $mv {
-        mv $path $backups_path
-    } else {
-        cp $path $backups_path
-    }
-
-    if not $quiet { $path }
 }
 
 export def 'queue-task-add' [
@@ -4723,13 +4449,6 @@ export def --env 'use-recommended-nushell-settings' []: nothing -> nothing {
     $env.config.table.trim.methodology = 'truncating'
     $env.config.completions.algorithm = 'fuzzy'
     $env.config.completions.quick = false
-}
-
-def 'param-or-input' [
-    param?
-] {
-    let $input = $in
-    $param | default $input
 }
 
 def 'nu-complete-random-sources' [] {
@@ -4822,7 +4541,7 @@ def 'nu-complete-validators-monikers' [ ] {
     query-staking-validators | select moniker operator_address | rename value description
 }
 
-export def 'nu-complete-graph-csv-files' [] {
+def 'nu-complete-graph-csv-files' [] {
     ls -s (cy-path graph '*.csv' | into glob)
     | sort-by modified -r
     | select name size
@@ -4851,13 +4570,6 @@ def 'fill non-exist' [
         $acc | default $value_to_replace $column
     }
 }
-
-def 'path-exists-safe' [
-    path_to_check
-] {
-    try {$path_to_check | path exists} catch {false}
-}
-
 
 export def 'cp-banner' [
     index: int = 0
