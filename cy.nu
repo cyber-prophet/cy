@@ -74,7 +74,7 @@ export def 'pin-text' [
         } else { }
 
     if not $skip_save_particle_in_cache {
-        let $path = ($env.cy.ipfs-files-folder | path join $'($cid).md')
+        let $path = $env.cy.ipfs-files-folder | path join $'($cid).md'
 
         if not ($path | path exists) {
             $text | save -r $path
@@ -132,8 +132,8 @@ export def 'link-texts' [
 export def 'link-chain' [
     ...rest: string # consecutive particles to cyberlink in a linkchain
 ]: [nothing -> table, list -> table] {
-    let $elements = ($in | default $rest | flatten)
-    let $count = ($elements | length)
+    let $elements = $in | default $rest | flatten
+    let $count = $elements | length
     if $count < 2 {
         return $'($count) particles were submitted. We need 2 or more'
     }
@@ -250,11 +250,9 @@ export def 'tweet' [
 
 # Add a random chuck norris cyberlink to the temp table
 def 'link-chuck' []: [nothing -> nothing] {
-    let $quote = (
-        http get -e https://api.chucknorris.io/jokes/random
+    let $quote = http get -e https://api.chucknorris.io/jokes/random
         | get value
         | $in + "\n\n" + 'via [Chucknorris.io](https://chucknorris.io)'
-    )
 
     cprint -f '=' --indent 4 $quote
 
@@ -263,10 +261,8 @@ def 'link-chuck' []: [nothing -> nothing] {
 
 # Add a random quote cyberlink to the temp table
 def 'link-quote' []: [nothing -> nothing] {
-    let $quote = (
-        http get -e -r https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=text
+    let $quote = http get -e -r https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=text
         | $in + "\n\n" + 'via [forismatic.com](https://forismatic.com)'
-    )
 
     cprint -f '=' --indent 4 $quote
 
@@ -329,8 +325,7 @@ export def 'links-view' [
     --quiet (-q) # Disable informational messages
     --no_timestamp # Don't output a timestamps column
 ]: [nothing -> table] {
-    let $filename = current-links-csv-path
-    let $links = $filename
+    let $links = current-links-csv-path
         | if ($in | path exists) {
             open
             | if $no_timestamp { reject timestamp -i } else {}
@@ -342,7 +337,7 @@ export def 'links-view' [
         let $links_count = $links | length
 
         if $links_count == 0 {
-            cprint $'The temp cyberlinks table *($filename)* is empty.
+            cprint $'The temp cyberlinks table *(current-links-csv-path)* is empty.
             You can add cyberlinks to it manually or by using commands like *"cy link-texts"*'
         } else {
             cprint $'There are *($links_count) cyberlinks* in the temp table:'
@@ -428,8 +423,8 @@ export def 'links-link-all' [
     --column (-c): string = 'from' # a column to use for values ('from' or 'to'). 'from' is default
     --empty # fill cids in empty cells only
 ]: [nothing -> table, table -> table] {
-    let $links = (inlinks-or-links)
-    let $cid = (pin-text $text)
+    let $links = inlinks-or-links
+    let $cid = pin-text $text
 
     $links
     | if $empty {
@@ -539,7 +534,7 @@ export def 'links-pin-columns-2' [
     if not $skip_save_particle_in_cache {
         $hash_associations
         | each {|i|
-            let $path = ($env.cy.ipfs-files-folder | path join $'($i.cid).md')
+            let $path = $env.cy.ipfs-files-folder | path join $'($i.cid).md'
             if not ($path | path exists) {
                 $i.item | save $path
             }
@@ -727,7 +722,7 @@ def 'tx-create' [
     --fee = 0
     --timeout_height = 0
 ]: [record -> record, list -> record] {
-    let msg = ($message | describe)
+    let msg = $message | describe
         | if ($in =~ '^list') {
             $message
         } else if ($in =~ '^record') {
@@ -777,7 +772,7 @@ def 'tx-authz' [ ]: path -> path {
 
 def 'tx-sign' [ ]: path -> path {
     let $unsigned_tx_path = $in
-    let $out_path = ($unsigned_tx_path | path-modify --suffix 'signed')
+    let $out_path = $unsigned_tx_path | path-modify --suffix 'signed'
     let $params = [
             --from $env.cy.address
             --chain-id $env.cy.chain-id
@@ -985,21 +980,18 @@ export def 'passport-set' [
         return
     }
 
-    let $nick = (
-        $nickname
+    let $nick = $nickname
         | default $env.cy.passport-nick?
         | if ($in | is-empty) {
             print 'there is no nickname for passport set. To update the fields we need one.'
             return
         } else {}
-    )
 
     let $json = $'{"update_data":{"nickname":"($nick)","($field)":"($cid)"}}'
 
     let $pcontract = 'bostrom1xut80d09q0tgtch8p0z4k5f88d3uvt8cvtzm5h3tu3tsy4jk9xlsfzhxel'
 
-    let $params = (
-        [
+    let $params = [
             '--from' $env.cy.address
             '--node' 'https://rpc.bostrom.cybernode.ai:443'
             '--output' 'json'
@@ -1012,7 +1004,6 @@ export def 'passport-set' [
             append ['--keyring-backend' 'test']
             | flatten
         } else {}
-    )
 
     if $verbose {
         print $'^cyber tx wasm execute ($pcontract) ($json) ($params | str join " ")'
@@ -1085,8 +1076,7 @@ export def 'dict-neurons-add' [
         }
     }
 
-    let $candidate = (
-        $input
+    let $candidate = $input
         | if ($desc == 'list<string>') {
             wrap neuron
         } else if ($desc == 'dataframe') {
@@ -1095,12 +1085,9 @@ export def 'dict-neurons-add' [
             [{neuron: $in}]
         } else { }
         | select neuron
-    )
 
-    let $validated_neurons = (
-        $candidate
+    let $validated_neurons = $candidate
         | where (is-neuron $it.neuron)
-    )
 
     $validated_neurons
     | upsert tag $tag
@@ -1306,7 +1293,7 @@ def get_links_hasura [
     multiplier: int
     --chunk_size: int = 1000
 ] {
-    let $graphql_api = (set-or-get-env-or-def 'indexer-graphql-endpoint')
+    let $graphql_api = set-or-get-env-or-def 'indexer-graphql-endpoint'
 
     $"{cyberlinks\(limit: ($chunk_size), offset: ($multiplier * $chunk_size), order_by: {height: asc},
         where: {height: {_gt: ($height)}}) {(graph_columns | str join ' ')}}"
@@ -1367,13 +1354,11 @@ export def 'graph-receive-new-links' [
     cprint $'Downloading using ($source)'
 
     for $mult in 0.. {
-        let $links = (
-            if $source == 'hasura' {
+        let $links = if $source == 'hasura' {
                 get_links_hasura $last_height $mult
             } else if $source == 'clickhouse' {
                 get_links_clickhouse $last_height $mult
             }
-        )
 
         $new_links_count += ($links | length)
 
@@ -1466,12 +1451,10 @@ export def 'graph-merge' [
         dfr with-column (dfr lit $source_a | dfr as source)
     }
 
-    let $df2_st = (
-        $df2
+    let $df2_st = $df2
         | if ($df2 | dfr columns | 'source' in $in) { } else {
             dfr with-column (dfr lit $source_b | dfr as source)
         }
-    )
 
     $input
     | dfr join $df2_st [particle_from particle_to neuron] [particle_from particle_to neuron] --outer
@@ -1540,47 +1523,43 @@ export def 'graph-to-particles' [
         ]
     }
 
-    let $dummy = (
-        $links
+    let $dummy = $links
         | dfr rename particle_from particle
         | dfr drop particle_to
         | dfr with-column (dfr lit 'a' | dfr as 'init-role')
         | dfr fetch 0 # Create dummy dfr to have something to appended to
-    )
 
-    (
-        $dummy
-        | if not $to {
-            dfr append --col (
-                graph-to-particles-keep-column $links --column from
+    $dummy
+    | if not $to {
+        dfr append --col (
+            graph-to-particles-keep-column $links --column from
+        )
+    } else {}
+    | if not $from {
+        dfr append --col (
+            graph-to-particles-keep-column $links --column to
+        )
+    } else {}
+    | dfr into-lazy
+    | if ('link_local_index' in $links_columns) {
+        dfr sort-by [link_local_index height]
+    } else {
+        dfr sort-by [height]
+    }
+    | dfr unique --subset [particle]
+    | if $cids_only {
+        dfr select particle
+    } else {
+        if $include_particle_index {
+            dfr with-column (
+                dfr arg-where ((dfr col height) != 0) | dfr as particle_index
             )
         } else {}
-        | if not $from {
-            dfr append --col (
-                graph-to-particles-keep-column $links --column to
-            )
+        | if $include_global {
+            dfr join (graph-particles-df) particle particle -s '_global'
         } else {}
-        | dfr into-lazy
-        | if ('link_local_index' in $links_columns) {
-            dfr sort-by [link_local_index height]
-        } else {
-            dfr sort-by [height]
-        }
-        | dfr unique --subset [particle]
-        | if $cids_only {
-            dfr select particle
-        } else {
-            if $include_particle_index {
-                dfr with-column (
-                    dfr arg-where ((dfr col height) != 0) | dfr as particle_index
-                )
-            } else {}
-            | if $include_global {
-                dfr join (graph-particles-df) particle particle -s '_global'
-            } else {}
-        }
-        | dfr collect
-    )
+    }
+    | dfr collect
 }
 
 # In the piped in particles df leave only particles appeared for the first time
@@ -1601,19 +1580,15 @@ export def 'graph-update-particles-parquet' [
 ] {
     let $parquet_path = cy-path graph particles.parquet
     let $particles_folder = $env.cy.ipfs-files-folder
-    let $all_particles = (
-        graph-links-df
+    let $all_particles = graph-links-df
         | graph-to-particles
         | graph-add-metadata
         | dfr select [particle neuron height timestamp content_s]
-    )
 
-    let $particles_wanted = (
-        $all_particles
+    let $particles_wanted = $all_particles
         | if $all {} else {
             particles-filter-by-type --timeout
         }
-    )
 
     if not $quiet {
         cprint $'Cy is updating ($parquet_path). It will take a coulple of minutes.'
@@ -1702,13 +1677,11 @@ export def 'graph-append-related' [
 ] {
     let $links_in = graph-select-standard-columns --extra_columns ['link_local_index' 'init-role' 'step']
     let $columns_in = $links_in | dfr columns
-    let $step = (
-        if 'step' in $columns_in {
+    let $step = if 'step' in $columns_in {
             $links_in.step | dfr max | dfr into-nu | get 0.step | ($in // 2) + 1 | ($in * 2) - 1
         } else {
             1
         }
-    )
 
     let $links = $links_in
         | dfr into-lazy
@@ -1854,8 +1827,7 @@ export def 'graph-stats' [] {
         )
         | dfr_countrows
 
-    let $stats_by_source = (
-        if ($links | dfr columns | 'source' in $in) {
+    let $stats_by_source = if ($links | dfr columns | 'source' in $in) {
             $links
             | dfr group-by source
             | dfr agg [(dfr col source | dfr count | dfr as source_count)]
@@ -1865,7 +1837,6 @@ export def 'graph-stats' [] {
             | transpose -idr
             | {source: $in}
         } else {{}}
-    )
 
     $links
     | dfr group-by dummyc
@@ -2195,8 +2166,7 @@ export def 'particles-filter-by-type' [
     --timeout
 ] {
     let $input = $in
-    let $filter_regex = (
-        if $media {
+    let $filter_regex = if $media {
             '"MIME'
         } else {}
         | if $timeout {
@@ -2204,7 +2174,6 @@ export def 'particles-filter-by-type' [
         } else {}
         | str join '|'
         | '^' + $in
-    )
 
     $input
     | dfr filter-with (
@@ -2221,10 +2190,9 @@ export def --env 'config-new' [
     make-default-folders-fn
 
     cprint -c green 'Choose the name of executable:'
-    let $exec = (nu-complete-executables | input list -f | print-and-pass)
+    let $exec = nu-complete-executables | input list -f | print-and-pass
 
-    let $addr_table = (
-        ^($exec) keys list --output json
+    let $addr_table = ^($exec) keys list --output json
         | from json
         | flatten
         | select name address
@@ -2236,45 +2204,37 @@ export def --env 'config-new' [
             | select name address
             | upsert keyring test
         )
-    )
 
     if ($addr_table | length) == 0 {
-        let $error_text = (
-            cprint --echo $'There are no addresses in the keyring of *($exec)*. To use Cy, you need to add one.
+        let $error_text = cprint --echo $'
+            There are no addresses in the keyring of *($exec)*. To use Cy, you need to add one.
             You can find out how to add the key by running the command "*($exec) keys add -h*".
             After adding the key, come back and launch this wizard again.'
-        )
 
         error make -u {msg: $error_text}
     }
 
     cprint -c green --before 1 $'Select the address from your ($exec) cli to send transactions from:'
 
-    let $address = (
-        $addr_table
+    let $address = $addr_table
         | input list -f
         | get address
         | print-and-pass
-    )
 
     let $keyring = $addr_table | where address == $address | get keyring.0
 
-    let $passport_nick = (
-        passport-get $address
+    let $passport_nick = passport-get $address
         | get nickname -i
-    )
 
     if (not ($passport_nick | is-empty)) {
        cprint -c default_italic --before 1 $'Passport nick *($passport_nick)* will be used'
     }
 
-    let $config_name = (
-        $addr_table
+    let $config_name = $addr_table
         | select address name
         | transpose -rd
         | get $address
         | $'($in)($passport_nick | if $in == null {} else {'-' + $in})-($exec)'
-    )
 
     let $chain_id = if ($exec == 'cyber') { 'bostrom' } else { 'space-pussy' }
 
@@ -2285,20 +2245,16 @@ export def --env 'config-new' [
     }
 
     cprint -c green --before 1 'Select the address of RPC api for interacting with the blockchain:'
-    let $rpc_address = (
-        [$rpc_def 'other']
+    let $rpc_address = [$rpc_def 'other']
         | input list -f
         | if $in == 'other' {
             input 'enter the RPC address:'
         } else {}
         | print-and-pass
-    )
 
     cprint -c green --before 1 'Select the ipfs service to store particles:'
 
-    let $ipfs_storage = (
-        set-cy-setting --output_value_only 'ipfs-storage'
-    )
+    let $ipfs_storage = set-cy-setting --output_value_only 'ipfs-storage'
 
     {
         'config-name': $config_name
@@ -2333,8 +2289,7 @@ export def --env 'config-save' [
     let $in_config = upsert config-name $config_name
     let $filename = cy-path config $'($config_name).toml'
 
-    let $filename2 = (
-        if not ($filename | path exists) {
+    let $filename2 = if not ($filename | path exists) {
             $filename
         } else {
             cprint -c green --before 1 $'($filename) exists. Do you want to overwrite it?'
@@ -2346,7 +2301,6 @@ export def --env 'config-save' [
                 (cy-path config $'(now-fn).toml')
             }
         }
-    )
 
     $in_config
     | upsert config-name ($filename2 | path parse | get stem)
@@ -2558,8 +2512,8 @@ export def 'cid-get-type-gateway' [
         | parse '{header}: {value}'
         | transpose -d -r -i
 
-    let $type = ($headers | get -i 'Content-Type')
-    let $size = ($headers | get -i 'Content-Length')
+    let $type = $headers | get -i 'Content-Type'
+    let $size = $headers | get -i 'Content-Length'
 
     if (
         ($type == null)
@@ -3177,7 +3131,7 @@ export def 'tokens-info-from-registry' [
     chain_name: string = 'bostrom'
 ] {
     let $pcontract = 'bostrom1w33tanvadg6fw04suylew9akcagcwngmkvns476wwu40fpq36pms92re6u'
-    let $json = ( {get_assets_by_chain: {chain_name: $chain_name}} | to json -r )
+    let $json = {get_assets_by_chain: {chain_name: $chain_name}} | to json -r
     let $params = ['--node' 'https://rpc.bostrom.cybernode.ai:443' '--output' 'json']
 
     caching-function --exec 'cyber' --no_default_params query wasm contract-state smart $pcontract $json $params
@@ -3381,11 +3335,9 @@ export def 'balances' [
             | merge $i
         }
 
-    let $default_columns = (
-        $balances | columns | prepend 'name' | uniq
+    let $default_columns = $balances | columns | prepend 'name' | uniq
         | reverse | prepend ['address'] | uniq
         | reverse | reduce -f {} {|i acc| $acc | merge {$i : 0}}
-    )
 
     $balances
     | each {|i| $default_columns | merge $i}
@@ -3480,12 +3432,11 @@ export def 'tokens-rewards-withdraw' [
 ] {
     let $address = $neuron | default $env.cy.address
 
-    let $tx = (
-        (^($env.cy.exec) tx distribution withdraw-all-rewards
-            --from $address --fees 2000boot --gas 2000000 --output json --yes)
+    let $tx = ^($env.cy.exec) tx distribution withdraw-all-rewards ...[
+            --from $address --fees 2000boot --gas 2000000 --output json --yes]
         | str replace "Default sign-mode 'direct' not supported by Ledger, using sign-mode 'amino-json'.\n" ''
         | from json
-    )
+
 
     if $tx.code? != 0 { cprint '*tx.code != 0*' }
     print ($tx | select code txhash)
@@ -3506,8 +3457,7 @@ export def 'rewards-withdraw-tx-analyse' [
     let $tx_height = $tx | get height | into int | $in - 1
     let $tx_neuron = $tx | get tx.body.messages.0.delegator_address
 
-    let $rewards = (
-        $tx
+    let $rewards = $tx
         | get logs
         | each {|i| $i
             | get -i events
@@ -3521,10 +3471,8 @@ export def 'rewards-withdraw-tx-analyse' [
         | insert denom {|i| $i.amount | str replace -r '\d+' '$1'}
         | insert rewards {|i| $i.amount | str replace -r '\D+' '$1' | into int}
         | reject amount
-    )
 
-    let $result = (
-        tokens-delegations-table-get $tx_neuron --height $tx_height
+    let $result = tokens-delegations-table-get $tx_neuron --height $tx_height
         | upsert height $tx_height
         | join -l (
             query-staking-validators | rename -c {operator_address: validator_address}
@@ -3535,7 +3483,6 @@ export def 'rewards-withdraw-tx-analyse' [
         | where delegated > 0
         | join ($rewards | where denom == boot) -l validator validator
         | upsert percent {|i| ($i.rewards / $i.delegated) }
-    )
 
     $result
     | upsert percent_rel {|i| $i.percent / ($result.percent | math max)}
@@ -3600,8 +3547,7 @@ export def 'tokens-investmint-wizzard' [
 
     $env.cy.caching-function-force-update = true
 
-    let $times = (
-        tokens-investmint-status-table $address
+    let $times = tokens-investmint-status-table $address
         | print-and-pass
         | window 2 --stride 2
         | each {|i| $i
@@ -3609,7 +3555,6 @@ export def 'tokens-investmint-wizzard' [
             | wrap tokens
             | upsert release_time $i.release_time.0
         }
-    )
 
     $env.cy.caching-function-force-update = false
 
@@ -3618,7 +3563,7 @@ export def 'tokens-investmint-wizzard' [
             error make {msg: (cprint --echo $'no liquid hydrogen on *($address)* address')}
         } else {}
 
-    let $h_to_investmint = (tokens-fraction-menu $h_free --denom hydrogen --bins_list [0.5 1 0.2])
+    let $h_to_investmint = tokens-fraction-menu $h_free --denom hydrogen --bins_list [0.5 1 0.2]
 
     let $resource_token = ['Volt' 'Ampere']
         | input list
@@ -3638,10 +3583,10 @@ export def 'tokens-investmint-wizzard' [
         | $in - (date now) | into int
         | $in / 10 ** 9 | into int
 
-    let $trans_unsigned = (
-        ^cyber tx resources investmint $h_to_investmint $resource_token $release_time
+    let $trans_unsigned = ^cyber tx resources investmint ...[
+        $h_to_investmint $resource_token $release_time
         --from $address --fees 2000boot --gas 2000000 ...(default-node-params) --generate-only
-    )
+    ]
 
     print ($trans_unsigned | from json | to yaml)
 
@@ -3666,15 +3611,11 @@ export def 'tokens-fraction-input' [
         cprint $'you can enter integer value (char lp)like *4_000_000* or *4000000*(char rp) or percent
             from your liquid BOOTs (char lp)like *30%*(char rp)'
 
-        let $input: string = input
-
-        let $value: int = (
-            $input
+        let $value = input
             | if ($in | str contains '%') {
                 str replace '%' '' | into float | $in / 100 | $tokens * $in
             } else { str replace -ar '[^0-9]' '' }
             | into int
-        )
 
         if ($value > $tokens) {
             cprint $'*($value)* is bigger than *($tokens)*'
@@ -4344,7 +4285,7 @@ export def 'echo_particle_txt' [
     i: string
     --markdown (-m)
 ] {
-    let $indent = ($i.step | into int | $in * 4 | $in + 12)
+    let $indent = $i.step | into int | $in * 4 | $in + 12
 
     if $i.content == null {
         $'⭕️ ($i.timestamp), ($i.nick) - timeout - ($i.particle)'
@@ -4522,7 +4463,7 @@ def 'nu-complete-bool' [] {
 }
 
 def 'nu-complete-props' [] {
-    let term_size = (term size | get columns)
+    let term_size = term size | get columns
 
     governance-view-props --dont_format
     | reverse
