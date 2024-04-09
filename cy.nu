@@ -177,7 +177,9 @@ export def 'link-files' [
             | where type == file
             | get name
             | where $it not-in ['desktop.ini' '.DS_Store']
-        } else { }
+        } else {
+            path basename
+        }
         | wrap from_text
 
     if (
