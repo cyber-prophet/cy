@@ -180,8 +180,11 @@ export def 'link-files' [
         } else { }
         | wrap from_text
 
-    $'Confirm uploading ($files_col | length) files?'
-    | if $yes or (confirm --default_not $in) { } else { return }
+    if (
+        ($env.cy.ipfs-upload-with-no-confirm? == true) or
+        $yes or
+        (confirm --default_not $'Confirm uploading ($files_col | length) files?')
+     ) { } else {return}
 
     let $results = $files_col
         | par-each {|f| $f
@@ -517,9 +520,11 @@ export def 'links-pin-columns-2' [
 
     cprint $'temp files saved to a local directory *($temp_ipfs_folder)*'
 
-    mut $hash_associations = if ($pin_to_local_ipfs) or (
+    mut $hash_associations = if (
+            ($env.cy.ipfs-upload-with-no-confirm? == true) or
+            $pin_to_local_ipfs or (
             confirm $'Pin files to local kubo? If `no` only hashes will be calculated.'
-        ) {
+        )) {
             ^ipfs add -r $temp_ipfs_folder
         } else {
             ^ipfs add -rn $temp_ipfs_folder

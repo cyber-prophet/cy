@@ -94,3 +94,9 @@ cyberlinks-csv-table:
   variants:
   - cyberlinks.csv
   - other
+ipfs-upload-with-no-confirm:
+  description: confirm uploading ipfs files without request
+  type: bool
+  variants:
+  - true
+  - false
