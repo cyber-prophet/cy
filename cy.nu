@@ -6,7 +6,7 @@
 
 use std assert [equal greater]
 use nu-utils [ bar, cprint, "str repeat", to-safe-filename, to-number-format, number-col-format,
-    nearest-given-weekday, print-and-pass, clip, confirm, bar, normalize, path-modify]
+    nearest-given-weekday, print-and-pass, clip, confirm, normalize, path-modify]
 use nu-utils internals [cy-path match-type default-settings open-cy-config-toml export1 param-or-input backup-and-echo make-default-folders-fn set-or-get-env-or-def set-select-from-variants path-exists-safe]
 
 use std log
@@ -338,7 +338,7 @@ export def 'links-view' [
 
         if $links_count == 0 {
             cprint $'The temp cyberlinks table *(current-links-csv-path)* is empty.
-            You can add cyberlinks to it manually or by using commands like *"cy link-texts"*'
+                You can add cyberlinks to it manually or by using commands like *"cy link-texts"*'
         } else {
             cprint $'There are *($links_count) cyberlinks* in the temp table:'
         }
@@ -761,7 +761,7 @@ def 'tx-authz' [ ]: path -> path {
     | upsert body.messages.neuron $env.cy.authz
     | upsert body.messages {|i| [ {
         "@type": "/cosmos.authz.v1beta1.MsgExec",
-        "grantee": ($current_json | get body.messages.neuron.0)
+        "grantee": $current_json.body.messages.neuron.0
         "msgs": $i.body.messages
     } ] }
     | to json -r
@@ -3433,7 +3433,8 @@ export def 'tokens-rewards-withdraw' [
     let $address = $neuron | default $env.cy.address
 
     let $tx = ^($env.cy.exec) tx distribution withdraw-all-rewards ...[
-            --from $address --fees 2000boot --gas 2000000 --output json --yes]
+            --from $address --fees 2000boot --gas 2000000 --output json --yes
+            --node $env.cy.rpc-address]
         | str replace "Default sign-mode 'direct' not supported by Ledger, using sign-mode 'amino-json'.\n" ''
         | from json
 
@@ -4238,7 +4239,7 @@ def is-connected []  {
 
 def --env is-connected-interval [
     interval = 1min
-]  {
+] {
     if ($env.internet-connected? | default (0 | into datetime)) > ((date now) - $interval) {
         # print 'skip'
         return true
