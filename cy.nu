@@ -3680,9 +3680,15 @@ def 'governance-prop-summary' [] {
 
 # Set the custom name for links csv table
 export def --env 'set-links-table-name' [
-    name: string # a name for a temporary cyberlinks table file
+    name?: string # a name for a temporary cyberlinks table file
 ]: nothing -> nothing {
-    $env.cy.links_table_name = $name
+    let $name_1 = $name
+        | if $in == null {
+            'temp_' + (now-fn)
+        } else {}
+
+    $env.cy.links_table_name = $name_1
+    if $name == null {$name_1}
 }
 
 export def --env 'set-cy-setting' [
