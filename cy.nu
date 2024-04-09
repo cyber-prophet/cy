@@ -3433,11 +3433,14 @@ export def 'tokens-rewards-withdraw' [
     let $address = $neuron | default $env.cy.address
 
     let $tx = ^($env.cy.exec) tx distribution withdraw-all-rewards ...[
-            --from $address --fees 2000boot --gas 2000000 --output json --yes
-            --node $env.cy.rpc-address]
+            ...(default-node-params)
+            --from $address
+            --fees '0boot'
+            --gas 2000000
+            --yes
+        ]
         | str replace "Default sign-mode 'direct' not supported by Ledger, using sign-mode 'amino-json'.\n" ''
         | from json
-
 
     if $tx.code? != 0 { cprint '*tx.code != 0*' }
     print ($tx | select code txhash)
