@@ -1553,6 +1553,7 @@ export def 'graph-to-particles' [
     } else {
         polars sort-by [height]
     }
+    | polars into-lazy
     | polars unique --subset [particle]
     | if $cids_only {
         polars select particle
@@ -1792,6 +1793,7 @@ export def 'graph-neurons-stats' [] {
     | polars fill-null 0
     | polars join --left ( dict-neurons-view --df --karma_bar) neuron neuron
     | polars select ($in | polars columns | prepend [nickname links_count last_link] | uniq)
+    | polars collect
 }
 
 # Output graph stats based on piped in or the whole graph
@@ -1853,6 +1855,7 @@ export def 'graph-stats' [] {
         (polars col timestamp | polars min | polars as 'first')
         (polars col timestamp | polars max | polars as 'last')
     ]
+    | polars collect
     | polars into-nu
     | reject index dummyc
     | get 0
@@ -2109,10 +2112,11 @@ export def 'graph-links-df' [
     let $df = $input
         | if ($input_type =~ '^table') {
             polars into-df
-        } else if ($input_type in ['dataframe' 'lazyframe']) {
-        } else {
-            error make {msg:$'unknown input ($input_type)'}
-        }
+        # } else if ($input_type in ['dataframe' 'lazyframe' NuDataFrameCustomValue ]) {
+        # } else {
+        #     error make {msg:$'unknown input ($input_type)'}
+        # }
+        } else {}
 
     let $df_columns = $df | polars columns
     let $existing_graph_columns = $df_columns | where $it in [particle_from particle_to neuron]
