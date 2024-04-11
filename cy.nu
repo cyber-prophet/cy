@@ -1645,7 +1645,7 @@ export def 'graph-update-particles-parquet' [
     )
     | polars drop short_cid
     | if $all {} else {
-        polars append -c (
+        polars append --col (
             $all_particles
             | particles-filter-by-type --exclude --timeout
         )
@@ -1736,8 +1736,8 @@ export def 'graph-append-related' [
     }
 
     $links
-    | polars append -c (append_related from --step ($step))
-    | polars append -c (append_related to --step ($step + 1))
+    | polars append --col (append_related from --step ($step))
+    | polars append --col (append_related to --step ($step + 1))
     | polars into-lazy
     | polars sort-by [link_local_index height]
     | polars unique --subset [particle_from particle_to]
@@ -1880,7 +1880,7 @@ export def 'graph-to-gephi' [] {
         | graph-to-particles --include_global
 
     let $t1_height_index = $links.height
-        | polars append -c $particles.height # Particles might be created before they appear in the filtered graph
+        | polars append --col $particles.height # Particles might be created before they appear in the filtered graph
         | polars unique
         | polars with-column (
             polars arg-where ((polars col height) != 0) | polars as height_index
