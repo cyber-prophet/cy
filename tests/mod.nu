@@ -162,8 +162,7 @@ export def tweet-1 [] {
 }
 
 export def set-link-table-1 [] {
-    let $temp_name = (random chars)
-    set-links-table-name ($temp_name)
+    set-links-table-name
     link-texts 'cyber' 'bostrom'
 }
 
@@ -243,7 +242,7 @@ export def cid-download-gateway-test-dummy [] {
 
 
 #[test]
-def test-tokens-routed-from [] {
+export def tokens-routed-from-1 [] {
     equal (tokens-routed-from bostrom1vu39vtn2ld3aapued6nwlhm7wpg2gj9zzlncek) null
     equal (tokens-routed-from bostrom1vu39vtn2ld3aapued6nwlhm7wpg2gj9zzlncej) []
 
