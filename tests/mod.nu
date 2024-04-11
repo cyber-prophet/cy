@@ -256,3 +256,15 @@ def test-tokens-routed-from [] {
     ]
     equal (tokens-routed-from bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 --height 2000) []
 }
+
+export def graph-complex-1 [] {
+    greater (
+        graph-links-df | polars filter-with ((polars col timestamp) > ((date now) - 15day | format date %F)) | polars filter-with ((polars col timestamp) < (date now | format date %F)) | graph-stats | get neurons
+    ) 0
+}
+
+export def graph-complex-2 [] {
+    equal (
+        graph-links-df | graph-neurons-stats | polars select nick links_count karma karma_norm karma_norm_bar | polars first 2 | polars into-nu | get 0.links_count | $in > 0
+    ) true
+}
