@@ -268,3 +268,17 @@ export def graph-complex-2 [] {
         graph-links-df | graph-neurons-stats | polars select nick links_count karma karma_norm karma_norm_bar | polars first 2 | polars into-nu | get 0.links_count | $in > 0
     ) true
 }
+
+export def graph-filter-system-particles-1 [] {
+    equal (
+        graph-links-df test-graph.csv | graph-filter-system-particles particle_from | polars shape | polars into-nu
+    ) [
+        [index, rows, columns]; [0, 76, 5]
+    ]
+
+    equal (
+        graph-links-df test-graph.csv | graph-filter-system-particles particle_from --exclude | polars shape | polars into-nu
+    ) [
+        [index, rows, columns]; [0, 1091, 5]
+    ]
+}
