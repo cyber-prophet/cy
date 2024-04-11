@@ -2102,12 +2102,13 @@ export def 'graph-links-df' [
     --exclude_system # exclude system particles in from column (tweet, follow, avatar)
 ] {
     let $input = $in
-    let $input_type = $input | describe
     let $cyberlinks_path = set-or-get-env-or-def cyberlinks-csv-table $filename
 
-    if ($not_in or ($input_type == 'nothing')) {
+    if ($not_in or ($filename == null)) {
         return (graph-open-csv-make-df (cy-path graph $cyberlinks_path))
     }
+
+    let $input_type = $input | describe
 
     let $df = $input
         | if ($input_type =~ '^table') {
