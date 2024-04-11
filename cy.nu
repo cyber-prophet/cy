@@ -35,9 +35,9 @@ export-env {export1}
 export def 'pin-text' [
     text_param?: string
     --only_hash # calculate hash only, don't pin anywhere
-    --ignore_cid # work with CIDs as regular texts
+    --ignore_cid # work with CIDs as regular texts, don't use them as they are
     --follow_file_path # check if `text_param` is a valid path, and if yes - try to open it
-    --skip_save_particle_in_cache # don't save particle to local cache in cid.md file
+    --skip_save_particle_in_cache # don't save particle to local cache in cid.md file #totest
 ]: [string -> string, nothing -> string] {
     let $text = param-or-input $text_param
         | into string
