@@ -1511,7 +1511,7 @@ export def 'graph-to-particles' [
     --cids_only (-c) # Output one column with CIDs only
     # --init_role # Output if particle originally was in 'from' or 'to' column
 ] {
-    let $links = graph-links-df | polars into-lazy
+    let $links = graph-links-df
 
     let $links_columns = $links | polars columns
     if ($to and $from) {
@@ -1547,7 +1547,6 @@ export def 'graph-to-particles' [
             graph-to-particles-keep-column $links --column to
         )
     } else {}
-    | polars into-lazy
     | if ('link_local_index' in $links_columns) {
         polars sort-by [link_local_index height]
     } else {
@@ -1555,6 +1554,7 @@ export def 'graph-to-particles' [
     }
     | polars into-lazy
     | polars unique --subset [particle]
+    | polars collect
     | if $cids_only {
         polars select particle
     } else {
@@ -1567,7 +1567,6 @@ export def 'graph-to-particles' [
             polars join (graph-particles-df) particle particle -s '_global'
         } else {}
     }
-    | polars collect
 }
 
 # In the piped in particles df leave only particles appeared for the first time
