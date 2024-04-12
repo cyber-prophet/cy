@@ -282,3 +282,22 @@ export def graph-filter-system-particles-1 [] {
         [index, rows, columns]; [0, 1091, 5]
     ]
 }
+
+export def graph-merge-1 [] {
+    equal (
+        graph-links-df test-graph.csv
+        | graph-filter-system-particles particle_from --exclude
+        | graph-merge (graph-links-df test-graph.csv
+        | graph-filter-system-particles particle_from)
+        | polars group-by source
+        | polars agg ((polars col source)
+        | polars count
+        | polars as count)
+        | polars collect
+        | polars into-nu
+        | sort-by count
+        | reject index
+    ) [
+        [source, count]; [b, 76], [a, 1091]
+    ]
+}
