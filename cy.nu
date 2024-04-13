@@ -1901,12 +1901,10 @@ export def 'graph-to-gephi' [] {
     | polars to-csv (cy-path export !gephi_cyberlinks.csv)
 
     $particles
-    | polars into-lazy
     | polars join --left $t1_height_index height height
     | polars with-column (
         (polars col particle) | polars as cid
     ) | polars rename [particle content_s] [id label]
-    | polars collect
     | polars with-column (
         polars concat-str '' [
             (polars lit '<[')
