@@ -4300,22 +4300,18 @@ def 'default-node-params' [] {
 
 # echo particle for publishing
 export def 'echo_particle_txt' [
-    i: string
+    i: record
     --markdown (-m)
 ] {
-    let $indent = $i.step | into int | $in * 4 | $in + 12
+    let $indent = $i.step? | default 0 | into int | $in * 4 | $in + 12
 
-    if $i.content == null {
+    if $i.content_s? == null {
         $'⭕️ ($i.timestamp), ($i.nick) - timeout - ($i.particle)'
     } else {
         $'🟢 ($i.timestamp), ($i.nick)(char nl)(char nl)($i.content_s)(char nl)(char nl)($i.particle)(char nl)(char nl)'
     }
     | mdcat -l --columns (80 + $indent) -
-    | complete
-    | get stdout
-    | lines
-    | each {|i| $"(' ' | str repeat $indent)($i)" | print $in}
-    | null
+    | print
     # | each {|b| $"((ansi grey) + ($i.step + 2 | into string) + (ansi reset) | str repeat $indent)($b)" | print $in}
 }
 
