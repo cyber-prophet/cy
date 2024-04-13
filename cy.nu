@@ -1691,7 +1691,6 @@ export def 'graph-append-related' [
         }
 
     let $links = $links_in
-        | polars into-lazy
         | if 'link_local_index' in $columns_in {} else {
             polars with-column [
                 (polars arg-where ((polars col height) != 0) | $in + 100_000_000 | polars as link_local_index),
@@ -1714,13 +1713,11 @@ export def 'graph-append-related' [
         | if $only_first_neuron {
             particles-keep-only-first-neuron
         } else {}
-        | polars into-lazy
         | polars select particle link_local_index init-role step
         | polars rename particle $'particle_($from_or_to)'
         | polars join (
             graph-links-df --not_in
             | graph-filter-system-particles particle_from --exclude
-            | polars into-lazy
         ) $'particle_($from_or_to)' $'particle_($from_or_to)'
         | polars with-column [
             (polars concat-str '-' [
@@ -1737,8 +1734,8 @@ export def 'graph-append-related' [
     $links
     | polars append --col (append_related from --step ($step))
     | polars append --col (append_related to --step ($step + 1))
-    | polars into-lazy
     | polars sort-by [link_local_index height]
+    | polars into-lazy
     | polars unique --subset [particle_from particle_to]
     | polars collect
 }
