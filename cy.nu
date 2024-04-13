@@ -1955,16 +1955,13 @@ export def 'graph-to-logseq' [
 
 # Output particles into txt formated feed
 export def 'graph-to-txt-feed' [] {
-    graph-append-related --only_first_neuron
-    | graph-to-particles
+    graph-to-particles
     | particles-keep-only-first-neuron
     | graph-add-metadata
     # | polars filter-with ($in.content_s | polars is-null | polars not)
-    | polars sort-by [link_local_index height]
-    | polars drop content_s neuron
+    | polars sort-by [height]
     | polars into-nu
     | reject index
-    | tee {print $in.0.init-role}
     | each {|i| echo_particle_txt $i}
 }
 
