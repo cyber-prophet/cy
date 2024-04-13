@@ -2103,20 +2103,20 @@ export def 'graph-links-df' [
 ] {
     let $input = $in
     let $cyberlinks_path = set-or-get-env-or-def cyberlinks-csv-table $filename
+    let $input_type = $input | describe
 
-    if ($not_in or ($filename == null)) {
+    if (
+        $not_in or
+        not ($filename | is-empty) or
+        (($filename | is-empty) and $input_type == 'nothing')
+    ) {
         return (graph-open-csv-make-df (cy-path graph $cyberlinks_path))
     }
 
-    let $input_type = $input | describe
 
     let $df = $input
         | if ($input_type =~ '^table') {
             polars into-df
-        # } else if ($input_type in ['dataframe' 'lazyframe' NuDataFrameCustomValue ]) {
-        # } else {
-        #     error make {msg:$'unknown input ($input_type)'}
-        # }
         } else {}
 
     let $df_columns = $df | polars columns
