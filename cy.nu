@@ -2128,6 +2128,7 @@ export def 'graph-links-df' [
 export def 'graph-keep-standard-columns-only' [
     standard_columns: list = [particle_from, particle_to, neuron, height, timestamp]
     --extra_columns: list = []
+    --out # reject standard columns
 ] {
     let $input = $in
     let $in_columns = $input | polars columns
@@ -2135,7 +2136,11 @@ export def 'graph-keep-standard-columns-only' [
         | where $it in ($standard_columns | append $extra_columns)
 
     $input
-    | polars select $out_columns
+    | if $out {
+        polars drop ...($out_columns)
+    } else {
+        polars select $out_columns
+    }
 }
 
 def 'graph-open-csv-make-df' [
