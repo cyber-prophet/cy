@@ -1682,7 +1682,7 @@ export def 'graph-filter-contracts' [
 export def 'graph-append-related' [
     --only_first_neuron (-o)
 ] {
-    let $links_in = graph-select-standard-columns --extra_columns ['link_local_index' 'init-role' 'step']
+    let $links_in = graph-keep-standard-columns-only --extra_columns ['link_local_index' 'init-role' 'step']
     let $columns_in = $links_in | polars columns
     let $step = if 'step' in $columns_in {
             $links_in.step | polars max | polars into-nu | get 0.step | ($in // 2) + 1 | ($in * 2) - 1
@@ -2030,7 +2030,7 @@ export def 'graph-add-metadata' [
     --new_lines
 ] {
     let $links = graph-links-df
-        | graph-select-standard-columns --extra_columns ['particle', 'link_local_index', 'init-role', 'step']
+        | graph-keep-standard-columns-only --extra_columns ['particle', 'link_local_index', 'init-role', 'step']
 
     let $p = graph-particles-df
         | polars select particle content_s
@@ -2125,7 +2125,7 @@ export def 'graph-links-df' [
 }
 
 
-def 'graph-select-standard-columns' [
+export def 'graph-keep-standard-columns-only' [
     standard_columns: list = [particle_from, particle_to, neuron, height, timestamp]
     --extra_columns: list = []
 ] {
