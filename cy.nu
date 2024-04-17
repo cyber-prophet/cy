@@ -4237,17 +4237,12 @@ def is-cid [particle: string] {
     $particle =~ '^Qm\w{44}$'
 }
 
-def is-neuron [particle: string] {
-    (
-        $particle =~ '^bostrom\w{39}$'
-        or $particle =~ '^bostrom\w{59}$'
-        or $particle =~ '^pussy\w{39}$'
-        or $particle =~ '^pussy\w{59}$'
-    )
+def is-neuron [address: string] {
+    $address =~ '^(bostrom|pussy)(\w{39}|\w{59})$'
 }
 
-def is-validator [test: string] {
-    $test =~ '^(bostrom|pussy)\w{46}$'
+def is-validator [address: string] {
+    $address =~ '^(bostrom|pussy)\w{46}$'
 }
 
 def is-connected []  {
