@@ -51,7 +51,7 @@ export def 'pin-text' [
         if (is-cid $text) { return $text }
     }
 
-    if ($env.cy.pin_text_only_hash? == true or $only_hash) {
+    if $env.cy.pin_text_only_hash? == true or $only_hash {
         $text
         | ipfs add -Q --only-hash
         | str trim --char (char nl)
@@ -183,7 +183,7 @@ export def 'link-files' [
         | wrap from_text
 
     if (
-        ($env.cy.ipfs-upload-with-no-confirm? == true) or
+        $env.cy.ipfs-upload-with-no-confirm? == true or
         $yes or
         (confirm --default_not $'Confirm uploading ($files_col | length) files?')
      ) { } else {return}
@@ -523,10 +523,10 @@ export def 'links-pin-columns-2' [
     cprint $'temp files saved to a local directory *($temp_ipfs_folder)*'
 
     mut $hash_associations = if (
-            ($env.cy.ipfs-upload-with-no-confirm? == true) or
-            $pin_to_local_ipfs or (
-            confirm $'Pin files to local kubo? If `no` only hashes will be calculated.'
-        )) {
+            $env.cy.ipfs-upload-with-no-confirm? == true or
+            $pin_to_local_ipfs or
+            ( confirm $'Pin files to local kubo? If `no` only hashes will be calculated.' )
+        ) {
             ^ipfs add -r $temp_ipfs_folder
         } else {
             ^ipfs add -rn $temp_ipfs_folder
@@ -548,7 +548,7 @@ export def 'links-pin-columns-2' [
         }
     }
 
-    if ((not $ignore_cid) and ($groups.cid? != null)) {
+    if (not $ignore_cid) and $groups.cid? != null {
         $hash_associations = (
             $groups.cid | wrap cid
             | merge ($groups.cid | wrap item)
@@ -1514,7 +1514,7 @@ export def 'graph-to-particles' [
     let $links = graph-links-df
 
     let $links_columns = $links | polars columns
-    if ($to and $from) {
+    if $to and $from {
         error make {msg: 'you need to use only "to", "from" or none flags at all, none both of them'}
     }
 
@@ -2099,7 +2099,7 @@ export def 'graph-links-df' [
     if (
         $not_in or
         not ($filename | is-empty) or
-        (($filename | is-empty) and $input_type == 'nothing')
+        ($filename | is-empty) and $input_type == 'nothing'
     ) {
         return (graph-open-csv-make-df (cy-path graph $cyberlinks_path))
     }
@@ -2114,7 +2114,7 @@ export def 'graph-links-df' [
     let $existing_graph_columns = $df_columns | where $it in [particle_from particle_to neuron]
 
     if (
-        ($existing_graph_columns | length | $in == 3)
+        ($existing_graph_columns | length) == 3
         or ('particle' in $df_columns)
     ) {
         $df
@@ -2524,9 +2524,9 @@ export def 'cid-get-type-gateway' [
     let $size = $headers | get -i 'Content-Length'
 
     if (
-        ($type == null)
-        or ($size == null)
-        or (($type == 'text/html') and (($size == '157')))
+        $type == null
+        or $size == null
+        or ($type == 'text/html') and ($size == '157') # missing pages
     ) {
         return null
     }
@@ -2583,7 +2583,7 @@ export def 'cid-download-async' [
 
     let $task = $'cid-download ($cid) --source ($source) --info_only=($info_only) --folder "($folder)"'
 
-    if ($content == null) or ($content == 'timeout') or $force {
+    if $content == null or $content == 'timeout' or $force {
         queue-task-add $task
         print 'downloading'
     }
@@ -2624,7 +2624,7 @@ def 'cid-download-kubo' [
     let $file_path = $folder | default $env.cy.ipfs-files-folder | path join $'($cid).md'
     let $type = ^ipfs cat --timeout $timeout -l 400 $cid
         | complete
-        | if ($in == null) or ($in.exit_code == 1) {
+        | if $in == null or $in.exit_code == 1 {
             'empty'
         } else {
             get stdout
@@ -2673,7 +2673,7 @@ def 'cid-download-gateway' [
     let $meta = cid-get-type-gateway $cid
 
     if (
-        (($meta.type? | default '') == 'text/plain; charset=utf-8') and (not $info_only)
+        ($meta.type? | default '') == 'text/plain; charset=utf-8' and not $info_only
     ) {
         # to catch response body closed before all bytes were read
         # {http get -e https://gateway.ipfs.cybernode.ai/ipfs/QmdnSiS36vggN6gHbeeoJUBSUEa7B1xTJTcVR8F92vjTHK
@@ -4062,7 +4062,7 @@ export def --wrapped 'caching-function' [
     mut $update = (
         $force_update or
         ($env.cy.caching-function-force-update? | default false) or
-        (($freshness > $cache_stale_refresh) and (not $disable_update))
+        ($freshness > $cache_stale_refresh and not $disable_update)
     )
 
     if 'error' in ($last_data | columns) {
@@ -4181,7 +4181,7 @@ export def 'qnbn' [
     | append $addresses
     | if $df {
         polars into-df
-    } else if ($in | length | $in == 1) and (not $force_list_output) {
+    } else if ($in | length) == 1 and not $force_list_output {
         get neuron.0
     } else {}
 }
@@ -4239,10 +4239,10 @@ def is-cid [particle: string] {
 
 def is-neuron [particle: string] {
     (
-        ($particle =~ '^bostrom\w{39}$')
-        or ($particle =~ '^bostrom\w{59}$')
-        or ($particle =~ '^pussy\w{39}$')
-        or ($particle =~ '^pussy\w{59}$')
+        $particle =~ '^bostrom\w{39}$'
+        or $particle =~ '^bostrom\w{59}$'
+        or $particle =~ '^pussy\w{39}$'
+        or $particle =~ '^pussy\w{59}$'
     )
 }
 
