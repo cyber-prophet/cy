@@ -4215,7 +4215,7 @@ export def 'update-cy' [
 export def 'help-cy' [] {
     cy-path cy.nu
     | open --raw
-    | parse -r "(\n(# )(?<desc>.*?)(?:\n#[^\n]*)*\nexport (def|def --env) '(?<command>.*)')"
+    | parse -r "(\n# (?<desc>.*?)(?:\n#[^\n]*)*\nexport def(:? --(:?env|wrapped))* '(?<command>.*)')"
     | select command desc
     | upsert command {|row index| ('cy ' + $row.command)}
 }
