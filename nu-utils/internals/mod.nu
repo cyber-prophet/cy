@@ -1,4 +1,5 @@
-use ../cprint.nu
+use ../../nu-utils [ bar, cprint, "str repeat", to-safe-filename, to-number-format, number-col-format,
+nearest-given-weekday, print-and-pass, clip, confirm, normalize, path-modify]
 
 export def 'cy-path' [
     ...folders: string # folders to add to cy path
