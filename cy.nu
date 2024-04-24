@@ -3681,7 +3681,7 @@ def 'governance-prop-summary' [] {
 
 # Set the custom name for links csv table
 export def --env 'set-links-table-name' [
-    name?: string # a name for a temporary cyberlinks table file
+    name?: string@'nu-complete-links-csv-files' # a name for a temporary cyberlinks table file
 ]: nothing -> nothing {
     let $name_1 = $name
         | if $in == null {
@@ -4492,6 +4492,16 @@ def 'nu-complete-validators-monikers' [ ] {
 
 def 'nu-complete-graph-csv-files' [] {
     ls -s (cy-path graph '*.csv' | into glob)
+    | sort-by modified -r
+    | select name size
+    | upsert size {|i| $i.size | into string}
+    | rename value description
+}
+
+def 'nu-complete-links-csv-files' [] {
+    ls -s (cy-path mylinks '*.csv' | into glob)
+    | where name !~ '_cyberlinks_archive.csv'
+    | update name {|i| $i.name | str replace -r '\.csv$' ''}
     | sort-by modified -r
     | select name size
     | upsert size {|i| $i.size | into string}
