@@ -31,7 +31,7 @@ export def open-cy-config-toml []: nothing -> record {
     default-settings
     | merge $config
     | default (cy-path) path
-    | default (cy-path cy graph particles safe) ipfs-files-folder
+    | default (cy-path graph particles safe) ipfs-files-folder
     | default no-config-set config-name
 }
 
