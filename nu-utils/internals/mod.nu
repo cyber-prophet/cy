@@ -1,3 +1,5 @@
+use ../cprint.nu
+
 export def 'cy-path' [
     ...folders: string # folders to add to cy path
     --create_missing # if the resulted path doesn't exist - create it
