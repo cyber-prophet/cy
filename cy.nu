@@ -4044,8 +4044,7 @@ export def --wrapped 'caching-function' [
         | str replace -r '--node.*' ''
         | str trim -c '_'
         | to-safe-filename --suffix '.json'
-        | [$env.cy.path cache jsonl $in]
-        | path join
+        | cy-path cache jsonl --file $in
 
     log debug $'json path: ($json_path)'
 
