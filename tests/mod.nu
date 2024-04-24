@@ -202,6 +202,7 @@ export def link-complex-1 [] {
     equal (links-send-tx | get code) 0
 }
 
+# here we stop with lazy tests
 
 export def passport-get-test [] {
     equal (passport-get bostrom1aypv5wxute0nnhfv44jkhyfkzt7zyrden85tel) {nickname: ?}
