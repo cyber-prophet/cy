@@ -7,7 +7,7 @@
 use std assert [equal greater]
 use nu-utils [ bar, cprint, "str repeat", to-safe-filename, to-number-format, number-col-format,
     nearest-given-weekday, print-and-pass, clip, confirm, normalize, path-modify]
-use nu-utils internals [cy-path match-type default-settings open-cy-config-toml export1 param-or-input backup-and-echo make-default-folders-fn set-or-get-env-or-def set-select-from-variants path-exists-safe]
+use cy-internals.nu [cy-path match-type default-settings open-cy-config-toml export1 param-or-input backup-and-echo make-default-folders-fn set-or-get-env-or-def set-select-from-variants path-exists-safe]
 
 use std log
 
