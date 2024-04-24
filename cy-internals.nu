@@ -84,6 +84,8 @@ export def export1 --env [] {
             {}
         }
 
+    make-default-folders-fn
+
     $env.cy = ($config | merge $user_config)
 }
 
