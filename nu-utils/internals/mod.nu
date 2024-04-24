@@ -61,7 +61,7 @@ export def match-type [
 export def export1 --env [] {
 
     if $nu.is-interactive {
-        let $tested_versions = ['0.92.1']
+        let $tested_versions = ['0.92.1' '0.92.2' '0.92.3']
 
         version
         | get version

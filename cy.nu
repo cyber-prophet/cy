@@ -51,7 +51,7 @@ export def 'pin-text' [
         if (is-cid $text) { return $text }
     }
 
-    if ($env.cy.pin_text_only_hash? == true or $only_hash) {
+    if $env.cy.pin_text_only_hash? == true or $only_hash {
         $text
         | ipfs add -Q --only-hash
         | str trim --char (char nl)
@@ -183,7 +183,7 @@ export def 'link-files' [
         | wrap from_text
 
     if (
-        ($env.cy.ipfs-upload-with-no-confirm? == true) or
+        $env.cy.ipfs-upload-with-no-confirm? == true or
         $yes or
         (confirm --default_not $'Confirm uploading ($files_col | length) files?')
      ) { } else {return}
@@ -523,10 +523,10 @@ export def 'links-pin-columns-2' [
     cprint $'temp files saved to a local directory *($temp_ipfs_folder)*'
 
     mut $hash_associations = if (
-            ($env.cy.ipfs-upload-with-no-confirm? == true) or
-            $pin_to_local_ipfs or (
-            confirm $'Pin files to local kubo? If `no` only hashes will be calculated.'
-        )) {
+            $env.cy.ipfs-upload-with-no-confirm? == true or
+            $pin_to_local_ipfs or
+            ( confirm $'Pin files to local kubo? If `no` only hashes will be calculated.' )
+        ) {
             ^ipfs add -r $temp_ipfs_folder
         } else {
             ^ipfs add -rn $temp_ipfs_folder
@@ -548,7 +548,7 @@ export def 'links-pin-columns-2' [
         }
     }
 
-    if ((not $ignore_cid) and ($groups.cid? != null)) {
+    if (not $ignore_cid) and $groups.cid? != null {
         $hash_associations = (
             $groups.cid | wrap cid
             | merge ($groups.cid | wrap item)
@@ -662,18 +662,18 @@ export def 'links-remove-existed-2' [] {
     graph-receive-new-links
 
     let $existing_links = graph-links-df
-        | dfr filter-with ((dfr col neuron) == $env.cy.address)
-        | dfr select particle_from particle_to
-        | dfr with-column (dfr lit true | dfr as duplicate)
-        | dfr into-lazy
+        | polars filter-with ((polars col neuron) == $env.cy.address)
+        | polars select particle_from particle_to
+        | polars with-column (polars lit true | polars as duplicate)
+        | polars into-lazy
 
     links-view
-    | dfr into-lazy
-    | dfr join --left $existing_links [from to] [particle_from particle_to]
-    | dfr filter-with (dfr col duplicate | dfr is-not-null)
-    | dfr drop duplicate
-    | dfr collect
-    | dfr into-nu
+    | polars into-lazy
+    | polars join --left $existing_links [from to] [particle_from particle_to]
+    | polars filter-with (polars col duplicate | polars is-not-null)
+    | polars drop duplicate
+    | polars collect
+    | polars into-nu
     | reject index
     | links-replace
 }
@@ -1064,7 +1064,7 @@ export def 'dict-neurons-view' [
         | to yaml
         | str replace -a 'null' "''" # dataframes errors on `object` type columns (that contains nulls)
         | from yaml
-        | dfr into-df
+        | polars into-df
     } else { }
 }
 
@@ -1087,7 +1087,7 @@ export def 'dict-neurons-add' [
         | if ($desc == 'list<string>') {
             wrap neuron
         } else if ($desc == 'dataframe') {
-            dfr into-nu
+            polars into-nu
         } else if ($desc == 'string') {
             [{neuron: $in}]
         } else { }
@@ -1164,10 +1164,10 @@ export def 'dict-neurons-update' [
 ] {
     if $neurons_from_graph {
         graph-links-df
-        | dfr select neuron
-        | dfr unique
-        | dfr join --left (dict-neurons-view --df) neuron neuron
-        | dfr into-nu
+        | polars select neuron
+        | polars unique
+        | polars join --left (dict-neurons-view --df) neuron neuron
+        | polars into-nu
         | reject index
     } else {
         dict-neurons-view
@@ -1407,26 +1407,26 @@ export def 'graph-download-missing-particles' [
                 *'bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8' | dict-neurons-add follow*"
 
                 $input
-                | dfr filter-with (
-                    (dfr col neuron)
-                    | dfr is-in ['bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8']
+                | polars filter-with (
+                    (polars col neuron)
+                    | polars is-in ['bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8']
                 )
             } else {
-                dfr filter-with (
-                    (dfr col neuron)
-                    | dfr is-in $follow_list
+                polars filter-with (
+                    (polars col neuron)
+                    | polars is-in $follow_list
                 )
             }
         }
         | if ($block_list | is-empty) {} else {
-            dfr filter-with ((dfr col neuron) | dfr is-in $block_list | dfr expr-not)
+            polars filter-with ((polars col neuron) | polars is-in $block_list | polars expr-not)
         }
         | graph-to-particles
         | graph-add-metadata
         | particles-filter-by-type --timeout
         | print-and-pass
-        | dfr select particle
-        | dfr into-nu
+        | polars select particle
+        | polars into-nu
         | get particle
 
     $particles | each {queue-cid-add $in}
@@ -1441,10 +1441,10 @@ export def 'graph-filter-system-particles' [
     column = 'particle' # the column to look for system cids
     --exclude
 ] {
-    dfr filter-with (
-        (dfr col $column)
-        | dfr is-in (system_cids)
-        | if $exclude {dfr expr-not} else {}
+    polars filter-with (
+        (polars col $column)
+        | polars is-in (system_cids)
+        | if $exclude {polars expr-not} else {}
     )
 }
 
@@ -1454,37 +1454,37 @@ export def 'graph-merge' [
     --source_a: string = 'a'
     --source_b: string = 'b'
 ] {
-    let $input = if ($in | dfr columns | 'source' in $in) { } else {
-        dfr with-column (dfr lit $source_a | dfr as source)
+    let $input = if ($in | polars columns | 'source' in $in) { } else {
+        polars with-column (polars lit $source_a | polars as source)
     }
 
     let $df2_st = $df2
-        | if ($df2 | dfr columns | 'source' in $in) { } else {
-            dfr with-column (dfr lit $source_b | dfr as source)
+        | if ($df2 | polars columns | 'source' in $in) { } else {
+            polars with-column (polars lit $source_b | polars as source)
         }
 
     $input
-    | dfr join $df2_st [particle_from particle_to neuron] [particle_from particle_to neuron] --outer
-    | dfr with-column (
-        dfr when ((dfr col source) | dfr is-null) (dfr col source_x)
-        | dfr when ((dfr col source_x) | dfr is-null) (dfr col source)
-        | dfr otherwise (dfr concat-str '-' [(dfr col source) (dfr col source_x)])
-        | dfr as source
+    | polars join $df2_st [particle_from particle_to neuron] [particle_from particle_to neuron] --outer
+    | polars with-column (
+        polars when ((polars col source) | polars is-null) (polars col source_x)
+        | polars when ((polars col source_x) | polars is-null) (polars col source)
+        | polars otherwise (polars concat-str '-' [(polars col source) (polars col source_x)])
+        | polars as source
     )
-    | dfr with-column (
-        dfr when ((dfr col height) | dfr is-null) (dfr col height_x)
-        | dfr otherwise (dfr col height) | dfr as height
+    | polars with-column (
+        polars when ((polars col height) | polars is-null) (polars col height_x)
+        | polars otherwise (polars col height) | polars as height
     )
-    | dfr with-column (
-        dfr when ((dfr col timestamp) | dfr is-null) (dfr col timestamp_x)
-        | dfr otherwise (dfr col timestamp) | dfr as timestamp
+    | polars with-column (
+        polars when ((polars col timestamp) | polars is-null) (polars col timestamp_x)
+        | polars otherwise (polars col timestamp) | polars as timestamp
     )
-    | dfr drop height_x timestamp_x source_x
+    | polars drop height_x timestamp_x source_x
 }
 
 # Output unique list of particles from piped in cyberlinks table
 #
-# > cy graph-to-particles --include_global | dfr into-nu | first 2 | to yaml
+# > cy graph-to-particles --include_global | polars into-nu | first 2 | to yaml
 # - index: 0
 #   particle: QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 #   neuron: bostrom1ymprf45c44rp9k0g2r84w2tjhsq7kalv98rgpt
@@ -1511,10 +1511,10 @@ export def 'graph-to-particles' [
     --cids_only (-c) # Output one column with CIDs only
     # --init_role # Output if particle originally was in 'from' or 'to' column
 ] {
-    let $links = graph-links-df | dfr into-lazy
+    let $links = graph-links-df
 
-    let $links_columns = $links | dfr columns
-    if ($to and $from) {
+    let $links_columns = $links | polars columns
+    if $to and $from {
         error make {msg: 'you need to use only "to", "from" or none flags at all, none both of them'}
     }
 
@@ -1523,61 +1523,61 @@ export def 'graph-to-particles' [
         --column: string
     ] {
         $links
-        | dfr rename $'particle_($column)' particle
-        | dfr drop $'particle_(col-name-reverse $column)'
-        | dfr with-column [
-            (dfr lit ($column) | dfr as 'init-role'),
+        | polars rename $'particle_($column)' particle
+        | polars drop $'particle_(col-name-reverse $column)'
+        | polars with-column [
+            (polars lit ($column) | polars as 'init-role'),
         ]
     }
 
     let $dummy = $links
-        | dfr rename particle_from particle
-        | dfr drop particle_to
-        | dfr with-column (dfr lit 'a' | dfr as 'init-role')
-        | dfr fetch 0 # Create dummy dfr to have something to appended to
+        | polars rename particle_from particle
+        | polars drop particle_to
+        | polars with-column (polars lit 'a' | polars as 'init-role')
+        | polars fetch 0 # Create dummy polars to have something to appended to
 
     $dummy
     | if not $to {
-        dfr append --col (
+        polars append --col (
             graph-to-particles-keep-column $links --column from
         )
     } else {}
     | if not $from {
-        dfr append --col (
+        polars append --col (
             graph-to-particles-keep-column $links --column to
         )
     } else {}
-    | dfr into-lazy
     | if ('link_local_index' in $links_columns) {
-        dfr sort-by [link_local_index height]
+        polars sort-by [link_local_index height]
     } else {
-        dfr sort-by [height]
+        polars sort-by [height]
     }
-    | dfr unique --subset [particle]
+    | polars into-lazy
+    | polars unique --subset [particle]
+    | polars collect
     | if $cids_only {
-        dfr select particle
+        polars select particle
     } else {
         if $include_particle_index {
-            dfr with-column (
-                dfr arg-where ((dfr col height) != 0) | dfr as particle_index
+            polars with-column (
+                polars arg-where ((polars col height) != 0) | polars as particle_index
             )
         } else {}
         | if $include_global {
-            dfr join (graph-particles-df) particle particle -s '_global'
+            polars join (graph-particles-df) particle particle -s '_global'
         } else {}
     }
-    | dfr collect
 }
 
 # In the piped in particles df leave only particles appeared for the first time
 export def 'particles-keep-only-first-neuron' [ ] {
-    dfr join -s '_global' (
+    polars join -s '_global' (
         graph-particles-df
-        | dfr select particle neuron
+        | polars select particle neuron
     ) particle particle
-    | dfr with-column (($in.neuron) == ($in.neuron_global)) --name 'is_first_neuron'
-    | dfr filter-with $in.is_first_neuron
-    | dfr drop neuron_global is_first_neuron
+    | polars with-column (($in.neuron) == ($in.neuron_global)) --name 'is_first_neuron'
+    | polars filter-with $in.is_first_neuron
+    | polars drop neuron_global is_first_neuron
 }
 
 # Update the 'particles.parquet' file (it inculdes content of text files)
@@ -1590,7 +1590,7 @@ export def 'graph-update-particles-parquet' [
     let $all_particles = graph-links-df
         | graph-to-particles
         | graph-add-metadata
-        | dfr select [particle neuron height timestamp content_s]
+        | polars select [particle neuron height timestamp content_s]
 
     let $particles_wanted = $all_particles
         | if $all {} else {
@@ -1604,10 +1604,10 @@ export def 'graph-update-particles-parquet' [
     let $particles_on_disk = glob ($particles_folder | path join '*.md') | path basename
 
     let $particles_to_open = $particles_wanted
-        | dfr with-column ((dfr concat-str '.' [(dfr col particle) (dfr lit 'md')]) | dfr as name)
-        | dfr join ($particles_on_disk | wrap name | dfr into-df) name name
-        | dfr select name
-        | dfr into-nu
+        | polars with-column ((polars concat-str '.' [(polars col particle) (polars lit 'md')]) | polars as name)
+        | polars join ($particles_on_disk | wrap name | polars into-df) name name
+        | polars select name
+        | polars into-nu
         | select name
 
     let $downloaded_particles = $particles_to_open
@@ -1615,42 +1615,42 @@ export def 'graph-update-particles-parquet' [
             |i| open -r ($particles_folder | path join $i.name)
             | str substring -g 0..160
         }
-        | dfr into-df
-        | dfr with-column (
+        | polars into-df
+        | polars with-column (
             $in.name
-            | dfr str-slice 0 -l 46
+            | polars str-slice 0 -l 46
         )
-        | dfr rename name particle
-        | dfr with-column (
+        | polars rename name particle
+        | polars with-column (
             $in.content_s
-            | dfr str-slice 0 -l 150
-            | dfr replace-all -p (char nl) -r '⏎'
+            | polars str-slice 0 -l 150
+            | polars replace-all -p (char nl) -r '⏎'
         )
 
     $particles_wanted
-    | dfr drop 'content_s'
-    | dfr join --left $downloaded_particles particle particle
-    | dfr with-column (
+    | polars drop 'content_s'
+    | polars join --left $downloaded_particles particle particle
+    | polars with-column (
         $in.content_s
-        | dfr fill-null 'timeout|'
+        | polars fill-null 'timeout|'
     )
-    | dfr with-column ( # short name to make content_s unique
+    | polars with-column ( # short name to make content_s unique
         $in.particle
-        | dfr str-slice 39 # last 7 symbols of 46-symbol cid
-        | dfr rename particle short_cid
+        | polars str-slice 39 # last 7 symbols of 46-symbol cid
+        | polars rename particle short_cid
     )
-    | dfr with-column (
-        dfr concat-str '|' [(dfr col content_s) (dfr col short_cid)]
+    | polars with-column (
+        polars concat-str '|' [(polars col content_s) (polars col short_cid)]
     )
-    | dfr drop short_cid
+    | polars drop short_cid
     | if $all {} else {
-        dfr append -c (
+        polars append --col (
             $all_particles
             | particles-filter-by-type --exclude --timeout
         )
     }
-    | dfr sort-by height particle
-    | dfr to-parquet ($parquet_path | backup-and-echo --mv)
+    | polars sort-by height particle
+    | polars to-parquet ($parquet_path | backup-and-echo --mv)
     | print ($in | get 0 -i)
 }
 
@@ -1661,10 +1661,10 @@ export def 'graph-filter-neurons' [
     let $links = graph-links-df
 
     $neurons_nicks
-    | dfr into-df
-    | dfr join ( dict-neurons-view --df ) '0' nick
-    | dfr select neuron
-    | dfr join ( $links ) neuron neuron
+    | polars into-df
+    | polars join ( dict-neurons-view --df ) '0' nick
+    | polars select neuron
+    | polars join ( $links ) neuron neuron
 }
 
 # Filter the graph to keep or exclude links from contracts
@@ -1672,9 +1672,9 @@ export def 'graph-filter-contracts' [
     --exclude
 ] {
     graph-links-df
-    | dfr filter-with (
+    | polars filter-with (
         $in.neuron =~ '.{64}'
-        | if $exclude {dfr not} else {}
+        | if $exclude {polars not} else {}
     )
 }
 
@@ -1682,27 +1682,26 @@ export def 'graph-filter-contracts' [
 export def 'graph-append-related' [
     --only_first_neuron (-o)
 ] {
-    let $links_in = graph-select-standard-columns --extra_columns ['link_local_index' 'init-role' 'step']
-    let $columns_in = $links_in | dfr columns
+    let $links_in = graph-keep-standard-columns-only --extra_columns ['link_local_index' 'init-role' 'step']
+    let $columns_in = $links_in | polars columns
     let $step = if 'step' in $columns_in {
-            $links_in.step | dfr max | dfr into-nu | get 0.step | ($in // 2) + 1 | ($in * 2) - 1
+            $links_in.step | polars max | polars into-nu | get 0.step | ($in // 2) + 1 | ($in * 2) - 1
         } else {
             1
         }
 
     let $links = $links_in
-        | dfr into-lazy
         | if 'link_local_index' in $columns_in {} else {
-            dfr with-column [
-                (dfr arg-where ((dfr col height) != 0) | $in + 100_000_000 | dfr as link_local_index),
+            polars with-column [
+                (polars arg-where ((polars col height) != 0) | $in + 100_000_000 | polars as link_local_index),
             ]
-            | dfr with-column (dfr concat-str '' [(dfr col link_local_index) (dfr lit '')])
+            | polars with-column (polars concat-str '' [(polars col link_local_index) (polars lit '')])
         }
         | if 'init-role' in $columns_in {} else {
-            dfr with-column (dfr lit 'base' | dfr as 'init-role')
+            polars with-column (polars lit 'base' | polars as 'init-role')
         }
         | if 'step' in $columns_in {} else {
-            dfr with-column (dfr lit 0 | dfr as 'step')
+            polars with-column (polars lit 0 | polars as 'step')
         }
 
     def append_related [
@@ -1714,33 +1713,31 @@ export def 'graph-append-related' [
         | if $only_first_neuron {
             particles-keep-only-first-neuron
         } else {}
-        | dfr into-lazy
-        | dfr select particle link_local_index init-role step
-        | dfr rename particle $'particle_($from_or_to)'
-        | dfr join (
+        | polars select particle link_local_index init-role step
+        | polars rename particle $'particle_($from_or_to)'
+        | polars join (
             graph-links-df --not_in
             | graph-filter-system-particles particle_from --exclude
-            | dfr into-lazy
         ) $'particle_($from_or_to)' $'particle_($from_or_to)'
-        | dfr with-column [
-            (dfr concat-str '-' [
-                (dfr col 'link_local_index')
-                (dfr col 'init-role')
-                (dfr col $'particle_($from_or_to)')
-                (dfr lit ($from_or_to))
-                (dfr col $'particle_(col-name-reverse $from_or_to)')
+        | polars with-column [
+            (polars concat-str '-' [
+                (polars col 'link_local_index')
+                (polars col 'init-role')
+                (polars col $'particle_($from_or_to)')
+                (polars lit ($from_or_to))
+                (polars col $'particle_(col-name-reverse $from_or_to)')
             ]),
-            ((dfr col step) + (if $from_or_to == from {1} else {-1}))
+            ((polars col step) + (if $from_or_to == from {1} else {-1}))
         ]
     }
 
     $links
-    | dfr append -c (append_related from --step ($step))
-    | dfr append -c (append_related to --step ($step + 1))
-    | dfr into-lazy
-    | dfr sort-by [link_local_index height]
-    | dfr unique --subset [particle_from particle_to]
-    | dfr collect
+    | polars append --col (append_related from --step ($step))
+    | polars append --col (append_related to --step ($step + 1))
+    | polars sort-by [link_local_index height]
+    | polars into-lazy
+    | polars unique --subset [particle_from particle_to]
+    | polars collect
 }
 
 # Output neurons stats based on piped in or the whole graph
@@ -1749,65 +1746,66 @@ export def 'graph-neurons-stats' [] {
     let $p = graph-particles-df
 
     let $follows = [['particle'];['QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx']] # follow
-        | dfr into-df
-        | dfr join --left $links particle particle_from
-        | dfr group-by neuron
-        | dfr agg [
-            (dfr col timestamp | dfr count | dfr as 'follows')
+        | polars into-df
+        | polars join --left $links particle particle_from
+        | polars group-by neuron
+        | polars agg [
+            (polars col timestamp | polars count | polars as 'follows')
         ]
-        | dfr sort-by follows --reverse [true]
+        | polars sort-by follows --reverse [true]
 
     let $followers = [['particle'];['QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx']] # follow
-        | dfr into-df
-        | dfr join --left $links particle particle_from
-        | dfr join $p particle_to particle
-        | dfr with-column (
-            $in | dfr select content_s | dfr replace -p '\|.*' -r ''
+        | polars into-df
+        | polars join --left $links particle particle_from
+        | polars join $p particle_to particle
+        | polars with-column (
+            $in | polars select content_s | polars replace -p '\|.*' -r ''
         )
-        | dfr group-by content_s
-        | dfr agg [
-            (dfr col timestamp | dfr count | dfr as 'followers')
+        | polars group-by content_s
+        | polars agg [
+            (polars col timestamp | polars count | polars as 'followers')
         ]
-        | dfr rename content_s neuron
+        | polars rename content_s neuron
 
     let $tweets = [['particle'];['QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx']] # tweet
-        | dfr into-df
-        | dfr join --left $links particle particle_from
-        | dfr group-by neuron
-        | dfr agg [
-            (dfr col timestamp | dfr count | dfr as 'tweets')
+        | polars into-df
+        | polars join --left $links particle particle_from
+        | polars group-by neuron
+        | polars agg [
+            (polars col timestamp | polars count | polars as 'tweets')
         ]
 
     $links
-    | dfr group-by neuron
-    | dfr agg [
-        (dfr col timestamp | dfr count | dfr as 'links_count')
-        (dfr col timestamp | dfr min | dfr as 'first_link')
-        (dfr col timestamp | dfr max | dfr as 'last_link')
+    | polars group-by neuron
+    | polars agg [
+        (polars col timestamp | polars count | polars as 'links_count')
+        (polars col timestamp | polars min | polars as 'first_link')
+        (polars col timestamp | polars max | polars as 'last_link')
     ]
-    | dfr sort-by links_count --reverse [true] # cygraph neurons activity
-    | dfr join --left $followers neuron neuron
-    | dfr join --left $follows neuron neuron
-    | dfr join --left $tweets neuron neuron
-    | dfr fill-null 0
-    | dfr join --left ( dict-neurons-view --df --karma_bar) neuron neuron
-    | dfr select ($in | dfr columns | prepend [nickname links_count last_link] | uniq)
+    | polars sort-by links_count --reverse [true] # cygraph neurons activity
+    | polars join --left $followers neuron neuron
+    | polars join --left $follows neuron neuron
+    | polars join --left $tweets neuron neuron
+    | polars fill-null 0
+    | polars join --left ( dict-neurons-view --df --karma_bar) neuron neuron
+    | polars select ($in | polars columns | prepend [nickname links_count last_link] | uniq)
+    | polars collect
 }
 
 # Output graph stats based on piped in or the whole graph
 export def 'graph-stats' [] {
-    let $links = graph-links-df | dfr with-column (dfr lit a | dfr as dummyc)
+    let $links = graph-links-df | polars with-column (polars lit a | polars as dummyc)
     let $p = graph-particles-df
     let $p2 = $links | graph-to-particles | graph-add-metadata
 
     def dfr_countrows [] {
-        dfr with-column (dfr lit 1) | dfr select literal | dfr sum | dfr into-nu | get literal.0
+        polars with-column (polars lit 1) | polars select literal | polars sum | polars into-nu | get literal.0
     }
 
     let $n_links_unique = $links
-        | dfr into-lazy
-        | dfr unique --subset [particle_from particle_to]
-        | dfr collect
+        | polars into-lazy
+        | polars unique --subset [particle_from particle_to]
+        | polars collect
         | dfr_countrows
 
     let $n_particles_unique = $p2 | dfr_countrows
@@ -1817,43 +1815,44 @@ export def 'graph-stats' [] {
         | dfr_countrows
 
     let $n_particles_non_text = $p2
-        | dfr filter-with ($in.content_s =~ '^"MIME type"')
+        | polars filter-with ($in.content_s =~ '^"MIME type"')
         | dfr_countrows
 
     let $follows = $links
-        | dfr filter-with (
-            (dfr col particle_from)
-            | dfr is-in ['QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx'] # follow
+        | polars filter-with (
+            (polars col particle_from)
+            | polars is-in ['QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx'] # follow
         )
         | dfr_countrows
 
     let $tweets = $links
-        | dfr filter-with (
-            (dfr col particle_from)
-            | dfr is-in ['QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx'] # tweet
+        | polars filter-with (
+            (polars col particle_from)
+            | polars is-in ['QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx'] # tweet
         )
         | dfr_countrows
 
-    let $stats_by_source = if ($links | dfr columns | 'source' in $in) {
+    let $stats_by_source = if ($links | polars columns | 'source' in $in) {
             $links
-            | dfr group-by source
-            | dfr agg [(dfr col source | dfr count | dfr as source_count)]
-            | dfr sort-by source
-            | dfr into-nu
+            | polars group-by source
+            | polars agg [(polars col source | polars count | polars as source_count)]
+            | polars sort-by source
+            | polars into-nu
             | reject index
             | transpose -idr
             | {source: $in}
         } else {{}}
 
     $links
-    | dfr group-by dummyc
-    | dfr agg [
-        (dfr col neuron | dfr n-unique | dfr as 'neurons')
-        (dfr col timestamp | dfr count | dfr as 'links')
-        (dfr col timestamp | dfr min | dfr as 'first')
-        (dfr col timestamp | dfr max | dfr as 'last')
+    | polars group-by dummyc
+    | polars agg [
+        (polars col neuron | polars n-unique | polars as 'neurons')
+        (polars col timestamp | polars count | polars as 'links')
+        (polars col timestamp | polars min | polars as 'first')
+        (polars col timestamp | polars max | polars as 'last')
     ]
-    | dfr into-nu
+    | polars collect
+    | polars into-nu
     | reject index dummyc
     | get 0
     | {links: $in}
@@ -1877,46 +1876,44 @@ export def 'graph-to-gephi' [] {
         | graph-to-particles --include_global
 
     let $t1_height_index = $links.height
-        | dfr append -c $particles.height # Particles might be created before they appear in the filtered graph
-        | dfr unique
-        | dfr with-column (
-            dfr arg-where ((dfr col height) != 0) | dfr as height_index
+        | polars append --col $particles.height # Particles might be created before they appear in the filtered graph
+        | polars unique
+        | polars with-column (
+            polars arg-where ((polars col height) != 0) | polars as height_index
         )
 
     let $height_index_max = $t1_height_index
-        | dfr shape
-        | dfr into-nu
+        | polars shape
+        | polars into-nu
         | get rows.0
 
     $links
-    | dfr join --left $t1_height_index height height
-    | dfr with-column (
-        dfr concat-str '' [
-            (dfr lit '<[')
-            (dfr col height_index)
-            (dfr lit ($',($height_index_max)]>'))
+    | polars join --left $t1_height_index height height
+    | polars with-column (
+        polars concat-str '' [
+            (polars lit '<[')
+            (polars col height_index)
+            (polars lit ($',($height_index_max)]>'))
         ]
-        | dfr as Timeset
+        | polars as Timeset
     )
-    | dfr rename [particle_from particle_to] [source target]
-    | dfr to-csv (cy-path export !gephi_cyberlinks.csv)
+    | polars rename [particle_from particle_to] [source target]
+    | polars to-csv (cy-path export !gephi_cyberlinks.csv)
 
     $particles
-    | dfr into-lazy
-    | dfr join --left $t1_height_index height height
-    | dfr with-column (
-        (dfr col particle) | dfr as cid
-    ) | dfr rename [particle content_s] [id label]
-    | dfr collect
-    | dfr with-column (
-        dfr concat-str '' [
-            (dfr lit '<[')
-            (dfr col height_index)
-            (dfr lit ($',($height_index_max)]>'))
+    | polars join --left $t1_height_index height height
+    | polars with-column (
+        (polars col particle) | polars as cid
+    ) | polars rename [particle content_s] [id label]
+    | polars with-column (
+        polars concat-str '' [
+            (polars lit '<[')
+            (polars col height_index)
+            (polars lit ($',($height_index_max)]>'))
         ]
-        | dfr as Timeset
+        | polars as Timeset
     )
-    | dfr into-nu
+    | polars into-nu
     | reject index
     | move id label cid --before height
     | save -f (cy-path export !gephi_particles.csv)
@@ -1936,7 +1933,7 @@ export def 'graph-to-logseq' [
     mkdir ($path | path join journals)
 
     $particles
-    | dfr into-nu
+    | polars into-nu
     | par-each {|p|
         # print $p.particle
         $"author:: [[($p.nick)]]\n\n- (
@@ -1947,7 +1944,7 @@ export def 'graph-to-logseq' [
     }
 
     $links
-    | dfr into-nu
+    | polars into-nu
     | each {|c|
         $"\t- [[($links.particle_to)]] ($links.height) [[($links.nick?)]]\n" |
         save -a ($path | path join pages $'($links.particle_from).md')
@@ -1956,25 +1953,22 @@ export def 'graph-to-logseq' [
 
 # Output particles into txt formated feed
 export def 'graph-to-txt-feed' [] {
-    graph-append-related --only_first_neuron
-    | graph-to-particles
+    graph-to-particles
     | particles-keep-only-first-neuron
     | graph-add-metadata
-    # | dfr filter-with ($in.content_s | dfr is-null | dfr not)
-    | dfr sort-by [link_local_index height]
-    | dfr drop content_s neuron
-    | dfr into-nu
+    # | polars filter-with ($in.content_s | polars is-null | polars not)
+    | polars sort-by [height]
+    | polars into-nu
     | reject index
-    | tee {print $in.0.init-role}
     | each {|i| echo_particle_txt $i}
 }
 
 # Export piped-in graph to a CSV file in cosmograph format
 export def 'graph-to-cosmograph' [] {
     graph-add-metadata
-    | dfr rename timestamp time
-    | dfr select ($in | dfr columns | prepend [content_s_from content_s_to] | uniq)
-    | dfr into-nu
+    | polars rename timestamp time
+    | polars select ($in | polars columns | prepend [content_s_from content_s_to] | uniq)
+    | polars into-nu
     | reject index
     | save -f (
         cy-path 'export' $'cybergraph-in-cosmograph(now-fn).csv'
@@ -1988,9 +1982,9 @@ export def 'graph-to-graphviz' [
     --preset: string@nu-complete-graphviz-presets = ''
 ] {
     let $graph = graph-add-metadata --escape_quotes --new_lines
-        | dfr select 'content_s_from' 'content_s_to'
+        | polars select 'content_s_from' 'content_s_to'
         | $in.content_s_from + ' -> ' + $in.content_s_to + ';'
-        | dfr into-nu
+        | polars into-nu
         | rename index links
         | get links
         | str join (char nl)
@@ -2012,7 +2006,7 @@ def 'nu-complete-graphviz-presets' [] {
 # Add content_s and neuron's nicknames columns to piped in or the whole graph df
 #
 # > cy graph-filter-neurons maxim_bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
-# | cy graph-add-metadata | dfr into-nu | first 2 | to yaml
+# | cy graph-add-metadata | polars into-nu | first 2 | to yaml
 # - index: 0
 #   neuron: bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
 #   particle_from: QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx
@@ -2036,57 +2030,57 @@ export def 'graph-add-metadata' [
     --new_lines
 ] {
     let $links = graph-links-df
-        | graph-select-standard-columns --extra_columns ['particle', 'link_local_index', 'init-role', 'step']
+        | graph-keep-standard-columns-only --extra_columns ['particle', 'link_local_index', 'init-role', 'step']
 
     let $p = graph-particles-df
-        | dfr select particle content_s
+        | polars select particle content_s
         | if $escape_quotes {
-            dfr with-column (
+            polars with-column (
                 $in.content_s
-                | dfr replace-all --pattern '"' --replace '\"'
-                | dfr replace-all --pattern '^(.*)$' --replace '"$1"'
+                | polars replace-all --pattern '"' --replace '\"'
+                | polars replace-all --pattern '^(.*)$' --replace '"$1"'
             )
         } else {}
         | if $new_lines {
-            dfr with-column (
+            polars with-column (
                 $in.content_s
-                | dfr replace-all --pattern '⏎' --replace (char nl)
+                | polars replace-all --pattern '⏎' --replace (char nl)
             )
         } else {}
 
-    let $links_columns = $links | dfr columns
+    let $links_columns = $links | polars columns
 
     let $c_out = $links
         | if 'particle_to' in $links_columns {
-            dfr join --left $p particle_to particle
-            | dfr rename content_s content_s_to
+            polars join --left $p particle_to particle
+            | polars rename content_s content_s_to
         } else {}
         | if 'particle_from' in $links_columns {
-            dfr join --left $p particle_from particle
-            | dfr rename content_s content_s_from
+            polars join --left $p particle_from particle
+            | polars rename content_s content_s_from
         } else {}
         | if 'particle' in $links_columns {
-            dfr join --left $p particle particle
+            polars join --left $p particle particle
         } else {}
-        | dfr fill-null 'timeout|'
-        | dfr drop height
-        | dfr append $links.height
+        | polars fill-null 'timeout|'
+        | polars drop height
+        | polars append $links.height
         | if 'neuron' in $links_columns {
-            dfr join --left (
+            polars join --left (
                 dict-neurons-view --df
-                | dfr select neuron nick
+                | polars select neuron nick
             ) neuron neuron
         } else {}
 
-    let $columns_order_target = $c_out | dfr columns | reverse
+    let $columns_order_target = $c_out | polars columns | reverse
 
     $c_out
-    | dfr select $columns_order_target
+    | polars select $columns_order_target
 }
 
 # Output a full graph, or pass piped in graph further
 #
-# > cy graph-links-df | dfr into-nu | first 1 | to yaml
+# > cy graph-links-df | polars into-nu | first 1 | to yaml
 # - index: 0
 #   particle_from: QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 #   particle_to: QmbVugfLG1FoUtkZqZQ9WcwTLe1ivmcE9yMVGvuz3YWjy6
@@ -2100,59 +2094,65 @@ export def 'graph-links-df' [
 ] {
     let $input = $in
     let $cyberlinks_path = set-or-get-env-or-def cyberlinks-csv-table $filename
+    let $input_type = $input | describe
 
-    if ($not_in or ($filename != null)) {
+    if (
+        $not_in or
+        not ($filename | is-empty) or
+        ($filename | is-empty) and $input_type == 'nothing'
+    ) {
         return (graph-open-csv-make-df (cy-path graph $cyberlinks_path))
     }
 
-    let $input_type = $input | describe
 
     let $df = $input
         | if ($input_type =~ '^table') {
-            dfr into-df
-        } else if ($input_type in ['dataframe' 'lazyframe']) {
-        } else {
-            error make {msg:$'unknown input ($input_type)'}
-        }
+            polars into-df
+        } else {}
 
-    let $df_columns = $df | dfr columns
+    let $df_columns = $df | polars columns
     let $existing_graph_columns = $df_columns | where $it in [particle_from particle_to neuron]
 
     if (
-        ($existing_graph_columns | length | $in == 3)
+        ($existing_graph_columns | length) == 3
         or ('particle' in $df_columns)
     ) {
         $df
     } else {
         graph-open-csv-make-df (cy-path graph $cyberlinks_path)
-        | dfr join --inner $df $existing_graph_columns $existing_graph_columns
+        | polars join --inner $df $existing_graph_columns $existing_graph_columns
     }
 }
 
 
-def 'graph-select-standard-columns' [
+export def 'graph-keep-standard-columns-only' [
     standard_columns: list = [particle_from, particle_to, neuron, height, timestamp]
     --extra_columns: list = []
+    --out # reject standard columns
 ] {
     let $input = $in
-    let $in_columns = $input | dfr columns
+    let $in_columns = $input | polars columns
     let $out_columns = $in_columns
         | where $it in ($standard_columns | append $extra_columns)
 
     $input
-    | dfr select $out_columns
+    | if $out {
+        polars drop ...($out_columns)
+    } else {
+        polars select $out_columns
+    }
 }
 
 def 'graph-open-csv-make-df' [
     path: path
     --datetime
 ] {
-    dfr open $path --infer-schema 10000
+    polars open $path --infer-schema 10000
     | if $datetime {
-        dfr with-column (
+        polars with-column (
             $in.timestamp
-            | dfr as-datetime '%Y-%m-%dT%H:%M:%S' -n
-            | dfr rename datetime timestamp
+            | polars as-datetime '%Y-%m-%dT%H:%M:%S' -n
+            | polars rename datetime timestamp
         )
     } else {}
 }
@@ -2160,7 +2160,7 @@ def 'graph-open-csv-make-df' [
 export def 'graph-particles-df' [] {
     cy-path graph particles.parquet
     | if ($in | path exists) {
-        dfr open $in
+        polars open $in
     } else {
         cprint `particles.parquet doesn't exist. Use *graph-update-particles-parquet*`
 
@@ -2184,9 +2184,9 @@ export def 'particles-filter-by-type' [
         | '^' + $in
 
     $input
-    | dfr filter-with (
+    | polars filter-with (
         $in.content_s =~ $filter_regex
-        | if $exclude {dfr not} else {}
+        | if $exclude {polars not} else {}
     )
 }
 
@@ -2524,9 +2524,9 @@ export def 'cid-get-type-gateway' [
     let $size = $headers | get -i 'Content-Length'
 
     if (
-        ($type == null)
-        or ($size == null)
-        or (($type == 'text/html') and (($size == '157')))
+        $type == null
+        or $size == null
+        or ($type == 'text/html') and ($size == '157') # missing pages
     ) {
         return null
     }
@@ -2583,7 +2583,7 @@ export def 'cid-download-async' [
 
     let $task = $'cid-download ($cid) --source ($source) --info_only=($info_only) --folder "($folder)"'
 
-    if ($content == null) or ($content == 'timeout') or $force {
+    if $content == null or $content == 'timeout' or $force {
         queue-task-add $task
         print 'downloading'
     }
@@ -2624,7 +2624,7 @@ def 'cid-download-kubo' [
     let $file_path = $folder | default $env.cy.ipfs-files-folder | path join $'($cid).md'
     let $type = ^ipfs cat --timeout $timeout -l 400 $cid
         | complete
-        | if ($in == null) or ($in.exit_code == 1) {
+        | if $in == null or $in.exit_code == 1 {
             'empty'
         } else {
             get stdout
@@ -2673,7 +2673,7 @@ def 'cid-download-gateway' [
     let $meta = cid-get-type-gateway $cid
 
     if (
-        (($meta.type? | default '') == 'text/plain; charset=utf-8') and (not $info_only)
+        ($meta.type? | default '') == 'text/plain; charset=utf-8' and not $info_only
     ) {
         # to catch response body closed before all bytes were read
         # {http get -e https://gateway.ipfs.cybernode.ai/ipfs/QmdnSiS36vggN6gHbeeoJUBSUEa7B1xTJTcVR8F92vjTHK
@@ -4044,8 +4044,7 @@ export def --wrapped 'caching-function' [
         | str replace -r '--node.*' ''
         | str trim -c '_'
         | to-safe-filename --suffix '.json'
-        | [$env.cy.path cache jsonl $in]
-        | path join
+        | cy-path cache jsonl --file $in
 
     log debug $'json path: ($json_path)'
 
@@ -4062,7 +4061,7 @@ export def --wrapped 'caching-function' [
     mut $update = (
         $force_update or
         ($env.cy.caching-function-force-update? | default false) or
-        (($freshness > $cache_stale_refresh) and (not $disable_update))
+        ($freshness > $cache_stale_refresh and not $disable_update)
     )
 
     if 'error' in ($last_data | columns) {
@@ -4180,8 +4179,8 @@ export def 'qnbn' [
     $neurons
     | append $addresses
     | if $df {
-        dfr into-df
-    } else if ($in | length | $in == 1) and (not $force_list_output) {
+        polars into-df
+    } else if ($in | length) == 1 and not $force_list_output {
         get neuron.0
     } else {}
 }
@@ -4215,7 +4214,7 @@ export def 'update-cy' [
 export def 'help-cy' [] {
     cy-path cy.nu
     | open --raw
-    | parse -r "(\n(# )(?<desc>.*?)(?:\n#[^\n]*)*\nexport (def|def --env) '(?<command>.*)')"
+    | parse -r "(\n# (?<desc>.*?)(?:\n#[^\n]*)*\nexport def(:? --(:?env|wrapped))* '(?<command>.*)')"
     | select command desc
     | upsert command {|row index| ('cy ' + $row.command)}
 }
@@ -4237,17 +4236,12 @@ def is-cid [particle: string] {
     $particle =~ '^Qm\w{44}$'
 }
 
-def is-neuron [particle: string] {
-    (
-        ($particle =~ '^bostrom\w{39}$')
-        or ($particle =~ '^bostrom\w{59}$')
-        or ($particle =~ '^pussy\w{39}$')
-        or ($particle =~ '^pussy\w{59}$')
-    )
+def is-neuron [address: string] {
+    $address =~ '^(bostrom|pussy)(\w{39}|\w{59})$'
 }
 
-def is-validator [test: string] {
-    $test =~ '^(bostrom|pussy)\w{46}$'
+def is-validator [address: string] {
+    $address =~ '^(bostrom|pussy)\w{46}$'
 }
 
 def is-connected []  {
@@ -4287,7 +4281,7 @@ def 'first_cyberlink' [] {
         [0, "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV", "bostrom1ymprf45c44rp9k0g2r84w2tjhsq7kalv98rgpt",
         490, "2021-11-05 14:11:41", "cyber|QK3oufV"]
     ]
-    | dfr into-df
+    | polars into-df
 }
 
 def 'default-node-params' [] {
@@ -4300,22 +4294,18 @@ def 'default-node-params' [] {
 
 # echo particle for publishing
 export def 'echo_particle_txt' [
-    i: string
+    i: record
     --markdown (-m)
 ] {
-    let $indent = $i.step | into int | $in * 4 | $in + 12
+    let $indent = $i.step? | default 0 | into int | $in * 4 | $in + 12
 
-    if $i.content == null {
+    if $i.content_s? == null {
         $'⭕️ ($i.timestamp), ($i.nick) - timeout - ($i.particle)'
     } else {
         $'🟢 ($i.timestamp), ($i.nick)(char nl)(char nl)($i.content_s)(char nl)(char nl)($i.particle)(char nl)(char nl)'
     }
     | mdcat -l --columns (80 + $indent) -
-    | complete
-    | get stdout
-    | lines
-    | each {|i| $"(' ' | str repeat $indent)($i)" | print $in}
-    | null
+    | print
     # | each {|b| $"((ansi grey) + ($i.step + 2 | into string) + (ansi reset) | str repeat $indent)($b)" | print $in}
 }
 

@@ -255,3 +255,56 @@ export def tokens-routed-from-1 [] {
     ]
     equal (tokens-routed-from bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 --height 2000) []
 }
+
+export def graph-complex-1 [] {
+    greater (
+        graph-links-df | polars filter-with ((polars col timestamp) > ((date now) - 15day | format date %F)) | polars filter-with ((polars col timestamp) < (date now | format date %F)) | graph-stats | get neurons
+    ) 0
+}
+
+export def graph-complex-2 [] {
+    equal (
+        graph-links-df | graph-neurons-stats | polars select nick links_count karma karma_norm karma_norm_bar | polars first 2 | polars into-nu | get 0.links_count | $in > 0
+    ) true
+}
+
+export def graph-filter-system-particles-1 [] {
+    equal (
+        graph-links-df test-graph.csv | graph-filter-system-particles particle_from | polars shape | polars into-nu
+    ) [
+        [index, rows, columns]; [0, 76, 5]
+    ]
+
+    equal (
+        graph-links-df test-graph.csv | graph-filter-system-particles particle_from --exclude | polars shape | polars into-nu
+    ) [ [index, rows, columns]; [0, 1188, 5] ]
+}
+
+export def graph-merge-1 [] {
+    equal (
+        graph-links-df test-graph.csv
+        | graph-filter-system-particles particle_from --exclude
+        | graph-merge (graph-links-df test-graph.csv
+        | graph-filter-system-particles particle_from)
+        | polars group-by source
+        | polars agg ((polars col source) | polars count | polars as count)
+        | polars collect
+        | polars into-nu
+        | sort-by count
+        | reject index
+    ) [[source, count]; [b, 76], [a, 1188]]
+}
+
+export def graph-to-particles-1 [] {
+    equal (
+        graph-links-df test-graph.csv
+        | graph-to-particles
+        | polars first 3
+        | polars into-nu
+    ) (
+        [ [index, neuron, particle, height, timestamp, init-role];
+        [0, "bostrom1ay267fakkrgfy9lf2m7wsj8uez2dgylhtkdf9k", "QmPcfxEfW317u3bbz8MbEhjoMZ5HMFsx5TbsEHWPd1kLLw", 9029, "2021-11-06 03:52:13", from],
+        [1, "bostrom1ay267fakkrgfy9lf2m7wsj8uez2dgylhtkdf9k", "QmXQ4k4ciK5ieaSwtccmH9mm4QdPS6Spd21DTqLFrEwDWR", 9029, "2021-11-06 03:52:13", to],
+        [2, "bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t", "QmYrXCXqunhqqirz3LBmvbnQb2pFFCk7douQkHDPDvQ3iE", 12863, "2021-11-06 09:59:22", from] ]
+    )
+}
