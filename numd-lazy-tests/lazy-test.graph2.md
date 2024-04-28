@@ -133,16 +133,16 @@
 │ 8   │ el-nivvo           │           4 │ bostrom1ay267fakkrgfy9lf2m7wsj8uez2dgylhtkdf9k                     │
 │ 9   │ cyberdbot          │           3 │ bostrom135ca8hdpy9sk0ntwqzpzsvatyl48ptx5j359lz                     │
 │ ... │ ...                │ ...         │ ...                                                                │
-│ 15  │ laurentiu          │           1 │ bostrom1zy8knphzhf9u8xeyjc6k3eps96q48hlmj03zsk                     │
+│ 15  │ therealcalmate     │           1 │ bostrom1ltpef4eyh72ly3x8cx6ath6sfg94ag42aga5n5                     │
 │ 16  │ mazw1010           │           1 │ bostrom13eehekx464l2qtl4xfyzggvd77nef22x82asv8                     │
-│ 17  │ cybergudwin        │           1 │ bostrom1v5x5vl4c0zjua37ymqjy4267fy9m6x8yvzvkfp                     │
-│ 18  │ superhuman         │           1 │ bostrom1pntx8ql2v7cqxu05etg8c4v0r2vz7qnq9uqmpy                     │
-│ 19  │ kalpemo            │           1 │ bostrom1rj7zt2pzuzwhjlr24u0prnqqxm3xexavtpqtzx                     │
+│ 17  │ kalpemo            │           1 │ bostrom1rj7zt2pzuzwhjlr24u0prnqqxm3xexavtpqtzx                     │
+│ 18  │ elonamusk          │           1 │ bostrom19wtkh935tx2ut2n4m6tjvkfvew4shaeezfl7em                     │
+│ 19  │ castigaojetes      │           1 │ bostrom1kwwp7f5pszyxr39whf2rwm7gly596mdw5gmmf4                     │
 │ 20  │ belzebuth          │           1 │ bostrom1qnlxnneluedfg3lusv8r36t5c0s4r2p0xhhszj                     │
-│ 21  │ digital-oppression │           1 │ bostrom1g70uv8y47s5pn07n4gtgakz278vps228r9emvt                     │
-│ 22  │ ?                  │           1 │ bostrom15xx4xh3p7f773ssyz25ydrk27g09cl7qfh75mh                     │
-│ 23  │ castigaojetes      │           1 │ bostrom1kwwp7f5pszyxr39whf2rwm7gly596mdw5gmmf4                     │
-│ 24  │ elonamusk          │           1 │ bostrom19wtkh935tx2ut2n4m6tjvkfvew4shaeezfl7em                     │
+│ 21  │ ?                  │           1 │ bostrom15xx4xh3p7f773ssyz25ydrk27g09cl7qfh75mh                     │
+│ 22  │ superhuman         │           1 │ bostrom1pntx8ql2v7cqxu05etg8c4v0r2vz7qnq9uqmpy                     │
+│ 23  │ digital-oppression │           1 │ bostrom1g70uv8y47s5pn07n4gtgakz278vps228r9emvt                     │
+│ 24  │ laurentiu          │           1 │ bostrom1zy8knphzhf9u8xeyjc6k3eps96q48hlmj03zsk                     │
 ╰──#──┴──────nickname──────┴─links_count─┴───────────────────────────────neuron───────────────────────────────╯
 
 > graph-links-df test-graph.csv | graph-filter-contracts | graph-append-related | graph-stats
@@ -151,6 +151,7 @@
 │ links     │ {record 6 fields} │
 │ particles │ {record 4 fields} │
 ╰───────────┴───────────────────╯
+
 > graph-links-df test-graph.csv | graph-filter-contracts | graph-append-related | graph-stats | table -e
 ╭───────────┬───────────────────────────────────╮
 │ neurons   │ 25                                │
@@ -169,10 +170,13 @@
 │           │ │ not_downloaded │ 12  │          │
 │           │ ╰────────────────┴─────╯          │
 ╰───────────┴───────────────────────────────────╯
+
 > graph-links-df test-graph.csv | graph-filter-contracts | graph-to-gephi 
+
 > graph-links-df test-graph.csv | graph-filter-contracts | graph-to-cosmograph 
 You can upload the file to https://cosmograph.app/run
-/Users/user/cy/export/cybergraph-in-cosmograph20240415-134607.csv
+/Users/user/cy/export/cybergraph-in-cosmograph20240428-055955.csv
+
 > graph-links-df test-graph.csv | graph-filter-contracts | graph-to-graphviz 
 digraph G {
 
@@ -198,6 +202,7 @@ Size = 218789
 "maxim|FPcw8pT" -> "osmo1nngr5aj3gcvphlhnvtqth8k3sl4asq3n3teenj|dXphKiW";
 "maxim|FPcw8pT" -> "terra1h9epjq7wp08ypj7g99k0vs4xtvk9acmq3saxrl|oGDjbmp";
 }
+
 > graph-links-df test-graph.csv | graph-filter-contracts | graph-add-metadata | graph-keep-standard-columns-only --out
 ╭─#──┬────────────nick────────────┬──content_s_from───┬──────────────────────content_s_to──────────────────────╮
 │ 0  │ passport-address_?@q9qaku3 │ mastercyb|W4sJiUP │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t|Abm5U1N │
