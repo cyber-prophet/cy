@@ -1,3 +1,6 @@
+use nu-utils [ bar, cprint, "str repeat", to-safe-filename, to-number-format, number-col-format,
+nearest-given-weekday, print-and-pass, clip, confirm, normalize, path-modify]
+
 export def 'cy-path' [
     ...folders: string # folders to add to cy path
     --create_missing # if the resulted path doesn't exist - create it
@@ -28,7 +31,7 @@ export def open-cy-config-toml []: nothing -> record {
     default-settings
     | merge $config
     | default (cy-path) path
-    | default (cy-path cy graph particles safe) ipfs-files-folder
+    | default (cy-path graph particles safe) ipfs-files-folder
     | default no-config-set config-name
 }
 
@@ -80,6 +83,8 @@ export def export1 --env [] {
             cprint $'A config file was not found. Run *cy config-new*'
             {}
         }
+
+    make-default-folders-fn
 
     $env.cy = ($config | merge $user_config)
 }

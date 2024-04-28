@@ -8,9 +8,10 @@ Very much WIP. Actively developed.
 
 ## Key features of Cy
 
-- Setting different settings for different profiles (RPC endpoints, private keys, networks, etc...)
-- Seamlessly upload and download data to cyber node or to a local IPFS node
-- Creating multiple cyber links
+- Different settings for different profiles (RPC endpoints, private keys, networks, etc.)
+- Seamlessly upload and download data to a Cyber node or to a local IPFS node
+- Creating multiple cyberlinks
+- Export graph formats: Cosmograph, Gephi, Graphviz
 - Shortcuts for interacting with passport smart contract
 - Cyber search in terminal
 - Many more (see list of functions below)
@@ -2622,4 +2623,3 @@ Input/output types:
   ╰─────┴──────╯
 
 ```
-
