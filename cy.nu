@@ -2337,8 +2337,11 @@ export def --env 'config-activate' [
 
     cprint -c green_underline -b 1 'Config is loaded'
 
-    open $config_path
-    | upsert 'config-name' ($config_toml | get 'config-name')
+    let $new_config = open $config_path
+    | upsert 'config-name' $config_toml.config-name
+
+    # can't save to the same location as opened in this piped
+    $new_config
     | save $config_path -f
 
     $config_toml
