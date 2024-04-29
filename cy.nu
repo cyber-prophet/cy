@@ -205,6 +205,47 @@ export def 'link-files' [
     if not $quiet { $results }
 }
 
+# Link files hierarchy in the a specified or current folder
+export def 'link-folder' [
+    folder_path?: path # path to a folder to link files at
+    --include_extension # Include a file extension (works only with `--link_filenames`)
+    --disable_append (-D) # Don't append links to the links table
+    --no_folders # Don't link folders to their child members
+    --yes (-y) # Confirm uploading files without request
+]: [nothing -> table] {
+    let $path = $folder_path | default (pwd)
+
+    if (
+        $env.cy.ipfs-upload-with-no-confirm? == true or
+        $yes or
+        (confirm --default_not $'Confirm uploading ($path)')
+     ) { } else {return}
+
+    ^ipfs add $path --recursive --progress=false
+    | lines
+    | parse '{s} {cid} {path}'
+    | reject s
+    | insert file_type {|i| pwd | path dirname | path join $i.path | path type}
+    | where file_type == file
+    | each {|i|
+        $i.path
+        | if $include_extension {} else {
+            path parse | reject extension | path join
+        }
+        | path split
+        | if $no_folders {
+            last
+        } else {}
+        | append $i.cid
+        | window 2
+        | each {|p| {from_text: $p.0 to_text: $p.1}}
+    }
+    | flatten
+    | uniq
+    | links-pin-columns-2 --dont_replace
+    | if $disable_append {} else {links-append}
+}
+
 # Create a cyberlink according to semantic construction of following a neuron
 #
 # > cy follow bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8 | to yaml
