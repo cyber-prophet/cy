@@ -835,11 +835,17 @@ def 'links-send-tx' [ ] {
         | tx-sign
         | tx-broadcast
 
-    let $filename = cy-path mylinks _cyberlinks_archive.csv
     if $response.code == 0 {
-        open $filename
+        let $filename = cy-path mylinks _cyberlinks_archive.csv
+
+        let $header = open $filename | first
+
+        $header
         | append ( $links | upsert neuron $env.cy.address )
-        | save $filename --force
+        | fill non-exist
+        | skip
+        | to csv --noheaders
+        | save $filename --append --raw
 
         links-view -q | skip (
             set-or-get-env-or-def links-per-transaction
