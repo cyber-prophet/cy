@@ -189,7 +189,7 @@ export def 'link-files' [
      ) { } else {return}
 
     let $results = $files_col
-        | par-each {|f| $f
+        | each {|f| $f
             | upsert to_text $'pinned_file:($f.from_text)'
             | upsert to (ipfs add $f.from_text -Q | str replace (char nl) '')
             | if ($link_filenames) {
