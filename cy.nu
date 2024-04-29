@@ -242,7 +242,7 @@ export def 'link-folder' [
     }
     | flatten
     | uniq
-    | links-pin-columns-2 --dont_replace
+    | links-pin-columns-2 --dont_replace --quiet
     | if $disable_append {} else {links-append}
 }
 
@@ -534,6 +534,7 @@ export def 'links-pin-columns-2' [
     --pin_to_local_ipfs # Pin to local kubo
     --ignore_cid # work with CIDs as regular texts
     --skip_save_particle_in_cache # don't save particles to local cache in cid.md file
+    --quiet (-q) # don't print information about tem folder
 ]: [nothing -> table, table -> table] {
     let $links = inlinks-or-links
 
@@ -561,7 +562,9 @@ export def 'links-pin-columns-2' [
     # Saving ininitial text files
     $lookup | each {|i| $i.item | save -r ($temp_ipfs_folder | path join $i.index)}
 
-    cprint $'temp files saved to a local directory *($temp_ipfs_folder)*'
+    if not $quiet {
+        cprint $'temp files saved to a local directory *($temp_ipfs_folder)*'
+    }
 
     mut $hash_associations = if (
             $env.cy.ipfs-upload-with-no-confirm? == true or
