@@ -221,12 +221,19 @@ export def 'link-folder' [
         (confirm --default_not $'Confirm uploading ($path)')
      ) { } else {return}
 
-    ^ipfs add $path --recursive --progress=false
+    let $hashes = ^ipfs add $path --recursive --progress=false
     | lines
     | parse '{s} {cid} {path}'
     | reject s
     | insert file_type {|i| pwd | path dirname | path join $i.path | path type}
     | where file_type == file
+
+    let $to_text_subst = $hashes
+        | insert f {|i| $i.path | path basename | $'pinned_file:($in)'}
+        | select cid f
+        | transpose --ignore-titles --as-record --header-row
+
+    $hashes
     | each {|i|
         $i.path
         | if $include_extension {} else {
@@ -242,6 +249,7 @@ export def 'link-folder' [
     }
     | flatten
     | uniq
+    | update to_text {|i| $to_text_subst | get -i $i.to_text | default $i.to_text}
     | links-pin-columns-2 --dont_replace --quiet
     | if $disable_append {} else {links-append}
 }
