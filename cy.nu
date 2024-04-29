@@ -227,6 +227,7 @@ export def 'link-folder' [
     | reject s
     | insert file_type {|i| pwd | path dirname | path join $i.path | path type}
     | where file_type == file
+    | where path !~ '(Identifier|Zone)'
 
     let $to_text_subst = $hashes
         | insert f {|i| $i.path | path basename | $'pinned_file:($in)'}
