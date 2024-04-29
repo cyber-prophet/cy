@@ -250,8 +250,8 @@ export def 'link-folder' [
     }
     | flatten
     | uniq
-    | update to_text {|i| $to_text_subst | get -i $i.to_text | default $i.to_text}
     | links-pin-columns-2 --dont_replace --quiet
+    | update to_text {|i| $to_text_subst | get -i $i.to_text | default $i.to_text}
     | if $disable_append {} else {links-append}
 }
 
