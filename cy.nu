@@ -568,9 +568,9 @@ export def 'links-pin-columns-2' [
             $pin_to_local_ipfs or
             ( confirm $'Pin files to local kubo? If `no` only hashes will be calculated.' )
         ) {
-            ^ipfs add -r $temp_ipfs_folder
+            ^ipfs add $temp_ipfs_folder --progress=false --recursive
         } else {
-            ^ipfs add -rn $temp_ipfs_folder
+            ^ipfs add $temp_ipfs_folder --progress=false --recursive --only-hash
         }
         | lines
         | drop # remove the root folder's cid
