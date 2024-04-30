@@ -189,7 +189,7 @@ export def 'link-files' [
      ) { } else {return}
 
     let $results = $files_col
-        | par-each {|f| $f
+        | each {|f| $f
             | upsert to_text $'pinned_file:($f.from_text)'
             | upsert to (ipfs add $f.from_text -Q | str replace (char nl) '')
             | if ($link_filenames) {
@@ -203,6 +203,56 @@ export def 'link-files' [
 
     if not $disable_append { $results | links-append --quiet }
     if not $quiet { $results }
+}
+
+# Link files hierarchy in the a specified or current folder
+export def 'link-folder' [
+    folder_path?: path # path to a folder to link files at
+    --include_extension # Include a file extension (works only with `--link_filenames`)
+    --disable_append (-D) # Don't append links to the links table
+    --no_folders # Don't link folders to their child members
+    --yes (-y) # Confirm uploading files without request
+]: [nothing -> table] {
+    let $path = $folder_path | default (pwd)
+
+    if (
+        $env.cy.ipfs-upload-with-no-confirm? == true or
+        $yes or
+        (confirm --default_not $'Confirm uploading ($path)')
+     ) { } else {return}
+
+    let $hashes = ^ipfs add $path --recursive --progress=false
+    | lines
+    | parse '{s} {cid} {path}'
+    | reject s
+    | insert file_type {|i| pwd | path dirname | path join $i.path | path type}
+    | where file_type == file
+    | where path !~ '(Identifier|Zone)'
+
+    let $to_text_subst = $hashes
+        | insert f {|i| $i.path | path basename | $'pinned_file:($in)'}
+        | select cid f
+        | transpose --ignore-titles --as-record --header-row
+
+    $hashes
+    | each {|i|
+        $i.path
+        | if $include_extension {} else {
+            path parse | reject extension | path join
+        }
+        | path split
+        | if $no_folders {
+            last
+        } else {}
+        | append $i.cid
+        | window 2
+        | each {|p| {from_text: $p.0 to_text: $p.1}}
+    }
+    | flatten
+    | uniq
+    | links-pin-columns-2 --dont_replace --quiet
+    | update to_text {|i| $to_text_subst | get -i $i.to_text | default $i.to_text}
+    | if $disable_append {} else {links-append}
 }
 
 # Create a cyberlink according to semantic construction of following a neuron
@@ -493,6 +543,7 @@ export def 'links-pin-columns-2' [
     --pin_to_local_ipfs # Pin to local kubo
     --ignore_cid # work with CIDs as regular texts
     --skip_save_particle_in_cache # don't save particles to local cache in cid.md file
+    --quiet (-q) # don't print information about tem folder
 ]: [nothing -> table, table -> table] {
     let $links = inlinks-or-links
 
@@ -520,16 +571,18 @@ export def 'links-pin-columns-2' [
     # Saving ininitial text files
     $lookup | each {|i| $i.item | save -r ($temp_ipfs_folder | path join $i.index)}
 
-    cprint $'temp files saved to a local directory *($temp_ipfs_folder)*'
+    if not $quiet {
+        cprint $'temp files saved to a local directory *($temp_ipfs_folder)*'
+    }
 
     mut $hash_associations = if (
             $env.cy.ipfs-upload-with-no-confirm? == true or
             $pin_to_local_ipfs or
             ( confirm $'Pin files to local kubo? If `no` only hashes will be calculated.' )
         ) {
-            ^ipfs add -r $temp_ipfs_folder
+            ^ipfs add $temp_ipfs_folder --progress=false --recursive
         } else {
-            ^ipfs add -rn $temp_ipfs_folder
+            ^ipfs add $temp_ipfs_folder --progress=false --recursive --only-hash
         }
         | lines
         | drop # remove the root folder's cid
@@ -835,11 +888,17 @@ def 'links-send-tx' [ ] {
         | tx-sign
         | tx-broadcast
 
-    let $filename = cy-path mylinks _cyberlinks_archive.csv
     if $response.code == 0 {
-        open $filename
+        let $filename = cy-path mylinks _cyberlinks_archive.csv
+
+        let $header = open $filename | first
+
+        $header
         | append ( $links | upsert neuron $env.cy.address )
-        | save $filename --force
+        | fill non-exist
+        | skip
+        | to csv --noheaders
+        | save $filename --append --raw
 
         links-view -q | skip (
             set-or-get-env-or-def links-per-transaction
@@ -2337,8 +2396,11 @@ export def --env 'config-activate' [
 
     cprint -c green_underline -b 1 'Config is loaded'
 
-    open $config_path
-    | upsert 'config-name' ($config_toml | get 'config-name')
+    let $new_config = open $config_path
+    | upsert 'config-name' $config_toml.config-name
+
+    # can't save to the same location as opened in this piped
+    $new_config
     | save $config_path -f
 
     $config_toml
