@@ -6,7 +6,7 @@ def --env 'install_if_missing' [
     local_cli_name?
 ] {
     if ($local_cli_name | default $brew_cli_name | which $in) == [] {
-        if (confirm $"You don't have `($brew_cli_name)` app availble now. Would you like to install it via homebrew?") {
+        if (confirm $"You don't have `($brew_cli_name)` app available now. Would you like to install it via homebrew?") {
             try {
                 brew install $brew_cli_name;
                 print ''
@@ -47,6 +47,7 @@ install_if_missing "curl"
 install_if_missing "pueue"
 install_if_missing "ipfs"
 install_if_missing "mdcat"
+install_if_missing "rustup-init"
 # install_if_missing "gum"
 
 if ( '~/.ipfs' | path exists | not $in ) {
@@ -59,7 +60,7 @@ if ( ipfs swarm peers | complete | get exit_code | $in == 1 ) {
     sleep 0.5sec
 }
 
-# add cybernode to boostrap
+# add cybernode to bootstrap
 try {ipfs bootstrap add '/ip4/135.181.19.86/tcp/4001/p2p/12D3KooWNMcnoQynAY9hyi4JxzSu64BsRGcJ9z7vKghqk8sTrpqY'}
 sleep 0.5sec
 
@@ -69,6 +70,9 @@ if (brew list ipfs | complete | get exit_code | $in == 0) {
     brew upgrade ipfs;
 }
 
+cargo install nu_plugin_polars
+plugin add ('~/.cargo/bin/nu_plugin_polars' | path expand)
+
 let $cy_folder = '~/cy'
 
 (open $nu.config-path | lines | find -r '^overlay use .*cy\.nu')
@@ -77,7 +81,7 @@ let $cy_folder = '~/cy'
     | save -a $'($nu.config-path)'
 }
 
-# Change default settings to preffered by Cyber-prophet
+# Change default settings to preferred by Cyber-prophet
 open $nu.config-path
 | str replace 'show_banner: true' 'show_banner: false'
 | str replace 'show_empty: true' 'show_empty: false'

@@ -63,17 +63,17 @@ export def match-type [
 
 export def export1 --env [] {
 
-    if $nu.is-interactive {
-        let $tested_versions = ['0.92.1' '0.92.2' '0.92.3']
+    # if $nu.is-interactive {
+    #     let $tested_versions = ['0.92.1' '0.92.2' '0.92.3']
 
-        version
-        | get version
-        | if $in not-in $tested_versions {
-            cprint $'This version of Cy was tested on ($tested_versions), and you have ($in).
-                We suggest you to use one of the tested versions. If you installed *nushell*
-                using brew, you can update it with the command *brew upgrade nushell*'
-        }
-    }
+    #     version
+    #     | get version
+    #     | if $in not-in $tested_versions {
+    #         cprint $'This version of Cy was tested on ($tested_versions), and you have ($in).
+    #             We suggest you to use one of the tested versions. If you installed *nushell*
+    #             using brew, you can update it with the command *brew upgrade nushell*'
+    #     }
+    # }
 
     let $config = open-cy-config-toml
 
