@@ -210,7 +210,8 @@ export def 'link-folder' [
     folder_path?: path # path to a folder to link files at
     --include_extension # Include a file extension (works only with `--link_filenames`)
     --disable_append (-D) # Don't append links to the links table
-    --no_folders # Don't link folders to their child members
+    --no_content # Use only directory and file names for cyberlinks, don't create cyberlinks to file contents
+    --no_folders # Don't link folders to their child members (is not avaible if --no_content)
     --yes (-y) # Confirm uploading files without request
 ]: [nothing -> table] {
     let $path = $folder_path | default (pwd)
@@ -241,10 +242,12 @@ export def 'link-folder' [
             path parse | reject extension | path join
         }
         | path split
-        | if $no_folders {
-            last
-        } else {}
-        | append $i.cid
+        | if $no_content {} else {
+            if $no_folders {
+                last
+            } else {}
+            | append $i.cid
+        }
         | window 2
         | each {|p| {from_text: $p.0 to_text: $p.1}}
     }
