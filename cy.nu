@@ -2179,6 +2179,9 @@ export def 'graph-links-df' [
         or ('particle' in $df_columns)
     ) {
         $df
+    } else if ($existing_graph_columns | length) == 0 {
+        print $input
+        error make {msg: $'there are no graph columns in ($df_columns)'}
     } else {
         graph-open-csv-make-df (cy-path graph $cyberlinks_path)
         | polars join --inner $df $existing_graph_columns $existing_graph_columns
