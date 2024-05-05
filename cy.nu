@@ -211,7 +211,7 @@ export def 'link-folder' [
     --include_extension # Include a file extension (works only with `--link_filenames`)
     --disable_append (-D) # Don't append links to the links table
     --no_content # Use only directory and file names for cyberlinks, don't create cyberlinks to file contents
-    --no_folders # Don't link folders to their child members (is not avaible if --no_content)
+    --no_folders # Don't link folders to their child members (is not available if --no_content)
     --yes (-y) # Confirm uploading files without request
 ]: [nothing -> table] {
     let $path = $folder_path | default (pwd)
@@ -290,7 +290,7 @@ export def 'follow' [
 # to: QmWm9pmmz66cq41t1vtZWoRz5xmHSmoKCrrgdP9adcpoZK
 export def 'tweet' [
     text_to: string # text to tweet
-    --disable_send (-D) # don't send tweet immideately, but put it into the temp table
+    --disable_send (-D) # don't send tweet immediately, but put it into the temp table
 ]: [nothing -> record, string -> record] {
     let $text_to = param-or-input $text_to
     let $cid_from = 'QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx' # pin-text 'tweet'
@@ -352,7 +352,7 @@ export def 'link-random' [
         match $source {
             'forismatic.com' => { link-quote }
             'chucknorris.io' => { link-chuck }
-            _ => {error make {msg: $'unkown source ($source)'}}
+            _ => {error make {msg: $'unknown source ($source)'}}
         }
     }
 
@@ -433,7 +433,7 @@ export def 'links-replace' [
 
 # Swap columns from and to
 export def 'links-swap-from-to' [
-    --dont_replace (-D) # output results only, without modifiying the links table
+    --dont_replace (-D) # output results only, without modifying the links table
     --keep_original # append results to original links
 ]: [nothing -> table, table -> table] {
     let $input = inlinks-or-links
@@ -613,7 +613,7 @@ export def 'links-pin-columns-2' [
     }
 
     $links
-    | reject -i from to # if text_from or text_to are absent, the resulting table is empty. Mabye use default?
+    | reject -i from to # if text_from or text_to are absent, the resulting table is empty. Maybe use default?
     | join -l ($hash_associations | rename from from_text) from_text
     | join -l ($hash_associations | rename to to_text) to_text
     | if $dont_replace {} else { links-replace }
@@ -1032,7 +1032,7 @@ export def 'passport-get' [
 # Set a passport's particle, data or avatar field for a given nickname
 #
 # > cy passport-set QmZSbGCBAPpqwXHSbUkn4P2RHiL2nRjv7BGFP4vVjcYKHd
-# The particle field for maxim should be successfuly set to QmZSbGCBAPpqwXHSbUkn4P2RHiL2nRjv7BGFP4vVjcYKHd
+# The particle field for maxim should be successfully set to QmZSbGCBAPpqwXHSbUkn4P2RHiL2nRjv7BGFP4vVjcYKHd
 export def 'passport-set' [
     cid: string # cid to set
     nickname? # Provide a passport's nickname. If null - the nick from config will be used.
@@ -1087,7 +1087,7 @@ export def 'passport-set' [
             | upsert raw_log {|i| $i.raw_log | from json}
             | select raw_log code txhash
         } else {
-            cprint $'The *($field)* field for *($nick)* should be successfuly set to *($cid)*'
+            cprint $'The *($field)* field for *($nick)* should be successfully set to *($cid)*'
         }
     } else {
         cprint $'The cid might not be set. You can check it with the command
@@ -1141,7 +1141,7 @@ export def 'dict-neurons-add' [
 
     if $input == null {
         error make {
-            msg: 'you should pipe a list, a table or a dataframe containg `neuron` column to this command'
+            msg: 'you should pipe a list, a table or a dataframe containing `neuron` column to this command'
         }
     }
 
@@ -1170,7 +1170,7 @@ export def 'dict-neurons-add' [
     | save -ra $path_csv
 }
 
-# Ouput dict-neurons tags
+# Output dict-neurons tags
 export def 'dict-neurons-tags' [
     --path # return the path of tags file
     --wide # return wide table with categories as columns
@@ -1435,7 +1435,7 @@ export def 'graph-receive-new-links' [
             $links | to csv --noheaders | save -ra $path_csv
 
             cprint -a 0 $'(char cr)Since the last update (char lp)which was on ($last_height
-                ) height(char rp) ($new_links_count) cyberlinks recieved!'
+                ) height(char rp) ($new_links_count) cyberlinks received!'
         } else {
             break
         }
@@ -1642,7 +1642,7 @@ export def 'particles-keep-only-first-neuron' [ ] {
     | dfr drop neuron_global is_first_neuron
 }
 
-# Update the 'particles.parquet' file (it inculdes content of text files)
+# Update the 'particles.parquet' file (it includes content of text files)
 export def 'graph-update-particles-parquet' [
     --quiet (-q) # Disable informational messages about the saved parquet file
     --all # re-read all downloaded particles
@@ -2013,7 +2013,7 @@ export def 'graph-to-logseq' [
     }
 }
 
-# Output particles into txt formated feed
+# Output particles into txt formatted feed
 export def 'graph-to-txt-feed' [] {
     graph-to-particles
     | particles-keep-only-first-neuron
@@ -3048,7 +3048,7 @@ export def 'tokens-rewards-get' [
 
 export def 'tokens-investmint-status-table' [
     neuron?: string
-    --h_liquid # retrun amount of liquid H
+    --h_liquid # return amount of liquid H
     --quiet # don't print amount of H liquid
     --height: int = 0 # a height to request a state on
     --sum
@@ -3090,7 +3090,7 @@ export def 'tokens-investmint-status-table' [
         | $h_all - $in
 
     if not $quiet {
-        print $'liquid hydrogen availible for investminting: (
+        print $'liquid hydrogen available for investminting: (
             $hydrogen_liquid | to-number-format --significant_integers 0)'
     }
 
@@ -3563,7 +3563,7 @@ export def 'rewards-withdraw-tx-analyse' [
     | move percent_rel --after commission
 }
 
-export def 'tokens-delegate-wizzard' [
+export def 'tokens-delegate-wizard' [
     $neuron?: string # an address of a neuron
 ] {
     let $address = $neuron | default $env.cy.address
@@ -3614,7 +3614,7 @@ def tokens-fraction-menu [
     | print-and-pass
 }
 
-export def 'tokens-investmint-wizzard' [
+export def 'tokens-investmint-wizard' [
     $neuron?: string # an address of a neuron
 ] {
     let $address = $neuron | default $env.cy.address
@@ -3898,7 +3898,7 @@ export def 'query-tx' [
     } else {
         select height code logs
     }
-    | upsert trans_staus {|i| trans_status $i}
+    | upsert trans_status {|i| trans_status $i}
 }
 
 # Query tx by acc/seq
@@ -4095,7 +4095,7 @@ export def --wrapped 'caching-function' [
     let $executable = if $exec != '' {$exec} else {$env.cy.exec}
     let $sub_commands_and_args = $rest
         | flatten
-        | flatten # to recieve params as a list from passport-get
+        | flatten # to receive params as a list from passport-get
         | if $no_default_params {} else {
             append (default-node-params)
         }
@@ -4127,7 +4127,7 @@ export def --wrapped 'caching-function' [
     )
 
     if 'error' in ($last_data | columns) {
-        log debug $'last update ($freshness) was unsuccessfull, requesting for a new one'
+        log debug $'last update ($freshness) was unsuccessful, requesting for a new one'
         $update = true
     }
 

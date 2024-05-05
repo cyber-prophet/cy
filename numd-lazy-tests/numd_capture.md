@@ -26,7 +26,7 @@
 │ cy passport-set                               │ Set a passport's particle, data or avatar field for a given nickname     │
 │ cy dict-neurons-view                          │ Output neurons dict                                                      │
 │ cy dict-neurons-add                           │ Add piped in neurons to YAML-dictionary with tag and category            │
-│ cy dict-neurons-tags                          │ Ouput dict-neurons tags                                                  │
+│ cy dict-neurons-tags                          │ Output dict-neurons tags                                                  │
 │ cy doctor                                     │ Fix some problems of cy (for example caused by updates)                  │
 │ cy dict-neurons-update                        │ Update neurons YAML-dictionary                                           │
 │ cy graph-download-snapshot                    │ Download a snapshot of cybergraph                                        │
@@ -36,7 +36,7 @@
 │ cy graph-merge                                │ merge two graphs together, add the `source` column                       │
 │ cy graph-to-particles                         │ Output unique list of particles from piped in cyberlinks table           │
 │ cy particles-keep-only-first-neuron           │ In the piped in particles df leave only particles appeared for the fi... │
-│ cy graph-update-particles-parquet             │ Update the 'particles.parquet' file (it inculdes content of text files)  │
+│ cy graph-update-particles-parquet             │ Update the 'particles.parquet' file (it includes content of text files)  │
 │ cy graph-filter-neurons                       │ Filter the graph to chosen neurons only                                  │
 │ cy graph-filter-contracts                     │ Filter the graph to keep or exclude links from contracts                 │
 │ cy graph-append-related                       │ Append related cyberlinks to the piped in graph                          │
@@ -44,7 +44,7 @@
 │ cy graph-stats                                │ Output graph stats based on piped in or the whole graph                  │
 │ cy graph-to-gephi                             │ Export a graph into CSV file for import to Gephi                         │
 │ cy graph-to-logseq                            │ Logseq export WIP                                                        │
-│ cy graph-to-txt-feed                          │ Output particles into txt formated feed                                  │
+│ cy graph-to-txt-feed                          │ Output particles into txt formatted feed                                  │
 │ cy graph-to-cosmograph                        │ Export piped-in graph to a CSV file in cosmograph format                 │
 │ cy graph-to-graphviz                          │ Export piped-in graph into graphviz format                               │
 │ cy graph-add-metadata                         │ Add content_s and neuron's nicknames columns to piped in or the whole... │

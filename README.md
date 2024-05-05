@@ -27,7 +27,7 @@ git clone https://github.com/cyber-prophet/cy; cd cy;
 overlay use -pr cy.nu
 ```
 
-### Install all the neccessary apps using homebrew (Mac, Linux)
+### Install all the necessary apps using homebrew (Mac, Linux)
 
 Open Terminal app on your computer.
 
@@ -265,7 +265,7 @@ Usage:
   to: QmWm9pmmz66cq41t1vtZWoRz5xmHSmoKCrrgdP9adcpoZK
 
 Flags:
-  -D, --disable_send - don't send tweet immideately, but put it into the temp table
+  -D, --disable_send - don't send tweet immediately, but put it into the temp table
 
 Parameters:
   text_to <string>: text to tweet
@@ -399,7 +399,7 @@ Usage:
   > links-swap-from-to {flags}
 
 Flags:
-  -D, --dont_replace - output results only, without modifiying the links table
+  -D, --dont_replace - output results only, without modifying the links table
   --keep_original - append results to original links
 
 Input/output types:
@@ -668,7 +668,7 @@ Usage:
   > passport-set {flags} <cid> (nickname)
 
   > cy passport-set QmZSbGCBAPpqwXHSbUkn4P2RHiL2nRjv7BGFP4vVjcYKHd
-  The particle field for maxim should be successfuly set to QmZSbGCBAPpqwXHSbUkn4P2RHiL2nRjv7BGFP4vVjcYKHd
+  The particle field for maxim should be successfully set to QmZSbGCBAPpqwXHSbUkn4P2RHiL2nRjv7BGFP4vVjcYKHd
 
 Flags:
   --field <String> - A passport's field to set: particle, data, new_avatar (default: 'particle')
@@ -729,7 +729,7 @@ Input/output types:
 ### cy dict-neurons-tags
 
 ```
-  Ouput dict-neurons tags
+  Output dict-neurons tags
 
 Usage:
   > dict-neurons-tags {flags}
@@ -949,7 +949,7 @@ Input/output types:
 ### cy graph-update-particles-parquet
 
 ```
-  Update the 'particles.parquet' file (it inculdes content of text files)
+  Update the 'particles.parquet' file (it includes content of text files)
 
 Usage:
   > graph-update-particles-parquet {flags}
@@ -1082,7 +1082,7 @@ Input/output types:
 ### cy graph-to-txt-feed
 
 ```
-  Output particles into txt formated feed
+  Output particles into txt formatted feed
 
 Usage:
   > graph-to-txt-feed
@@ -1728,7 +1728,7 @@ Usage:
   > tokens-investmint-status-table {flags} (neuron)
 
 Flags:
-  --h_liquid - retrun amount of liquid H
+  --h_liquid - return amount of liquid H
   --quiet - don't print amount of H liquid
   --height <Int> - a height to request a state on (default: 0)
   --sum
@@ -2044,11 +2044,11 @@ Input/output types:
 
 ```
 
-### cy tokens-delegate-wizzard
+### cy tokens-delegate-wizard
 
 ```
 Usage:
-  > tokens-delegate-wizzard ($neuron)
+  > tokens-delegate-wizard ($neuron)
 
 Parameters:
   $neuron <string>: an address of a neuron (optional)
@@ -2060,11 +2060,11 @@ Input/output types:
 
 ```
 
-### cy tokens-investmint-wizzard
+### cy tokens-investmint-wizard
 
 ```
 Usage:
-  > tokens-investmint-wizzard ($neuron)
+  > tokens-investmint-wizard ($neuron)
 
 Parameters:
   $neuron <string>: an address of a neuron (optional)
