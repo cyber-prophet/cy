@@ -2062,9 +2062,6 @@ export def 'graph-to-graphviz' [
     }
 }
 
-def 'nu-complete-graphviz-presets' [] {
-    [ 'sfdp', 'dot' ]
-}
 # Add content_s and neuron's nicknames columns to piped in or the whole graph df
 #
 # > cy graph-filter-neurons maxim_bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
@@ -4575,6 +4572,10 @@ def 'nu-complete-links-csv-files' [] {
 
 def 'nu-complete-graph-provider' [] {
     ['hasura' 'clickhouse']
+}
+
+def 'nu-complete-graphviz-presets' [] {
+    [ 'sfdp', 'dot' ]
 }
 
 # > [{a: 1} {b: 2}] | to nuon
