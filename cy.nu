@@ -2064,8 +2064,7 @@ export def 'graph-to-graphviz' [
 
 # Add content_s and neuron's nicknames columns to piped in or the whole graph df
 #
-# > cy graph-filter-neurons maxim_bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
-# | cy graph-add-metadata | dfr into-nu | first 2 | to yaml
+# > cy graph-filter-neurons maxim@n6r76m8 | cy graph-add-metadata | dfr into-nu | first 2 | to yaml
 # - index: 0
 #   neuron: bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
 #   particle_from: QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx
