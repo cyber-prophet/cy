@@ -1,5 +1,5 @@
 use ../cy.nu *
-use ../nu-utils internals [export1 cy-path]
+use ../cy-internals.nu [export1 cy-path]
 use std assert [equal greater]
 
 export-env {
@@ -276,8 +276,8 @@ export def graph-filter-system-particles-1 [] {
     ]
 
     equal (
-        graph-links-df test-graph.csv | graph-filter-system-particles particle_from --exclude | dfr shape | dfr into-nu
-    ) [ [index, rows, columns]; [0, 1188, 5] ]
+        graph-links-df test-graph.csv | graph-filter-system-particles particle_from --exclude | polars shape | polars into-nu
+    ) [ [index, rows, columns]; [0, 1205, 5] ]
 }
 
 export def graph-merge-1 [] {
@@ -292,7 +292,7 @@ export def graph-merge-1 [] {
         | dfr into-nu
         | sort-by count
         | reject index
-    ) [[source, count]; [b, 76], [a, 1188]]
+    ) [[source, count]; [b, 76], [a, 1205]]
 }
 
 export def graph-to-particles-1 [] {
