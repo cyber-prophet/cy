@@ -1551,20 +1551,22 @@ export def 'graph-merge' [
 #   particle: QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 #   neuron: bostrom1ymprf45c44rp9k0g2r84w2tjhsq7kalv98rgpt
 #   height: 490
-#   timestamp: 2021-11-05
-#   nick: mrbro_bostrom1ymprf45c44rp9k0g2r84w2tjhsq7kalv98rgpt
-#   particle_index: 0
-#   size: 5
-#   content_s: cyber
+#   timestamp: 2021-11-05T14:11:41
+#   init-role: from
+#   neuron_global: bostrom1ymprf45c44rp9k0g2r84w2tjhsq7kalv98rgpt
+#   height_global: 490
+#   timestamp_global: 2021-11-05T14:11:41
+#   content_s: cyber|QK3oufV
 # - index: 1
 #   particle: QmbVugfLG1FoUtkZqZQ9WcwTLe1ivmcE9yMVGvuz3YWjy6
 #   neuron: bostrom1ymprf45c44rp9k0g2r84w2tjhsq7kalv98rgpt
 #   height: 490
-#   timestamp: 2021-11-05
-#   nick: mrbro_bostrom1ymprf45c44rp9k0g2r84w2tjhsq7kalv98rgpt
-#   particle_index: 1
-#   size: 11
-#   content_s: fuckgoogle!
+#   timestamp: 2021-11-05T14:11:41
+#   init-role: to
+#   neuron_global: bostrom1ymprf45c44rp9k0g2r84w2tjhsq7kalv98rgpt
+#   height_global: 490
+#   timestamp_global: 2021-11-05T14:11:41
+#   content_s: fuckgoogle!|z3YWjy6
 export def 'graph-to-particles' [
     --from # Use only particles from the 'from' column
     --to # Use only particles from the 'to' column
@@ -2066,23 +2068,23 @@ export def 'graph-to-graphviz' [
 #
 # > cy graph-filter-neurons maxim@n6r76m8 | cy graph-add-metadata | dfr into-nu | first 2 | to yaml
 # - index: 0
-#   neuron: bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
-#   particle_from: QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx
-#   particle_to: QmaxuSoSUkgKBGBJkT2Ypk9zWdXor89JEmaeEB66wZUHYo
+#   nick: maxim@n6r76m8
 #   height: 87794
-#   timestamp: 2021-11-11
-#   content_s_from: tweet
-#   content_s_to: '"MIME type" = "image/svg+xml"'
-#   nick: maxim_bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
-# - index: 1
+#   content_s_from: tweet|R5V4Rvx
+#   content_s_to: '"MIME type" = "image/svg+xml"⏎Size = "79336"⏎|6wZUHYo'
+#   timestamp: 2021-11-11 10:36:24
+#   particle_to: QmaxuSoSUkgKBGBJkT2Ypk9zWdXor89JEmaeEB66wZUHYo
+#   particle_from: QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx
 #   neuron: bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
-#   particle_from: Qmf89bXkJH9jw4uaLkHmZkxQ51qGKfUPtAMxA8rTwBrmTs
-#   particle_to: QmYnLm5MFGFwcoXo65XpUyCEKX4yV7HbCAZiDZR95aKr4t
+# - index: 1
+#   nick: maxim@n6r76m8
 #   height: 88371
-#   timestamp: 2021-11-11
-#   content_s_from: avatar
-#   content_s_to: '"MIME type" = "image/svg+xml"'
-#   nick: maxim_bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
+#   content_s_from: avatar|TwBrmTs
+#   content_s_to: '"MIME type" = "image/svg+xml"⏎Size = "68266"⏎|95aKr4t'
+#   timestamp: 2021-11-11 11:31:54
+#   particle_to: QmYnLm5MFGFwcoXo65XpUyCEKX4yV7HbCAZiDZR95aKr4t
+#   particle_from: Qmf89bXkJH9jw4uaLkHmZkxQ51qGKfUPtAMxA8rTwBrmTs
+#   neuron: bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8
 export def 'graph-add-metadata' [
     --escape_quotes
     --new_lines
@@ -2144,7 +2146,7 @@ export def 'graph-add-metadata' [
 #   particle_to: QmbVugfLG1FoUtkZqZQ9WcwTLe1ivmcE9yMVGvuz3YWjy6
 #   neuron: bostrom1ymprf45c44rp9k0g2r84w2tjhsq7kalv98rgpt
 #   height: 490
-#   timestamp: 2021-11-05
+#   timestamp: 2021-11-05T14:11:41
 export def 'graph-links-df' [
     filename?: string@'nu-complete-graph-csv-files' # graph csv filename in the 'cy/graph' folder or a path to the graph
     --not_in # don't catch pipe in
