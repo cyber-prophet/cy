@@ -3617,6 +3617,7 @@ def tokens-fraction-menu [
 
 export def 'tokens-investmint-wizard' [
     $neuron?: string # an address of a neuron
+    --weeks-from-now: int
 ] {
     let $address = $neuron | default $env.cy.address
 
@@ -3651,10 +3652,14 @@ export def 'tokens-investmint-wizard' [
 
     let $release_time = $times
         | select release_time tokens
-        | prepend (1..6 | each { {release_time: (nearest-given-weekday --weeks $in)} })
-        | sort-by release_time
-        | input list
-        | get release_time
+        | if $weeks_from_now != null {
+            nearest-given-weekday --weeks $weeks_from_now
+        } else {
+            prepend (1..6 | each { {release_time: (nearest-given-weekday --weeks $in)} })
+            | sort-by release_time
+            | input list
+            | get release_time
+        }
         | $in - (date now) | into int
         | $in / 10 ** 9 | into int
 
