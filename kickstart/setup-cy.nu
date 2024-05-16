@@ -70,7 +70,6 @@ if (brew list ipfs | complete | get exit_code | $in == 0) {
     brew upgrade ipfs;
 }
 
-rustup-init -y
 cargo install nu_plugin_polars
 plugin add ('~/.cargo/bin/nu_plugin_polars' | path expand)
 
