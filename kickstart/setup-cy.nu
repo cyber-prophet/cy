@@ -47,6 +47,7 @@ install_if_missing "curl"
 install_if_missing "pueue"
 install_if_missing "ipfs"
 install_if_missing "mdcat"
+install_if_missing "rust-init"
 # install_if_missing "gum"
 
 if ( '~/.ipfs' | path exists | not $in ) {
@@ -68,6 +69,9 @@ try {ipfs routing findpeer 12D3KooWNMcnoQynAY9hyi4JxzSu64BsRGcJ9z7vKghqk8sTrpqY}
 if (brew list ipfs | complete | get exit_code | $in == 0) {
     brew upgrade ipfs;
 }
+
+cargo install nu_plugin_polars
+plugin add ('~/.cargo/bin/nu_plugin_polars' | path expand)
 
 let $cy_folder = '~/cy'
 
