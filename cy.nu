@@ -532,10 +532,10 @@ export def 'links-pin-columns' [
     $links
     | each {|i| $i
         | if $i.from_text? != null {
-            upsert from ( $dict | get -is $i.from_text )
+            upsert from ( $dict | get --ignore-errors --sensitive $i.from_text )
         } else {}
         | if $i.to_text? != null {
-            upsert to ( $dict | get -is $i.to_text )
+            upsert to ( $dict | get --ignore-errors --sensitive $i.to_text )
         } else {}
     }
     | if $dont_replace {} else { links-replace }
@@ -828,7 +828,7 @@ def 'tx-authz' [ ]: path -> path {
         "msgs": $i.body.messages
     } ] }
     | to json -r
-    | save -rf $out_path
+    | save --raw --force $out_path
 
     $out_path
 }
@@ -1167,7 +1167,7 @@ export def 'dict-neurons-add' [
     } else {
         to csv
     }
-    | save -ra $path_csv
+    | save --raw --append $path_csv
 }
 
 # Output dict-neurons tags
@@ -1244,7 +1244,7 @@ export def 'dict-neurons-update' [
         par-each -t $threads {|i|
             $i | merge (
                 tokens-balance-get $i.neuron
-                | transpose -idr
+                | transpose --ignore-titles --as-record --header-row
             )
         }
     } else {}
@@ -1432,7 +1432,7 @@ export def 'graph-receive-new-links' [
         $new_links_count += ($links | length)
 
         if $links != [] {
-            $links | to csv --noheaders | save -ra $path_csv
+            $links | to csv --noheaders | save --raw --append $path_csv
 
             cprint -a 0 $'(char cr)Since the last update (char lp)which was on ($last_height
                 ) height(char rp) ($new_links_count) cyberlinks received!'
@@ -1903,7 +1903,7 @@ export def 'graph-stats' [] {
             | dfr sort-by source
             | dfr into-nu
             | reject index
-            | transpose -idr
+            | transpose --ignore-titles --as-record --header-row
             | {source: $in}
         } else {{}}
 
@@ -2300,7 +2300,7 @@ export def --env 'config-new' [
 
     let $config_name = $addr_table
         | select address name
-        | transpose -rd
+        | transpose --header-row --as-record
         | get $address
         | $'($in)($passport_nick | if $in == null {} else {'-' + $in})-($exec)'
 
@@ -2933,7 +2933,7 @@ export def 'tokens-balance-get' [
         into int amount
     }
     | if $record {
-        transpose -idr
+        transpose --ignore-titles --as-record --header-row
     } else {}
 }
 
@@ -2954,7 +2954,7 @@ export def 'tokens-supply-get' [
     caching-function query bank total [--height $height]
     | get supply
     | into int amount
-    | transpose -idr
+    | transpose --ignore-titles --as-record --header-row
 }
 
 export def 'tokens-pools-table-get' [
@@ -2974,7 +2974,7 @@ export def 'tokens-pools-table-get' [
             tokens-balance-get --height $height --record $i.reserve_account_address
         }
     }
-    | where balances != (token-dummy-balance | transpose -idr)
+    | where balances != (token-dummy-balance | transpose --ignore-titles --as-record --header-row)
     | upsert balances {
         |i| $i.balances | select ...$i.reserve_coin_denoms # keep only pool's tokens
     }
@@ -3158,7 +3158,7 @@ export def 'tokens-ibc-denoms-table' [
     | reject ibc_hash
     | upsert token {
         |i| $i.path #denom compound
-        | str replace -ra '[^-0-9]' ''
+        | str replace --regex --all '[^-0-9]' ''
         | str trim -c '-'
         | if ($in | split row '-' | length | $in > 1) {
             $in + '🛑'
@@ -3253,10 +3253,10 @@ export def 'tokens-in-token-naive' [
     let $input = $in
     let $denom = tokens-info-from-registry
         | select token denom
-        | transpose -idr
+        | transpose --ignore-titles --as-record --header-row
         | get $token
 
-    let $target_denom_price_in_h = tokens-price-in-h-naive | transpose -idr | get $denom
+    let $target_denom_price_in_h = tokens-price-in-h-naive | transpose --ignore-titles --as-record --header-row | get $denom
 
     let $column_name = $'amount_in_($token)_naive'
 
@@ -3673,7 +3673,7 @@ export def 'tokens-investmint-wizard' [
     if (confirm '*Confirm transaction?*') {
         let $unsigned = cy-path temp 'tx_investmint_unsigned.json'
         let $signed: string = cy-path temp 'tx_investmint_signed.json'
-        $trans_unsigned | save -rf $unsigned
+        $trans_unsigned | save --raw --force $unsigned
         ^($env.cy.exec) tx sign $unsigned --from $address --output-document $signed --yes ...(default-node-params)
 
         ^($env.cy.exec) tx broadcast $signed ...(default-node-params) | from json | select txhash
@@ -3694,7 +3694,7 @@ export def 'tokens-fraction-input' [
         let $value = input
             | if ($in | str contains '%') {
                 str replace '%' '' | into float | $in / 100 | $tokens * $in
-            } else { str replace -ar '[^0-9]' '' }
+            } else { str replace --regex --all '[^0-9]' '' }
             | into int
 
         if ($value > $tokens) {
@@ -3849,7 +3849,7 @@ export def 'validator-query-delegators' [
         } else {
             nu-complete-validators-monikers
             | select value description
-            | transpose -idr
+            | transpose --ignore-titles --as-record --header-row
             | get $validator_or_moniker
         }
 
@@ -3947,7 +3947,7 @@ def 'query-links-bandwidth-params' []: nothing -> record {
     | get params
     | transpose key value
     | into float value
-    | transpose -idr
+    | transpose --ignore-titles --as-record --header-row
 }
 
 # Query status of authz grants for address
@@ -4202,7 +4202,7 @@ def 'request-save-output-exec-response' [
 
     $response
     | to json -r
-    | save -fr $json_path
+    | save --raw --force $json_path
 
     if 'error' in ($response | columns) {
         if $error {
@@ -4216,7 +4216,7 @@ def 'request-save-output-exec-response' [
     | if ($in.update_time | into int) != 0 {
         to json -r
         | $'($in)(char nl)'
-        | save -ar ($json_path | str replace '.json' '_arch.jsonl')
+        | save --append --raw ($json_path | str replace '.json' '_arch.jsonl')
     }
 
     if not $quiet {$response}
@@ -4312,7 +4312,7 @@ def is-validator [address: string] {
     $address =~ '^(bostrom|pussy)\w{46}$'
 }
 
-def is-connected []  {
+def is-connected [] {
     (do -i {http get https://duckduckgo.com/} | describe) == 'raw input'
 }
 
