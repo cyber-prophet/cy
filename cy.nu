@@ -1874,7 +1874,8 @@ export def 'graph-stats' [] {
         | dfr_countrows
 
     let $n_particles_non_text = $p2
-        | polars filter-with ($in.content_s =~ '^"MIME type"')
+        | polars append ($in | polars select content_s | polars contains '^"MIME type"')
+        | polars filter-with (polars col content_s_x)
         | dfr_countrows
 
     let $follows = $links
@@ -2090,17 +2091,23 @@ export def 'graph-add-metadata' [
     let $p = graph-particles-df
         | polars select particle content_s
         | if $escape_quotes {
-            polars with-column (
-                $in.content_s
+            polars append (
+                $in
+                | polars select content_s
                 | polars replace-all --pattern '"' --replace '\"'
                 | polars replace-all --pattern '^(.*)$' --replace '"$1"'
             )
+            | polars drop content_s
+            | polars rename content_s_x content_s
         } else {}
         | if $new_lines {
-            polars with-column (
-                $in.content_s
+            polars append (
+                $in
+                | polars select content_s
                 | polars replace-all --pattern '⏎' --replace (char nl)
             )
+            | polars drop content_s
+            | polars rename contetn_s_x content_s
         } else {}
 
     let $links_columns = $links | polars columns
