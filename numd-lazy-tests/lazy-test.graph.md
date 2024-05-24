@@ -1,5 +1,5 @@
 ```nushell
-> graph-links-df test-graph.csv 
+> graph-links-df test-graph.csv | polars collect
 ╭──#───┬─────────────────────neuron─────────────────────┬─────────────────particle_from──────────────────┬──────────────────particle_to───────────────────┬──height──┬──────timestamp──────╮
 │ 0    │ bostrom1ay267fakkrgfy9lf2m7wsj8uez2dgylhtkdf9k │ QmPcfxEfW317u3bbz8MbEhjoMZ5HMFsx5TbsEHWPd1kLLw │ QmXQ4k4ciK5ieaSwtccmH9mm4QdPS6Spd21DTqLFrEwDWR │     9029 │ 2021-11-06 03:52:13 │
 │ 1    │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t │ QmYrXCXqunhqqirz3LBmvbnQb2pFFCk7douQkHDPDvQ3iE │ QmY4X4SkVBkoUGZdTzdcW7SKY8t4ULj5GJBRcRr4UMyahp │    12863 │ 2021-11-06 09:59:22 │
@@ -24,7 +24,7 @@
 │ 1280 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ QmZdKqcYqYGy88QpUGZpqjmDUkwm6gZBhygxtSHbCKzbAV │ 12847309 │ 2024-04-01 13:14:37 │
 ╰──#───┴─────────────────────neuron─────────────────────┴─────────────────particle_from──────────────────┴──────────────────particle_to───────────────────┴──height──┴──────timestamp──────╯
 
-> graph-links-df test-graph.csv | graph-to-particles | particles-keep-only-first-neuron 
+> graph-links-df test-graph.csv | graph-to-particles | particles-keep-only-first-neuron | polars collect
 ╭──#──┬───────────────────────────────neuron───────────────────────────────┬────────────────────particle────────────────────┬──height──┬──────timestamp──────┬─init-role─╮
 │ 0   │ bostrom1ay267fakkrgfy9lf2m7wsj8uez2dgylhtkdf9k                     │ QmXQ4k4ciK5ieaSwtccmH9mm4QdPS6Spd21DTqLFrEwDWR │     9029 │ 2021-11-06 03:52:13 │ to        │
 │ 1   │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t                     │ QmRkxeB7V537fVc8913TmQwtxwuZBAVsWNedRMDyQ8Df97 │    15287 │ 2021-11-06 13:52:52 │ from      │
