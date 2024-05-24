@@ -2242,10 +2242,9 @@ export def 'particles-filter-by-type' [
         | '^' + $in
 
     $input
-    | polars filter-with (
-        $in.content_s =~ $filter_regex
-        | if $exclude {polars not} else {}
-    )
+    | polars append ($in | polars select content_s | polars contains $filter_regex | if $exclude {polars not} else {})
+    | polars filter-with (polars col content_s_x)
+    | polars drop content_s_x
 }
 
 # Create a config JSON to set env variables, to use them as parameters in cyber cli
