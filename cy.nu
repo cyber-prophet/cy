@@ -721,10 +721,9 @@ export def 'links-remove-existed-2' [] {
         | polars filter-with ((polars col neuron) == $env.cy.address)
         | polars select particle_from particle_to
         | polars with-column (polars lit true | polars as duplicate)
-        | polars into-lazy
 
     links-view
-    | polars into-lazy
+    | polars into-df
     | polars join --left $existing_links [from to] [particle_from particle_to]
     | polars filter-with (polars col duplicate | polars is-not-null)
     | polars drop duplicate
@@ -1616,7 +1615,6 @@ export def 'graph-to-particles' [
     } else {
         polars sort-by [height]
     }
-    | polars into-lazy
     | polars unique --subset [particle]
     | polars collect
     | if $cids_only {
@@ -1799,7 +1797,6 @@ export def 'graph-append-related' [
     | polars append --col (append_related from --step ($step))
     | polars append --col (append_related to --step ($step + 1))
     | polars sort-by [link_local_index height]
-    | polars into-lazy
     | polars unique --subset [particle_from particle_to]
     | polars collect
 }
@@ -1867,7 +1864,6 @@ export def 'graph-stats' [] {
     }
 
     let $n_links_unique = $links
-        | polars into-lazy
         | polars unique --subset [particle_from particle_to]
         | polars collect
         | dfr_countrows
