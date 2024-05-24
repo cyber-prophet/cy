@@ -1818,7 +1818,7 @@ export def 'graph-neurons-stats' [] {
         | polars into-df
         | polars join --left $links particle particle_from
         | polars join $p particle_to particle
-        | polars with-column (
+        | polars append (
             $in | polars select content_s | polars replace -p '\|.*' -r ''
         )
         | polars group-by content_s
