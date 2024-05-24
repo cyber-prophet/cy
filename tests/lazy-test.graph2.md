@@ -1,5 +1,5 @@
 ```nushell
-> graph-links-df test-graph.csv | graph-filter-neurons maxim@n6r76m8
+> graph-links-df test-graph.csv | graph-filter-neurons maxim@n6r76m8 | polars collect
 ╭──#───┬─────────────────────neuron─────────────────────┬─────────────────particle_from──────────────────┬──────────────────particle_to───────────────────┬──height──┬──────timestamp──────╮
 │ 0    │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 │ QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx │ QmaxuSoSUkgKBGBJkT2Ypk9zWdXor89JEmaeEB66wZUHYo │    87794 │ 2021-11-11 10:36:24 │
 │ 1    │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 │ Qmf89bXkJH9jw4uaLkHmZkxQ51qGKfUPtAMxA8rTwBrmTs │ QmYnLm5MFGFwcoXo65XpUyCEKX4yV7HbCAZiDZR95aKr4t │    88371 │ 2021-11-11 11:31:54 │
@@ -24,7 +24,7 @@
 │ 1020 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ QmZdKqcYqYGy88QpUGZpqjmDUkwm6gZBhygxtSHbCKzbAV │ 12847309 │ 2024-04-01 13:14:37 │
 ╰──#───┴─────────────────────neuron─────────────────────┴─────────────────particle_from──────────────────┴──────────────────particle_to───────────────────┴──height──┴──────timestamp──────╯
 
-> graph-links-df test-graph.csv | graph-filter-contracts
+> graph-links-df test-graph.csv | graph-filter-contracts | polars collect
 ╭─#──┬───────────────────────────────neuron───────────────────────────────┬─────────────────particle_from──────────────────┬──────────────────particle_to───────────────────┬──height──┬──────timestamp──────╮
 │ 0  │ bostrom1jkte0pytr85qg0whmgux3vmz9ehmh82w40h8gaqeg435fnkyfxqq9qaku3 │ QmVww6z5eshB4puR74xCwmNPrsbcou1dfF8Q2zmW4sJiUP │ QmPhByrCLn4E8buNkYjPag9PuxXHPJgo7mAumxVAbm5U1N │  3627537 │ 2022-07-08 16:17:49 │
 │ 1  │ bostrom16y344e8ryydmeu2g8yyfznq79j7jfnar4p59ngpvaazcj83jzsmsts7qxt │ QmZbcRTU4fdrMy2YzDKEUAXezF3pRDmFSMXbXYABVe3UhW │ QmbNve1YGn7vtSRm3XWvjG2AzFrB1zz78VJbAtpA2zEuhJ │  3627649 │ 2022-07-08 16:28:33 │
@@ -45,7 +45,7 @@
 │ 16 │ bostrom16y344e8ryydmeu2g8yyfznq79j7jfnar4p59ngpvaazcj83jzsmsts7qxt │ QmaMhB3x2dM6pp3dWo4oHWvLjtqXUkA5SMXuMuvFPcw8pT │ QmPoomrqMFTTBhsgDWH2pmTArgfvb5XqogXz3qZoGDjbmp │ 12234459 │ 2024-02-19 12:02:32 │
 ╰─#──┴───────────────────────────────neuron───────────────────────────────┴─────────────────particle_from──────────────────┴──────────────────particle_to───────────────────┴──height──┴──────timestamp──────╯
 
-> graph-links-df test-graph.csv | graph-filter-contracts --exclude
+> graph-links-df test-graph.csv | graph-filter-contracts --exclude | polars collect
 ╭──#───┬─────────────────────neuron─────────────────────┬─────────────────particle_from──────────────────┬──────────────────particle_to───────────────────┬──height──┬──────timestamp──────╮
 │ 0    │ bostrom1ay267fakkrgfy9lf2m7wsj8uez2dgylhtkdf9k │ QmPcfxEfW317u3bbz8MbEhjoMZ5HMFsx5TbsEHWPd1kLLw │ QmXQ4k4ciK5ieaSwtccmH9mm4QdPS6Spd21DTqLFrEwDWR │     9029 │ 2021-11-06 03:52:13 │
 │ 1    │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t │ QmYrXCXqunhqqirz3LBmvbnQb2pFFCk7douQkHDPDvQ3iE │ QmY4X4SkVBkoUGZdTzdcW7SKY8t4ULj5GJBRcRr4UMyahp │    12863 │ 2021-11-06 09:59:22 │
@@ -70,7 +70,7 @@
 │ 1263 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ QmZdKqcYqYGy88QpUGZpqjmDUkwm6gZBhygxtSHbCKzbAV │ 12847309 │ 2024-04-01 13:14:37 │
 ╰──#───┴─────────────────────neuron─────────────────────┴─────────────────particle_from──────────────────┴──────────────────particle_to───────────────────┴──height──┴──────timestamp──────╯
 
-> graph-links-df test-graph.csv | graph-filter-contracts | graph-append-related | graph-keep-standard-columns-only
+> graph-links-df test-graph.csv | graph-filter-contracts | graph-append-related | graph-keep-standard-columns-only | polars collect
 ╭──#──┬───────────────────────────────neuron───────────────────────────────┬─────────────────particle_from──────────────────┬──────────────────particle_to───────────────────┬─height──┬──────timestamp──────╮
 │ 0   │ bostrom1jkte0pytr85qg0whmgux3vmz9ehmh82w40h8gaqeg435fnkyfxqq9qaku3 │ QmVww6z5eshB4puR74xCwmNPrsbcou1dfF8Q2zmW4sJiUP │ QmPhByrCLn4E8buNkYjPag9PuxXHPJgo7mAumxVAbm5U1N │ 3627537 │ 2022-07-08 16:17:49 │
 │ 1   │ bostrom1qjf43tsdhzfk5apchznuheqf6sux0wwmt4q4qq                     │ QmVww6z5eshB4puR74xCwmNPrsbcou1dfF8Q2zmW4sJiUP │ QmPWdU4mAqaxcwV6UboiH24aoVhcTLVwb4QoZjkA2aCiH4 │ 4544674 │ 2022-09-08 01:47:01 │
@@ -95,7 +95,7 @@
 │ 115 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8                     │ QmfQdNw9ajQwNW6eA35DRS7tTb1gnFCULRCKQat4zABRC6 │ QmaNY1eb7GNiUm6wCoKKGp3Sfg8W5VuZwhKeWnDerHfruG │ 6700597 │ 2023-02-01 16:36:31 │
 ╰──#──┴───────────────────────────────neuron───────────────────────────────┴─────────────────particle_from──────────────────┴──────────────────particle_to───────────────────┴─height──┴──────timestamp──────╯
 
-> graph-links-df test-graph.csv | graph-filter-contracts | graph-append-related --only_first_neuron  | graph-keep-standard-columns-only
+> graph-links-df test-graph.csv | graph-filter-contracts | graph-append-related --only_first_neuron  | graph-keep-standard-columns-only | polars collect
 ╭──#──┬───────────────────────────────neuron───────────────────────────────┬─────────────────particle_from──────────────────┬──────────────────particle_to───────────────────┬──height──┬──────timestamp──────╮
 │ 0   │ bostrom1jkte0pytr85qg0whmgux3vmz9ehmh82w40h8gaqeg435fnkyfxqq9qaku3 │ QmVww6z5eshB4puR74xCwmNPrsbcou1dfF8Q2zmW4sJiUP │ QmPhByrCLn4E8buNkYjPag9PuxXHPJgo7mAumxVAbm5U1N │  3627537 │ 2022-07-08 16:17:49 │
 │ 1   │ bostrom16y344e8ryydmeu2g8yyfznq79j7jfnar4p59ngpvaazcj83jzsmsts7qxt │ QmZbcRTU4fdrMy2YzDKEUAXezF3pRDmFSMXbXYABVe3UhW │ QmbNve1YGn7vtSRm3XWvjG2AzFrB1zz78VJbAtpA2zEuhJ │  3627649 │ 2022-07-08 16:28:33 │
@@ -120,7 +120,7 @@
 │ 27  │ bostrom16y344e8ryydmeu2g8yyfznq79j7jfnar4p59ngpvaazcj83jzsmsts7qxt │ QmVww6z5eshB4puR74xCwmNPrsbcou1dfF8Q2zmW4sJiUP │ QmPohTpW8TNyjbtLJM61R7TsVdLa8ZPuTHBhteUzYL1Lbv │  5983239 │ 2022-12-14 16:11:51 │
 ╰──#──┴───────────────────────────────neuron───────────────────────────────┴─────────────────particle_from──────────────────┴──────────────────particle_to───────────────────┴──height──┴──────timestamp──────╯
 
-> graph-links-df test-graph.csv | graph-filter-contracts | graph-append-related | graph-neurons-stats | graph-keep-standard-columns-only --extra_columns [nickname links_count neuron]
+> graph-links-df test-graph.csv | graph-filter-contracts | graph-append-related | graph-neurons-stats | graph-keep-standard-columns-only --extra_columns [nickname links_count neuron] | polars collect
 ╭──#──┬──────nickname──────┬─links_count─┬───────────────────────────────neuron───────────────────────────────╮
 │ 0   │ mastercyb          │          24 │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t                     │
 │ 1   │ ?                  │          16 │ bostrom16y344e8ryydmeu2g8yyfznq79j7jfnar4p59ngpvaazcj83jzsmsts7qxt │
@@ -169,11 +169,11 @@
 │           │ │ not_downloaded │ 12  │          │
 │           │ ╰────────────────┴─────╯          │
 ╰───────────┴───────────────────────────────────╯
-> graph-links-df test-graph.csv | graph-filter-contracts | graph-to-gephi 
-> graph-links-df test-graph.csv | graph-filter-contracts | graph-to-cosmograph 
+> graph-links-df test-graph.csv | graph-filter-contracts | graph-to-gephi
+> graph-links-df test-graph.csv | graph-filter-contracts | graph-to-cosmograph
 You can upload the file to https://cosmograph.app/run
 /Users/user/cy/export/cybergraph-in-cosmograph20240415-134607.csv
-> graph-links-df test-graph.csv | graph-filter-contracts | graph-to-graphviz 
+> graph-links-df test-graph.csv | graph-filter-contracts | graph-to-graphviz
 digraph G {
 
 "mastercyb|W4sJiUP" -> "bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t|Abm5U1N";
