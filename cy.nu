@@ -1734,10 +1734,9 @@ export def 'graph-filter-contracts' [
     --exclude
 ] {
     graph-links-df
-    | polars filter-with (
-        $in.neuron =~ '.{64}'
-        | if $exclude {polars not} else {}
-    )
+    | polars append ($in | polars select neuron | polars contains '.{64}' | if $exclude {polars not} else {})
+    | polars filter-with (polars col neuron_x)
+    | polars drop neuron_x
 }
 
 # Append related cyberlinks to the piped in graph
