@@ -1637,9 +1637,9 @@ export def 'particles-keep-only-first-neuron' [ ] {
         graph-particles-df
         | polars select particle neuron
     ) particle particle
-    | polars with-column (($in.neuron) == ($in.neuron_global)) --name 'is_first_neuron'
-    | polars filter-with $in.is_first_neuron
-    | polars drop neuron_global is_first_neuron
+    | polars append (($in | polars select neuron) == ($in | polars select neuron_global))
+    | polars filter-with (polars col eq_neuron_neuron_global)
+    | polars drop neuron_global eq_neuron_neuron_global
 }
 
 # Update the 'particles.parquet' file (it includes content of text files)
