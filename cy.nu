@@ -1976,7 +1976,7 @@ export def 'graph-to-gephi' [] {
     | polars into-nu
     | reject index
     | move id label cid --before height
-    | save -f (cy-path export !gephi_particles.csv)
+    | save -f (cy-path export !gephi_particles.csv | $'($in)(print $in)')
 }
 
 # Logseq export WIP
