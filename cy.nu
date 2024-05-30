@@ -1640,7 +1640,7 @@ export def 'particles-keep-only-first-neuron' [ ] {
         | polars select particle neuron
     ) particle particle
     | polars with-column (($in.neuron) == ($in.neuron_global)) --name 'is_first_neuron'
-    | polars filter-with $in.is_first_neuron
+    | polars filter-with (polars col is_first_neuron)
     | polars drop neuron_global is_first_neuron
 }
 
