@@ -20,7 +20,7 @@ use std iter scan
 #
 # > 1sec / 3 | math significant-digits
 # 333ms
-export def 'significant-digits' [
+export def main [
     n: int = 4 # a number of first non-zero digits to keep
 ]: [int -> int, float -> float, duration -> duration] {
     let $input = $in

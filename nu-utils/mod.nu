@@ -11,3 +11,4 @@ export module "seconds-to-target-weekday.nu"
 export module "str repeat.nu"
 export module "to-number-format.nu"
 export module "to-safe-filename.nu"
+export use significant-digits.nu
