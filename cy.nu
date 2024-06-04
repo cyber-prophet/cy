@@ -1698,6 +1698,7 @@ export def 'graph-update-particles-parquet' [
         $in.content_s
         | polars fill-null 'timeout|'
     )
+    | polars collect
     | polars with-column ( # short name to make content_s unique
         $in.particle
         | polars str-slice 39 # last 7 symbols of 46-symbol cid
