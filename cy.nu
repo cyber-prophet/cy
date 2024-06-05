@@ -391,7 +391,7 @@ export def 'links-view' [
             []
         }
 
-    if (not $quiet) {
+    if not $quiet {
         let $links_count = $links | length
 
         if $links_count == 0 {
