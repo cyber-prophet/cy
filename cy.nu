@@ -428,7 +428,7 @@ export def 'links-replace' [
 ]: [table -> table, table -> nothing] {
     save (current-links-csv-path) --force
 
-    if (not $quiet) { links-view -q }
+    if not $quiet { links-view -q }
 }
 
 # Swap columns from and to
@@ -2297,7 +2297,7 @@ export def --env 'config-new' [
     let $passport_nick = passport-get $address
         | get nickname -i
 
-    if (not ($passport_nick | is-empty)) {
+    if not ($passport_nick | is-empty) {
        cprint -c default_italic --before 1 $'Passport nick *($passport_nick)* will be used'
     }
 
