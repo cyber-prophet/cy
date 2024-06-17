@@ -4109,13 +4109,7 @@ export def --wrapped 'caching-function' [
             append (default-node-params)
         }
 
-    let $json_path = $executable
-        | append ($sub_commands_and_args)
-        | str join '_'
-        | str replace -r '--node.*' ''
-        | str trim -c '_'
-        | to-safe-filename --suffix '.json'
-        | cy-path cache jsonl --file $in
+    let $json_path = generate-cache-path $executable $sub_commands_and_args
 
     log debug $'json path: ($json_path)'
 
@@ -4225,6 +4219,18 @@ def 'request-save-output-exec-response' [
     if not $quiet {$response}
 }
 
+def generate-cache-path [
+    $executable
+    $sub_commands_and_args
+] {
+    $executable
+    | append ($sub_commands_and_args)
+    | str join '_'
+    | str replace -r '--node.*' ''
+    | str trim -c '_'
+    | to-safe-filename --suffix '.json'
+    | cy-path cache jsonl --file $in
+}
 
 # query neuron addrsss by his nick
 export def 'qnbn' [
