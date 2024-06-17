@@ -1230,7 +1230,6 @@ export def 'dict-neurons-update' [
         | polars unique
         | polars join --left (dict-neurons-view --df) neuron neuron
         | polars into-nu
-        | reject index
     } else {
         dict-neurons-view
     }
@@ -1918,7 +1917,7 @@ export def 'graph-stats' [] {
     ]
     | polars collect
     | polars into-nu
-    | reject index dummyc
+    | reject dummyc
     | get 0
     | {links: $in}
     | upsert neurons {|i| $i.links.neurons}
