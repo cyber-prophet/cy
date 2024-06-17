@@ -4077,51 +4077,50 @@ export def 'validator-chooser' [
     } else {}
 }
 
-def 'initialize-parameters' [
-    exec
-    cache_validity_duration
-    cache_stale_refresh
-    force_update
-    disable_update
-    retries
-    no_default_params
+# A wrapper, to cache CLI requests
+export def --wrapped 'caching-function' [
     ...rest
-] {
+    --exec: string = '' # The name of executable
+    --cache_validity_duration: duration = 60min # Sets the cache's valid duration.
+                                                # No updates initiated during this period.
+    --cache_stale_refresh: duration # Sets stale cache's usable duration.
+                                    # Triggers background update and returns cache results.
+                                    # If exceeded, requests immediate data update.
+    --force_update
+    --disable_update (-U)
+    --quiet # Don't output execution's result
+    --no_default_params # Don't use default params (like output, chain-id)
+    --error # raise error instead of null in case of cli's error
+    --retries: int
+]: nothing -> record {
     if ($retries != null) {$env.cy.caching-function-max-retries = $retries}
 
     let $rest = $rest | each {into string}
+
+    let $cache_stale_refresh = set-or-get-env-or-def caching-function-cache_stale_refresh $cache_stale_refresh
 
     if $rest == [] { error make {msg: 'The "caching-function" function needs arguments'} }
 
     let $executable = if $exec != '' {$exec} else {$env.cy.exec}
     let $sub_commands_and_args = $rest
         | flatten
-        | flatten
-        | if $no_default_params == true {} else {
+        | flatten # to receive params as a list from passport-get
+        | if $no_default_params {} else {
             append (default-node-params)
         }
 
-    { executable: ($executable), sub_commands_and_args: $sub_commands_and_args }
-}
+    let $json_path = $executable
+        | append ($sub_commands_and_args)
+        | str join '_'
+        | str replace -r '--node.*' ''
+        | str trim -c '_'
+        | to-safe-filename --suffix '.json'
+        | cy-path cache jsonl --file $in
 
-def 'generate-cache-path' [executable: string, sub_commands_and_args: list] {
-    $executable
-    | append ($sub_commands_and_args)
-    | str join '_'
-    | str replace -r '--node.*' ''
-    | str trim -c '_'
-    | to-safe-filename --suffix '.json'
-    | cy-path cache jsonl --file $in
-}
+    log debug $'json path: ($json_path)'
 
-def 'validate-cache' [
-    json_path
-    cache_validity_duration
-    cache_stale_refresh
-    force_update
-    disable_update
-] {
     let $last_data = if ($json_path | path exists) {
+            # use debug here print $json_path
             open $json_path
         } else {
             {'update_time': 0}
@@ -4130,28 +4129,49 @@ def 'validate-cache' [
 
     let $freshness = (date now) - $last_data.update_time
 
-    let $update = (
+    mut $update = (
         $force_update or
         ($env.cy.caching-function-force-update? | default false) or
         ($freshness > $cache_stale_refresh and not $disable_update)
     )
 
     if 'error' in ($last_data | columns) {
+        log debug $'last update ($freshness) was unsuccessful, requesting for a new one'
         $update = true
     }
 
-    { last_data: $last_data, freshness: $freshness, update: $update }
+    if $update {
+        (request-save-output-exec-response $executable $sub_commands_and_args $json_path $error $quiet
+            --last_data $last_data)
+    } else {
+        if $freshness > $cache_validity_duration {
+            queue-task-add -o 2 (
+                $'caching-function --exec ($executable) --force_update [' +
+                (
+                    $sub_commands_and_args
+                    | each {
+                        str replace -a '"' '\"' | $'"($in)"'
+                    }
+                    | str join ' '
+                ) +
+                '] | to yaml | lines | first 5 | str join "\n"'
+            )
+        }
+
+        $last_data
+    }
 }
 
-def 'execute-request' [
+def 'request-save-output-exec-response' [
     executable: string
     sub_commands_and_args: list
     json_path: string
-    error: bool
-    quiet: bool
-    retries: int
-    last_data: record
+    error: bool = false
+    quiet: bool = false
+    --last_data: = {'update_time': 0}
 ] {
+    log debug $'($executable) ($sub_commands_and_args | str join " ")'
+
     mut $retries = (
         $env.cy?.caching-function-max-retries?
         | default 5
@@ -4195,47 +4215,14 @@ def 'execute-request' [
         }
     }
 
-    if not $quiet {$response}
-}
-
-export def --wrapped 'caching-function' [
-    ...rest
-    --exec: string = '' # The name of executable
-    --cache_validity_duration: duration = 60min # Sets the cache's valid duration.
-                                                # No updates initiated during this period.
-    --cache_stale_refresh: duration # Sets stale cache's usable duration.
-                                    # Triggers background update and returns cache results.
-                                    # If exceeded, requests immediate data update.
-    --force_update
-    --disable_update (-U)
-    --quiet # Don't output execution's result
-    --no_default_params # Don't use default params (like output, chain-id)
-    --error # raise error instead of null in case of cli's error
-    --retries: int
-]: nothing -> record {
-    let $params = initialize-parameters $exec $cache_validity_duration $cache_stale_refresh $force_update $disable_update $retries $no_default_params $rest
-    let $json_path = generate-cache-path $params.executable $params.sub_commands_and_args
-    let $cache_status = validate-cache $json_path $cache_validity_duration $cache_stale_refresh $force_update $disable_update
-
-    if $cache_status.update {
-        execute-request $params.executable $params.sub_commands_and_args $json_path $error $quiet $retries $cache_status.last_data
-    } else {
-        if $cache_status.freshness > $cache_validity_duration and not $disable_update {
-            queue-task-add -o 2 (
-                $'caching-function --exec ($params.executable) --force_update [' +
-                (
-                    $params.sub_commands_and_args
-                    | each {
-                        str replace -a '"' '\"' | $'"($in)"'
-                    }
-                    | str join ' '
-                ) +
-                '] | to yaml | lines | first 5 | str join "\n"'
-            )
-        }
-
-        $cache_status.last_data
+    $last_data
+    | if ($in.update_time | into int) != 0 {
+        to json -r
+        | $'($in)(char nl)'
+        | save --append --raw ($json_path | str replace '.json' '_arch.jsonl')
     }
+
+    if not $quiet {$response}
 }
 
 
