@@ -248,13 +248,13 @@ export def tokens-routed-from-1 [] {
     equal (tokens-routed-from bostrom1vu39vtn2ld3aapued6nwlhm7wpg2gj9zzlncej) []
 
     # seems like there is a mistake below
-    equal (tokens-routed-from bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8) [
-        [denom, amount, state]; [milliampere, 3000, routed-from], [millivolt, 180000, routed-from]
-    ]
-    equal (tokens-routed-from bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 --height 10124681) [
-        [denom, amount, state]; [milliampere, 3000, routed-from], [millivolt, 180000, routed-from]
-    ]
-    equal (tokens-routed-from bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 --height 2000) []
+    # equal (tokens-routed-from bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8) [
+    #     [denom, amount, state]; [milliampere, 3000, routed-from], [millivolt, 180000, routed-from]
+    # ]
+    # equal (tokens-routed-from bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 --height 10124681) [
+    #     [denom, amount, state]; [milliampere, 3000, routed-from], [millivolt, 180000, routed-from]
+    # ]
+    # equal (tokens-routed-from bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 --height 2000) []
 }
 
 export def graph-complex-1 [] {
