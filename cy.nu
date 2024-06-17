@@ -3021,7 +3021,7 @@ export def 'tokens-delegations-table-get' [
     --height: int = 0 # a height to request a state on
     --sum
 ] {
-    caching-function query staking delegations ($address | default $env.cy.address) [--height $height]
+    caching-function query staking delegations ($address | default $env.cy.address) --height $height
     | get -i delegation_responses
     | if $in == null {return} else {}
     | each {|i| $i.delegation | merge $i.balance}
