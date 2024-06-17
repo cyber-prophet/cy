@@ -1821,7 +1821,7 @@ export def 'graph-neurons-stats' [] {
     let $followers = [['particle'];['QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx']] # follow
         | polars into-df
         | polars join --left $links particle particle_from
-        | polars join $p particle_to particle
+        | polars join $p particle_to particle --suffix '2' # it was working before `polars` 0.94
         | polars with-column (
             $in | polars select content_s | polars replace -p '\|.*' -r ''
         )
