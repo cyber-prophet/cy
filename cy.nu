@@ -1715,7 +1715,7 @@ export def 'graph-update-particles-parquet' [
     }
     | polars sort-by height particle
     | polars to-parquet ($parquet_path | backup-and-echo --mv)
-    | print ($in | get 0 -i)
+    | print $in.0?
 }
 
 # Filter the graph to chosen neurons only
