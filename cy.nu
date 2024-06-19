@@ -3154,11 +3154,16 @@ export def 'tokens-ibc-denoms-table' [
     | rename denom amount
     | where denom =~ '^ibc'
     | upsert ibc_hash {|i| $i.denom | str replace 'ibc/' ''}
-    | each {
-        |i| $i
-        | merge ( caching-function query ibc-transfer denom-trace $"'($i.ibc_hash)'" | get denom_trace )
+    | join --left (cy-path kickstart ibc_denoms.csv | open) ibc_hash
+    | each { |i| $i
+        | if $i.base_denom? == null {
+            merge ( caching-function query ibc-transfer denom-trace $"'($i.ibc_hash)'" --retries 1
+                | get -i denom_trace
+                | default {} )
+        } else {}
     }
-    | reject ibc_hash
+    | where path? != null # fix for not-found tokens
+    | reject -i ibc_hash
     | upsert token {
         |i| $i.path #denom compound
         | str replace --regex --all '[^-0-9]' ''
