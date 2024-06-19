@@ -3216,6 +3216,7 @@ export def 'tokens-info-from-registry' [
     | select base symbol denom_units name description display traces -i
     | rename denom token
     | where token != null
+    | insert network $chain_name
 }
 
 export def 'tokens-price-in-h-naive' [
