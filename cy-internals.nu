@@ -149,7 +149,9 @@ export def --env 'set-or-get-env-or-def' [
         | if $in != null {} else {
             $env.cy | get -i $key
         }
-        | if $in != null {} else {
+        | if $in != null {
+            return $in
+        } else {
             let $key_record = (
                 open (cy-path kickstart settings-variants.yaml)
                 | get -i $key
