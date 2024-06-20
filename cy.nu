@@ -1715,7 +1715,7 @@ export def 'graph-update-particles-parquet' [
     }
     | polars sort-by height particle
     | polars to-parquet ($parquet_path | backup-and-echo --mv)
-    | print ($in | get 0 -i)
+    | print $in.0?
 }
 
 # Filter the graph to chosen neurons only
@@ -3153,12 +3153,15 @@ export def 'tokens-ibc-denoms-table' [
     | transpose
     | rename denom amount
     | where denom =~ '^ibc'
-    | upsert ibc_hash {|i| $i.denom | str replace 'ibc/' ''}
-    | each {
-        |i| $i
-        | merge ( caching-function query ibc-transfer denom-trace $"'($i.ibc_hash)'" | get denom_trace )
+    | join --left (cy-path kickstart ibc_denoms.csv | open) denom
+    | each { |i| $i
+        | if $i.base_denom? == null {
+            merge ( caching-function query ibc-transfer denom-trace $"'($i.denom | str replace 'ibc/' '')'" --retries 1
+                | get -i denom_trace
+                | default {} )
+        } else {}
     }
-    | reject ibc_hash
+    | where path? != null # fix for not-found tokens
     | upsert token {
         |i| $i.path #denom compound
         | str replace --regex --all '[^-0-9]' ''
@@ -3204,16 +3207,16 @@ export def 'tokens-denoms-decimals-dict' [] {
 export def 'tokens-info-from-registry' [
     chain_name: string = 'bostrom'
 ] {
-    let $pcontract = 'bostrom1w33tanvadg6fw04suylew9akcagcwngmkvns476wwu40fpq36pms92re6u'
-    let $json = {get_assets_by_chain: {chain_name: $chain_name}} | to json -r
-    let $params = ['--node' 'https://rpc.bostrom.cybernode.ai:443' '--output' 'json']
-
-    caching-function --exec 'cyber' --no_default_params query wasm contract-state smart $pcontract $json $params
+    'bostrom1w33tanvadg6fw04suylew9akcagcwngmkvns476wwu40fpq36pms92re6u'
+    | append ({get_assets_by_chain: {chain_name: $chain_name}} | to json -r)
+    | append [['--node' 'https://rpc.bostrom.cybernode.ai:443' '--output' 'json']]
+    | caching-function --exec 'cyber' --no_default_params query wasm contract-state smart $in.0 $in.1 $in.2
     | get data.assets
     | upsert denom_units {|i| $i.denom_units?.exponent? | default [0] | math max}
     | select base symbol denom_units name description display traces -i
     | rename denom token
     | where token != null
+    | insert network $chain_name
 }
 
 export def 'tokens-price-in-h-naive' [
