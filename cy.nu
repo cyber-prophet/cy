@@ -7,7 +7,7 @@
 use std assert [equal greater]
 use nu-utils [ bar, cprint, "str repeat", to-safe-filename, to-number-format, number-col-format,
     nearest-given-weekday, print-and-pass, clip, confirm, normalize, path-modify]
-use cy-internals.nu [cy-path match-type default-settings open-cy-config-toml export1 param-or-input backup-and-echo make-default-folders-fn set-or-get-env-or-def set-select-from-variants path-exists-safe]
+use cy-internals.nu [cy-path match-type default-settings open-cy-config-toml export1 backup-and-echo make-default-folders-fn set-or-get-env-or-def set-select-from-variants path-exists-safe]
 
 use std log
 
@@ -39,7 +39,7 @@ export def 'pin-text' [
     --follow_file_path # check if `text_param` is a valid path, and if yes - try to open it
     --skip_save_particle_in_cache # don't save particle to local cache in cid.md file #totest
 ]: [string -> string, nothing -> string] {
-    let $text = param-or-input $text_param
+    let $text = if $text_param == null {} else {$text_param}
         | into string
         | if (
             $env.cy.pin_text_follow_file_path? == true or $follow_file_path
@@ -292,7 +292,7 @@ export def 'tweet' [
     text_to: string # text to tweet
     --disable_send (-D) # don't send tweet immediately, but put it into the temp table
 ]: [nothing -> record, string -> record] {
-    let $text_to = param-or-input $text_to
+    let $text_to = if $text_to == null {} else {$text_to}
     let $cid_from = 'QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx' # pin-text 'tweet'
 
     if $disable_send {

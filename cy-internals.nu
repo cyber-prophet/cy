@@ -89,19 +89,12 @@ export def export1 --env [] {
     $env.cy = ($config | merge $user_config)
 }
 
-export def 'param-or-input' [
-    param?
-] {
-    let $input = $in
-    $param | default $input
-}
-
 export def 'backup-and-echo' [
     filename?: path
     --quiet # don't echo the file-path back
     --mv # move the file to backup directory instead of copy
 ] {
-    let $path = param-or-input $filename
+    let $path = if $filename == null {} else {$filename}
     let $backups_path = cy-path backups $'(now-fn)($path | path basename)'
 
     if not ( $path | path exists ) {
@@ -152,10 +145,9 @@ export def --env 'set-or-get-env-or-def' [
         | if $in != null {
             return $in
         } else {
-            let $key_record = (
-                open (cy-path kickstart settings-variants.yaml)
+            let $key_record = cy-path kickstart settings-variants.yaml
+                | open
                 | get -i $key
-            )
 
             $key_record
             | get -i variants.0
