@@ -4142,17 +4142,12 @@ export def --wrapped 'caching-function' [
             --last_data $last_data)
     } else {
         if $freshness > $cache_validity_duration {
-            queue-task-add -o 2 (
-                $'caching-function --exec ($executable) --force_update [' +
-                (
-                    $sub_commands_and_args
-                    | each {
-                        str replace -a '"' '\"' | $'"($in)"'
-                    }
-                    | str join ' '
-                ) +
-                '] | to yaml | lines | first 5 | str join "\n"'
-            )
+            $sub_commands_and_args
+            | each { str replace -a '"' '\"' | $'"($in)"' }
+            | str join ' '
+            | ($'caching-function --exec ($executable) --force_update [' +
+                $in + '] | to yaml | lines | first 5 | str join "\n"')
+            | queue-task-add -o 2 $in
         }
 
         $last_data
