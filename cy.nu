@@ -4142,12 +4142,7 @@ export def --wrapped 'caching-function' [
             --last_data $last_data)
     } else {
         if $freshness > $cache_validity_duration {
-            $sub_commands_and_args
-            | each { str replace -a '"' '\"' | $'"($in)"' }
-            | str join ' '
-            | ($'caching-function --exec ($executable) --force_update [' +
-                $in + '] | to yaml | lines | first 5 | str join "\n"')
-            | queue-task-add -o 2 $in
+            add-background-task $executable sub_commands_and_args
         }
 
         $last_data
@@ -4228,6 +4223,18 @@ def generate-cache-path [
     | str trim -c '_'
     | to-safe-filename --suffix '.json'
     | cy-path cache jsonl --file $in
+}
+
+def add-background-task [
+    executable
+    sub_commands_and_args
+] {
+    $sub_commands_and_args
+    | each { str replace -a '"' '\"' | $'"($in)"' }
+    | str join ' '
+    | ($'caching-function --exec ($executable) --force_update [' +
+        $in + '] | to yaml | lines | first 5 | str join "\n"')
+    | queue-task-add -o 2 $in
 }
 
 # query neuron addrsss by his nick
