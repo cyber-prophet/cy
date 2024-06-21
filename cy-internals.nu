@@ -28,8 +28,7 @@ export def open-cy-config-toml []: nothing -> record {
         | path join .cy_config.toml
         | if ($in | path exists) { open } else { {} }
 
-    default-settings
-    | merge $config
+    $config
     | default (cy-path) path
     | default (cy-path graph particles safe) ipfs-files-folder
     | default no-config-set config-name
@@ -82,7 +81,7 @@ export def export1 --env [] {
 
     make-default-folders-fn
 
-    $env.cy = ($config | merge $user_config)
+    $env.cy = (default-settings | merge $config | merge $user_config)
 }
 
 export def 'backup-and-echo' [
