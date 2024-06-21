@@ -880,9 +880,7 @@ def 'tx-broadcast' []: path -> record {
 # code: 0
 # txhash: 9B37FA56D666C2AA15E36CDC507D3677F9224115482ACF8CAF498A246DEF8EB0
 def 'links-send-tx' [ ] {
-    let $links = links-view -q | first (
-        set-get-env links-per-transaction
-    )
+    let $links = links-view -q | first $env.cy.links-per-transaction
 
     let $response = tx-json-create-from-cyberlinks $links
         | if ($env.cy.authz? != null) {
@@ -1361,12 +1359,10 @@ def get_links_hasura [
     multiplier: int
     --chunk_size: int = 1000
 ] {
-    let $graphql_api = set-get-env 'indexer-graphql-endpoint'
-
     $"{cyberlinks\(limit: ($chunk_size), offset: ($multiplier * $chunk_size), order_by: {height: asc},
         where: {height: {_gt: ($height)}}) {(graph_columns | str join ' ')}}"
     | {'query': $in}
-    | http post -t application/json $graphql_api $in
+    | http post -t application/json $env.cy.indexer-graphql-endpoint $in
     | get data.cyberlinks
 }
 
