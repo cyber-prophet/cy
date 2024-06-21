@@ -4138,8 +4138,8 @@ export def --wrapped 'caching-function' [
     }
 
     if $update {
-        (request-save-output-exec-response $executable $sub_commands_and_args $json_path $error $quiet
-            --last_data $last_data)
+        (request-save-output-exec-response $executable $sub_commands_and_args $json_path
+            --error=$error --quiet=$quiet --last_data $last_data)
     } else {
         if $freshness > $cache_validity_duration {
             add-background-task $executable sub_commands_and_args
@@ -4153,8 +4153,8 @@ def 'request-save-output-exec-response' [
     executable: string
     sub_commands_and_args: list
     json_path: string
-    error: bool = false
-    quiet: bool = false
+    --error
+    --quiet
     --last_data: = {'update_time': 0}
 ] {
     log debug $'($executable) ($sub_commands_and_args | str join " ")'
