@@ -36,15 +36,11 @@ export def open-cy-config-toml []: nothing -> record {
 }
 
 export def default-settings []: nothing -> record {
-    open (cy-path kickstart settings-variants.yaml)
-    | items {|k v|
-        $v.variants.0 # the first variant in the list is the default one
-        | if $in == other { {} } else {
-            match-type $v.type?
-            | wrap $k
-        }
-    }
-    | reduce -f {} {|i acc| $acc | merge $i}
+    cy-path kickstart settings-variants.yaml
+    | open
+    | items {|k v| {k: $k v: ($v.variants.0 | match-type $v.type?)}}
+    | where v != 'other'
+    | transpose -idr
 }
 
 export def match-type [
