@@ -7,7 +7,7 @@
 use std assert [equal greater]
 use nu-utils [ bar, cprint, "str repeat", to-safe-filename, to-number-format, number-col-format,
     nearest-given-weekday, print-and-pass, clip, confirm, normalize, path-modify]
-use cy-internals.nu [cy-path match-type default-settings open-cy-config-toml export1 backup-and-echo make-default-folders-fn set-or-get-env-or-def set-select-from-variants path-exists-safe]
+use cy-internals.nu [cy-path match-type default-settings open-cy-config-toml export1 backup-and-echo make-default-folders-fn set-get-env set-select-from-variants path-exists-safe]
 
 use std log
 
@@ -669,7 +669,7 @@ export def 'links-remove-existed-1by1' [
     --all_links # check all links in the temp table
 ]: [nothing -> table, nothing -> nothing] {
     let $links_view = links-view -q
-    let $links_per_trans = set-or-get-env-or-def --dont_set_env links-per-transaction
+    let $links_per_trans = set-get-env links-per-transaction
 
     let $links_with_status = $links_view
         | if $all_links {} else {
@@ -881,7 +881,7 @@ def 'tx-broadcast' []: path -> record {
 # txhash: 9B37FA56D666C2AA15E36CDC507D3677F9224115482ACF8CAF498A246DEF8EB0
 def 'links-send-tx' [ ] {
     let $links = links-view -q | first (
-        set-or-get-env-or-def links-per-transaction
+        set-get-env links-per-transaction
     )
 
     let $response = tx-json-create-from-cyberlinks $links
@@ -904,7 +904,7 @@ def 'links-send-tx' [ ] {
         | save $filename --append --raw
 
         links-view -q | skip (
-            set-or-get-env-or-def links-per-transaction
+            set-get-env links-per-transaction
         ) | links-replace
 
         {'cy': $'($links | length) cyberlinks should be successfully sent'}
@@ -956,7 +956,7 @@ export def 'links-publish' [
     | links-prepare-for-publishing
     | links-replace
     | length
-    | $in // (set-or-get-env-or-def links-per-transaction $links_per_trans)
+    | $in // (set-get-env links-per-transaction $links_per_trans)
     | seq 0 $in
     | each {links-send-tx}
 }
@@ -1361,7 +1361,7 @@ def get_links_hasura [
     multiplier: int
     --chunk_size: int = 1000
 ] {
-    let $graphql_api = set-or-get-env-or-def 'indexer-graphql-endpoint'
+    let $graphql_api = set-get-env 'indexer-graphql-endpoint'
 
     $"{cyberlinks\(limit: ($chunk_size), offset: ($multiplier * $chunk_size), order_by: {height: asc},
         where: {height: {_gt: ($height)}}) {(graph_columns | str join ' ')}}"
@@ -1374,9 +1374,9 @@ def 'get_links_clickhouse' [
     height: int
     multiplier: int
 ] {
-    let $url = set-or-get-env-or-def 'indexer-clickhouse-endpoint'
-    let $auth = set-or-get-env-or-def 'indexer-clickhouse-auth'
-    let $chunk_size = set-or-get-env-or-def 'indexer-clickhouse-chunksize'
+    let $url = set-get-env 'indexer-clickhouse-endpoint'
+    let $auth = set-get-env 'indexer-clickhouse-auth'
+    let $chunk_size = set-get-env 'indexer-clickhouse-chunksize'
 
     $'SELECT particle_from, particle_to, neuron, height, timestamp
         FROM spacebox.cyberlink
@@ -1413,7 +1413,7 @@ export def 'graph-receive-new-links' [
     filename?: string@'nu-complete-graph-csv-files' # graph csv filename in the 'cy/graph' folder
     --source: string@'nu-complete-graph-provider' = 'hasura'
 ] {
-    let $cyberlinks_path = set-or-get-env-or-def cyberlinks-csv-table $filename
+    let $cyberlinks_path = set-get-env cyberlinks-csv-table $filename
     let $path_csv = cy-path graph $cyberlinks_path
     let $last_height = graph_csv_get_last_height $path_csv
 
@@ -2153,7 +2153,7 @@ export def 'graph-links-df' [
     --exclude_system # exclude system particles in from column (tweet, follow, avatar)
 ] {
     let $input = $in
-    let $cyberlinks_path = set-or-get-env-or-def cyberlinks-csv-table $filename
+    let $cyberlinks_path = set-get-env cyberlinks-csv-table $filename
     let $input_type = $input | describe
 
     if (
@@ -4100,7 +4100,7 @@ export def --wrapped 'caching-function' [
 
     let $rest = $rest | into string
 
-    let $cache_stale_refresh = set-or-get-env-or-def caching-function-cache_stale_refresh $cache_stale_refresh
+    let $cache_stale_refresh = set-get-env caching-function-cache_stale_refresh $cache_stale_refresh
 
     if $rest == [] { error make {msg: 'The "caching-function" function needs arguments'} }
 
