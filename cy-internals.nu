@@ -131,29 +131,13 @@ export def 'set-select-from-variants' [
 export def --env 'set-or-get-env-or-def' [
     key
     value?
-    --dont_set_env
 ] {
-    let $val_ref = $value
-        | if $in != null {} else {
-            $env.cy | get -i $key
-        }
-        | if $in != null {
-            return $in
-        } else {
-            let $key_record = cy-path kickstart settings-variants.yaml
-                | open
-                | get -i $key
-
-            $key_record
-            | get -i variants.0
-            | match-type $key_record.type?
-        }
-
-    if not $dont_set_env {
-        $env.cy = ($env.cy | upsert $key $val_ref)
+    if $value != null {
+        $env.cy = ($env.cy | upsert $key $value)
+        return $value
+    } else {
+        $env.cy | get $key
     }
-
-    $val_ref
 }
 
 
