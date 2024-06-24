@@ -3163,8 +3163,8 @@ export def 'tokens-ibc-denoms-table' [
             )
         } else {}
     }
-    | upsert token {
-        tokens-shorten-ibc $in.denom $in.base_denom $in.path
+    | upsert token {|i|
+        tokens-shorten-ibc $i.denom $i.base_denom $i.path
     }
     | sort-by path --natural
     | reject path amount
