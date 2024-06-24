@@ -3210,8 +3210,8 @@ export def 'tokens-info-from-registry' [
 ] {
     'bostrom1w33tanvadg6fw04suylew9akcagcwngmkvns476wwu40fpq36pms92re6u'
     | append ({get_assets_by_chain: {chain_name: $chain_name}} | to json -r)
-    | append [['--node' 'https://rpc.bostrom.cybernode.ai:443' '--output' 'json']]
-    | caching-function --exec 'cyber' --no_default_params query wasm contract-state smart $in.0 $in.1 ...$in.2
+    | append ['--node' 'https://rpc.bostrom.cybernode.ai:443' '--output' 'json']
+    | caching-function --exec 'cyber' --no_default_params query wasm contract-state smart ...$in
     | get data.assets
     | upsert denom_units {|i| $i.denom_units?.exponent? | default [0] | math max}
     | select base symbol denom_units name description display traces -i
