@@ -3182,13 +3182,12 @@ export def 'tokens-ibc-denoms-table' [
 export def 'tokens-denoms-decimals-dict' [] {
     # eventually should be on contract bostrom15phze6xnvfnpuvvgs2tw58xnnuf872wlz72sv0j2yauh6zwm7cmqqpmc42
     # but now on git
-    http get 'https://raw.githubusercontent.com/cybercongress/cyb/master/src/utils/tokenList.js'
+    # http get 'https://raw.githubusercontent.com/cybercongress/cyb-ts/master/src/utils/tokenList.js'
+    open tokenList.js
     | str replace -r -m '(?s).*(\[.*\]).*' '$1'
     | from nuon
     | rename -c {'coinMinimalDenom': 'base_denom'}
     | rename -c {'denom': 'ticker'}
-    | rename -c {'coinDecimals': 'decimals'}
-    | select base_denom ticker decimals
     | append [
         [base_denom, ticker, coinDecimals];
         [usomm SOMM 6]
@@ -3198,6 +3197,8 @@ export def 'tokens-denoms-decimals-dict' [] {
         [hydrogen mH 6]
         [tocyb mTOCYB 6]
     ]
+    | rename -c {'coinDecimals': 'decimals'}
+    | select base_denom ticker decimals
     | reverse
     | uniq-by base_denom
 }
