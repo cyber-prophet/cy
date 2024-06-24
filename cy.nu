@@ -4087,6 +4087,7 @@ export def --wrapped 'caching-function' [
     --exec: string = '' # The name of executable
     --cache_validity_duration: duration = 60min # Sets the cache's valid duration.
                                                 # No updates initiated during this period.
+                                                # set to 0sec to request for
     --cache_stale_refresh: duration # Sets stale cache's usable duration.
                                     # Triggers background update and returns cache results.
                                     # If exceeded, requests immediate data update.
@@ -4099,7 +4100,7 @@ export def --wrapped 'caching-function' [
 ]: nothing -> record {
     if ($retries != null) {$env.cy.caching-function-max-retries = $retries}
 
-    let $rest = $rest | into string
+    let $rest = $rest | flatten | flatten | into string
 
     let $cache_stale_refresh = set-get-env caching-function-cache_stale_refresh $cache_stale_refresh
 
@@ -4107,8 +4108,6 @@ export def --wrapped 'caching-function' [
 
     let $executable = if $exec != '' {$exec} else {$env.cy.exec}
     let $sub_commands_and_args = $rest
-        | flatten
-        | flatten # to receive params as a list from passport-get
         | if $no_default_params {} else {
             append (default-node-params)
         }
