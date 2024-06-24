@@ -3217,7 +3217,8 @@ export def 'tokens-info-from-registry' [
     | upsert denom_units {|i| $i.denom_units?.exponent? | default [0] | math max}
     | select base symbol denom_units name description display traces -i
     | rename denom token
-    | where token != null
+    | where token != null # tokens with no information
+    | upsert traces {|i| if $i.traces? == null {''}  else {get chain.path.0 | split row '/' | drop | str join '/'}}
     | insert network $chain_name
 }
 
