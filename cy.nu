@@ -3159,7 +3159,7 @@ export def 'tokens-ibc-denoms-table' [
                 | str replace 'ibc/' ''
                 | caching-function query ibc-transfer denom-trace $"'($in)'" --retries 1
                 | get -i denom_trace
-                | default {path: 'unknown' base_denom: 'unknown'}
+                | default {path: '00-00' base_denom: 'unknown'}
             )
         } else {}
     }
