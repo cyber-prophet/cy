@@ -3164,13 +3164,7 @@ export def 'tokens-ibc-denoms-table' [
         } else {}
     }
     | upsert token {
-        |i| $i.path #denom compound
-        | str replace --regex --all '[^-0-9]' ''
-        | str trim -c '-'
-        | if ($in | split row '-' | length | $in > 1) {
-            $in + '🛑'
-        } else {}
-        | $'($i.base_denom)/($i.denom | str substring 62..68)/($in)'
+        tokens-shorten-ibc $in.denom $in.base_denom $in.path
     }
     | sort-by path --natural
     | reject path amount
@@ -3180,9 +3174,6 @@ export def 'tokens-ibc-denoms-table' [
 }
 
 export def 'tokens-denoms-exponent-dict' [] {
-    # eventually should be on contract bostrom15phze6xnvfnpuvvgs2tw58xnnuf872wlz72sv0j2yauh6zwm7cmqqpmc42
-    # but now on git
-    # http get 'https://raw.githubusercontent.com/cybercongress/cyb-ts/master/src/utils/tokenList.js'
     open tokenList.js
     | str replace -r -m '(?s).*(\[.*\]).*' '$1'
     | from nuon
@@ -3728,6 +3719,20 @@ export def 'tokens-fraction-input' [
             }
         }
     }
+}
+
+def 'tokens-shorten-ibc' [
+    denom: string
+    base_denom: string
+    path: string
+] {
+    $path #denom compound
+    | str replace --regex --all '[^-0-9]' ''
+    | str trim -c '-'
+    | if ($in | split row '-' | length | $in > 1) {
+        '🛑'
+    } else {}
+    | $'($base_denom)/($denom | str substring 62..68)/($in)'
 }
 
 # info about props current and past
