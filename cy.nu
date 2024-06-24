@@ -2951,7 +2951,7 @@ def 'token-dummy-balance' [] {
 export def 'tokens-supply-get' [
     --height: int = 0 # a height to request a state on
 ] {
-    caching-function query bank total [--height $height]
+    caching-function query bank total --height $height
     | get supply
     | into int amount
     | transpose --ignore-titles --as-record --header-row
