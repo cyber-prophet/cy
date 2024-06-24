@@ -880,7 +880,8 @@ def 'tx-broadcast' []: path -> record {
 # code: 0
 # txhash: 9B37FA56D666C2AA15E36CDC507D3677F9224115482ACF8CAF498A246DEF8EB0
 def 'links-send-tx' [ ] {
-    let $links = links-view -q | first $env.cy.links-per-transaction
+    let $links = links-view -q
+        | first $env.cy.links-per-transaction
 
     let $response = tx-json-create-from-cyberlinks $links
         | if ($env.cy.authz? != null) {
@@ -901,9 +902,9 @@ def 'links-send-tx' [ ] {
         | to csv --noheaders
         | save $filename --append --raw
 
-        links-view -q | skip (
-            set-get-env links-per-transaction
-        ) | links-replace
+        links-view -q
+        | skip $env.cy.links-per-transaction
+        | links-replace
 
         {'cy': $'($links | length) cyberlinks should be successfully sent'}
         | merge $response
