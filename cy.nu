@@ -3154,9 +3154,13 @@ export def 'tokens-ibc-denoms-table' [
     | join --left (cy-path kickstart ibc_denoms.csv | open) denom
     | each { |i| $i
         | if $i.base_denom? == null {
-            merge ( caching-function query ibc-transfer denom-trace $"'($i.denom | str replace 'ibc/' '')'" --retries 1
+            merge (
+                $i.denom
+                | str replace 'ibc/' ''
+                | caching-function query ibc-transfer denom-trace $"'($in)'" --retries 1
                 | get -i denom_trace
-                | default {path: 'unknown' base_denom: 'unknown'} )
+                | default {path: 'unknown' base_denom: 'unknown'}
+            )
         } else {}
     }
     | upsert token {
