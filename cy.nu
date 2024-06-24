@@ -3179,7 +3179,7 @@ export def 'tokens-ibc-denoms-table' [
     }
 }
 
-export def 'tokens-denoms-decimals-dict' [] {
+export def 'tokens-denoms-exponent-dict' [] {
     # eventually should be on contract bostrom15phze6xnvfnpuvvgs2tw58xnnuf872wlz72sv0j2yauh6zwm7cmqqpmc42
     # but now on git
     # http get 'https://raw.githubusercontent.com/cybercongress/cyb-ts/master/src/utils/tokenList.js'
@@ -3197,8 +3197,8 @@ export def 'tokens-denoms-decimals-dict' [] {
         [hydrogen mH 6]
         [tocyb mTOCYB 6]
     ]
-    | rename -c {'coinDecimals': 'decimals'}
-    | select base_denom ticker decimals
+    | rename -c {'coinDecimals': 'exponent'}
+    | select base_denom ticker exponent
     | reverse
     | uniq-by base_denom
 }
@@ -3379,20 +3379,20 @@ export def 'tokens-format' [
     | move token --before ($in | columns | first)
     | move denom --after ($in | columns | last)
     | upsert base_denom {|i| $i.token | split row '/' | get 0 }
-    | join -l (tokens-denoms-decimals-dict) base_denom base_denom
-    | default 0 decimals
+    | join -l (tokens-denoms-exponent-dict) base_denom base_denom
+    | default 0 exponent
     | upsert token {
         |i| $i.token
         | str replace $i.base_denom ($i.ticker? | default ($i.token | str upcase))
     }
     | if amount in $columns {
         upsert amount_f {
-            |i| $i.amount / (10 ** $i.decimals)
+            |i| $i.amount / (10 ** $i.exponent)
             | to-number-format --integers 9 --decimals 0
         }
         | move amount_f --after token
     } else {}
-    | reject -i base_denom ticker decimals
+    | reject -i base_denom ticker exponent
     | if $clean {reject denom amount} else {}
 }
 
