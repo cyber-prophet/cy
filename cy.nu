@@ -3208,25 +3208,28 @@ export def 'tokens-denoms-exponent-dict' [] {
 # https://github.com/Snedashkovsky/on-chain-registry
 export def 'tokens-info-from-registry' [
     chain_name: string = 'bostrom'
+    --full # show full data
 ] {
     'bostrom1w33tanvadg6fw04suylew9akcagcwngmkvns476wwu40fpq36pms92re6u'
     | append ({get_assets_by_chain: {chain_name: $chain_name}} | to json -r)
     | append ['--node' 'https://rpc.bostrom.cybernode.ai:443' '--output' 'json']
     | caching-function --exec 'cyber' --no_default_params query wasm contract-state smart ...$in
     | get data.assets
-    | where display != null # tokens with no information
-    | insert path {|i|
-        if $i.traces? == null {''} else {
-            $i.traces
-            | get chain.path.0
-            | split row '/'
-            | drop
-            | str join '/'
+    | if $full {} else {
+        where display != null # tokens with no information
+        | insert path {|i|
+            if $i.traces? == null {''} else {
+                $i.traces
+                | get chain.path.0
+                | split row '/'
+                | drop
+                | str join '/'
+            }
         }
+        | upsert exponent {|i| $i.denom_units?.exponent? | default [0] | math max}
+        | select base display exponent chain_id path -i
+        | rename denom base_denom
     }
-    | upsert exponent {|i| $i.denom_units?.exponent? | default [0] | math max}
-    | select base display exponent chain_id path -i
-    | rename denom base_denom
 }
 
 export def 'tokens-price-in-h-naive' [
