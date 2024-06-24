@@ -3214,11 +3214,8 @@ export def 'tokens-info-from-registry' [
     | append ['--node' 'https://rpc.bostrom.cybernode.ai:443' '--output' 'json']
     | caching-function --exec 'cyber' --no_default_params query wasm contract-state smart ...$in
     | get data.assets
-    | upsert denom_units {|i| $i.denom_units?.exponent? | default [0] | math max}
-    | select base symbol denom_units name description display traces -i
-    | rename denom token
-    | where token != null # tokens with no information
-    | upsert traces {|i|
+    | where display != null # tokens with no information
+    | insert path {|i|
         if $i.traces? == null {''} else {
             $i.traces
             | get chain.path.0
@@ -3227,7 +3224,9 @@ export def 'tokens-info-from-registry' [
             | str join '/'
         }
     }
-    | insert network $chain_name
+    | upsert exponent {|i| $i.denom_units?.exponent? | default [0] | math max}
+    | select base display exponent chain_id path -i
+    | rename denom base_denom
 }
 
 export def 'tokens-price-in-h-naive' [
