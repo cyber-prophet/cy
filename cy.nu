@@ -3134,6 +3134,7 @@ export def 'tokens-routed-to' [
 
 # Check IBC denoms
 #
+# The emoji 🛑 means that it has been sent not from the network that issued this token.
 # > cy tokens-ibc-denoms-table | first 2 | to yaml
 # - path: transfer/channel-2
 #   base_denom: uosmo
@@ -3155,10 +3156,9 @@ export def 'tokens-ibc-denoms-table' [
         | if $i.base_denom? == null {
             merge ( caching-function query ibc-transfer denom-trace $"'($i.denom | str replace 'ibc/' '')'" --retries 1
                 | get -i denom_trace
-                | default {} )
+                | default {path: 'unknown' base_denom: 'unknown'} )
         } else {}
     }
-    | where path? != null # fix for not-found tokens
     | upsert token {
         |i| $i.path #denom compound
         | str replace --regex --all '[^-0-9]' ''
