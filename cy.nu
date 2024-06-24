@@ -3367,7 +3367,7 @@ def swap_calc_amount [
 export def 'tokens-format' [
     --clean # display only formatted values
 ] {
-    let $input = join -l (tokens-ibc-denoms-table) denom denom | fill non-exist -v ''
+    let $input = join -l (tokens-ibc-denoms-table) denom | fill non-exist -v ''
 
     let $columns = $input | columns
 
@@ -3379,7 +3379,7 @@ export def 'tokens-format' [
     | move token --before ($in | columns | first)
     | move denom --after ($in | columns | last)
     | upsert base_denom {|i| $i.token | split row '/' | get 0 }
-    | join -l (tokens-denoms-exponent-dict) base_denom base_denom
+    | join -l (tokens-denoms-exponent-dict) base_denom
     | default 0 exponent
     | upsert token {
         |i| $i.token
