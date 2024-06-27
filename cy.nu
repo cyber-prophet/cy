@@ -3262,7 +3262,7 @@ export def 'tokens-in-token-naive' [
 ]: table -> table {
     let $input = $in
     let $denom = tokens-info-from-registry
-        | select token denom
+        | select base_denom denom
         | transpose --ignore-titles --as-record --header-row
         | get $token
 
