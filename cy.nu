@@ -1987,7 +1987,6 @@ export def 'graph-to-gephi' [] {
         | polars as Timeset
     )
     | polars into-nu
-    | reject index
     | move id label cid --before height
     | save -f (cy-path export !gephi_particles.csv)
 }
@@ -2042,7 +2041,6 @@ export def 'graph-to-cosmograph' [] {
     | polars rename timestamp time
     | polars select ($in | polars columns | prepend [content_s_from content_s_to] | uniq)
     | polars into-nu
-    | reject index
     | save -f (
         cy-path 'export' $'cybergraph-in-cosmograph(now-fn).csv'
         | print-and-pass {|i| cprint $'You can upload the file to *https://cosmograph.app/run* ($i)'}
@@ -2058,7 +2056,7 @@ export def 'graph-to-graphviz' [
         | polars select 'content_s_from' 'content_s_to'
         | $in.content_s_from + ' -> ' + $in.content_s_to + ';'
         | polars into-nu
-        | rename index links
+        | rename links
         | get links
         | str join (char nl)
         | "digraph G {\n" + $options + "\n" + $in + "\n}"

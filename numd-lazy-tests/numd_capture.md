@@ -295,7 +295,6 @@ true
         | polars collect
         | polars into-nu
         | sort-by count
-        | reject index
 ╭─source─┬─count─╮
 │ b      │    76 │
 │ a      │  1205 │
@@ -310,7 +309,6 @@ true
         | polars collect
         | polars into-nu
         | sort-by count
-        | reject index
 ╭──#──┬──────────────────────neuron──────────────────────┬─────────────────────particle─────────────────────┬──height──┬───────timestamp───────┬──init-role──╮
 │ 0   │ bostrom1ay267fakkrgfy9lf2m7wsj8uez2dgylhtkdf9k   │ QmPcfxEfW317u3bbz8MbEhjoMZ5HMFsx5TbsEHWPd1kLLw   │     9029 │ 2021-11-06 03:52:13   │ from        │
 │ 1   │ bostrom1ay267fakkrgfy9lf2m7wsj8uez2dgylhtkdf9k   │ QmXQ4k4ciK5ieaSwtccmH9mm4QdPS6Spd21DTqLFrEwDWR   │     9029 │ 2021-11-06 03:52:13   │ to          │
