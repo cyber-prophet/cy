@@ -1,95 +1,10 @@
 ```nushell
 > $env.config.table.abbreviated_row_count = 10000
+
 > help-cy
-╭────────────────────command────────────────────┬───────────────────────────────────desc───────────────────────────────────╮
-│ cy pin-text                                   │ Pin a text particle                                                      │
-│ cy link-texts                                 │ Add a 2-texts cyberlink to the temp table                                │
-│ cy link-chain                                 │ Add a link chain to the temp table                                       │
-│ cy link-files                                 │ Pin files from the current folder to the local node and append their ... │
-│ cy follow                                     │ Create a cyberlink according to semantic construction of following a ... │
-│ cy tweet                                      │ Add a tweet and send it immediately (unless of disable_send flag)        │
-│ cy link-random                                │ Make a random cyberlink from different APIs (chucknorris.io, forismat... │
-│ cy links-view                                 │ View the temp cyberlinks table                                           │
-│ cy links-append                               │ Append piped-in table to the temp cyberlinks table                       │
-│ cy links-replace                              │ Replace the temp table with piped-in table                               │
-│ cy links-swap-from-to                         │ Swap columns from and to                                                 │
-│ cy links-clear                                │ Empty the temp cyberlinks table                                          │
-│ cy links-link-all                             │ Add the same text particle into the 'from' or 'to' column of the temp... │
-│ cy links-pin-columns                          │ Pin values from column 'text_from' and 'text_to' to an IPFS node and ... │
-│ cy links-remove-existed-1by1                  │ Remove existing cyberlinks from the temp cyberlinks table                │
-│ cy links-remove-existed-2                     │ Remove existing links using graph snapshot data                          │
-│ cy links-publish                              │ Publish all links from the temp table to cybergraph                      │
-│ cy tsv-copy                                   │ Copy a table from the pipe into the clipboard (in tsv format)            │
-│ cy tsv-paste                                  │ Paste a table from the clipboard to stdin (so it can be piped further)   │
-│ cy message-send                               │ send message to neuron with (in 1boot transaction with memo)             │
-│ cy passport-get                               │ Get a passport by providing a neuron's address or nick                   │
-│ cy passport-set                               │ Set a passport's particle, data or avatar field for a given nickname     │
-│ cy dict-neurons-view                          │ Output neurons dict                                                      │
-│ cy dict-neurons-add                           │ Add piped in neurons to YAML-dictionary with tag and category            │
-│ cy dict-neurons-tags                          │ Output dict-neurons tags                                                  │
-│ cy doctor                                     │ Fix some problems of cy (for example caused by updates)                  │
-│ cy dict-neurons-update                        │ Update neurons YAML-dictionary                                           │
-│ cy graph-download-snapshot                    │ Download a snapshot of cybergraph                                        │
-│ cy graph-receive-new-links                    │ Download the latest cyberlinks from a hasura cybernode endpoint          │
-│ cy graph-download-missing-particles           │ download particles missing from local cache for followed neurons or t... │
-│ cy graph-filter-system-particles              │ filter system particles out                                              │
-│ cy graph-merge                                │ merge two graphs together, add the `source` column                       │
-│ cy graph-to-particles                         │ Output unique list of particles from piped in cyberlinks table           │
-│ cy particles-keep-only-first-neuron           │ In the piped in particles df leave only particles appeared for the fi... │
-│ cy graph-update-particles-parquet             │ Update the 'particles.parquet' file (it includes content of text files)  │
-│ cy graph-filter-neurons                       │ Filter the graph to chosen neurons only                                  │
-│ cy graph-filter-contracts                     │ Filter the graph to keep or exclude links from contracts                 │
-│ cy graph-append-related                       │ Append related cyberlinks to the piped in graph                          │
-│ cy graph-neurons-stats                        │ Output neurons stats based on piped in or the whole graph                │
-│ cy graph-stats                                │ Output graph stats based on piped in or the whole graph                  │
-│ cy graph-to-gephi                             │ Export a graph into CSV file for import to Gephi                         │
-│ cy graph-to-logseq                            │ Logseq export WIP                                                        │
-│ cy graph-to-txt-feed                          │ Output particles into txt formatted feed                                  │
-│ cy graph-to-cosmograph                        │ Export piped-in graph to a CSV file in cosmograph format                 │
-│ cy graph-to-graphviz                          │ Export piped-in graph into graphviz format                               │
-│ cy graph-add-metadata                         │ Add content_s and neuron's nicknames columns to piped in or the whole... │
-│ cy graph-links-df                             │ Output a full graph, or pass piped in graph further                      │
-│ cy config-new                                 │ Create a config JSON to set env variables, to use them as parameters ... │
-│ cy config-view                                │ View a saved JSON config file                                            │
-│ cy config-save                                │ Save the piped-in JSON into config file                                  │
-│ cy config-activate                            │ Activate the config JSON                                                 │
-│ cy search                                     │ Use the built-in node search function in cyber or pussy                  │
-│ cy cid-get-type-gateway                       │ Obtain cid info                                                          │
-│ cy cid-read-or-download                       │ Read a CID from the cache, and if the CID is absent - add it into the... │
-│ cy cid-download-async                         │ Add a cid into queue to download asynchronously                          │
-│ cy cid-download                               │ Download cid immediately and mark it in the queue                        │
-│ cy queue-cid-add                              │ Add a CID to the download queue                                          │
-│ cy watch-search-folder                        │ Watch the queue folder, and if there are updates, request files to do... │
-│ cy queue-cids-download                        │ Check the queue for the new CIDs, and if there are any, safely downlo... │
-│ cy cache-clean-cids-queue                     │ remove from queue CIDs with many attempts                                │
-│ cy cache-clear                                │ Clear the cache folder                                                   │
-│ cy query-current-height                       │ Get a current height for the active network in config                    │
-│ cy query-rank-karma                           │ Get a karma metric for a given neuron                                    │
-│ cy tokens-balance-get                         │ Get a balance for a given account                                        │
-│ cy tokens-supply-get                          │ Get supply of all tokens in a network                                    │
-│ cy tokens-ibc-denoms-table                    │ Check IBC denoms                                                         │
-│ cy tokens-info-from-registry                  │ Get info about tokens from the on-chain-registry contract                │
-│ cy balances                                   │ Check balances for the keys added to the active CLI                      │
-│ cy tokens-rewards-withdraw                    │ Withdraw rewards, make stats                                             │
-│ cy governance-view-props                      │ info about props current and past                                        │
-│ cy set-links-table-name                       │ Set the custom name for links csv table                                  │
-│ cy ipfs-bootstrap-add-congress                │ Add the cybercongress node to bootstrap nodes                            │
-│ cy validator-generate-persistent-peers-string │ Dump the peers connected to the given node to the comma-separated 'pe... │
-│ cy validator-query-delegators                 │ Query all delegators to a specified validator                            │
-│ cy query-tx                                   │ Query tx by hash                                                         │
-│ cy query-tx-seq                               │ Query tx by acc/seq                                                      │
-│ cy query-account                              │ Query account                                                            │
-│ cy query-authz-grants-by-granter              │ Query status of authz grants for address                                 │
-│ cy query-authz-grants-by-grantee              │ Query status of authz grants for address                                 │
-│ cy caching-function                           │ A wrapper, to cache CLI requests                                         │
-│ cy qnbn                                       │ query neuron addrsss by his nick                                         │
-│ cy update-cy                                  │ Update Cy and Nushell to the latest versions                             │
-│ cy help-cy                                    │ An ordered list of cy commands                                           │
-│ cy echo_particle_txt                          │ echo particle for publishing                                             │
-╰────────────────────command────────────────────┴───────────────────────────────────desc───────────────────────────────────╯
 
 > help-cy | length
-84
+0
 ```
 
 ```nushell
@@ -97,16 +12,22 @@
 
 > pin-text 'cyber'
 QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
+
 > pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV'
 QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
+
 > pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV' --ignore_cid
 QmcDUZon6VQLR3gjAvSKnudSVQ2RbGXUtFFV8mR6zHZK8F
+
 > pin-text 'linkfilestest/cyber.txt'
 QmafiM9MqvpAh4eZJrB7KJ3BAaEqphJGS9EDpLnMePKCPn
+
 > pin-text ([tests linkfilestest cyber.txt] | path join) --follow_file_path
 QmSFQ4nwTiQppHg3daTJ7GHFuiFFiu6mNjjeKN54ynTTUx
+
 > pin-text ([linkfilestest cyber.txt] | path join) --follow_file_path
 QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
+
 > link-texts "cyber" "bostrom"
 ╭───────────┬────────────────────────────────────────────────╮
 │ from_text │ cyber                                          │
@@ -114,6 +35,7 @@ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 │ from      │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │
 │ to        │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │
 ╰───────────┴────────────────────────────────────────────────╯
+
 > link-texts "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV" "bostrom"
 ╭───────────┬────────────────────────────────────────────────╮
 │ from_text │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │
@@ -121,6 +43,7 @@ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 │ from      │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │
 │ to        │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │
 ╰───────────┴────────────────────────────────────────────────╯
+
 > link-texts "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV" "bostrom" --ignore_cid
 ╭───────────┬────────────────────────────────────────────────╮
 │ from_text │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │
@@ -128,32 +51,36 @@ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 │ from      │ QmcDUZon6VQLR3gjAvSKnudSVQ2RbGXUtFFV8mR6zHZK8F │
 │ to        │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │
 ╰───────────┴────────────────────────────────────────────────╯
+
 > set-cy-setting ipfs-upload-with-no-confirm 'true'
 
 > link-chain bostrom cyber superintelligence
-╭────from_text─────┬─────────to_text──────────┬─────────────────────────from──────────────────────────┬──────────────────────────to──────────────────────────╮
-│ bostrom          │ cyber                    │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb        │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV       │
-│ cyber            │ superintelligence        │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV        │ QmRMMbTqFQ3o2NmHNYzLoS5fjT5WE3h9Sn21MvmEcsvJ8M       │
-╰────from_text─────┴─────────to_text──────────┴─────────────────────────from──────────────────────────┴──────────────────────────to──────────────────────────╯
+temp files saved to a local directory
+/Users/user/cy/temp/ipfs_upload/20240627-135001
+╭─from_text─┬──────to_text──────┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────╮
+│ bostrom   │ cyber             │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │
+│ cyber     │ superintelligence │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │ QmRMMbTqFQ3o2NmHNYzLoS5fjT5WE3h9Sn21MvmEcsvJ8M │
+╰─from_text─┴──────to_text──────┴──────────────────────from──────────────────────┴───────────────────────to───────────────────────╯
 
 > set-links-table-name
-temp_20240417-125111
+temp_20240627-135002
+
 > cd linkfilestest
 
 > link-files --link_filenames --yes --include_extension
-╭────from_text─────┬───────────to_text────────────┬────────────────────────from─────────────────────────┬─────────────────────────to─────────────────────────╮
-│ bostrom.txt      │ pinned_file:bostrom.txt      │ QmPtV5CU9v3u7MY7hMgG3z9kTno8o7JHJD1e6f3NLfZ86k      │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb     │
-│ cyber.txt        │ pinned_file:cyber.txt        │ QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6      │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV     │
-╰────from_text─────┴───────────to_text────────────┴────────────────────────from─────────────────────────┴─────────────────────────to─────────────────────────╯
+╭──from_text──┬─────────to_text─────────┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────╮
+│ bostrom.txt │ pinned_file:bostrom.txt │ QmPtV5CU9v3u7MY7hMgG3z9kTno8o7JHJD1e6f3NLfZ86k │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │
+│ cyber.txt   │ pinned_file:cyber.txt   │ QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6 │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │
+╰──from_text──┴─────────to_text─────────┴──────────────────────from──────────────────────┴───────────────────────to───────────────────────╯
 
 > cd ..
 
 > cd linkfilestest
 
 > link-files --link_filenames --yes --include_extension bostrom.txt
-╭────from_text─────┬───────────to_text────────────┬────────────────────────from─────────────────────────┬─────────────────────────to─────────────────────────╮
-│ bostrom.txt      │ pinned_file:bostrom.txt      │ QmPtV5CU9v3u7MY7hMgG3z9kTno8o7JHJD1e6f3NLfZ86k      │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb     │
-╰────from_text─────┴───────────to_text────────────┴────────────────────────from─────────────────────────┴─────────────────────────to─────────────────────────╯
+╭──from_text──┬─────────to_text─────────┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────╮
+│ bostrom.txt │ pinned_file:bostrom.txt │ QmPtV5CU9v3u7MY7hMgG3z9kTno8o7JHJD1e6f3NLfZ86k │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │
+╰──from_text──┴─────────to_text─────────┴──────────────────────from──────────────────────┴───────────────────────to───────────────────────╯
 
 > cd ..
 
@@ -164,41 +91,41 @@ temp_20240417-125111
 │ from      │ QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx │
 │ to        │ QmYwEKZimUeniN7CEAfkBRHCn4phJtNoNJxnZXEAhEt3af │
 ╰───────────┴────────────────────────────────────────────────╯
+
 > follow bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8 --use_local_list_only
 
 > validator-chooser | length
-96
-> caching-function query rank karma bostrom1smsn8u0h5tlvt3jazf78nnrv54aspged9h2nl9 | describe
-nothing
-> config-activate 42gboot+cyber
-╭────────────────────┬────────────────────────────────────────────────────────────╮
-│ config-name        │ 42gboot+cyber                                              │
-│ ipfs-download-from │ gateway                                                    │
-│ ipfs-files-folder  │ /Users/user/Documents/local_files/cyber_files/ipfs_objects │
-│ path               │ /Users/user/cy                                             │
-│ address            │ bostrom166tas63rcdezv35jycr8mlfr0qgjdm7rgpzly5             │
-│ chain-id           │ bostrom                                                    │
-│ exec               │ cyber                                                      │
-│ ipfs-storage       │ cybernode                                                  │
-│ passport-nick      │ 42gboot                                                    │
-│ rpc-address        │ https://rpc.bostrom.cybernode.ai:443                       │
-╰────────────────────┴────────────────────────────────────────────────────────────╯
+156
+
 > caching-function query rank karma bostrom1smsn8u0h5tlvt3jazf78nnrv54aspged9h2nl9 | describe
 record<karma: string, update_time: date>
+
+> config-activate 42gboot+cyber
+
+> caching-function query rank karma bostrom1smsn8u0h5tlvt3jazf78nnrv54aspged9h2nl9 | describe
+record<karma: string, update_time: date>
+
 > caching-function query bank balances bostrom1quchyywzdxp62dq3rwan8fg35v6j58sjwnfpuu | describe
 record<balances: table<denom: string, amount: string>, pagination: record<next_key: nothing, total: string>, update_time: date>
+
 > caching-function query bank balances bostrom1cj8j6pc3nda8v708j3s4a6gq2jrnue7j857m9t | describe
 record<balances: table<denom: string, amount: string>, pagination: record<next_key: nothing, total: string>, update_time: date>
+
 > caching-function query staking delegations bostrom1eg3v42jpwf3d66v6rnrn9hedyd8qvhqy4dt8pc | describe
 record<delegation_responses: table<delegation: record<delegator_address: string, validator_address: string, shares: string>, balance: record<denom: string, amount: string>>, pagination: record<next_key: nothing, total: string>, update_time: date>
+
 > caching-function query staking delegations bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 | describe
 record<delegation_responses: table<delegation: record<delegator_address: string, validator_address: string, shares: string>, balance: record<denom: string, amount: string>>, pagination: record<next_key: nothing, total: string>, update_time: date>
+
 > caching-function query rank top | describe
 record<result: table<particle: string, rank: string>, pagination: record<total: int>, update_time: date>
+
 > caching-function query ibc-transfer denom-traces | describe
 record<denom_traces: table<path: string, base_denom: string>, pagination: record<next_key: nothing, total: string>, update_time: date>
+
 > caching-function query liquidity pools --cache_validity_duration 0sec | describe
 record<pools: table<id: string, type_id: int, reserve_coin_denoms: list<string>, reserve_account_address: string, pool_coin_denom: string>, pagination: record<next_key: nothing, total: string>, update_time: date>
+
 > links-clear
 
 > tweet 'cyber-prophet is cool' --disable_send
@@ -208,8 +135,10 @@ record<pools: table<id: string, type_id: int, reserve_coin_denoms: list<string>,
 │ from      │ QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx │
 │ to        │ QmWm9pmmz66cq41t1vtZWoRz5xmHSmoKCrrgdP9adcpoZK │
 ╰───────────┴────────────────────────────────────────────────╯
+
 > set-links-table-name
-temp_20240417-125554
+temp_20240627-135022
+
 > link-texts 'cyber' 'bostrom'
 ╭───────────┬────────────────────────────────────────────────╮
 │ from_text │ cyber                                          │
@@ -217,101 +146,178 @@ temp_20240417-125554
 │ from      │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │
 │ to        │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │
 ╰───────────┴────────────────────────────────────────────────╯
+
 > [[from_text, to_text]; ['cyber-prophet' '🤘'] ['tweet' 'cy is cool!']]
-    | links-append
-╭────from_text─────┬────to_text────┬───────────────────────from───────────────────────┬────────────────────────to────────────────────────┬─────timestamp─────╮
-│ cyber            │ bostrom       │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV   │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb   │ 20240417-125602   │
-│ cyber-prophet    │ 🤘            │                                                  │                                                  │ 20240417-125611   │
-│ tweet            │ cy is cool!   │                                                  │                                                  │ 20240417-125611   │
-╰────from_text─────┴────to_text────┴───────────────────────from───────────────────────┴────────────────────────to────────────────────────┴─────timestamp─────╯
+╭───from_text───┬───to_text───╮
+│ cyber-prophet │ 🤘          │
+│ tweet         │ cy is cool! │
+╰───from_text───┴───to_text───╯
 
 > links-pin-columns
-╭────from_text─────┬────to_text────┬───────────────────────from───────────────────────┬────────────────────────to────────────────────────┬─────timestamp─────╮
-│ cyber            │ bostrom       │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV   │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb   │ 20240417-125602   │
-│ cyber-prophet    │ 🤘            │ QmXFUupJCSfydJZ85HQHD8tU1L7CZFErbRdMTBxkAmBJaD   │ QmQKvsh8pp6qFk31ch6RydBFeEHi82TjsRP8FEPYQ3jDow   │ 20240417-125611   │
-│ tweet            │ cy is cool!   │ QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx   │ QmddL5M8JZiaUDcEHT2LgUnZZGLMTTDEYVKWN1iMLk6PY8   │ 20240417-125611   │
-╰────from_text─────┴────to_text────┴───────────────────────from───────────────────────┴────────────────────────to────────────────────────┴─────timestamp─────╯
+╭─from_text─┬─to_text─┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────┬────timestamp────╮
+│ cyber     │ bostrom │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │ 20240627-135026 │
+╰─from_text─┴─to_text─┴──────────────────────from──────────────────────┴───────────────────────to───────────────────────┴────timestamp────╯
 
 > links-view --no_timestamp
-╭───────from_text───────┬──────to_text───────┬─────────────────────────from──────────────────────────┬──────────────────────────to───────────────────────────╮
-│ cyber                 │ bostrom            │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV        │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb        │
-│ cyber-prophet         │ 🤘                 │ QmXFUupJCSfydJZ85HQHD8tU1L7CZFErbRdMTBxkAmBJaD        │ QmQKvsh8pp6qFk31ch6RydBFeEHi82TjsRP8FEPYQ3jDow        │
-│ tweet                 │ cy is cool!        │ QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx        │ QmddL5M8JZiaUDcEHT2LgUnZZGLMTTDEYVKWN1iMLk6PY8        │
-╰───────from_text───────┴──────to_text───────┴─────────────────────────from──────────────────────────┴──────────────────────────to───────────────────────────╯
+There are 1 cyberlinks in the temp table:
+╭─from_text─┬─to_text─┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────╮
+│ cyber     │ bostrom │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │
+╰─from_text─┴─to_text─┴──────────────────────from──────────────────────┴───────────────────────to───────────────────────╯
 
 > links-link-all 'cy testing script'
-╭──────from_text──────┬────to_text────┬──────────────────────from───────────────────────┬───────────────────────to────────────────────────┬────timestamp─────╮
-│ cy testing script   │ bostrom       │ QmdMy9SGd3StRUXoEX4BZQvGsgW6ejn4gMCT727GypSeZx  │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb  │ 20240417-125602  │
-│ cy testing script   │ 🤘            │ QmdMy9SGd3StRUXoEX4BZQvGsgW6ejn4gMCT727GypSeZx  │ QmQKvsh8pp6qFk31ch6RydBFeEHi82TjsRP8FEPYQ3jDow  │ 20240417-125611  │
-│ cy testing script   │ cy is cool!   │ QmdMy9SGd3StRUXoEX4BZQvGsgW6ejn4gMCT727GypSeZx  │ QmddL5M8JZiaUDcEHT2LgUnZZGLMTTDEYVKWN1iMLk6PY8  │ 20240417-125611  │
-╰──────from_text──────┴────to_text────┴──────────────────────from───────────────────────┴───────────────────────to────────────────────────┴────timestamp─────╯
+╭─────from_text─────┬─to_text─┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────┬────timestamp────╮
+│ cy testing script │ bostrom │ QmdMy9SGd3StRUXoEX4BZQvGsgW6ejn4gMCT727GypSeZx │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │ 20240627-135026 │
+╰─────from_text─────┴─to_text─┴──────────────────────from──────────────────────┴───────────────────────to───────────────────────┴────timestamp────╯
 
 > links-view --no_timestamp
-╭────────from_text─────────┬──────to_text──────┬─────────────────────────from─────────────────────────┬──────────────────────────to──────────────────────────╮
-│ cy testing script        │ bostrom           │ QmdMy9SGd3StRUXoEX4BZQvGsgW6ejn4gMCT727GypSeZx       │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb       │
-│ cy testing script        │ 🤘                │ QmdMy9SGd3StRUXoEX4BZQvGsgW6ejn4gMCT727GypSeZx       │ QmQKvsh8pp6qFk31ch6RydBFeEHi82TjsRP8FEPYQ3jDow       │
-│ cy testing script        │ cy is cool!       │ QmdMy9SGd3StRUXoEX4BZQvGsgW6ejn4gMCT727GypSeZx       │ QmddL5M8JZiaUDcEHT2LgUnZZGLMTTDEYVKWN1iMLk6PY8       │
-╰────────from_text─────────┴──────to_text──────┴─────────────────────────from─────────────────────────┴──────────────────────────to──────────────────────────╯
+There are 1 cyberlinks in the temp table:
+╭─────from_text─────┬─to_text─┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────╮
+│ cy testing script │ bostrom │ QmdMy9SGd3StRUXoEX4BZQvGsgW6ejn4gMCT727GypSeZx │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │
+╰─────from_text─────┴─to_text─┴──────────────────────from──────────────────────┴───────────────────────to───────────────────────╯
 
 > config-activate 42gboot+cyber
-╭────────────────────┬────────────────────────────────────────────────────────────╮
-│ config-name        │ 42gboot+cyber                                              │
-│ ipfs-download-from │ gateway                                                    │
-│ ipfs-files-folder  │ /Users/user/Documents/local_files/cyber_files/ipfs_objects │
-│ path               │ /Users/user/cy                                             │
-│ address            │ bostrom166tas63rcdezv35jycr8mlfr0qgjdm7rgpzly5             │
-│ chain-id           │ bostrom                                                    │
-│ exec               │ cyber                                                      │
-│ ipfs-storage       │ cybernode                                                  │
-│ passport-nick      │ 42gboot                                                    │
-│ rpc-address        │ https://rpc.bostrom.cybernode.ai:443                       │
-╰────────────────────┴────────────────────────────────────────────────────────────╯
+
 > link-random 3
+=============================================================================== 
+    If you have made mistakes, there is always another chance for you. You may
+    have a fresh start any moment you choose. (Mary Pickford)
+
+    via [forismatic.com](https://forismatic.com)
+=============================================================================== 
+=============================================================================== 
+    Life is really simple, but we insist on making it complicated.   (Confucius
+    )
+
+    via [forismatic.com](https://forismatic.com)
+=============================================================================== 
+=============================================================================== 
+    I cannot give you the formula for success, but I can give you the formula
+    for failure: which is: Try to please everybody.  (Herbert Swope)
+
+    via [forismatic.com](https://forismatic.com)
+=============================================================================== 
 
 > link-random 3 --source forismatic.com
+=============================================================================== 
+    Go put your creed into the deed. Nor speak with double tongue.  (Ralph
+    Emerson)
+
+    via [forismatic.com](https://forismatic.com)
+=============================================================================== 
+=============================================================================== 
+    To be fully alive, fully human, and completely awake is to be continually
+    thrown out of the nest. (Pema Chodron)
+
+    via [forismatic.com](https://forismatic.com)
+=============================================================================== 
+=============================================================================== 
+    There is never enough time to do everything, but there is always enough time
+    to do the most important thing.  (Brian Tracy)
+
+    via [forismatic.com](https://forismatic.com)
+=============================================================================== 
 
 > links-remove-existed-1by1
+0
+2
+1
+5
+3
+4
+6
+2 cyberlinks was/were already created by
+bostrom166tas63rcdezv35jycr8mlfr0qgjdm7rgpzly5
+╭───────────┬────────────────────────────────────────────────╮
+│ from_text │ QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx │
+│ from      │ QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx │
+│ to_text   │ cyber-prophet is cool                          │
+│ to        │ QmWm9pmmz66cq41t1vtZWoRz5xmHSmoKCrrgdP9adcpoZK │
+╰───────────┴────────────────────────────────────────────────╯
+╭───────────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ from_text │ quote                                                                                                            │
+│ from      │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna                                                                   │
+│ to_text   │ To be fully alive, fully human, and completely awake is to be continually thrown out of the nest. (Pema Chodron) │
+│           │                                                                                                                  │
+│           │ via [forismatic.com](https://forismatic.com)                                                                     │
+│ to        │ QmTVP2xANLC8dRC51uiyFPyGgqtbhY9mMUNwSzL6EDrp2s                                                                   │
+╰───────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+So they were removed from the temp table!
+
+╭─#─┬─from_text─┬──────────────────────────────────────────────────to_text──────────────────────────────────────────────────┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────┬────timestamp────┬─link_exist─╮
+│ 1 │ quote     │ If you have made mistakes, there is always another chance for you. You may have a fresh start any mome... │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ QmT9garztvRBa34Fm8npoKTbZZoSrss95DpYKK71BvLL7s │ 20240627-135044 │ false      │
+│ 2 │ quote     │ Life is really simple, but we insist on making it complicated.   (Confucius )                             │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ QmZpsangk85egnB4iedo1xgbAZu3CUAazU5FVuvnBiG3cr │ 20240627-135103 │ false      │
+│   │           │                                                                                                           │                                                │                                                │                 │            │
+│   │           │ via [forismatic.com](https://forismatic.com)                                                              │                                                │                                                │                 │            │
+│ 3 │ quote     │ I cannot give you the formula for success, but I can give you the formula for failure: which is: Try t... │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ Qmb4Po9pBdD1tVZCAn5W9ZZZwSsti9LpFh1C52CP7mpRbC │ 20240627-135129 │ false      │
+│ 4 │ quote     │ Go put your creed into the deed. Nor speak with double tongue.  (Ralph Emerson)                           │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ QmV5ubhQasCQpsBNFKGgGGQyaoAeqvVSBdHPetcEgbtgYR │ 20240627-135141 │ false      │
+│   │           │                                                                                                           │                                                │                                                │                 │            │
+│   │           │ via [forismatic.com](https://forismatic.com)                                                              │                                                │                                                │                 │            │
+│ 6 │ quote     │ There is never enough time to do everything, but there is always enough time to do the most important ... │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ QmamGiE4qcyY27unvNtCT2iCCY2YWvckmfMBg2g9fhrJqP │ 20240627-135226 │ false      │
+╰─#─┴─from_text─┴──────────────────────────────────────────────────to_text──────────────────────────────────────────────────┴──────────────────────from──────────────────────┴───────────────────────to───────────────────────┴────timestamp────┴─link_exist─╯
 
 > graph-links-df | polars filter-with ((polars col timestamp) > ((date now) - 15day | format date %F)) | polars filter-with ((polars col timestamp) < (date now | format date %F)) | graph-stats | get neurons
-59
+34
+
 > graph-links-df | graph-neurons-stats | polars select nick links_count karma karma_norm karma_norm_bar | polars first 2 | polars into-nu | get 0.links_count | $in > 0
 true
+
 > graph-links-df test-graph.csv | graph-filter-system-particles particle_from | polars shape | polars into-nu
-╭─#─┬─rows─┬─columns─╮
-│ 0 │   76 │       5 │
-╰─#─┴─rows─┴─columns─╯
+╭─rows─┬─columns─╮
+│   76 │       5 │
+╰─rows─┴─columns─╯
 
 > graph-links-df test-graph.csv | graph-filter-system-particles particle_from --exclude | polars shape | polars into-nu
-╭─#─┬─rows─┬─columns─╮
-│ 0 │ 1205 │       5 │
-╰─#─┴─rows─┴─columns─╯
+╭─rows─┬─columns─╮
+│ 1205 │       5 │
+╰─rows─┴─columns─╯
 
 > graph-links-df test-graph.csv
-        | graph-filter-system-particles particle_from --exclude
-        | graph-merge (graph-links-df test-graph.csv
-        | graph-filter-system-particles particle_from)
-        | polars group-by source
-        | polars agg ((polars col source) | polars count | polars as count)
-        | polars collect
-        | polars into-nu
-        | sort-by count
-╭─source─┬─count─╮
-│ b      │    76 │
-│ a      │  1205 │
-╰─source─┴─count─╯
+╭──#───┬─────────────────────neuron─────────────────────┬─────────────────particle_from──────────────────┬──────────────────particle_to───────────────────┬──height──┬──────timestamp──────╮
+│ 0    │ bostrom1ay267fakkrgfy9lf2m7wsj8uez2dgylhtkdf9k │ QmPcfxEfW317u3bbz8MbEhjoMZ5HMFsx5TbsEHWPd1kLLw │ QmXQ4k4ciK5ieaSwtccmH9mm4QdPS6Spd21DTqLFrEwDWR │     9029 │ 2021-11-06 03:52:13 │
+│ 1    │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t │ QmYrXCXqunhqqirz3LBmvbnQb2pFFCk7douQkHDPDvQ3iE │ QmY4X4SkVBkoUGZdTzdcW7SKY8t4ULj5GJBRcRr4UMyahp │    12863 │ 2021-11-06 09:59:22 │
+│ 2    │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │ QmY4X4SkVBkoUGZdTzdcW7SKY8t4ULj5GJBRcRr4UMyahp │    12869 │ 2021-11-06 09:59:57 │
+│ 3    │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t │ QmRkxeB7V537fVc8913TmQwtxwuZBAVsWNedRMDyQ8Df97 │ QmRBxwqwNhLUjnsKwm8giYNVv4wwa77XUk51bYoo67tbah │    15287 │ 2021-11-06 13:52:52 │
+│ 4    │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t │ QmRkxeB7V537fVc8913TmQwtxwuZBAVsWNedRMDyQ8Df97 │ QmSDCFfY1S2UxoDkhbAtFbnm2vp97eefNyb5NQKpXENwDj │    15303 │ 2021-11-06 13:54:27 │
+│ 5    │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t │ QmRkxeB7V537fVc8913TmQwtxwuZBAVsWNedRMDyQ8Df97 │ Qmd4suKEMpRKuFkEeGbsHqDAKJfSQdNkkxPie6cfVacm8X │    15315 │ 2021-11-06 13:55:38 │
+│ 6    │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t │ QmRkxeB7V537fVc8913TmQwtxwuZBAVsWNedRMDyQ8Df97 │ QmWjcFRoVPeYXWug6NsoWFGA8PWqfFWcJ6G2HFNLf5QyXR │    15340 │ 2021-11-06 13:58:01 │
+│ 7    │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │ QmWjcFRoVPeYXWug6NsoWFGA8PWqfFWcJ6G2HFNLf5QyXR │    15343 │ 2021-11-06 13:58:19 │
+│ 8    │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t │ QmRkxeB7V537fVc8913TmQwtxwuZBAVsWNedRMDyQ8Df97 │ QmcwgfBG21fQ3sqiQhwnvFmadijd2GYZDF81QyQLXoJtEM │    15379 │ 2021-11-06 14:01:50 │
+│ 9    │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │ QmcwgfBG21fQ3sqiQhwnvFmadijd2GYZDF81QyQLXoJtEM │    15400 │ 2021-11-06 14:03:50 │
+│ ...  │ ...                                            │ ...                                            │ ...                                            │ ...      │ ...                 │
+│ 1271 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 │ QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx │ QmRSyyB1TVSyJRbKCXPJVvdjX7Q8ZBAE3hDJoo67TiFKab │ 12570332 │ 2024-03-13 13:27:52 │
+│ 1272 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 │ QmRSyyB1TVSyJRbKCXPJVvdjX7Q8ZBAE3hDJoo67TiFKab │ QmeQDBrFavhzKY6zVXPfoRKJgnbGSpjSH7fe7PdkuohfXw │ 12596377 │ 2024-03-15 08:15:50 │
+│ 1273 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 │ QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx │ QmaViP33J9V7v2HYiXjbhH6BsJrBqY7ZnwU93nKTaCzs5f │ 12641050 │ 2024-03-18 09:49:09 │
+│ 1274 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 │ QmSS1GaRdKBdkvxrbQnnW7FrXcVCyZMBcuZsV7qPGWCEBS │ QmaViP33J9V7v2HYiXjbhH6BsJrBqY7ZnwU93nKTaCzs5f │ 12641076 │ 2024-03-18 09:51:42 │
+│ 1275 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 │ QmTto1JaBHqT354oLjqxook2ikN7kanrfmB4eLGXw917AB │ QmWm9pmmz66cq41t1vtZWoRz5xmHSmoKCrrgdP9adcpoZK │ 12641084 │ 2024-03-18 09:52:28 │
+│ 1276 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 │ QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx │ Qme1RyD7Jtxg8LyUKcFLURoZXJvNTuK2sh3VbbsPDvRDsq │ 12641093 │ 2024-03-18 09:53:21 │
+│ 1277 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 │ QmPjz7yuUboFSV95yJXzUG8BDXK66bEBmDEbrcBqgafWqb │ QmUvxAbodisXtZDpiKpB9sZbHLhjNMxqWCpEm4doqWk1Cq │ 12641123 │ 2024-03-18 09:56:20 │
+│ 1278 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 │ QmSZmi6xpwhxb7juxw61HoT2MNQtxFq6hNutLD5JZdjySW │ QmSozQsP5FXmWYuVGkZMVEdmj3as2WawzkGhJkyw6gGRz9 │ 12667642 │ 2024-03-20 05:16:12 │
+│ 1279 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 │ QmSZmi6xpwhxb7juxw61HoT2MNQtxFq6hNutLD5JZdjySW │ QmQ8ntTiVnJxxBQSoeaAnNQR2oHvbpTgHLwWKWxGngZgbm │ 12667658 │ 2024-03-20 05:17:46 │
+│ 1280 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ QmZdKqcYqYGy88QpUGZpqjmDUkwm6gZBhygxtSHbCKzbAV │ 12847309 │ 2024-04-01 13:14:37 │
+╰──#───┴─────────────────────neuron─────────────────────┴─────────────────particle_from──────────────────┴──────────────────particle_to───────────────────┴──height──┴──────timestamp──────╯
 
 > graph-links-df test-graph.csv
-        | graph-filter-system-particles particle_from --exclude
-        | graph-merge (graph-links-df test-graph.csv
-        | graph-filter-system-particles particle_from)
-        | polars group-by source
-        | polars agg ((polars col source) | polars count | polars as count)
-        | polars collect
-        | polars into-nu
-        | sort-by count
-╭──#──┬──────────────────────neuron──────────────────────┬─────────────────────particle─────────────────────┬──height──┬───────timestamp───────┬──init-role──╮
-│ 0   │ bostrom1ay267fakkrgfy9lf2m7wsj8uez2dgylhtkdf9k   │ QmPcfxEfW317u3bbz8MbEhjoMZ5HMFsx5TbsEHWPd1kLLw   │     9029 │ 2021-11-06 03:52:13   │ from        │
-│ 1   │ bostrom1ay267fakkrgfy9lf2m7wsj8uez2dgylhtkdf9k   │ QmXQ4k4ciK5ieaSwtccmH9mm4QdPS6Spd21DTqLFrEwDWR   │     9029 │ 2021-11-06 03:52:13   │ to          │
-│ 2   │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t   │ QmYrXCXqunhqqirz3LBmvbnQb2pFFCk7douQkHDPDvQ3iE   │    12863 │ 2021-11-06 09:59:22   │ from        │
-╰──#──┴──────────────────────neuron──────────────────────┴─────────────────────particle─────────────────────┴──height──┴───────timestamp───────┴──init-role──╯
+╭──#───┬─────────────────────neuron─────────────────────┬─────────────────particle_from──────────────────┬──────────────────particle_to───────────────────┬──height──┬──────timestamp──────╮
+│ 0    │ bostrom1ay267fakkrgfy9lf2m7wsj8uez2dgylhtkdf9k │ QmPcfxEfW317u3bbz8MbEhjoMZ5HMFsx5TbsEHWPd1kLLw │ QmXQ4k4ciK5ieaSwtccmH9mm4QdPS6Spd21DTqLFrEwDWR │     9029 │ 2021-11-06 03:52:13 │
+│ 1    │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t │ QmYrXCXqunhqqirz3LBmvbnQb2pFFCk7douQkHDPDvQ3iE │ QmY4X4SkVBkoUGZdTzdcW7SKY8t4ULj5GJBRcRr4UMyahp │    12863 │ 2021-11-06 09:59:22 │
+│ 2    │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │ QmY4X4SkVBkoUGZdTzdcW7SKY8t4ULj5GJBRcRr4UMyahp │    12869 │ 2021-11-06 09:59:57 │
+│ 3    │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t │ QmRkxeB7V537fVc8913TmQwtxwuZBAVsWNedRMDyQ8Df97 │ QmRBxwqwNhLUjnsKwm8giYNVv4wwa77XUk51bYoo67tbah │    15287 │ 2021-11-06 13:52:52 │
+│ 4    │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t │ QmRkxeB7V537fVc8913TmQwtxwuZBAVsWNedRMDyQ8Df97 │ QmSDCFfY1S2UxoDkhbAtFbnm2vp97eefNyb5NQKpXENwDj │    15303 │ 2021-11-06 13:54:27 │
+│ 5    │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t │ QmRkxeB7V537fVc8913TmQwtxwuZBAVsWNedRMDyQ8Df97 │ Qmd4suKEMpRKuFkEeGbsHqDAKJfSQdNkkxPie6cfVacm8X │    15315 │ 2021-11-06 13:55:38 │
+│ 6    │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t │ QmRkxeB7V537fVc8913TmQwtxwuZBAVsWNedRMDyQ8Df97 │ QmWjcFRoVPeYXWug6NsoWFGA8PWqfFWcJ6G2HFNLf5QyXR │    15340 │ 2021-11-06 13:58:01 │
+│ 7    │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │ QmWjcFRoVPeYXWug6NsoWFGA8PWqfFWcJ6G2HFNLf5QyXR │    15343 │ 2021-11-06 13:58:19 │
+│ 8    │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t │ QmRkxeB7V537fVc8913TmQwtxwuZBAVsWNedRMDyQ8Df97 │ QmcwgfBG21fQ3sqiQhwnvFmadijd2GYZDF81QyQLXoJtEM │    15379 │ 2021-11-06 14:01:50 │
+│ 9    │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │ QmcwgfBG21fQ3sqiQhwnvFmadijd2GYZDF81QyQLXoJtEM │    15400 │ 2021-11-06 14:03:50 │
+│ ...  │ ...                                            │ ...                                            │ ...                                            │ ...      │ ...                 │
+│ 1271 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 │ QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx │ QmRSyyB1TVSyJRbKCXPJVvdjX7Q8ZBAE3hDJoo67TiFKab │ 12570332 │ 2024-03-13 13:27:52 │
+│ 1272 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 │ QmRSyyB1TVSyJRbKCXPJVvdjX7Q8ZBAE3hDJoo67TiFKab │ QmeQDBrFavhzKY6zVXPfoRKJgnbGSpjSH7fe7PdkuohfXw │ 12596377 │ 2024-03-15 08:15:50 │
+│ 1273 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 │ QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx │ QmaViP33J9V7v2HYiXjbhH6BsJrBqY7ZnwU93nKTaCzs5f │ 12641050 │ 2024-03-18 09:49:09 │
+│ 1274 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 │ QmSS1GaRdKBdkvxrbQnnW7FrXcVCyZMBcuZsV7qPGWCEBS │ QmaViP33J9V7v2HYiXjbhH6BsJrBqY7ZnwU93nKTaCzs5f │ 12641076 │ 2024-03-18 09:51:42 │
+│ 1275 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 │ QmTto1JaBHqT354oLjqxook2ikN7kanrfmB4eLGXw917AB │ QmWm9pmmz66cq41t1vtZWoRz5xmHSmoKCrrgdP9adcpoZK │ 12641084 │ 2024-03-18 09:52:28 │
+│ 1276 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 │ QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx │ Qme1RyD7Jtxg8LyUKcFLURoZXJvNTuK2sh3VbbsPDvRDsq │ 12641093 │ 2024-03-18 09:53:21 │
+│ 1277 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 │ QmPjz7yuUboFSV95yJXzUG8BDXK66bEBmDEbrcBqgafWqb │ QmUvxAbodisXtZDpiKpB9sZbHLhjNMxqWCpEm4doqWk1Cq │ 12641123 │ 2024-03-18 09:56:20 │
+│ 1278 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 │ QmSZmi6xpwhxb7juxw61HoT2MNQtxFq6hNutLD5JZdjySW │ QmSozQsP5FXmWYuVGkZMVEdmj3as2WawzkGhJkyw6gGRz9 │ 12667642 │ 2024-03-20 05:16:12 │
+│ 1279 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 │ QmSZmi6xpwhxb7juxw61HoT2MNQtxFq6hNutLD5JZdjySW │ QmQ8ntTiVnJxxBQSoeaAnNQR2oHvbpTgHLwWKWxGngZgbm │ 12667658 │ 2024-03-20 05:17:46 │
+│ 1280 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ QmZdKqcYqYGy88QpUGZpqjmDUkwm6gZBhygxtSHbCKzbAV │ 12847309 │ 2024-04-01 13:14:37 │
+╰──#───┴─────────────────────neuron─────────────────────┴─────────────────particle_from──────────────────┴──────────────────particle_to───────────────────┴──height──┴──────timestamp──────╯
 ```
