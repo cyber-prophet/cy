@@ -1530,6 +1530,18 @@ export def 'graph-merge' [
         | polars as source
     )
     | polars with-column (
+        polars when ((polars col particle_from) | polars is-null) (polars col particle_from_x)
+        | polars otherwise (polars col particle_from) | polars as particle_from
+    )
+    | polars with-column (
+        polars when ((polars col particle_to) | polars is-null) (polars col particle_to_x)
+        | polars otherwise (polars col particle_to) | polars as particle_to
+    )
+    | polars with-column (
+        polars when ((polars col neuron) | polars is-null) (polars col neuron_x)
+        | polars otherwise (polars col neuron) | polars as neuron
+    )
+    | polars with-column (
         polars when ((polars col height) | polars is-null) (polars col height_x)
         | polars otherwise (polars col height) | polars as height
     )
@@ -1537,7 +1549,7 @@ export def 'graph-merge' [
         polars when ((polars col timestamp) | polars is-null) (polars col timestamp_x)
         | polars otherwise (polars col timestamp) | polars as timestamp
     )
-    | polars drop height_x timestamp_x source_x
+    | polars drop particle_from_x particle_to_x neuron_x height_x timestamp_x source_x
 }
 
 # Output unique list of particles from piped in cyberlinks table
