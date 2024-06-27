@@ -2349,17 +2349,15 @@ export def --env 'config-new' [
 # View a saved JSON config file
 export def 'config-view' [
     config_name?: string@'nu-complete-config-names'
-    # --quiet (-q)
 ] {
     if $config_name == null {
         $env.cy
     } else {
         open (cy-path config $'($config_name).toml')
     }
-    # | if $quiet {} else {print-and-pass}
 }
 
-# Save the piped-in JSON into config file
+# Save the piped-in JSON into a config file inside of `cy/config` folder
 export def --env 'config-save' [
     config_name: string@'nu-complete-config-names'
     --inactive # Don't activate current config
