@@ -2362,32 +2362,14 @@ export def --env 'config-save' [
     config_name: string@'nu-complete-config-names'
     --inactive # Don't activate current config
 ] {
-    let $in_config = upsert config-name $config_name
-    let $filename = cy-path config $'($config_name).toml'
-
-    let $filename2 = if not ($filename | path exists) {
-            $filename
-        } else {
-            cprint -c green --before 1 $'($filename) exists. Do you want to overwrite it?'
-
-            ['yes' 'no'] | input list
-            | if $in == 'yes' {
-                $filename | backup-and-echo
-            } else {
-                (cy-path config $'(now-fn).toml')
-            }
-        }
-
-    $in_config
-    | upsert config-name ($filename2 | path parse | get stem)
-    | upsert config-path ($filename2)
-    | if not $inactive {
-        config-activate
-    } else {}
+    default ($env.cy)
+    | upsert config-name $config_name
     | print-and-pass
-    | save $filename2 -f
+    | save -f ( cy-path config $'($config_name).toml' )
 
-    print $'($filename2) is saved'
+    if not $inactive {
+        config-activate $config_name
+    }
 }
 
 # Activate the config JSON
