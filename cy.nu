@@ -2374,27 +2374,16 @@ export def --env 'config-save' [
 
 # Activate the config JSON
 export def --env 'config-activate' [
-    config_name?: string@'nu-complete-config-names'
+    config_name: string@'nu-complete-config-names'
 ] {
-    let $config = default (config-view $config_name)
     let $config_path = $nu.home-path | path join .cy_config.toml
-    let $config_toml = open $config_path
-        | merge $config
 
-# todo refactor
+    open $config_path
+    | upsert config-name $config_name
+    | collect
+    | save -f $config_path
 
-    $env.cy = $config_toml
-
-    cprint -c green_underline -b 1 'Config is loaded'
-
-    let $new_config = open $config_path
-    | upsert 'config-name' $config_toml.config-name
-
-    # can't save to the same location as opened in this piped
-    $new_config
-    | save $config_path -f
-
-    $config_toml
+    export1
 }
 
 def 'search-sync' [
