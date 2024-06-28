@@ -2116,32 +2116,28 @@ export def 'graph-add-metadata' [
 
     let $links_columns = $links | polars columns
 
-    let $c_out = $links
-        | if 'particle_to' in $links_columns {
-            polars join --left $p particle_to particle
-            | polars rename content_s content_s_to
-        } else {}
-        | if 'particle_from' in $links_columns {
-            polars join --left $p particle_from particle
-            | polars rename content_s content_s_from
-        } else {}
-        | if 'particle' in $links_columns {
-            polars join --left $p particle particle
-        } else {}
-        | polars fill-null 'timeout|'
-        | polars drop height
-        | polars append $links.height
-        | if 'neuron' in $links_columns {
-            polars join --left (
-                dict-neurons-view --df
-                | polars select neuron nick
-            ) neuron neuron
-        } else {}
-
-    let $columns_order_target = $c_out | polars columns | reverse
-
-    $c_out
-    | polars select $columns_order_target
+    $links
+    | if 'particle_to' in $links_columns {
+        polars join --left $p particle_to particle
+        | polars rename content_s content_s_to
+    } else {}
+    | if 'particle_from' in $links_columns {
+        polars join --left $p particle_from particle
+        | polars rename content_s content_s_from
+    } else {}
+    | if 'particle' in $links_columns {
+        polars join --left $p particle particle
+    } else {}
+    | polars fill-null 'timeout|'
+    | polars drop height
+    | polars append $links.height
+    | if 'neuron' in $links_columns {
+        polars join --left (
+            dict-neurons-view --df
+            | polars select neuron nick
+        ) neuron neuron
+    } else {}
+    | polars select ($in | polars columns | reverse)
 }
 
 # Output a full graph, or pass piped in graph further
