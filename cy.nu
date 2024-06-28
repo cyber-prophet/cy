@@ -2108,7 +2108,7 @@ export def 'graph-add-metadata' [
             )
         } else {}
         | if $new_lines {
-            polars append (
+            polars with-column (
                 $in.content_s
                 | polars replace-all --pattern '⏎' --replace (char nl)
             )
