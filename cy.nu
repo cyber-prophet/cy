@@ -2049,21 +2049,21 @@ export def 'graph-to-graphviz' [
     --options: string = ''
     --preset: string@nu-complete-graphviz-presets = ''
 ] {
-    let $graph = graph-add-metadata --escape_quotes --new_lines
-        | polars select 'content_s_from' 'content_s_to'
-        | $in.content_s_from + ' -> ' + $in.content_s_to + ';'
-        | polars into-nu
-        | rename links
-        | get links
-        | str join (char nl)
-        | "digraph G {\n" + $options + "\n" + $in + "\n}"
-
-    if $preset == '' { $graph } else {
+    graph-add-metadata --escape_quotes --new_lines
+    | polars select 'content_s_from' 'content_s_to'
+    | $in.content_s_from + ' -> ' + $in.content_s_to + ';'
+    | polars into-nu
+    | rename links
+    | get links
+    | str join (char nl)
+    | "digraph G {\n" + $options + "\n" + $in + "\n}"
+    | if $preset == '' { } else {
+        let $input = $in
         let $filename = cy-path export $'graphviz_($preset)_(now-fn).svg'
 
         let $params = ['-Tsvg' $'-o($filename)']
 
-        $graph | ^($preset) ...$params
+        $input | ^($preset) ...$params
         $filename
     }
 }
