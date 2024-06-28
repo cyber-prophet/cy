@@ -2094,7 +2094,9 @@ export def 'graph-add-metadata' [
     --new_lines
 ] {
     let $links = graph-links-df
-        | graph-keep-standard-columns-only --extra_columns ['particle', 'link_local_index', 'init-role', 'step']
+        | graph-keep-standard-columns-only --extra_columns [
+            'particle', 'link_local_index', 'init-role', 'step'
+        ]
 
     let $p = graph-particles-df
         | polars select particle content_s
