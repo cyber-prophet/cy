@@ -95,7 +95,9 @@ export def 'backup-and-echo' [
 export def 'set-select-from-variants' [
     $key
 ] {
-    let $key_record = open (cy-path kickstart settings-variants.yaml) | get -i $key
+    let $key_record = cy-path kickstart settings-variants.yaml
+        | open
+        | get -i $key
 
     if $key_record == null {
         input 'type your setting: '
