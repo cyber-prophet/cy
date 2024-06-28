@@ -112,7 +112,7 @@ export def 'set-select-from-variants' [
     }
 }
 
-# Sets, retrieves, or defaults an environment variable based on input, without setting it if specified.
+# Sets an environment variable if a value is provided; otherwise, retrieves the current value of the environment variable.
 export def --env 'set-get-env' [
     key
     value?
