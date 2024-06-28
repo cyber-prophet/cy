@@ -730,7 +730,6 @@ export def 'links-remove-existed-2' [] {
     | polars drop duplicate
     | polars collect
     | polars into-nu
-    | reject index
     | links-replace
 }
 
@@ -1911,7 +1910,6 @@ export def 'graph-stats' [] {
             | polars agg [(polars col source | polars count | polars as source_count)]
             | polars sort-by source
             | polars into-nu
-            | reject index
             | transpose --ignore-titles --as-record --header-row
             | {source: $in}
         } else {{}}
@@ -2031,7 +2029,6 @@ export def 'graph-to-txt-feed' [] {
     # | polars filter-with ($in.content_s | polars is-null | polars not)
     | polars sort-by [height]
     | polars into-nu
-    | reject index
     | each {|i| echo_particle_txt $i}
 }
 
