@@ -48,12 +48,18 @@ install_if_missing "ipfs"
 install_if_missing "mdcat"
 install_if_missing "rustup-init"
 
-if ( '~/.ipfs' | path exists | not $in ) {
+# upgrade ipfs if it is installed
+if (brew list ipfs | complete | get exit_code) == 0 {
+    brew upgrade ipfs
+}
+
+# add default folder for ipfs
+if not ('~/.ipfs' | path exists) {
     try {ipfs init}
     sleep 0.5sec
 }
 
-if ( ipfs swarm peers | complete | get exit_code | $in == 1 ) {
+if (ipfs swarm peers | complete | get exit_code) == 1 {
     try {brew services start ipfs}
     sleep 0.5sec
 }
@@ -62,18 +68,17 @@ if ( ipfs swarm peers | complete | get exit_code | $in == 1 ) {
 try {ipfs bootstrap add '/ip4/135.181.19.86/tcp/4001/p2p/12D3KooWNMcnoQynAY9hyi4JxzSu64BsRGcJ9z7vKghqk8sTrpqY'}
 sleep 0.5sec
 
+# check if congress's cybernode is availible
 try {ipfs routing findpeer 12D3KooWNMcnoQynAY9hyi4JxzSu64BsRGcJ9z7vKghqk8sTrpqY}
 
-if (brew list ipfs | complete | get exit_code | $in == 0) {
-    brew upgrade ipfs;
-}
-
+# nu_plugin_polars is needed for local graph snapshot querying
 cargo install nu_plugin_polars
 plugin add ('~/.cargo/bin/nu_plugin_polars' | path expand)
 
 let $cy_folder = '~/cy'
 
-(open $nu.config-path | lines | find -r '^overlay use .*cy\.nu')
+# check if there is `overlay use ... cy.nu ` in the configs
+open $nu.config-path | lines | find -r '^overlay use .*cy\.nu'
 | if ($in | is-empty) {
     $"#💎 load Cy on NuShell start(char nl)overlay use '($cy_folder)/cy.nu' -pr (char nl)"
     | save -a $'($nu.config-path)'
@@ -90,7 +95,7 @@ open $nu.config-path
 | str replace 'algorithm: "prefix"' 'algorithm: "fuzzy"'
 | save -f $nu.config-path
 
-if (open $nu.env-path | lines | where ($it | str starts-with '$env.EDITOR') | length | $in == 0) {
+if (open $nu.env-path | lines | where ($it | str starts-with '$env.EDITOR') | length) == 0 {
     (char nl) + '$env.EDITOR = nano' + (char nl) | save -a $nu.env-path
 }
 
