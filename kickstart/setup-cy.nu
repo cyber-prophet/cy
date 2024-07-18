@@ -44,11 +44,9 @@ def --env 'confirm' [
 install_if_missing "cyber"
 install_if_missing "pussy"
 install_if_missing "curl"
-install_if_missing "pueue"
 install_if_missing "ipfs"
 install_if_missing "mdcat"
 install_if_missing "rustup-init"
-# install_if_missing "gum"
 
 if ( '~/.ipfs' | path exists | not $in ) {
     try {ipfs init}
