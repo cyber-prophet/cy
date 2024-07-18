@@ -289,7 +289,7 @@ export def 'follow' [
 # from: QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx
 # to: QmWm9pmmz66cq41t1vtZWoRz5xmHSmoKCrrgdP9adcpoZK
 export def 'tweet' [
-    text_to: string # text to tweet
+    text_to?: string # text to tweet
     --disable_send (-D) # don't send tweet immediately, but put it into the temp table
 ]: [nothing -> record, string -> record] {
     let $text_to = if $text_to == null {} else {$text_to}
