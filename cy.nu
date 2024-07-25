@@ -1521,7 +1521,7 @@ export def 'graph-merge' [
         }
 
     $input
-    | polars join $df2_st [particle_from particle_to neuron] [particle_from particle_to neuron] --outer
+    | polars join $df2_st [particle_from particle_to neuron] [particle_from particle_to neuron] --full
     | polars with-column (
         polars when ((polars col source) | polars is-null) (polars col source_x)
         | polars when ((polars col source_x) | polars is-null) (polars col source)
@@ -2184,7 +2184,7 @@ export def 'graph-links-df' [
         print $input
         error make {msg: $'there are no graph columns in ($df_columns)'}
     } else {
-        graph-open-csv-make-df (cy-path graph $cyberlinks_path)
+        graph-open-csv-make-df (cy-path graph $cyberlinks_path) # fixme - take it out
         | polars join --inner $df $existing_graph_columns $existing_graph_columns
     }
 }
@@ -2494,15 +2494,15 @@ export def search-walk [
         | upsert page $page
     }
 
-    generate {
-        result: [],
-        page : -1,
-        pagination: {total: $results_per_page}
-    } {|i|
+    generate {|i|
         {out: $i.result}
         | if ($i.pagination.total / $results_per_page - 1 | math ceil) > $i.page {
             upsert next (serp ($i.page + 1))
         } else {}
+    } {
+        result: [],
+        page : -1,
+        pagination: {total: $results_per_page}
     }
     | flatten
     | into int rank
@@ -3872,7 +3872,7 @@ export def 'validator-query-delegators' [
         } else {}
     }
 
-    generate $start $closure
+    generate $closure $start
     | flatten
     | flatten
     | into int amount
@@ -4038,7 +4038,7 @@ export def 'query-staking-validators' [] {
         | get pagination.total
         | into int
         | $in // 100
-        | 1..$in
+        | seq 1 $in
         | each {|i| $i * 100}
 
     let $all_validators = $offset_to_go
