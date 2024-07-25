@@ -281,7 +281,7 @@ export def 'follow' [
     }
 }
 
-# Add a tweet and send it immediately (unless of disable_send flag)
+# Add a tweet and send it immediately (unless of `--disable_send`)
 #
 # > cy links-clear; cy tweet 'cyber-prophet is cool' --disable_send | to yaml
 # from_text: QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx
