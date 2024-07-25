@@ -223,12 +223,12 @@ export def 'link-folder' [
      ) { } else {return}
 
     let $hashes = ^ipfs add $path --recursive --progress=false
-    | lines
-    | parse '{s} {cid} {path}'
-    | reject s
-    | insert file_type {|i| pwd | path dirname | path join $i.path | path type}
-    | where file_type == file
-    | where path !~ '(Identifier|Zone)'
+        | lines
+        | parse '{s} {cid} {path}'
+        | reject s
+        | insert file_type {|i| pwd | path dirname | path join $i.path | path type}
+        | where file_type == file
+        | where path !~ '(Identifier|Zone)'
 
     let $to_text_subst = $hashes
         | insert f {|i| $i.path | path basename | $'pinned_file:($in)'}
