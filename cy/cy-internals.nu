@@ -180,3 +180,12 @@ export def 'fill non-exist' [
         $acc | default $value_to_replace $column
     }
 }
+
+export def 'current-links-csv-path' [
+    name?: path
+]: nothing -> path {
+    $name
+    | default ($env.cy?.links_table_name?)
+    | default 'temp'
+    | cy-path mylinks $'($in).csv'
+}

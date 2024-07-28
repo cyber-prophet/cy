@@ -7,7 +7,7 @@
 use std assert [equal greater]
 use cy/nu-utils [ bar, cprint, "str repeat", to-safe-filename, to-number-format, number-col-format,
     nearest-given-weekday, print-and-pass, clip, confirm, normalize, path-modify]
-use cy/cy-internals.nu [cy-path match-type default-settings open-cy-config-toml export1 backup-and-echo make-default-folders-fn set-get-env set-select-from-variants path-exists-safe 'fill non-exist']
+use cy/cy-internals.nu [cy-path match-type default-settings open-cy-config-toml export1 backup-and-echo make-default-folders-fn set-get-env set-select-from-variants path-exists-safe 'fill non-exist' current-links-csv-path]
 
 use std log
 
@@ -2940,14 +2940,6 @@ export def --env 'set-cy-setting' [
     }
 }
 
-def 'current-links-csv-path' [
-    name?: path
-]: nothing -> path {
-    $name
-    | default ($env.cy?.links_table_name?)
-    | default 'temp'
-    | cy-path mylinks $'($in).csv'
-}
 
 # Add the cybercongress node to bootstrap nodes
 export def 'ipfs-bootstrap-add-congress' []: nothing -> nothing {
