@@ -111,3 +111,18 @@ export def 'queue-cids-download' [
         } else {}
     }
 }
+
+
+# Add a CID to the download queue
+export def 'queue-cid-add' [
+    cid: string
+    symbol: string = ''
+] {
+    let $path = cy-path cache queue_cids_to_download $cid
+
+    if not ($path | path exists) {
+        touch $path
+    } else if $symbol != '' {
+        $symbol | save -a $path
+    }
+}

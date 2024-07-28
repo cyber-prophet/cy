@@ -2727,20 +2727,6 @@ def 'cid-download-gateway' [
     }
 }
 
-# Add a CID to the download queue
-export def 'queue-cid-add' [
-    cid: string
-    symbol: string = ''
-] {
-    let $path = cy-path cache queue_cids_to_download $cid
-
-    if not ($path | path exists) {
-        touch $path
-    } else if $symbol != '' {
-        $symbol | save -a $path
-    }
-}
-
 # Watch the queue folder, and if there are updates, request files to download
 export def 'watch-search-folder' [] {
     watch (cy-path cache search) {|| queue-cids-download }
