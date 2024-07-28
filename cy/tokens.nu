@@ -1,5 +1,6 @@
 use cy-internals.nu ['fill non-exist']
 use nu-utils ['cprint']
+use cy-complete.nu *
 
 # Get a balance for a given account
 #
@@ -834,13 +835,4 @@ def 'tokens-shorten-ibc' [
         '🛑'
     } else {}
     | $'($base_denom)/($denom | str substring 62..68)/($in)'
-}
-
-# Helper function to use addresses for completions in --from parameter
-def 'nu-complete key-names' [] {
-    ^$env.cy.exec keys list --output json
-    | from json
-    | select name address
-    | upsert name {|i| $i.name + 🔑}
-    | rename value description
 }

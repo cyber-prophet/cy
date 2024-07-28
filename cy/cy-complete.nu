@@ -105,3 +105,12 @@ export def 'nu-complete-graph-provider' [] {
 export def 'nu-complete-graphviz-presets' [] {
     [ 'sfdp', 'dot' ]
 }
+
+# Helper function to use addresses for completions in --from parameter
+export def 'nu-complete key-names' [] {
+    ^$env.cy.exec keys list --output json
+    | from json
+    | select name address
+    | upsert name {|i| $i.name + 🔑}
+    | rename value description
+}
