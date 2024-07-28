@@ -2963,26 +2963,6 @@ export def 'echo_particle_txt' [
     # | each {|b| $"((ansi grey) + ($i.step + 2 | into string) + (ansi reset) | str repeat $indent)($b)" | print $in}
 }
 
-def 'col-name-reverse' [
-    column: string
-] {
-    match $column {
-        'from' => {'to'},
-        'to' => {'from'},
-        _ => {''}
-    }
-}
-
-def 'now-fn' [
-    --pretty (-P)
-] {
-    date now
-    | format date (
-        if $pretty {'%Y-%m-%d-%H:%M:%S'} else {'%Y%m%d-%H%M%S'}
-    )
-}
-
-
 # Check if all necessary dependencies are installed
 export def check-requirements []: nothing -> nothing {
 

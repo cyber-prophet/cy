@@ -374,3 +374,22 @@ export def 'default-node-params' [] {
         '--output' 'json'
     ]
 }
+
+export def 'col-name-reverse' [
+    column: string
+] {
+    match $column {
+        'from' => {'to'},
+        'to' => {'from'},
+        _ => {''}
+    }
+}
+
+export def 'now-fn' [
+    --pretty (-P)
+] {
+    date now
+    | format date (
+        if $pretty {'%Y-%m-%d-%H:%M:%S'} else {'%Y%m%d-%H%M%S'}
+    )
+}
