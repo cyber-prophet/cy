@@ -2832,40 +2832,6 @@ export def 'authz-give-grant' [
     | tx-broadcast
 }
 
-export def 'query-links-bandwidth-neuron' [
-    neuron? # an address of a neuron
-]: nothing -> table {
-    caching-function query bandwidth neuron ($neuron | default $env.cy.address) --cache_stale_refresh 5min
-    | get neuron_bandwidth
-    | select max_value remained_value
-    | transpose param links
-    | into int links
-    | upsert links {|i| $i.links / (query-links-bandwidth-price) | math floor}
-}
-
-export def 'query-staking-validators' [] {
-    let $vals_1_page = caching-function query staking validators --count-total
-
-    let $offset_to_go = $vals_1_page
-        | get pagination.total
-        | into int
-        | $in // 100
-        | seq 1 $in
-        | each {|i| $i * 100}
-
-    let $all_validators = $offset_to_go
-        | each {|i| caching-function query staking validators --count-total --offset $i | get validators}
-        | flatten
-        | prepend $vals_1_page.validators
-
-    $all_validators
-    | upsert moniker {|i| $i.description.moniker}
-    | upsert commission {|i| $i.commission.commission_rates.rate | into float}
-    | select moniker commission jailed tokens operator_address
-    | into int tokens
-    | sort-by tokens -r
-}
-
 export def 'validator-chooser' [
     --only_my_validators
 ] {
