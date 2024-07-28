@@ -1,5 +1,23 @@
 use cy-complete.nu *
 
+# An ordered list of cy commands
+export def 'help-cy' [] {
+    cy-path cy mod.nu
+    | open
+    | parse 'export use {file} *'
+    | get file
+    | each {cy-path cy $in | parse-nu}
+    | flatten
+}
+
+def parse-nu [] {
+    open $in --raw
+    | collect
+    | parse -r "(\n# (?<desc>.*?)(?:\n#[^\n]*)*\nexport def(:? --(:?env|wrapped))* '(?<command>.*)')"
+    | select command desc
+    | upsert command {|row index| ('cy ' + $row.command)}
+}
+
 # Check if all necessary dependencies are installed
 export def check-requirements []: nothing -> nothing {
 

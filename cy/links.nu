@@ -10,6 +10,7 @@ use nu-utils [ bar, cprint, "str repeat", to-safe-filename, to-number-format, nu
 use cy-internals.nu *
 use cy-complete.nu *
 use queue.nu *
+use maintenance.nu [help-cy]
 
 export def main [] { help-cy }
 # export def cy [] { help-cy }
@@ -1005,15 +1006,6 @@ export def 'qnbn' [
     } else if ($in | length) == 1 and not $force_list_output {
         get neuron.0
     } else {}
-}
-
-# An ordered list of cy commands
-export def 'help-cy' [] {
-    cy-path cy.nu
-    | open --raw
-    | parse -r "(\n# (?<desc>.*?)(?:\n#[^\n]*)*\nexport def(:? --(:?env|wrapped))* '(?<command>.*)')"
-    | select command desc
-    | upsert command {|row index| ('cy ' + $row.command)}
 }
 
 def --env is-connected-interval [
