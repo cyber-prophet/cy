@@ -5,11 +5,11 @@
 # > overlay use -pr ~/cy/cy.nu
 
 use std assert [equal greater]
-use cy/nu-utils [ bar, cprint, "str repeat", to-safe-filename, to-number-format, number-col-format,
+use nu-utils [ bar, cprint, "str repeat", to-safe-filename, to-number-format, number-col-format,
     nearest-given-weekday, print-and-pass, clip, confirm, normalize, path-modify]
-use cy/cy-internals.nu *
-use cy/cy-complete.nu *
-use cy/queue.nu *
+use cy-internals.nu *
+use cy-complete.nu *
+use queue.nu *
 
 export def main [] { help-cy }
 # export def cy [] { help-cy }
