@@ -162,3 +162,21 @@ export def 'path-exists-safe' [
 ] {
     try {$path_to_check | path exists} catch {false}
 }
+
+# > [{a: 1} {b: 2}] | to nuon
+# [{a: 1}, {b: 2}]
+#
+# > [{a: 1} {b: 2}] | fill non-exist | to nuon
+# [[a, b]; [1, null], [null, 2]]
+export def 'fill non-exist' [
+    tbl?
+    --value_to_replace (-v): any = ''
+] {
+    let $table = default $tbl
+
+    $table
+    | columns
+    | reduce -f $table {|column acc|
+        $acc | default $value_to_replace $column
+    }
+}

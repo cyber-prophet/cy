@@ -7,7 +7,7 @@
 use std assert [equal greater]
 use nu-utils [ bar, cprint, "str repeat", to-safe-filename, to-number-format, number-col-format,
     nearest-given-weekday, print-and-pass, clip, confirm, normalize, path-modify]
-use cy-internals.nu [cy-path match-type default-settings open-cy-config-toml export1 backup-and-echo make-default-folders-fn set-get-env set-select-from-variants path-exists-safe]
+use cy-internals.nu [cy-path match-type default-settings open-cy-config-toml export1 backup-and-echo make-default-folders-fn set-get-env set-select-from-variants path-exists-safe 'fill non-exist']
 
 use std log
 
@@ -4577,24 +4577,6 @@ def 'nu-complete-graph-provider' [] {
 
 def 'nu-complete-graphviz-presets' [] {
     [ 'sfdp', 'dot' ]
-}
-
-# > [{a: 1} {b: 2}] | to nuon
-# [{a: 1}, {b: 2}]
-#
-# > [{a: 1} {b: 2}] | fill non-exist | to nuon
-# [[a, b]; [1, null], [null, 2]]
-def 'fill non-exist' [
-    tbl?
-    --value_to_replace (-v): any = ''
-] {
-    let $table = default $tbl
-
-    $table
-    | columns
-    | reduce -f $table {|column acc|
-        $acc | default $value_to_replace $column
-    }
 }
 
 export def 'cp-banner' [
