@@ -159,3 +159,16 @@ export def 'cp-banner' [
                                                                                                                    "
     # | ansi gradient --fgstart '0x7FFF00'
 }
+
+export def 'banner' [] {
+    print $"
+     ____ _   _
+    / ___\) | | |
+   \( \(___| |_| |
+    \\____)\\__  |   (ansi yellow)cy(ansi reset) nushell module is loaded
+         \(____/    have fun🔵"
+}
+
+export def 'banner2' [] {
+    print $'(ansi yellow)cy(ansi reset) is loaded'
+}
