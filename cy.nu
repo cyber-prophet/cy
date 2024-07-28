@@ -5,7 +5,7 @@
 # > overlay use -pr ~/cy/cy.nu
 
 use std assert [equal greater]
-use nu-utils [ bar, cprint, "str repeat", to-safe-filename, to-number-format, number-col-format,
+use cy/nu-utils [ bar, cprint, "str repeat", to-safe-filename, to-number-format, number-col-format,
     nearest-given-weekday, print-and-pass, clip, confirm, normalize, path-modify]
 use cy/cy-internals.nu [cy-path match-type default-settings open-cy-config-toml export1 backup-and-echo make-default-folders-fn set-get-env set-select-from-variants path-exists-safe 'fill non-exist']
 
