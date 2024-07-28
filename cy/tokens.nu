@@ -1,6 +1,7 @@
 use cy-internals.nu *
 use nu-utils ['cprint']
 use cy-complete.nu *
+use query.nu *
 
 # Get a balance for a given account
 #
