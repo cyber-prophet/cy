@@ -189,3 +189,19 @@ export def 'current-links-csv-path' [
     | default 'temp'
     | cy-path mylinks $'($in).csv'
 }
+
+export def is-cid [particle: string] {
+    $particle =~ '^Qm\w{44}$'
+}
+
+export def is-neuron [address: string] {
+    $address =~ '^(bostrom|pussy)(\w{39}|\w{59})$'
+}
+
+export def is-validator [address: string] {
+    $address =~ '^(bostrom|pussy)\w{46}$'
+}
+
+export def is-connected [] {
+    (do -i {http get https://duckduckgo.com/} | describe) == 'raw input'
+}

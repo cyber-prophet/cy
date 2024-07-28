@@ -1,4 +1,4 @@
-use cy-internals.nu ['fill non-exist']
+use cy-internals.nu *
 use nu-utils ['cprint']
 use cy-complete.nu *
 

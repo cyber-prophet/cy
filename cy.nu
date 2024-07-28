@@ -3453,22 +3453,6 @@ def 'banner2' [] {
     print $'(ansi yellow)cy(ansi reset) is loaded'
 }
 
-def is-cid [particle: string] {
-    $particle =~ '^Qm\w{44}$'
-}
-
-def is-neuron [address: string] {
-    $address =~ '^(bostrom|pussy)(\w{39}|\w{59})$'
-}
-
-def is-validator [address: string] {
-    $address =~ '^(bostrom|pussy)\w{46}$'
-}
-
-def is-connected [] {
-    (do -i {http get https://duckduckgo.com/} | describe) == 'raw input'
-}
-
 def --env is-connected-interval [
     interval = 1min
 ] {
