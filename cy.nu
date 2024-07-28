@@ -2553,24 +2553,6 @@ export def 'authz-give-grant' [
     | tx-broadcast
 }
 
-export def 'validator-chooser' [
-    --only_my_validators
-] {
-    query-staking-validators
-    | rename -c {tokens: 'delegated_total'}
-    | join -l (
-        tokens-delegations-table-get
-        | select validator_address amount
-        | rename operator_address delegated_my
-    ) operator_address operator_address
-    | default 0 delegated_my
-    | sort-by delegated_my delegated_total -r
-    | move delegated_my delegated_total --before operator_address
-    | if $only_my_validators {
-        where delegated_my > 0
-    } else {}
-}
-
 # query neuron addrsss by his nick
 export def 'qnbn' [
     ...nicks: string@'nicks-and-keynames'
