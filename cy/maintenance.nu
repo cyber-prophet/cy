@@ -47,3 +47,21 @@ export def 'update-cy' [
     git stash pop
     cd -
 }
+
+
+# Fix some problems of cy (for example caused by updates)
+export def 'doctor' [] {
+    # fix column names in neurons_dict_tags (change introduced on 20231226)
+    let $dict_n_tags_path = cy-path graph neurons_dict_tags.csv
+
+    $dict_n_tags_path
+    | if ($in | path exists) {
+        open
+        | if ($in | columns | 'value' in $in) {
+            rename -c {value: tag}
+            | save -f $dict_n_tags_path
+
+            print $'($dict_n_tags_path) updated'
+        }
+    }
+}
