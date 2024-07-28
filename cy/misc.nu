@@ -203,3 +203,23 @@ export def log_row_csv [
     $'($cid),($source),"($type)",($size),($status),(history session)(char nl)'
     | save -a $file_path
 }
+
+export def 'authz-give-grant' [
+    $neuron # an address of a neuron
+    $message_type: string@"nu-complete-authz-types"
+    $expiration: duration
+] {
+    let $path = cy-path temp transactions --file $'($env.cy.address)-authz-(now-fn).json'
+
+    (
+        ^$env.cy.exec tx authz grant $neuron generic --msg-type $message_type
+        --from $env.cy.address
+        --expiration (date now | $in + $expiration | format date '%s' | into int)
+        --generate-only
+        ...(default-node-params)
+    ) | save $path
+
+    $path
+    | tx-sign
+    | tx-broadcast
+}
