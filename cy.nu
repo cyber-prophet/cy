@@ -2172,19 +2172,6 @@ export def 'cid-get-type-gateway' [
     {type: $type size: $size}
 }
 
-export def log_row_csv [
-    --cid: string = ''
-    --source: string = ''
-    --type: string = ''
-    --size: string = ''
-    --status: string = ''
-    --file: path = ''
-] {
-    let $file_path = $file | if $in == '' {cy-path cache MIME_types.csv} else {}
-
-    $'($cid),($source),"($type)",($size),($status),(history session)(char nl)'
-    | save -a $file_path
-}
 
 # Read a CID from the cache, and if the CID is absent - add it into the queue
 export def 'cid-read-or-download' [

@@ -189,3 +189,17 @@ export def 'banner' [] {
 export def 'banner2' [] {
     print $'(ansi yellow)cy(ansi reset) is loaded'
 }
+
+export def log_row_csv [
+    --cid: string = ''
+    --source: string = ''
+    --type: string = ''
+    --size: string = ''
+    --status: string = ''
+    --file: path = ''
+] {
+    let $file_path = $file | if $in == '' {cy-path cache MIME_types.csv} else {}
+
+    $'($cid),($source),"($type)",($size),($status),(history session)(char nl)'
+    | save -a $file_path
+}
