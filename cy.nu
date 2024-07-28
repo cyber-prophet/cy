@@ -7,7 +7,8 @@
 use std assert [equal greater]
 use cy/nu-utils [ bar, cprint, "str repeat", to-safe-filename, to-number-format, number-col-format,
     nearest-given-weekday, print-and-pass, clip, confirm, normalize, path-modify]
-use cy/cy-internals.nu [cy-path match-type default-settings open-cy-config-toml export1 backup-and-echo make-default-folders-fn set-get-env set-select-from-variants path-exists-safe 'fill non-exist' current-links-csv-path]
+use cy/cy-internals.nu *
+use cy/cy-complete.nu *
 
 use std log
 
@@ -3618,113 +3619,6 @@ export def --env 'use-recommended-nushell-settings' []: nothing -> nothing {
     $env.config.table.trim.methodology = 'truncating'
     $env.config.completions.algorithm = 'fuzzy'
     $env.config.completions.quick = false
-}
-
-def 'nu-complete-random-sources' [] {
-    ['chucknorris.io' 'forismatic.com']
-}
-
-def 'nu-complete-search-functions' [] {
-    ['search-auto-refresh' 'search-with-backlinks', 'search-sync']
-}
-
-def 'nu-complete-neurons-nicks' [] {
-    dict-neurons-view | get nick
-}
-
-def 'nu-complete-config-names' [] {
-    ls (cy-path config)
-    | sort-by modified
-    | select name
-    | where ($it.name | path parse | get extension) == 'toml'
-    | upsert address {|i| open $i.name | get address}
-    | sort-by name -r
-    | upsert name {|i| $i.name | path parse | get stem}
-    | rename value description
-}
-
-def 'nu-complete-git-branches' [] {
-    ['main', 'dev']
-}
-
-def 'nu-complete-executables' [] {
-    ['cyber' 'pussy']
-}
-
-def 'nu-complete dict-nicks' [] {
-    dict-neurons-view
-    | select -i nickname neuron
-    | uniq-by nickname
-    | where nickname not-in [null '' '?']
-    | rename value description
-}
-
-def 'nu-complete-settings-variants' [] {
-    open (cy-path kickstart settings-variants.yaml)
-    | items {|key value| {value: $key, description: $value.description?}}
-}
-
-def 'nu-complete-settings-variant-options' [
-    context: string
-] {
-    open (cy-path kickstart settings-variants.yaml)
-    | get -i ($context | str trim | split row ' ' | last)
-    | get variants
-}
-
-def 'nicks-and-keynames' [] {
-    nu-complete key-names
-    | append (nu-complete dict-nicks)
-}
-
-def 'nu-complete-bool' [] {
-    [true, false]
-}
-
-def 'nu-complete-props' [] {
-    let term_size = term size | get columns
-
-    governance-view-props --dont_format
-    | reverse
-    | each {|i| {
-        value: $i.proposal_id,
-        description: $'($i.content.title | str substring 0..$term_size)($i | governance-prop-summary)'
-    }}
-}
-
-def 'nu-complete-authz-types' [] {
-    open (cy-path dictionaries tx_message_types.csv)
-    | get type
-}
-
-def 'nu-complete-validators-monikers' [ ] {
-    query-staking-validators | select moniker operator_address | rename value description
-}
-
-def 'nu-complete-graph-csv-files' [] {
-    ls -s (cy-path graph '*.csv' | into glob)
-    | sort-by modified -r
-    | select name size
-    | upsert size {|i| $i.size | into string}
-    | rename value description
-}
-
-def 'nu-complete-links-csv-files' [] {
-    ls -s (cy-path mylinks '*.csv' | into glob)
-    | where name !~ '_cyberlinks_archive.csv'
-    | update name {|i| $i.name | str replace -r '\.csv$' ''}
-    | sort-by modified -r
-    | select name size
-    | upsert size {|i| $i.size | into string}
-    | rename value description
-}
-
-def 'nu-complete-graph-provider' [] {
-    ['hasura' 'clickhouse']
-}
-
-def 'nu-complete-graphviz-presets' [] {
-    [ 'sfdp', 'dot' ]
 }
 
 export def 'cp-banner' [
