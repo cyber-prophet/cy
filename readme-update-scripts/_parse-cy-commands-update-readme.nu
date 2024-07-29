@@ -1,5 +1,5 @@
 # overlay hide cy_no_prefix
-use ~/cy/cy.nu
+use ~/cy/cy
 
 rm 'help_output.md' -f
 
@@ -10,7 +10,7 @@ scope modules
 | get name
 | skip
 | each {|i| $"parse_help 'cy ($i)' \(help '($i)'\);"}
-| prepend "use ~/cy/cy.nu"
+| prepend "use ~/cy/cy/"
 | prepend (view source 'parse_help')
 | str join "\n"
 | nu --env-config env-table-settings.nu -c $in
