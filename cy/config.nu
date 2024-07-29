@@ -5,8 +5,6 @@ use cy-internals.nu *
 export use cy-internals.nu load-default-env
 use passport.nu *
 
-export-env {load-default-env}
-
 # Create a config JSON to set env variables, to use them as parameters in cyber cli
 export def --env 'config-new' [
     # config_name?: string@'nu-complete-config-names'
