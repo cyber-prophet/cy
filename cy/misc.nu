@@ -1,5 +1,35 @@
 use cy-complete.nu *
 
+# query neuron addrsss by his nick
+export def 'qnbn' [
+    ...nicks: string@'nicks-and-keynames'
+    --df
+    --force_list_output (-f)
+] {
+    let $dict_nicks = nicks-and-keynames
+        | select value description
+        | rename name neuron
+
+    let $addresses = $nicks | where (is-neuron $it) | wrap neuron
+
+    let $neurons = if ($nicks | where not (is-neuron $it) | is-empty) {
+            []
+        } else {
+            $dict_nicks
+            | where name in $nicks
+            | select neuron
+            | uniq-by neuron
+        }
+
+    $neurons
+    | append $addresses
+    | if $df {
+        polars into-df
+    } else if ($in | length) == 1 and not $force_list_output {
+        get neuron.0
+    } else {}
+}
+
 # Add the cybercongress node to bootstrap nodes
 export def 'ipfs-bootstrap-add-congress' []: nothing -> nothing {
     ipfs bootstrap add '/ip4/135.181.19.86/tcp/4001/p2p/12D3KooWNMcnoQynAY9hyi4JxzSu64BsRGcJ9z7vKghqk8sTrpqY'
@@ -223,7 +253,6 @@ export def 'authz-give-grant' [
     | tx-sign
     | tx-broadcast
 }
-
 
 # echo particle for publishing
 export def 'echo_particle_txt' [
