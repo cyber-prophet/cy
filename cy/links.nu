@@ -4,12 +4,13 @@
 # Use:
 # > overlay use -pr ~/cy/cy.nu
 
-use nu-utils [ cprint, print-and-pass, confirm, path-modify]
-use cy-internals.nu *
+use nu-utils [cprint, print-and-pass, confirm, path-modify]
 use cy-complete.nu *
-use queue.nu *
+use cy-internals.nu *
+use dict.nu [dict-neurons-add]
+use graph.nu [graph-links-df graph-receive-new-links]
+use query.nu [query-links-bandwidth-neuron]
 use tx.nu [tx-json-create-from-cyberlinks tx-sign tx-authz tx-broadcast]
-export use maintenance.nu [help-cy]
 
 # Pin a text particle
 #
