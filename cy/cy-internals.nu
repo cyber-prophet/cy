@@ -30,7 +30,7 @@ export def 'cy-path' [
 export def open-cy-config-toml []: nothing -> record {
     $nu.home-path
     | path join .cy_config.toml
-    | if ($in | path exists) { open } else { {} }
+    | if ($in | path exists) { open } else { touch $in; {} }
     | default (cy-path) path
     | default (cy-path graph particles safe) ipfs-files-folder
     | default no-config-set config-name
