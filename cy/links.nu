@@ -8,7 +8,7 @@ use nu-utils [ cprint, print-and-pass, confirm, path-modify]
 use cy-internals.nu *
 use cy-complete.nu *
 use queue.nu *
-use maintenance.nu [help-cy]
+export use maintenance.nu [help-cy]
 
 export def main [] { help-cy }
 # export def cy [] { help-cy }
