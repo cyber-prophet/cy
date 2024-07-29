@@ -1,9 +1,9 @@
 use ../cy.nu *
-use ../cy-internals.nu [export1 cy-path]
+use ../cy-internals.nu [load-default-env cy-path]
 use std assert [equal greater]
 
 export-env {
-    export1
+    load-default-env
     $env.IPFS_PATH = /Users/user/.ipfs_blank
 }
 

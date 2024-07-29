@@ -4,7 +4,7 @@ use maintenance.nu [ check-requirements ]
 use cy-internals.nu *
 use passport.nu *
 
-export-env {export1}
+export-env {load-default-env}
 
 # Create a config JSON to set env variables, to use them as parameters in cyber cli
 export def --env 'config-new' [
@@ -129,7 +129,7 @@ export def --env 'config-activate' [
     | collect
     | save -f $config_path
 
-    export1
+    load-default-env
 }
 
 

@@ -58,7 +58,7 @@ export def match-type [
 }
 
 
-export def export1 --env [] {
+export def load-default-env --env [] {
     let $config = open-cy-config-toml
 
     let $user_config = $config.path
