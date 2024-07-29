@@ -1,5 +1,5 @@
 # Setup cy
-use ../nu-utils/ [cprint print-and-pass]
+use ../cy/nu-utils/ [cprint print-and-pass]
 
 def --env 'install_if_missing' [
     brew_cli_name: string
@@ -46,7 +46,6 @@ install_if_missing "pussy"
 install_if_missing "curl"
 install_if_missing "ipfs"
 install_if_missing "mdcat"
-install_if_missing "rustup-init"
 
 # upgrade ipfs if it is installed
 if (brew list ipfs | complete | get exit_code) == 0 {
