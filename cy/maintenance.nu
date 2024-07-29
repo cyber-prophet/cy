@@ -1,4 +1,5 @@
 use cy-complete.nu *
+use cy-internals.nu [cy-path]
 
 # An ordered list of cy commands
 export def 'help-cy' [] {
