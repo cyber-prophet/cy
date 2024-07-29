@@ -975,3 +975,16 @@ export def 'message-send' [
     ^$env.cy.exec tx bank send $from $neuron $amount --note (pin-text $message) --output json
     | from json
 }
+
+# Set the custom name for links csv table
+export def --env 'set-links-table-name' [
+    name?: string@'nu-complete-links-csv-files' # a name for a temporary cyberlinks table file
+]: nothing -> nothing {
+    let $name_1 = $name
+        | if $in == null {
+            'temp_' + (now-fn)
+        } else {}
+
+    $env.cy.links_table_name = $name_1
+    if $name == null {$name_1}
+}
