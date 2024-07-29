@@ -94,7 +94,7 @@ open $nu.config-path
 | str replace 'algorithm: "prefix"' 'algorithm: "fuzzy"'
 | save -f $nu.config-path
 
-if (open $nu.env-path | lines | where ($it | str starts-with '$env.EDITOR') | length) == 0 {
+if (open $nu.env-path | lines | where $it starts-with '$env.EDITOR' | is-empty) {
     (char nl) + '$env.EDITOR = nano' + (char nl) | save -a $nu.env-path
 }
 
