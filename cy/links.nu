@@ -200,13 +200,13 @@ export def 'link-files' [
     if not $quiet { $results }
 }
 
-# Link files hierarchy in the a specified or current folder
+# Link folders to filenames and filenames to files hierarchy in a specified or current folder
 export def 'link-folder' [
     folder_path?: path # path to a folder to link files at
-    --include_extension # Include a file extension (works only with `--link_filenames`)
+    --include_extension # Include a file extension
     --disable_append (-D) # Don't append links to the links table
-    --no_content # Use only directory and file names for cyberlinks, don't create cyberlinks to file contents
-    --no_folders # Don't link folders to their child members (is not available if --no_content)
+    --no_content # Use only directory and filenames, don't create cyberlinks to file contents
+    --no_folders # Don't link folders to their child members (is not available if `--no_content` is used)
     --yes (-y) # Confirm uploading files without request
 ]: [nothing -> table] {
     let $path = $folder_path | default (pwd)
