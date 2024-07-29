@@ -886,12 +886,9 @@ def 'links-send-tx' [ ] {
     if $response.code == 0 {
         let $filename = cy-path mylinks _cyberlinks_archive.csv
 
-        let $header = open $filename | first
-
-        $header
-        | append ( $links | upsert neuron $env.cy.address )
-        | fill non-exist
-        | skip
+        $links
+        | upsert neuron $env.cy.address
+        | select from to neuron timestamp txhash
         | to csv --noheaders
         | save $filename --append --raw
 

@@ -155,7 +155,7 @@ export def make-default-folders-fn []: nothing -> nothing {
     }
 
     if not (cy-path mylinks _cyberlinks_archive.csv | path exists) {
-        'from,to,address,timestamp,txhash'
+        'from,to,neuron,timestamp,txhash'
         # underscore is supposed to place the file first in the folder
         | save (cy-path mylinks _cyberlinks_archive.csv)
     }
