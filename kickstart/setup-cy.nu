@@ -77,9 +77,9 @@ plugin add ('~/.cargo/bin/nu_plugin_polars' | path expand)
 let $cy_folder = '~/cy'
 
 # check if there is `overlay use ... cy.nu ` in the configs
-open $nu.config-path | lines | find -r '^overlay use .*cy\.nu'
+open $nu.config-path | lines | find -r '^overlay use .*cy'
 | if ($in | is-empty) {
-    $"#💎 load Cy on NuShell start(char nl)overlay use '($cy_folder)/cy.nu' -pr (char nl)"
+    $"#💎 load Cy on Nushell start(char nl)overlay use '($cy_folder)/cy/' -pr(char nl)"
     | save -a $'($nu.config-path)'
 }
 
