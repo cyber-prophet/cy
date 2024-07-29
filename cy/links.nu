@@ -10,9 +10,6 @@ use cy-complete.nu *
 use queue.nu *
 export use maintenance.nu [help-cy]
 
-export def main [] { help-cy }
-# export def cy [] { help-cy }
-
 # Pin a text particle
 #
 # > cy pin-text 'cyber'
