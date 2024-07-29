@@ -18,10 +18,10 @@ use tx.nu [tx-json-create-from-cyberlinks tx-sign tx-authz tx-broadcast]
 # QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 #
 # > "cyber" | save -f cyber.txt; cy pin-text 'cyber.txt'
-# QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
+# QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6
 #
 # > "cyber" | save -f cyber.txt; cy pin-text 'cyber.txt' --follow_file_path
-# QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6
+# QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 #
 # > cy pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV'
 # QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
@@ -333,9 +333,9 @@ def 'link-quote' []: [nothing -> nothing] {
 # via [Chucknorris.io](https://chucknorris.io)
 # ==========================================================
 #
-# > cy link-random forismatic.com
 # ==========================================================
 # He who knows himself is enlightened.   (Lao Tzu )
+# > cy link-random --source forismatic.com
 #
 # via [forismatic.com](https://forismatic.com)
 # ==========================================================
