@@ -1,3 +1,5 @@
+use cy-internals.nu *
+use cy-complete.nu *
 
 def 'search-sync' [
     query
