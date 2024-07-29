@@ -709,7 +709,7 @@ export def 'links-remove-existed-1by1' [
 }
 
 # Remove existing links using graph snapshot data
-export def 'links-remove-existed-2' [] {
+export def 'links-remove-existed-using-snapshot' [] {
     graph-receive-new-links
 
     let $existing_links = graph-links-df
@@ -770,7 +770,7 @@ def 'links-send-tx' [ ] {
             error make --unspanned {msg: (cprint --echo 'Increase your *Volts* balance or wait time.')}
         }
         if $response.raw_log =~ 'your cyberlink already exists' {
-            error make --unspanned {msg: (cprint --echo 'Use *cy links-remove-existed-2*')}
+            error make --unspanned {msg: (cprint --echo 'Use *cy links-remove-existed-using-snapshot*')}
         }
 
         cprint 'The transaction might be not sent.'
