@@ -1,6 +1,6 @@
 # Cy💎
 
-Cy - a [nushell](https://www.nushell.sh/) wrapper for `cyber`, `ipfs` and other CLIs for interacting with Cybergraphs.
+Cy - a [Nushell](https://www.nushell.sh/) wrapper for `cyber`, `ipfs` and other CLIs for interacting with Cybergraphs.
 
 ## Status
 
@@ -9,10 +9,10 @@ Very much WIP. Actively developed.
 ## Key features of Cy
 
 - Different settings for different profiles (RPC endpoints, private keys, networks, etc.)
-- Seamlessly upload and download data to a Cyber node or to a local IPFS node
-- Creating multiple cyberlinks
-- Export graph formats: Cosmograph, Gephi, Graphviz
-- Shortcuts for interacting with passport smart contract
+- Seamlessly upload and download data to a Cybernode or to a local IPFS node
+- Create multiple cyberlinks and publish them simoltaneously
+- Export Cybergraphs to formats of Cosmograph, Gephi, Graphviz
+- Shortcuts for interacting with the Bostrom's passport smart contract
 - Cyber search in terminal
 - Many more (see list of functions below)
 
@@ -24,7 +24,7 @@ If you have `nushell`, `git` and `cyber` CLI-s installed:
 
 ```nushell
 git clone https://github.com/cyber-prophet/cy; cd cy;
-overlay use -pr cy.nu
+overlay use -pr cy/
 ```
 
 ### Install all the necessary apps using homebrew (Mac, Linux)
