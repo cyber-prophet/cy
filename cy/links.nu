@@ -941,13 +941,24 @@ def 'links-prepare-for-publishing' [] {
 export def 'links-publish' [
     --links_per_trans: int
 ] {
+    let $links_per_trans = set-get-env links-per-transaction $links_per_trans
+
     links-view --quiet
     | links-prepare-for-publishing
     | links-replace
     | length
-    | $in // (set-get-env links-per-transaction $links_per_trans)
-    | seq 0 $in
-    | each {links-send-tx}
+    | $in // $links_per_trans
+    | if $nu.os-info.name == 'macos' {
+        seq 0 $in
+        | each {links-send-tx}
+    } else { # in linux request for pin won't show up inside `each` cycle
+        if $in > 1 {
+            cprint $'Publising first ($links_per_trans) cyberlinks.
+                You will need to exectue *links-publish* ($in - 1) more
+                times.'
+        }
+        links-send-tx
+    }
 }
 
 def 'inlinks-or-links' []: [nothing -> table, table -> table] {
