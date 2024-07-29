@@ -891,6 +891,7 @@ def 'links-send-tx' [ ] {
         | upsert txhash $response.txhash
         | select from to neuron timestamp txhash
         | to csv --noheaders
+        | $in + (char nl)
         | save $filename --append --raw
 
         links-view -q
