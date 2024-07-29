@@ -22,8 +22,6 @@ def --env 'confirm' [
     --default_not (-n)
     --dont_keep_prompt
 ] : nothing -> bool {
-    if not $dont_keep_prompt {cprint $prompt}
-
     if ($env.confirm_all? | default false) {
         return true
     }
@@ -31,6 +29,8 @@ def --env 'confirm' [
     if ($env.reject_all? | default false) {
         return false
     }
+
+    if not $dont_keep_prompt {cprint $prompt}
 
     [yes 'yes for all' no 'no for all']
     | if $default_not { $in | reverse } else { }
