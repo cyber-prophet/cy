@@ -59,11 +59,12 @@ links-per-transaction:
   description: the number of links to fit in one transaction
   type: int
   variants:
+  - 80
   - 10
   - 25
   - 50
   - 75
-  - 100
+  - 90
   - other
 indexer-graphql-endpoint:
   description: hasura graphql indexer endpoint to get cyberlinks from
