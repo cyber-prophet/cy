@@ -975,23 +975,3 @@ export def 'message-send' [
     ^$env.cy.exec tx bank send $from $neuron $amount --note (pin-text $message) --output json
     | from json
 }
-
-
-def --env is-connected-interval [
-    interval = 1min
-] {
-    if ($env.internet-connected? | default (0 | into datetime)) > ((date now) - $interval) {
-        # print 'skip'
-        return true
-    }
-
-    if (is-connected) {
-        $env.internet-connected = (date now)
-        # print 'connected checked'
-        return true
-    } else {
-        $env.internet-connected = null
-        # print 'not connected'
-        return false
-    }
-}
