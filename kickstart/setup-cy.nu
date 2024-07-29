@@ -80,7 +80,7 @@ let $cy_folder = '~/cy'
 open $nu.config-path | lines | find -r '^overlay use .*cy'
 | if ($in | is-empty) {
     ((char nl) + "#💎 load Cy on Nushell start" + (char nl) +
-        "overlay use '($cy_folder)/cy/' -pr" + (char nl))
+        $"overlay use '($cy_folder)/cy/' -pr" + (char nl))
     | save -a $nu.config-path
 }
 
