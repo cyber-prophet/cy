@@ -884,15 +884,13 @@ def 'links-send-tx' [ ] {
         | tx-broadcast
 
     if $response.code == 0 {
-        let $filename = cy-path mylinks _cyberlinks_archive.csv
-
         $links
         | upsert neuron $env.cy.address
         | upsert txhash $response.txhash
         | select from to neuron timestamp txhash
         | to csv --noheaders
         | $in + (char nl)
-        | save $filename --append --raw
+        | save --append --raw (cy-path mylinks _cyberlinks_archive.csv)
 
         links-view -q
         | skip $env.cy.links-per-transaction
