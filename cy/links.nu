@@ -137,7 +137,7 @@ export def 'link-chain' [
     | each {
         |i| {from_text: ($elements | get $i), to_text: ($elements | get ($i + 1)) }
     }
-    | links-pin-columns-2
+    | links-pin-columns-using-kubo
 }
 
 # Pin files from the current folder to the local node and append their cyberlinks to the temp table
@@ -248,7 +248,7 @@ export def 'link-folder' [
     }
     | flatten
     | uniq
-    | links-pin-columns-2 --dont_replace --quiet
+    | links-pin-columns-using-kubo --dont_replace --quiet
     | update to_text {|i| $to_text_subst | get -i $i.to_text | default $i.to_text}
     | if $disable_append {} else {links-append}
 }
@@ -536,7 +536,7 @@ export def 'links-pin-columns' [
     | if $dont_replace {} else { links-replace }
 }
 
-export def 'links-pin-columns-2' [
+export def 'links-pin-columns-using-kubo' [
     --dont_replace (-D) # Don't replace the links cyberlinks table
     --pin_to_local_ipfs # Pin to local kubo
     --ignore_cid # work with CIDs as regular texts
