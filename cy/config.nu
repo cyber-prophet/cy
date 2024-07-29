@@ -4,6 +4,8 @@ use maintenance.nu [ check-requirements ]
 use cy-internals.nu *
 use passport.nu *
 
+export-env {export1}
+
 # Create a config JSON to set env variables, to use them as parameters in cyber cli
 export def --env 'config-new' [
     # config_name?: string@'nu-complete-config-names'

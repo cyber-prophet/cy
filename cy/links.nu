@@ -13,8 +13,6 @@ export use maintenance.nu [help-cy]
 export def main [] { help-cy }
 # export def cy [] { help-cy }
 
-export-env {export1}
-
 # Pin a text particle
 #
 # > cy pin-text 'cyber'
