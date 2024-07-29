@@ -2,6 +2,7 @@ use cy-complete.nu *
 use nu-utils [ cprint print-and-pass]
 use maintenance.nu [ check-requirements ]
 use cy-internals.nu *
+export use cy-internals.nu load-default-env
 use passport.nu *
 
 export-env {load-default-env}
