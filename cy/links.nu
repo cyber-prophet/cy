@@ -1,8 +1,4 @@
-# Cy - a tool for interacting with Cybergraphs
-# https://github.com/cyber-prophet/cy
-#
-# Use:
-# > overlay use -pr ~/cy/cy.nu
+# Cy submodule for creating and publishing cyberlinks
 
 use nu-utils [cprint, print-and-pass, confirm, path-modify]
 use cy-complete.nu *
@@ -254,7 +250,7 @@ export def 'link-folder' [
     | if $disable_append {} else {links-append}
 }
 
-# Create a cyberlink according to semantic construction of following a neuron
+# Create a cyberlink according to semantic convention of following a neuron
 #
 # > cy follow bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8 | to yaml
 # from_text: QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx
@@ -427,7 +423,7 @@ export def 'links-replace' [
     if not $quiet { links-view -q }
 }
 
-# Swap columns from and to
+# Swap columns `from` and `to`
 export def 'links-swap-from-to' [
     --dont_replace (-D) # output results only, without modifying the links table
     --keep_original # append results to original links
@@ -496,7 +492,7 @@ export def 'links-link-all' [
     | if $dont_replace {} else { links-replace }
 }
 
-# Pin values from column 'text_from' and 'text_to' to an IPFS node and fill according columns with their CIDs
+# Pin values of 'from_text' and 'to_text' columns to an IPFS node and fill `from` and `to` with their CIDs
 #
 # > [{from_text: 'cyber' to_text: 'cyber-prophet'} {from_text: 'tweet' to_text: 'cy is cool!'}]
 # | cy links-pin-columns | to yaml
@@ -660,7 +656,7 @@ def 'link-exist' [
     }
 }
 
-# Remove existing cyberlinks from the temp cyberlinks table
+# Remove existing in cybergraph cyberlinks from the temp table
 export def 'links-remove-existed-1by1' [
     --all_links # check all links in the temp table
 ]: [nothing -> table, nothing -> nothing] {
@@ -733,7 +729,6 @@ export def 'links-remove-existed-using-snapshot' [] {
 #
 # > cy links-send-tx | to yaml
 # cy: 2 cyberlinks should be successfully sent
-# code: 0
 # txhash: 9B37FA56D666C2AA15E36CDC507D3677F9224115482ACF8CAF498A246DEF8EB0
 def 'links-send-tx' [ ] {
     let $links = links-view -q
@@ -778,6 +773,7 @@ def 'links-send-tx' [ ] {
     }
 }
 
+# remove duplicated or non-valid cyberlinks from the temp table
 def 'links-prepare-for-publishing' [] {
     let $links = inlinks-or-links
 
@@ -829,7 +825,7 @@ def 'inlinks-or-links' []: [nothing -> table, table -> table] {
     | fill non-exist -v null
 }
 
-# Set the custom name for links csv table
+# Set a custom name for the temp links csv table
 export def --env 'set-links-table-name' [
     name?: string@'nu-complete-links-csv-files' # a name for a temporary cyberlinks table file
 ]: nothing -> nothing {
