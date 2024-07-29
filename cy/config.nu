@@ -125,9 +125,11 @@ export def --env 'config-activate' [
 ] {
     let $config_path = $nu.home-path | path join .cy_config.toml
 
-    open $config_path
+    $config_path
+    if ($in | path exists) {
+        open
+    } else {{}}
     | upsert config-name $config_name
-    | collect
     | save -f $config_path
 
     load-default-env
