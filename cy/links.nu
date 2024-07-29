@@ -4,9 +4,7 @@
 # Use:
 # > overlay use -pr ~/cy/cy.nu
 
-use std assert [equal greater]
-use nu-utils [ bar, cprint, "str repeat", to-safe-filename, to-number-format, number-col-format,
-    nearest-given-weekday, print-and-pass, clip, confirm, normalize, path-modify]
+use nu-utils [ cprint, print-and-pass, confirm, path-modify]
 use cy-internals.nu *
 use cy-complete.nu *
 use queue.nu *
