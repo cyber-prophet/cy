@@ -829,11 +829,12 @@ def 'inlinks-or-links' []: [nothing -> table, table -> table] {
 export def --env 'set-links-table-name' [
     name?: string@'nu-complete-links-csv-files' # a name for a temporary cyberlinks table file
 ]: nothing -> nothing {
-    let $name_1 = $name
-        | if $in == null {
-            'temp_' + (now-fn)
-        } else {}
+    $env.cy.links_table_name = (
+        $name
+        | default $'temp_(now-fn)'
+    )
 
-    $env.cy.links_table_name = $name_1
-    if $name == null {$name_1}
+    if $name == null {
+        return $env.cy.links_table_name
+    }
 }
