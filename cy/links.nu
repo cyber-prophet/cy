@@ -941,7 +941,7 @@ def 'links-prepare-for-publishing' [] {
 export def 'links-publish' [
     --links_per_trans: int
 ] {
-    links-view -q
+    links-view --quiet
     | links-prepare-for-publishing
     | links-replace
     | length
