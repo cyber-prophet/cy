@@ -38,16 +38,16 @@ Open Terminal app on your computer.
 brew tap cyber-prophet/homebrew-taps; brew install cybundle; cybundle
 ```
 
-3. The commands above, upon request, will install the following software on your computer if it is not installed yet:
+3. The commands above will install the following software on your computer if it is not installed yet:
 
    1. [cybundle script](https://github.com/cyber-prophet/homebrew-taps/blob/main/src/cybundle)
    1. [nushell](https://www.nushell.sh/) app
-   1. [curl](https://curl.se/)
-   1. [cyber](https://github.com/cybercongress/go-cyber)
-   1. [pussy](https://github.com/greatweb/space-pussy)
-   1. [ipfs - kubo](https://github.com/ipfs/kubo)
-   1. [pueue](https://github.com/Nukesor/pueue)
-   1. [mdcat](https://github.com/swsnr/mdcat)
+   1. [rustup](https://github.com/rust-lang/rustup): the Rust toolchain installer (needed for installation of `nu_plugin_polars`)
+   1. [curl](https://curl.se/) (optional)
+   1. [cyber](https://github.com/cybercongress/go-cyber) (optional)
+   1. [pussy](https://github.com/greatweb/space-pussy) (optional)
+   1. [kubo](https://github.com/ipfs/kubo): ipfs cli (optional)
+   1. [mdcat](https://github.com/swsnr/mdcat): markdown viewer (optional)
 
 After installation, you can launch `nu` in your terminal with already configured `cy` in it.
 
