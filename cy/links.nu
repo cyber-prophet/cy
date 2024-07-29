@@ -900,7 +900,7 @@ def 'links-send-tx' [ ] {
 
         {'cy': $'($links | length) cyberlinks should be successfully sent'}
         | merge $response
-        | select cy code txhash
+        | select cy txhash
 
     } else {
         print $response
