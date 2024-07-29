@@ -380,7 +380,7 @@ export def 'links-view' [
     let $links = current-links-csv-path
         | if ($in | path exists) {
             open
-            | if $no_timestamp { reject timestamp -i } else {}
+            | if $no_timestamp { reject timestamp -i } else {} # remove this flag
         } else {
             []
         }
