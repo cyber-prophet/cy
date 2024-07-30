@@ -305,25 +305,21 @@ export def 'tweet' [
 }
 
 # Add a random chuck norris cyberlink to the temp table
-def 'link-chuck' []: [nothing -> nothing] {
+def 'link-chuck' []: [nothing -> record] {
     let $quote = http get -e https://api.chucknorris.io/jokes/random
         | get value
         | $in + "\n\n" + 'via [Chucknorris.io](https://chucknorris.io)'
 
-    cprint -f '=' --indent 4 $quote
-
-    link-texts --quiet 'chuck norris' $quote
+    link-texts 'chuck norris' $quote
 }
 
 # Add a random quote cyberlink to the temp table
-def 'link-quote' []: [nothing -> nothing] {
+def 'link-quote' []: [nothing -> record] {
     let $quote = http get -e -r https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=text
         | $in + "\n\n" + 'via [forismatic.com](https://forismatic.com)'
 
-    cprint -f '=' --indent 4 $quote
-
     # link-texts 'quote' $quote
-    link-texts --quiet 'quote' $quote
+    link-texts 'quote' $quote
 }
 
 # Make a random cyberlink from different APIs (chucknorris.io, forismatic.com)
@@ -344,7 +340,7 @@ def 'link-quote' []: [nothing -> nothing] {
 export def 'link-random' [
     n: int = 1 # Number of links to append
     --source: string@'nu-complete-random-sources' = 'forismatic.com' # choose the source to take random links from
-]: [nothing -> nothing] {
+]: [nothing -> record, nothing -> table] {
     1..$n
     | each {
         match $source {
@@ -353,8 +349,6 @@ export def 'link-random' [
             _ => {error make {msg: $'unknown source ($source)'}}
         }
     }
-
-    null
 }
 
 # View the temp cyberlinks table
