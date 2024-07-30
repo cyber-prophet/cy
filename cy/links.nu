@@ -324,19 +324,21 @@ def 'link-quote' []: [nothing -> record] {
 
 # Make a random cyberlink from different APIs (chucknorris.io, forismatic.com)
 #
-# > cy link-random
-# ==========================================================
-# Chuck Norris IS Lukes father.
+# > cy link-random | to yaml
+# - from_text: quote
+#   to_text: |-
+#     If you want your life to be more rewarding, you have to change the way you think.   (Oprah Winfrey )
+#     via [forismatic.com](https://forismatic.com)
+#   from: QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna
+#   to: QmacQobc75xeG9vnogZxd1SC4GLLBriA6Z5cBJWwjgpsm1
 #
-# via [Chucknorris.io](https://chucknorris.io)
-# ==========================================================
-#
-# ==========================================================
-# He who knows himself is enlightened.   (Lao Tzu )
-# > cy link-random --source forismatic.com
-#
-# via [forismatic.com](https://forismatic.com)
-# ==========================================================
+# > cy link-random --source chucknorris.io | to yaml
+# - from_text: chuck norris
+#   to_text: |-
+#     The F1 button on Chuck Norris' computer works.
+#     via [Chucknorris.io](https://chucknorris.io)
+#   from: QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1
+#   to: QmUodhv94Y4m8EmFDrM23RxtU9EqTpniXUKwxRqLWCgUKm
 export def 'link-random' [
     n: int = 1 # Number of links to append
     --source: string@'nu-complete-random-sources' = 'forismatic.com' # choose the source to take random links from
