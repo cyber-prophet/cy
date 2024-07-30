@@ -139,8 +139,7 @@ export def 'link-chain' [
 
 # Pin files from the current folder to the local node and append their cyberlinks to the temp table
 #
-# > mkdir linkfilestest; cd linkfilestest
-# > 'cyber' | save cyber.txt; 'bostrom' | save bostrom.txt
+# > cd (mktemp -d); 'cyber' | save cyber.txt; 'bostrom' | save bostrom.txt;
 # > cy link-files --link_filenames --yes | to yaml
 # - from_text: bostrom.txt
 #   to_text: pinned_file:bostrom.txt
@@ -150,7 +149,6 @@ export def 'link-chain' [
 #   to_text: pinned_file:cyber.txt
 #   from: QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6
 #   to: QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
-# > cd ..; rm -r linkfilestest
 export def 'link-files' [
     ...files: path # filenames of files to pin to the local ipfs node
     --link_filenames (-n) # Add filenames as a `from` link
