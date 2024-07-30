@@ -10,18 +10,23 @@ use tx.nu [tx-json-create-from-cyberlinks tx-sign tx-authz tx-broadcast]
 
 # Pin a text particle
 #
+# pin text 'cyber', get it's cid
 # > cy pin-text 'cyber'
 # QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 #
-# > "cyber" | save -f cyber.txt; cy pin-text 'cyber.txt'
+# pin text 'cyber.txt', get it's cid
+# > cy pin-text 'cyber.txt'
 # QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6
 #
+# save text 'cyber' to the file. Use flag `--follow_file_path` to pin the content of file, but not it's name
 # > "cyber" | save -f cyber.txt; cy pin-text 'cyber.txt' --follow_file_path
 # QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 #
+# use `cy pin-text` with some cid, to see that it will return the cid by default unchanged
 # > cy pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV'
 # QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 #
+# use `--ignore_cid` flag to calculate hash from the initial cid as if it is a regular text
 # > cy pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV' --ignore_cid
 # QmcDUZon6VQLR3gjAvSKnudSVQ2RbGXUtFFV8mR6zHZK8F
 export def 'pin-text' [
@@ -139,7 +144,10 @@ export def 'link-chain' [
 
 # Pin files from the current folder to the local node and append their cyberlinks to the temp table
 #
+# Create temporary directory, cd there, save `cyber.txt` `bostrom.txt` files there with according content.
 # > cd (mktemp -d); 'cyber' | save cyber.txt; 'bostrom' | save bostrom.txt;
+#
+# Create cyberlinks from filenames to their content for previously saved files.
 # > cy link-files --link_filenames --yes | to yaml
 # - from_text: bostrom.txt
 #   to_text: pinned_file:bostrom.txt
@@ -195,7 +203,7 @@ export def 'link-files' [
     if not $quiet { $results }
 }
 
-# Link folders to filenames and filenames to files hierarchy in a specified or current folder
+# Create cyberlinks to hierarchies (if any) `parent_folder - child_folder`, `folder - filename`, `filename - content`
 export def 'link-folder' [
     folder_path?: path # path to a folder to link files at
     --include_extension # Include a file extension
@@ -248,7 +256,7 @@ export def 'link-folder' [
     | if $disable_append {} else {links-append}
 }
 
-# Create a cyberlink according to semantic convention of following a neuron
+# Create a cyberlink according to `following a neuron` semantic convention
 #
 # > cy follow bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8 | to yaml
 # from_text: QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx
