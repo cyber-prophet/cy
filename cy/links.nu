@@ -677,7 +677,7 @@ export def 'links-remove-existed-1by1' [
         | merge ($in | length | seq 0 $in | wrap index)
         | par-each {|i| $i
             | upsert link_exist {|row|
-                print $row.index
+                print -n $'($row.index) '
 
                 link-exist $row.from $row.to $env.cy.address
             }
@@ -690,7 +690,7 @@ export def 'links-remove-existed-1by1' [
     let $existed_links_count = $existed_links | length
 
     if $existed_links_count > 0 {
-        cprint $'*($existed_links_count) cyberlinks* was/were already created by *($env.cy.address)*'
+        cprint --before 1 $'*($existed_links_count) cyberlinks* was/were already created by *($env.cy.address)*'
 
         ($existed_links | select -i from_text from to_text to | each {|i| print $i})
 
