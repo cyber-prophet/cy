@@ -77,7 +77,7 @@ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 
 > cy link-chain bostrom cyber superintelligence
 temp files saved to a local directory
-/Users/user/cy/temp/ipfs_upload/20240731-141113
+/Users/user/cy/temp/ipfs_upload/20240731-141837
 ╭─from_text─┬──────to_text──────┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────╮
 │ bostrom   │ cyber             │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │
 │ cyber     │ superintelligence │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │ QmRMMbTqFQ3o2NmHNYzLoS5fjT5WE3h9Sn21MvmEcsvJ8M │
@@ -152,57 +152,118 @@ There are 1 cyberlinks in the temp table:
 > cy config-activate 42gboot+cyber
 
 > cy link-random 3
-╭from_text┬───────────────────────────────────────────────────────to_text────────────────────────────────────────────────────────┬──────────────────────from──────────────────────┬────────to────────╮
-│ quote   │ When you doubt your power, you give power to your doubt. (Honore de Balzac)                                          │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ QmNp2m4rdQS2M... │
-│         │                                                                                                                      │                                                │                  │
-│         │ via [forismatic.com](https://forismatic.com)                                                                         │                                                │                  │
-│ quote   │ To accomplish great things, we must not only act, but also dream; not only plan, but also believe.  (Anatole France) │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ Qma7keHHnpPtF... │
-│         │                                                                                                                      │                                                │                  │
-│         │ via [forismatic.com](https://forismatic.com)                                                                         │                                                │                  │
-│ quote   │ Friendship isn't a big thing. It's a million little things.                                                          │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ QmfWsrxMEKfap... │
-│         │                                                                                                                      │                                                │                  │
-│         │ via [forismatic.com](https://forismatic.com)                                                                         │                                                │                  │
-╰─from_te─┴───────────────────────────────────────────────────────to_text────────────────────────────────────────────────────────┴──────────────────────from──────────────────────┴────────to────────╯
+╭─from_text─┬────────────────────────────────────────to_text────────────────────────────────────────┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────╮
+│ quote     │ Don't miss all the beautiful colors of the rainbow looking for that pot of gold.      │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ Qmbh3TKPhfZQjEuLyFKdHKYCsLb46SSuzTSH7co6FLrt64 │
+│           │                                                                                       │                                                │                                                │
+│           │ via [forismatic.com](https://forismatic.com)                                          │                                                │                                                │
+│ quote     │ The personal life deeply lived always expands into truths beyond itself.  (Anais Nin) │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ QmTeRvZivV9nLiVL2vkH9jJL6d55eMY7LPVDGXJ8HB69g1 │
+│           │                                                                                       │                                                │                                                │
+│           │ via [forismatic.com](https://forismatic.com)                                          │                                                │                                                │
+│ quote     │ The way is not in the sky. The way is in the heart.   (Buddha)                        │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ QmW6qzdTVfhJrLC5YZSiQRuh1fDuXvmLGyZgGJ4Yax75uo │
+│           │                                                                                       │                                                │                                                │
+│           │ via [forismatic.com](https://forismatic.com)                                          │                                                │                                                │
+╰─from_text─┴────────────────────────────────────────to_text────────────────────────────────────────┴──────────────────────from──────────────────────┴───────────────────────to───────────────────────╯
 
 > cy link-random 3 --source forismatic.com
-╭from_text┬───────────────────────────────────────────────────────────────────────────────────to_text────────────────────────────────────────────────────────────────────────────────────┬─from─┬─to─╮
-│ quote   │ The dogmas of the quiet past are inadequate to the stormy present. The occasion is piled high with difficulty, and we must rise with the occasion. As our case is new, so... │ Q... │ .. │
-│ quote   │ One must be fond of people and trust them if one is not to make a mess of life.  (E.M. Forster)                                                                              │ Q... │ .. │
-│         │                                                                                                                                                                              │      │    │
-│         │ via [forismatic.com](https://forismatic.com)                                                                                                                                 │      │    │
-│ quote   │ You can't choose up sides on a round world. (Wayne Dyer)                                                                                                                     │ Q... │ .. │
-│         │                                                                                                                                                                              │      │    │
-│         │ via [forismatic.com](https://forismatic.com)                                                                                                                                 │      │    │
-╰─from_te─┴───────────────────────────────────────────────────────────────────────────────────to_text────────────────────────────────────────────────────────────────────────────────────┴─from─┴─to─╯
+╭from_text┬───────────────────────────────────────────────────────────to_text───────────────────────────────────────────────────────────┬──────────────────────from──────────────────────┬────to─────╮
+│ quote   │ Snowflakes are one of natures most fragile things, but just look what they can do when they stick together.  (Vista Kelly ) │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ QmSL95... │
+│         │                                                                                                                             │                                                │           │
+│         │ via [forismatic.com](https://forismatic.com)                                                                                │                                                │           │
+│ quote   │ A gem cannot be polished without friction, nor a man perfected without trials.  (Chinese Proverb)                           │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ QmaR1W... │
+│         │                                                                                                                             │                                                │           │
+│         │ via [forismatic.com](https://forismatic.com)                                                                                │                                                │           │
+│ quote   │ Know, first, who you are, and then adorn yourself accordingly.   (Epictetus )                                               │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ QmQPuF... │
+│         │                                                                                                                             │                                                │           │
+│         │ via [forismatic.com](https://forismatic.com)                                                                                │                                                │           │
+╰─from_te─┴───────────────────────────────────────────────────────────to_text───────────────────────────────────────────────────────────┴──────────────────────from──────────────────────┴────to─────╯
 
-> cy links-remove-existed-1by1
-0 1 2 3 4 5 6 7 1 cyberlinks was/were already created by
+> cy links-remove-existed-1by1 | enumerate | table -e
+0 1 2 3 4 5 6 7
+1 cyberlinks was/were already created by
 bostrom166tas63rcdezv35jycr8mlfr0qgjdm7rgpzly5
-╭───────────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ from_text │ quote                                                                                                                │
-│ from      │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna                                                                       │
-│ to_text   │ To accomplish great things, we must not only act, but also dream; not only plan, but also believe.  (Anatole France) │
-│           │                                                                                                                      │
-│           │ via [forismatic.com](https://forismatic.com)                                                                         │
-│ to        │ Qma7keHHnpPtFwAMVs1PukGRbBLbpj4AEWzDb7uMZWefdJ                                                                       │
-╰───────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭───────────┬────────────────────────────────────────────────────────────────╮
+│ from_text │ quote                                                          │
+│ from      │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna                 │
+│ to_text   │ The way is not in the sky. The way is in the heart.   (Buddha) │
+│           │                                                                │
+│           │ via [forismatic.com](https://forismatic.com)                   │
+│ to        │ QmW6qzdTVfhJrLC5YZSiQRuh1fDuXvmLGyZgGJ4Yax75uo                 │
+╰───────────┴────────────────────────────────────────────────────────────────╯
 So they were removed from the temp table!
 
-╭─#─┬from_text┬─────────────────────────────────────────────────────────────────────to_text─────────────────────────────────────────────────────────────────────┬─from─┬─to─┬─timestamp─┬link_exist╮
-│ 0 │ bostrom │ cyber                                                                                                                                           │ Q... │ .. │           │ false    │
-│ 1 │ cyber   │ superintelligence                                                                                                                               │ Q... │ .. │           │ false    │
-│ 2 │ quote   │ When you doubt your power, you give power to your doubt. (Honore de Balzac)                                                                     │ Q... │ .. │ 202407... │ false    │
-│   │         │                                                                                                                                                 │      │    │           │          │
-│   │         │ via [forismatic.com](https://forismatic.com)                                                                                                    │      │    │           │          │
-│ 4 │ quote   │ Friendship isn't a big thing. It's a million little things.                                                                                     │ Q... │ .. │ 202407... │ false    │
-│   │         │                                                                                                                                                 │      │    │           │          │
-│   │         │ via [forismatic.com](https://forismatic.com)                                                                                                    │      │    │           │          │
-│ 5 │ quote   │ The dogmas of the quiet past are inadequate to the stormy present. The occasion is piled high with difficulty, and we must rise with the occ... │ Q... │ .. │ 202407... │ false    │
-│ 6 │ quote   │ One must be fond of people and trust them if one is not to make a mess of life.  (E.M. Forster)                                                 │ Q... │ .. │ 202407... │ false    │
-│   │         │                                                                                                                                                 │      │    │           │          │
-│   │         │ via [forismatic.com](https://forismatic.com)                                                                                                    │      │    │           │          │
-│ 7 │ quote   │ You can't choose up sides on a round world. (Wayne Dyer)                                                                                        │ Q... │ .. │ 202407... │ false    │
-│   │         │                                                                                                                                                 │      │    │           │          │
-│   │         │ via [forismatic.com](https://forismatic.com)                                                                                                    │      │    │           │          │
-╰─#─┴─from_te─┴─────────────────────────────────────────────────────────────────────to_text─────────────────────────────────────────────────────────────────────┴─from─┴─to─┴─timestamp─┴─link_exi─╯
+╭─#─┬─────────────────────────────────────────────────────────────────────item─────────────────────────────────────────────────────────────────────╮
+│ 0 │ ╭────────────┬────────────────────────────────────────────────╮                                                                              │
+│   │ │ from_text  │ bostrom                                        │                                                                              │
+│   │ │ to_text    │ cyber                                          │                                                                              │
+│   │ │ from       │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │                                                                              │
+│   │ │ to         │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │                                                                              │
+│   │ │ timestamp  │                                                │                                                                              │
+│   │ │ index      │ 0                                              │                                                                              │
+│   │ │ link_exist │ false                                          │                                                                              │
+│   │ ╰────────────┴────────────────────────────────────────────────╯                                                                              │
+│ 1 │ ╭────────────┬────────────────────────────────────────────────╮                                                                              │
+│   │ │ from_text  │ cyber                                          │                                                                              │
+│   │ │ to_text    │ superintelligence                              │                                                                              │
+│   │ │ from       │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │                                                                              │
+│   │ │ to         │ QmRMMbTqFQ3o2NmHNYzLoS5fjT5WE3h9Sn21MvmEcsvJ8M │                                                                              │
+│   │ │ timestamp  │                                                │                                                                              │
+│   │ │ index      │ 1                                              │                                                                              │
+│   │ │ link_exist │ false                                          │                                                                              │
+│   │ ╰────────────┴────────────────────────────────────────────────╯                                                                              │
+│ 2 │ ╭────────────┬──────────────────────────────────────────────────────────────────────────────────╮                                            │
+│   │ │ from_text  │ quote                                                                            │                                            │
+│   │ │ to_text    │ Don't miss all the beautiful colors of the rainbow looking for that pot of gold. │                                            │
+│   │ │            │                                                                                  │                                            │
+│   │ │            │ via [forismatic.com](https://forismatic.com)                                     │                                            │
+│   │ │ from       │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna                                   │                                            │
+│   │ │ to         │ Qmbh3TKPhfZQjEuLyFKdHKYCsLb46SSuzTSH7co6FLrt64                                   │                                            │
+│   │ │ timestamp  │ 20240731-141854                                                                  │                                            │
+│   │ │ index      │ 2                                                                                │                                            │
+│   │ │ link_exist │ false                                                                            │                                            │
+│   │ ╰────────────┴──────────────────────────────────────────────────────────────────────────────────╯                                            │
+│ 3 │ ╭────────────┬───────────────────────────────────────────────────────────────────────────────────────╮                                       │
+│   │ │ from_text  │ quote                                                                                 │                                       │
+│   │ │ to_text    │ The personal life deeply lived always expands into truths beyond itself.  (Anais Nin) │                                       │
+│   │ │            │                                                                                       │                                       │
+│   │ │            │ via [forismatic.com](https://forismatic.com)                                          │                                       │
+│   │ │ from       │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna                                        │                                       │
+│   │ │ to         │ QmTeRvZivV9nLiVL2vkH9jJL6d55eMY7LPVDGXJ8HB69g1                                        │                                       │
+│   │ │ timestamp  │ 20240731-141858                                                                       │                                       │
+│   │ │ index      │ 3                                                                                     │                                       │
+│   │ │ link_exist │ false                                                                                 │                                       │
+│   │ ╰────────────┴───────────────────────────────────────────────────────────────────────────────────────╯                                       │
+│ 4 │ ╭────────────┬─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮ │
+│   │ │ from_text  │ quote                                                                                                                       │ │
+│   │ │ to_text    │ Snowflakes are one of natures most fragile things, but just look what they can do when they stick together.  (Vista Kelly ) │ │
+│   │ │            │                                                                                                                             │ │
+│   │ │            │ via [forismatic.com](https://forismatic.com)                                                                                │ │
+│   │ │ from       │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna                                                                              │ │
+│   │ │ to         │ QmSL95FVCKD1LwtmJobUM5DCiFSyJApbTSfVRagyEA9dLu                                                                              │ │
+│   │ │ timestamp  │ 20240731-141906                                                                                                             │ │
+│   │ │ index      │ 5                                                                                                                           │ │
+│   │ │ link_exist │ false                                                                                                                       │ │
+│   │ ╰────────────┴─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯ │
+│ 5 │ ╭────────────┬───────────────────────────────────────────────────────────────────────────────────────────────────╮                           │
+│   │ │ from_text  │ quote                                                                                             │                           │
+│   │ │ to_text    │ A gem cannot be polished without friction, nor a man perfected without trials.  (Chinese Proverb) │                           │
+│   │ │            │                                                                                                   │                           │
+│   │ │            │ via [forismatic.com](https://forismatic.com)                                                      │                           │
+│   │ │ from       │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna                                                    │                           │
+│   │ │ to         │ QmaR1Wuxqxf9gQyUNQkLdxWb3HqAAHhmp9LZ6M4FSax3jw                                                    │                           │
+│   │ │ timestamp  │ 20240731-141909                                                                                   │                           │
+│   │ │ index      │ 6                                                                                                 │                           │
+│   │ │ link_exist │ false                                                                                             │                           │
+│   │ ╰────────────┴───────────────────────────────────────────────────────────────────────────────────────────────────╯                           │
+│ 6 │ ╭────────────┬───────────────────────────────────────────────────────────────────────────────╮                                               │
+│   │ │ from_text  │ quote                                                                         │                                               │
+│   │ │ to_text    │ Know, first, who you are, and then adorn yourself accordingly.   (Epictetus ) │                                               │
+│   │ │            │                                                                               │                                               │
+│   │ │            │ via [forismatic.com](https://forismatic.com)                                  │                                               │
+│   │ │ from       │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna                                │                                               │
+│   │ │ to         │ QmQPuFt8sDcLHXy8zcYsXtwxZV1dTHWERqDJcSU4aXVeYh                                │                                               │
+│   │ │ timestamp  │ 20240731-141913                                                               │                                               │
+│   │ │ index      │ 7                                                                             │                                               │
+│   │ │ link_exist │ false                                                                         │                                               │
+│   │ ╰────────────┴───────────────────────────────────────────────────────────────────────────────╯                                               │
+╰─#─┴─────────────────────────────────────────────────────────────────────item─────────────────────────────────────────────────────────────────────╯
 ```
