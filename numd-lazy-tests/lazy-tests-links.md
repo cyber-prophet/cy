@@ -77,14 +77,13 @@ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 
 > cy link-chain bostrom cyber superintelligence
 temp files saved to a local directory
-/Users/user/cy/temp/ipfs_upload/20240731-133548
+/Users/user/cy/temp/ipfs_upload/20240731-141113
 ╭─from_text─┬──────to_text──────┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────╮
 │ bostrom   │ cyber             │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │
 │ cyber     │ superintelligence │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │ QmRMMbTqFQ3o2NmHNYzLoS5fjT5WE3h9Sn21MvmEcsvJ8M │
 ╰─from_text─┴──────to_text──────┴──────────────────────from──────────────────────┴───────────────────────to───────────────────────╯
 
-> cy set-links-table-name
-temp_20240731-133548
+> cy set-links-table-name lazy-tests-links-1
 
 > cd linkfilestest
 
@@ -121,8 +120,7 @@ temp_20240731-133548
 │ to        │ QmWm9pmmz66cq41t1vtZWoRz5xmHSmoKCrrgdP9adcpoZK │
 ╰───────────┴────────────────────────────────────────────────╯
 
-> cy set-links-table-name
-temp_20240731-133559
+> cy set-links-table-name lazy-tests-links-2
 
 > [{from_text: 'cyber' to_text: 'bostrom'}] | cy links-replace
 ╭─from_text─┬─to_text─╮
@@ -154,56 +152,56 @@ There are 1 cyberlinks in the temp table:
 > cy config-activate 42gboot+cyber
 
 > cy link-random 3
-╭from_text┬───────────────────────────────────────────────to_text────────────────────────────────────────────────┬──────────────────────from──────────────────────┬────────────────to────────────────╮
-│ quote   │ Let us always meet each other with smile, for the smile is the beginning of love.   (Mother Teresa ) │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ QmbrDpMAkHDUvj83yF5cdpv8uwznz... │
-│         │                                                                                                      │                                                │                                  │
-│         │ via [forismatic.com](https://forismatic.com)                                                         │                                                │                                  │
-│ quote   │ Better than a thousand hollow words, is one word that brings peace.   (Buddha)                       │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ QmQKdRkZmeeqZZAR7J8DPm43KcyRR... │
-│         │                                                                                                      │                                                │                                  │
-│         │ via [forismatic.com](https://forismatic.com)                                                         │                                                │                                  │
-│ quote   │ When you learn, teach. When you get, give. (Maya Angelou)                                            │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ QmdJ9PJekmkn8ST7ee9Pa2kZDq5QY... │
-│         │                                                                                                      │                                                │                                  │
-│         │ via [forismatic.com](https://forismatic.com)                                                         │                                                │                                  │
-╰─from_te─┴───────────────────────────────────────────────to_text────────────────────────────────────────────────┴──────────────────────from──────────────────────┴────────────────to────────────────╯
+╭from_text┬───────────────────────────────────────────────────────to_text────────────────────────────────────────────────────────┬──────────────────────from──────────────────────┬────────to────────╮
+│ quote   │ When you doubt your power, you give power to your doubt. (Honore de Balzac)                                          │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ QmNp2m4rdQS2M... │
+│         │                                                                                                                      │                                                │                  │
+│         │ via [forismatic.com](https://forismatic.com)                                                                         │                                                │                  │
+│ quote   │ To accomplish great things, we must not only act, but also dream; not only plan, but also believe.  (Anatole France) │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ Qma7keHHnpPtF... │
+│         │                                                                                                                      │                                                │                  │
+│         │ via [forismatic.com](https://forismatic.com)                                                                         │                                                │                  │
+│ quote   │ Friendship isn't a big thing. It's a million little things.                                                          │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ QmfWsrxMEKfap... │
+│         │                                                                                                                      │                                                │                  │
+│         │ via [forismatic.com](https://forismatic.com)                                                                         │                                                │                  │
+╰─from_te─┴───────────────────────────────────────────────────────to_text────────────────────────────────────────────────────────┴──────────────────────from──────────────────────┴────────to────────╯
 
 > cy link-random 3 --source forismatic.com
-╭from_text┬─────────────────────────────────────────────────────────────────────to_text──────────────────────────────────────────────────────────────────────┬───────────────from───────────────┬─to─╮
-│ quote   │ All men have a sweetness in their life. That is what helps them go on. It is towards that they turn when they feel too worn out.  (Albert Camus) │ QmR7zZv2PNo477ixpKBVYVUoquxLV... │ .. │
-│         │                                                                                                                                                  │                                  │    │
-│         │ via [forismatic.com](https://forismatic.com)                                                                                                     │                                  │    │
-│ quote   │ Without courage, wisdom bears no fruit.  (Baltasar Gracian)                                                                                      │ QmR7zZv2PNo477ixpKBVYVUoquxLV... │ .. │
-│         │                                                                                                                                                  │                                  │    │
-│         │ via [forismatic.com](https://forismatic.com)                                                                                                     │                                  │    │
-│ quote   │ Wisdom is the reward you get for a lifetime of listening when you'd have preferred to talk. (Doug Larson)                                        │ QmR7zZv2PNo477ixpKBVYVUoquxLV... │ .. │
-│         │                                                                                                                                                  │                                  │    │
-│         │ via [forismatic.com](https://forismatic.com)                                                                                                     │                                  │    │
-╰─from_te─┴─────────────────────────────────────────────────────────────────────to_text──────────────────────────────────────────────────────────────────────┴───────────────from───────────────┴─to─╯
+╭from_text┬───────────────────────────────────────────────────────────────────────────────────to_text────────────────────────────────────────────────────────────────────────────────────┬─from─┬─to─╮
+│ quote   │ The dogmas of the quiet past are inadequate to the stormy present. The occasion is piled high with difficulty, and we must rise with the occasion. As our case is new, so... │ Q... │ .. │
+│ quote   │ One must be fond of people and trust them if one is not to make a mess of life.  (E.M. Forster)                                                                              │ Q... │ .. │
+│         │                                                                                                                                                                              │      │    │
+│         │ via [forismatic.com](https://forismatic.com)                                                                                                                                 │      │    │
+│ quote   │ You can't choose up sides on a round world. (Wayne Dyer)                                                                                                                     │ Q... │ .. │
+│         │                                                                                                                                                                              │      │    │
+│         │ via [forismatic.com](https://forismatic.com)                                                                                                                                 │      │    │
+╰─from_te─┴───────────────────────────────────────────────────────────────────────────────────to_text────────────────────────────────────────────────────────────────────────────────────┴─from─┴─to─╯
 
 > cy links-remove-existed-1by1
-0 2 1 3 4 5 6 7 1 cyberlinks was/were already created by
+0 1 2 3 4 5 6 7 1 cyberlinks was/were already created by
 bostrom166tas63rcdezv35jycr8mlfr0qgjdm7rgpzly5
-╭───────────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ from_text │ quote                                                                                                    │
-│ from      │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna                                                           │
-│ to_text   │ Wisdom is the reward you get for a lifetime of listening when you'd have preferred to talk. (Doug Lar... │
-│ to        │ QmaHC64pyhsnUr6QQGEC7F6hboyQcYg7yCzz3i5dFkDvWE                                                           │
-╰───────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭───────────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ from_text │ quote                                                                                                                │
+│ from      │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna                                                                       │
+│ to_text   │ To accomplish great things, we must not only act, but also dream; not only plan, but also believe.  (Anatole France) │
+│           │                                                                                                                      │
+│           │ via [forismatic.com](https://forismatic.com)                                                                         │
+│ to        │ Qma7keHHnpPtFwAMVs1PukGRbBLbpj4AEWzDb7uMZWefdJ                                                                       │
+╰───────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 So they were removed from the temp table!
 
 ╭─#─┬from_text┬─────────────────────────────────────────────────────────────────────to_text─────────────────────────────────────────────────────────────────────┬─from─┬─to─┬─timestamp─┬link_exist╮
 │ 0 │ bostrom │ cyber                                                                                                                                           │ Q... │ .. │           │ false    │
 │ 1 │ cyber   │ superintelligence                                                                                                                               │ Q... │ .. │           │ false    │
-│ 2 │ quote   │ Let us always meet each other with smile, for the smile is the beginning of love.   (Mother Teresa )                                            │ Q... │ .. │ 202407... │ false    │
+│ 2 │ quote   │ When you doubt your power, you give power to your doubt. (Honore de Balzac)                                                                     │ Q... │ .. │ 202407... │ false    │
 │   │         │                                                                                                                                                 │      │    │           │          │
 │   │         │ via [forismatic.com](https://forismatic.com)                                                                                                    │      │    │           │          │
-│ 3 │ quote   │ Better than a thousand hollow words, is one word that brings peace.   (Buddha)                                                                  │ Q... │ .. │ 202407... │ false    │
+│ 4 │ quote   │ Friendship isn't a big thing. It's a million little things.                                                                                     │ Q... │ .. │ 202407... │ false    │
 │   │         │                                                                                                                                                 │      │    │           │          │
 │   │         │ via [forismatic.com](https://forismatic.com)                                                                                                    │      │    │           │          │
-│ 4 │ quote   │ When you learn, teach. When you get, give. (Maya Angelou)                                                                                       │ Q... │ .. │ 202407... │ false    │
+│ 5 │ quote   │ The dogmas of the quiet past are inadequate to the stormy present. The occasion is piled high with difficulty, and we must rise with the occ... │ Q... │ .. │ 202407... │ false    │
+│ 6 │ quote   │ One must be fond of people and trust them if one is not to make a mess of life.  (E.M. Forster)                                                 │ Q... │ .. │ 202407... │ false    │
 │   │         │                                                                                                                                                 │      │    │           │          │
 │   │         │ via [forismatic.com](https://forismatic.com)                                                                                                    │      │    │           │          │
-│ 5 │ quote   │ All men have a sweetness in their life. That is what helps them go on. It is towards that they turn when they feel too worn out.  (Albert Ca... │ Q... │ .. │ 202407... │ false    │
-│ 6 │ quote   │ Without courage, wisdom bears no fruit.  (Baltasar Gracian)                                                                                     │ Q... │ .. │ 202407... │ false    │
+│ 7 │ quote   │ You can't choose up sides on a round world. (Wayne Dyer)                                                                                        │ Q... │ .. │ 202407... │ false    │
 │   │         │                                                                                                                                                 │      │    │           │          │
 │   │         │ via [forismatic.com](https://forismatic.com)                                                                                                    │      │    │           │          │
 ╰─#─┴─from_te─┴─────────────────────────────────────────────────────────────────────to_text─────────────────────────────────────────────────────────────────────┴─from─┴─to─┴─timestamp─┴─link_exi─╯
