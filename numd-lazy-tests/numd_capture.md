@@ -77,14 +77,14 @@ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 
 > cy link-chain bostrom cyber superintelligence
 temp files saved to a local directory
-/Users/user/cy/temp/ipfs_upload/20240731-131655
+/Users/user/cy/temp/ipfs_upload/20240731-133548
 ╭─from_text─┬──────to_text──────┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────╮
 │ bostrom   │ cyber             │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │
 │ cyber     │ superintelligence │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │ QmRMMbTqFQ3o2NmHNYzLoS5fjT5WE3h9Sn21MvmEcsvJ8M │
 ╰─from_text─┴──────to_text──────┴──────────────────────from──────────────────────┴───────────────────────to───────────────────────╯
 
 > cy set-links-table-name
-temp_20240731-131655
+temp_20240731-133548
 
 > cd linkfilestest
 
@@ -122,33 +122,30 @@ temp_20240731-131655
 ╰───────────┴────────────────────────────────────────────────╯
 
 > cy set-links-table-name
-temp_20240731-131702
+temp_20240731-133559
 
-> {from_text: 'cyber' to_text: 'bostrom'} | cy links-replace
-╭───────────┬────────────────────────────────────────────────╮
-│ from_text │ cyber                                          │
-│ to_text   │ bostrom                                        │
-│ from      │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │
-│ to        │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │
-╰───────────┴────────────────────────────────────────────────╯
+> [{from_text: 'cyber' to_text: 'bostrom'}] | cy links-replace
+╭─from_text─┬─to_text─╮
+│ cyber     │ bostrom │
+╰─from_text─┴─to_text─╯
 
-> cy links-pin-columns | reject timestamp
-╭─from_text─┬─to_text─┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────┬────timestamp────╮
-│ cyber     │ bostrom │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │ 20240731-131705 │
-╰─from_text─┴─to_text─┴──────────────────────from──────────────────────┴───────────────────────to───────────────────────┴────timestamp────╯
+> cy links-pin-columns | reject timestamp -i
+╭─from_text─┬─to_text─┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────╮
+│ cyber     │ bostrom │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │
+╰─from_text─┴─to_text─┴──────────────────────from──────────────────────┴───────────────────────to───────────────────────╯
 
-> cy links-view | reject timestamp
+> cy links-view | reject timestamp -i
 There are 1 cyberlinks in the temp table:
 ╭─from_text─┬─to_text─┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────╮
 │ cyber     │ bostrom │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │
 ╰─from_text─┴─to_text─┴──────────────────────from──────────────────────┴───────────────────────to───────────────────────╯
 
 > cy links-link-all 'cy testing script'
-╭─────from_text─────┬─to_text─┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────┬────timestamp────╮
-│ cy testing script │ bostrom │ QmdMy9SGd3StRUXoEX4BZQvGsgW6ejn4gMCT727GypSeZx │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │ 20240731-131705 │
-╰─────from_text─────┴─to_text─┴──────────────────────from──────────────────────┴───────────────────────to───────────────────────┴────timestamp────╯
+╭─────from_text─────┬─to_text─┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────╮
+│ cy testing script │ bostrom │ QmdMy9SGd3StRUXoEX4BZQvGsgW6ejn4gMCT727GypSeZx │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │
+╰─────from_text─────┴─to_text─┴──────────────────────from──────────────────────┴───────────────────────to───────────────────────╯
 
-> cy links-view | reject timestamp
+> cy links-view | reject timestamp -i
 There are 1 cyberlinks in the temp table:
 ╭─────from_text─────┬─to_text─┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────╮
 │ cy testing script │ bostrom │ QmdMy9SGd3StRUXoEX4BZQvGsgW6ejn4gMCT727GypSeZx │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │
@@ -157,68 +154,57 @@ There are 1 cyberlinks in the temp table:
 > cy config-activate 42gboot+cyber
 
 > cy link-random 3
-╭from_text┬──────────────────────────────────────────────────────────────────to_text───────────────────────────────────────────────────────────────────┬──────────────────from──────────────────┬─to─╮
-│ quote   │ Love is the only force capable of transforming an enemy into friend.  (Martin Luther King, Jr.)                                            │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2... │ .. │
-│         │                                                                                                                                            │                                        │    │
-│         │ via [forismatic.com](https://forismatic.com)                                                                                               │                                        │    │
-│ quote   │ If you are patient in one moment of anger, you will escape one hundred days of sorrow. (Chinese Proverb)                                   │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2... │ .. │
-│         │                                                                                                                                            │                                        │    │
-│         │ via [forismatic.com](https://forismatic.com)                                                                                               │                                        │    │
-│ quote   │ There are two primary choices in life: to accept conditions as they exist, or accept the responsibility for changing them. (Denis Waitley) │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2... │ .. │
-│         │                                                                                                                                            │                                        │    │
-│         │ via [forismatic.com](https://forismatic.com)                                                                                               │                                        │    │
-╰─from_te─┴──────────────────────────────────────────────────────────────────to_text───────────────────────────────────────────────────────────────────┴──────────────────from──────────────────┴─to─╯
+╭from_text┬───────────────────────────────────────────────to_text────────────────────────────────────────────────┬──────────────────────from──────────────────────┬────────────────to────────────────╮
+│ quote   │ Let us always meet each other with smile, for the smile is the beginning of love.   (Mother Teresa ) │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ QmbrDpMAkHDUvj83yF5cdpv8uwznz... │
+│         │                                                                                                      │                                                │                                  │
+│         │ via [forismatic.com](https://forismatic.com)                                                         │                                                │                                  │
+│ quote   │ Better than a thousand hollow words, is one word that brings peace.   (Buddha)                       │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ QmQKdRkZmeeqZZAR7J8DPm43KcyRR... │
+│         │                                                                                                      │                                                │                                  │
+│         │ via [forismatic.com](https://forismatic.com)                                                         │                                                │                                  │
+│ quote   │ When you learn, teach. When you get, give. (Maya Angelou)                                            │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ QmdJ9PJekmkn8ST7ee9Pa2kZDq5QY... │
+│         │                                                                                                      │                                                │                                  │
+│         │ via [forismatic.com](https://forismatic.com)                                                         │                                                │                                  │
+╰─from_te─┴───────────────────────────────────────────────to_text────────────────────────────────────────────────┴──────────────────────from──────────────────────┴────────────────to────────────────╯
 
 > cy link-random 3 --source forismatic.com
-╭from_text┬───────────────────────────────────────────────────────────────────────────────────to_text────────────────────────────────────────────────────────────────────────────────────┬─from─┬─to─╮
-│ quote   │ Translation is the paradigm, the exemplar of all writing. It is translation that demonstrates most vividly the yearning for transformation that underlies every act invol... │ Q... │ .. │
-│ quote   │ Our distrust is very expensive.  (Ralph Emerson)                                                                                                                             │ Q... │ .. │
-│         │                                                                                                                                                                              │      │    │
-│         │ via [forismatic.com](https://forismatic.com)                                                                                                                                 │      │    │
-│ quote   │ Treat a man as he is, he will remain so. Treat a man the way he can be and ought to be, and he will become as he can be and should be.  (Johann Wolfgang von Goethe)         │ Q... │ .. │
-│         │                                                                                                                                                                              │      │    │
-│         │ via [forismatic.com](https://forismatic.com)                                                                                                                                 │      │    │
-╰─from_te─┴───────────────────────────────────────────────────────────────────────────────────to_text────────────────────────────────────────────────────────────────────────────────────┴─from─┴─to─╯
+╭from_text┬─────────────────────────────────────────────────────────────────────to_text──────────────────────────────────────────────────────────────────────┬───────────────from───────────────┬─to─╮
+│ quote   │ All men have a sweetness in their life. That is what helps them go on. It is towards that they turn when they feel too worn out.  (Albert Camus) │ QmR7zZv2PNo477ixpKBVYVUoquxLV... │ .. │
+│         │                                                                                                                                                  │                                  │    │
+│         │ via [forismatic.com](https://forismatic.com)                                                                                                     │                                  │    │
+│ quote   │ Without courage, wisdom bears no fruit.  (Baltasar Gracian)                                                                                      │ QmR7zZv2PNo477ixpKBVYVUoquxLV... │ .. │
+│         │                                                                                                                                                  │                                  │    │
+│         │ via [forismatic.com](https://forismatic.com)                                                                                                     │                                  │    │
+│ quote   │ Wisdom is the reward you get for a lifetime of listening when you'd have preferred to talk. (Doug Larson)                                        │ QmR7zZv2PNo477ixpKBVYVUoquxLV... │ .. │
+│         │                                                                                                                                                  │                                  │    │
+│         │ via [forismatic.com](https://forismatic.com)                                                                                                     │                                  │    │
+╰─from_te─┴─────────────────────────────────────────────────────────────────────to_text──────────────────────────────────────────────────────────────────────┴───────────────from───────────────┴─to─╯
 
 > cy links-remove-existed-1by1
-1 0 2 3 4 5 6 7 4 cyberlinks was/were already created by
+0 2 1 3 4 5 6 7 1 cyberlinks was/were already created by
 bostrom166tas63rcdezv35jycr8mlfr0qgjdm7rgpzly5
-╭───────────┬─────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ from_text │ quote                                                                                           │
-│ from      │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna                                                  │
-│ to_text   │ Love is the only force capable of transforming an enemy into friend.  (Martin Luther King, Jr.) │
-│           │                                                                                                 │
-│           │ via [forismatic.com](https://forismatic.com)                                                    │
-│ to        │ QmeQYGEi7hayBzwPgWBJwxT6cLvGGrNbUuev6EoMg9WGjc                                                  │
-╰───────────┴─────────────────────────────────────────────────────────────────────────────────────────────────╯
 ╭───────────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ from_text │ quote                                                                                                    │
 │ from      │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna                                                           │
-│ to_text   │ If you are patient in one moment of anger, you will escape one hundred days of sorrow. (Chinese Proverb) │
-│           │                                                                                                          │
-│           │ via [forismatic.com](https://forismatic.com)                                                             │
-│ to        │ QmTP64E4EctdvqxLYLDwQkn7dqKBBMRAw7qXN3EsM1ndRf                                                           │
-╰───────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-╭───────────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ from_text │ quote                                                                                                    │
-│ from      │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna                                                           │
-│ to_text   │ There are two primary choices in life: to accept conditions as they exist, or accept the responsibili... │
-│ to        │ Qmdi2DZky2uxxPV6ev7n42NHTd2bBiP5yoYNKPTc2pNcug                                                           │
-╰───────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-╭───────────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ from_text │ quote                                                                                                    │
-│ from      │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna                                                           │
-│ to_text   │ Translation is the paradigm, the exemplar of all writing. It is translation that demonstrates most vi... │
-│ to        │ QmRWhfJzURpHVjGXvu1eK11m1NaZ1fnS8TREj7vT7asxeK                                                           │
+│ to_text   │ Wisdom is the reward you get for a lifetime of listening when you'd have preferred to talk. (Doug Lar... │
+│ to        │ QmaHC64pyhsnUr6QQGEC7F6hboyQcYg7yCzz3i5dFkDvWE                                                           │
 ╰───────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 So they were removed from the temp table!
 
 ╭─#─┬from_text┬─────────────────────────────────────────────────────────────────────to_text─────────────────────────────────────────────────────────────────────┬─from─┬─to─┬─timestamp─┬link_exist╮
 │ 0 │ bostrom │ cyber                                                                                                                                           │ Q... │ .. │           │ false    │
 │ 1 │ cyber   │ superintelligence                                                                                                                               │ Q... │ .. │           │ false    │
-│ 6 │ quote   │ Our distrust is very expensive.  (Ralph Emerson)                                                                                                │ Q... │ .. │ 202407... │ false    │
+│ 2 │ quote   │ Let us always meet each other with smile, for the smile is the beginning of love.   (Mother Teresa )                                            │ Q... │ .. │ 202407... │ false    │
 │   │         │                                                                                                                                                 │      │    │           │          │
 │   │         │ via [forismatic.com](https://forismatic.com)                                                                                                    │      │    │           │          │
-│ 7 │ quote   │ Treat a man as he is, he will remain so. Treat a man the way he can be and ought to be, and he will become as he can be and should be.  (Joh... │ Q... │ .. │ 202407... │ false    │
+│ 3 │ quote   │ Better than a thousand hollow words, is one word that brings peace.   (Buddha)                                                                  │ Q... │ .. │ 202407... │ false    │
+│   │         │                                                                                                                                                 │      │    │           │          │
+│   │         │ via [forismatic.com](https://forismatic.com)                                                                                                    │      │    │           │          │
+│ 4 │ quote   │ When you learn, teach. When you get, give. (Maya Angelou)                                                                                       │ Q... │ .. │ 202407... │ false    │
+│   │         │                                                                                                                                                 │      │    │           │          │
+│   │         │ via [forismatic.com](https://forismatic.com)                                                                                                    │      │    │           │          │
+│ 5 │ quote   │ All men have a sweetness in their life. That is what helps them go on. It is towards that they turn when they feel too worn out.  (Albert Ca... │ Q... │ .. │ 202407... │ false    │
+│ 6 │ quote   │ Without courage, wisdom bears no fruit.  (Baltasar Gracian)                                                                                     │ Q... │ .. │ 202407... │ false    │
+│   │         │                                                                                                                                                 │      │    │           │          │
+│   │         │ via [forismatic.com](https://forismatic.com)                                                                                                    │      │    │           │          │
 ╰─#─┴─from_te─┴─────────────────────────────────────────────────────────────────────to_text─────────────────────────────────────────────────────────────────────┴─from─┴─to─┴─timestamp─┴─link_exi─╯
 ```
