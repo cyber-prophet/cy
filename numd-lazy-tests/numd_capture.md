@@ -1,34 +1,35 @@
 ```nushell
+> overlay use ~/cy/cy -pr
 > $env.config.table.abbreviated_row_count = 10000
 
-> help-cy
+> cy help-cy
 
-> help-cy | length
+> cy help-cy | length
 0
 ```
 
 ```nushell
 > $env.IPFS_PATH = /Users/user/.ipfs_blank
 
-> pin-text 'cyber'
+> cy pin-text 'cyber'
 QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 
-> pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV'
+> cy pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV'
 QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 
-> pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV' --ignore_cid
+> cy pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV' --ignore_cid
 QmcDUZon6VQLR3gjAvSKnudSVQ2RbGXUtFFV8mR6zHZK8F
 
-> pin-text 'linkfilestest/cyber.txt'
+> cy pin-text 'linkfilestest/cyber.txt'
 QmafiM9MqvpAh4eZJrB7KJ3BAaEqphJGS9EDpLnMePKCPn
 
-> pin-text ([tests linkfilestest cyber.txt] | path join) --follow_file_path
+> cy pin-text ([tests linkfilestest cyber.txt] | path join) --follow_file_path
 QmSFQ4nwTiQppHg3daTJ7GHFuiFFiu6mNjjeKN54ynTTUx
 
-> pin-text ([linkfilestest cyber.txt] | path join) --follow_file_path
+> cy pin-text ([linkfilestest cyber.txt] | path join) --follow_file_path
 QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 
-> link-texts "cyber" "bostrom"
+> cy link-texts "cyber" "bostrom"
 ╭───────────┬────────────────────────────────────────────────╮
 │ from_text │ cyber                                          │
 │ to_text   │ bostrom                                        │
@@ -36,7 +37,7 @@ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 │ to        │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │
 ╰───────────┴────────────────────────────────────────────────╯
 
-> link-texts "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV" "bostrom"
+> cy link-texts "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV" "bostrom"
 ╭───────────┬────────────────────────────────────────────────╮
 │ from_text │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │
 │ to_text   │ bostrom                                        │
@@ -44,7 +45,7 @@ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 │ to        │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │
 ╰───────────┴────────────────────────────────────────────────╯
 
-> link-texts "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV" "bostrom" --ignore_cid
+> cy link-texts "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV" "bostrom" --ignore_cid
 ╭───────────┬────────────────────────────────────────────────╮
 │ from_text │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │
 │ to_text   │ bostrom                                        │
@@ -52,9 +53,9 @@ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 │ to        │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │
 ╰───────────┴────────────────────────────────────────────────╯
 
-> set-cy-setting ipfs-upload-with-no-confirm 'true'
+> cy set-cy-setting ipfs-upload-with-no-confirm 'true'
 
-> link-chain bostrom cyber superintelligence
+> cy link-chain bostrom cyber superintelligence
 temp files saved to a local directory
 /Users/user/cy/temp/ipfs_upload/20240627-135001
 ╭─from_text─┬──────to_text──────┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────╮
@@ -62,12 +63,12 @@ temp files saved to a local directory
 │ cyber     │ superintelligence │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │ QmRMMbTqFQ3o2NmHNYzLoS5fjT5WE3h9Sn21MvmEcsvJ8M │
 ╰─from_text─┴──────to_text──────┴──────────────────────from──────────────────────┴───────────────────────to───────────────────────╯
 
-> set-links-table-name
+> cy set-links-table-name
 temp_20240627-135002
 
 > cd linkfilestest
 
-> link-files --link_filenames --yes --include_extension
+> cy link-files --link_filenames --yes --include_extension
 ╭──from_text──┬─────────to_text─────────┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────╮
 │ bostrom.txt │ pinned_file:bostrom.txt │ QmPtV5CU9v3u7MY7hMgG3z9kTno8o7JHJD1e6f3NLfZ86k │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │
 │ cyber.txt   │ pinned_file:cyber.txt   │ QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6 │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │
@@ -77,14 +78,14 @@ temp_20240627-135002
 
 > cd linkfilestest
 
-> link-files --link_filenames --yes --include_extension bostrom.txt
+> cy link-files --link_filenames --yes --include_extension bostrom.txt
 ╭──from_text──┬─────────to_text─────────┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────╮
 │ bostrom.txt │ pinned_file:bostrom.txt │ QmPtV5CU9v3u7MY7hMgG3z9kTno8o7JHJD1e6f3NLfZ86k │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │
 ╰──from_text──┴─────────to_text─────────┴──────────────────────from──────────────────────┴───────────────────────to───────────────────────╯
 
 > cd ..
 
-> follow bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8
+> cy follow bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8
 ╭───────────┬────────────────────────────────────────────────╮
 │ from_text │ QmPLSA5oPqYxgc8F7EwrM8WS9vKrr1zPoDniSRFh8HSrxx │
 │ to_text   │ bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8 │
@@ -92,43 +93,11 @@ temp_20240627-135002
 │ to        │ QmYwEKZimUeniN7CEAfkBRHCn4phJtNoNJxnZXEAhEt3af │
 ╰───────────┴────────────────────────────────────────────────╯
 
-> follow bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8 --use_local_list_only
+> cy follow bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8 --use_local_list_only
 
-> validator-chooser | length
-156
+> cy links-clear
 
-> caching-function query rank karma bostrom1smsn8u0h5tlvt3jazf78nnrv54aspged9h2nl9 | describe
-record<karma: string, update_time: date>
-
-> config-activate 42gboot+cyber
-
-> caching-function query rank karma bostrom1smsn8u0h5tlvt3jazf78nnrv54aspged9h2nl9 | describe
-record<karma: string, update_time: date>
-
-> caching-function query bank balances bostrom1quchyywzdxp62dq3rwan8fg35v6j58sjwnfpuu | describe
-record<balances: table<denom: string, amount: string>, pagination: record<next_key: nothing, total: string>, update_time: date>
-
-> caching-function query bank balances bostrom1cj8j6pc3nda8v708j3s4a6gq2jrnue7j857m9t | describe
-record<balances: table<denom: string, amount: string>, pagination: record<next_key: nothing, total: string>, update_time: date>
-
-> caching-function query staking delegations bostrom1eg3v42jpwf3d66v6rnrn9hedyd8qvhqy4dt8pc | describe
-record<delegation_responses: table<delegation: record<delegator_address: string, validator_address: string, shares: string>, balance: record<denom: string, amount: string>>, pagination: record<next_key: nothing, total: string>, update_time: date>
-
-> caching-function query staking delegations bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 | describe
-record<delegation_responses: table<delegation: record<delegator_address: string, validator_address: string, shares: string>, balance: record<denom: string, amount: string>>, pagination: record<next_key: nothing, total: string>, update_time: date>
-
-> caching-function query rank top | describe
-record<result: table<particle: string, rank: string>, pagination: record<total: int>, update_time: date>
-
-> caching-function query ibc-transfer denom-traces | describe
-record<denom_traces: table<path: string, base_denom: string>, pagination: record<next_key: nothing, total: string>, update_time: date>
-
-> caching-function query liquidity pools --cache_validity_duration 0sec | describe
-record<pools: table<id: string, type_id: int, reserve_coin_denoms: list<string>, reserve_account_address: string, pool_coin_denom: string>, pagination: record<next_key: nothing, total: string>, update_time: date>
-
-> links-clear
-
-> tweet 'cyber-prophet is cool' --disable_send
+> cy tweet 'cyber-prophet is cool' --disable_send
 ╭───────────┬────────────────────────────────────────────────╮
 │ from_text │ QmbdH2WBamyKLPE5zu4mJ9v49qvY8BFfoumoVPMR5V4Rvx │
 │ to_text   │ cyber-prophet is cool                          │
@@ -136,10 +105,10 @@ record<pools: table<id: string, type_id: int, reserve_coin_denoms: list<string>,
 │ to        │ QmWm9pmmz66cq41t1vtZWoRz5xmHSmoKCrrgdP9adcpoZK │
 ╰───────────┴────────────────────────────────────────────────╯
 
-> set-links-table-name
+> cy set-links-table-name
 temp_20240627-135022
 
-> link-texts 'cyber' 'bostrom'
+> cy link-texts 'cyber' 'bostrom'
 ╭───────────┬────────────────────────────────────────────────╮
 │ from_text │ cyber                                          │
 │ to_text   │ bostrom                                        │
@@ -147,77 +116,71 @@ temp_20240627-135022
 │ to        │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │
 ╰───────────┴────────────────────────────────────────────────╯
 
-> [[from_text, to_text]; ['cyber-prophet' '🤘'] ['tweet' 'cy is cool!']]
-╭───from_text───┬───to_text───╮
-│ cyber-prophet │ 🤘          │
-│ tweet         │ cy is cool! │
-╰───from_text───┴───to_text───╯
-
-> links-pin-columns
+> cy links-pin-columns
 ╭─from_text─┬─to_text─┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────┬────timestamp────╮
 │ cyber     │ bostrom │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │ 20240627-135026 │
 ╰─from_text─┴─to_text─┴──────────────────────from──────────────────────┴───────────────────────to───────────────────────┴────timestamp────╯
 
-> links-view --no_timestamp
+> cy links-view --no_timestamp
 There are 1 cyberlinks in the temp table:
 ╭─from_text─┬─to_text─┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────╮
 │ cyber     │ bostrom │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │
 ╰─from_text─┴─to_text─┴──────────────────────from──────────────────────┴───────────────────────to───────────────────────╯
 
-> links-link-all 'cy testing script'
+> cy links-link-all 'cy testing script'
 ╭─────from_text─────┬─to_text─┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────┬────timestamp────╮
 │ cy testing script │ bostrom │ QmdMy9SGd3StRUXoEX4BZQvGsgW6ejn4gMCT727GypSeZx │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │ 20240627-135026 │
 ╰─────from_text─────┴─to_text─┴──────────────────────from──────────────────────┴───────────────────────to───────────────────────┴────timestamp────╯
 
-> links-view --no_timestamp
+> cy links-view --no_timestamp
 There are 1 cyberlinks in the temp table:
 ╭─────from_text─────┬─to_text─┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────╮
 │ cy testing script │ bostrom │ QmdMy9SGd3StRUXoEX4BZQvGsgW6ejn4gMCT727GypSeZx │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │
 ╰─────from_text─────┴─to_text─┴──────────────────────from──────────────────────┴───────────────────────to───────────────────────╯
 
-> config-activate 42gboot+cyber
+> cy config-activate 42gboot+cyber
 
-> link-random 3
-=============================================================================== 
+> cy link-random 3
+===============================================================================
     If you have made mistakes, there is always another chance for you. You may
     have a fresh start any moment you choose. (Mary Pickford)
 
     via [forismatic.com](https://forismatic.com)
-=============================================================================== 
-=============================================================================== 
+===============================================================================
+===============================================================================
     Life is really simple, but we insist on making it complicated.   (Confucius
     )
 
     via [forismatic.com](https://forismatic.com)
-=============================================================================== 
-=============================================================================== 
+===============================================================================
+===============================================================================
     I cannot give you the formula for success, but I can give you the formula
     for failure: which is: Try to please everybody.  (Herbert Swope)
 
     via [forismatic.com](https://forismatic.com)
-=============================================================================== 
+===============================================================================
 
-> link-random 3 --source forismatic.com
-=============================================================================== 
+> cy link-random 3 --source forismatic.com
+===============================================================================
     Go put your creed into the deed. Nor speak with double tongue.  (Ralph
     Emerson)
 
     via [forismatic.com](https://forismatic.com)
-=============================================================================== 
-=============================================================================== 
+===============================================================================
+===============================================================================
     To be fully alive, fully human, and completely awake is to be continually
     thrown out of the nest. (Pema Chodron)
 
     via [forismatic.com](https://forismatic.com)
-=============================================================================== 
-=============================================================================== 
+===============================================================================
+===============================================================================
     There is never enough time to do everything, but there is always enough time
     to do the most important thing.  (Brian Tracy)
 
     via [forismatic.com](https://forismatic.com)
-=============================================================================== 
+===============================================================================
 
-> links-remove-existed-1by1
+> cy links-remove-existed-1by1
 0
 2
 1
@@ -255,23 +218,23 @@ So they were removed from the temp table!
 │ 6 │ quote     │ There is never enough time to do everything, but there is always enough time to do the most important ... │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ QmamGiE4qcyY27unvNtCT2iCCY2YWvckmfMBg2g9fhrJqP │ 20240627-135226 │ false      │
 ╰─#─┴─from_text─┴──────────────────────────────────────────────────to_text──────────────────────────────────────────────────┴──────────────────────from──────────────────────┴───────────────────────to───────────────────────┴────timestamp────┴─link_exist─╯
 
-> graph-links-df | polars filter-with ((polars col timestamp) > ((date now) - 15day | format date %F)) | polars filter-with ((polars col timestamp) < (date now | format date %F)) | graph-stats | get neurons
+> cy graph-links-df | polars filter-with ((polars col timestamp) > ((date now) - 15day | format date %F)) | polars filter-with ((polars col timestamp) < (date now | format date %F)) | graph-stats | get neurons
 34
 
-> graph-links-df | graph-neurons-stats | polars select nick links_count karma karma_norm karma_norm_bar | polars first 2 | polars into-nu | get 0.links_count | $in > 0
+> cy graph-links-df | graph-neurons-stats | polars select nick links_count karma karma_norm karma_norm_bar | polars first 2 | polars into-nu | get 0.links_count | $in > 0
 true
 
-> graph-links-df test-graph.csv | graph-filter-system-particles particle_from | polars shape | polars into-nu
+> cy graph-links-df test-graph.csv | graph-filter-system-particles particle_from | polars shape | polars into-nu
 ╭─rows─┬─columns─╮
 │   76 │       5 │
 ╰─rows─┴─columns─╯
 
-> graph-links-df test-graph.csv | graph-filter-system-particles particle_from --exclude | polars shape | polars into-nu
+> cy graph-links-df test-graph.csv | graph-filter-system-particles particle_from --exclude | polars shape | polars into-nu
 ╭─rows─┬─columns─╮
 │ 1205 │       5 │
 ╰─rows─┴─columns─╯
 
-> graph-links-df test-graph.csv
+> cy graph-links-df test-graph.csv
 ╭──#───┬─────────────────────neuron─────────────────────┬─────────────────particle_from──────────────────┬──────────────────particle_to───────────────────┬──height──┬──────timestamp──────╮
 │ 0    │ bostrom1ay267fakkrgfy9lf2m7wsj8uez2dgylhtkdf9k │ QmPcfxEfW317u3bbz8MbEhjoMZ5HMFsx5TbsEHWPd1kLLw │ QmXQ4k4ciK5ieaSwtccmH9mm4QdPS6Spd21DTqLFrEwDWR │     9029 │ 2021-11-06 03:52:13 │
 │ 1    │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t │ QmYrXCXqunhqqirz3LBmvbnQb2pFFCk7douQkHDPDvQ3iE │ QmY4X4SkVBkoUGZdTzdcW7SKY8t4ULj5GJBRcRr4UMyahp │    12863 │ 2021-11-06 09:59:22 │
@@ -296,7 +259,7 @@ true
 │ 1280 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ QmZdKqcYqYGy88QpUGZpqjmDUkwm6gZBhygxtSHbCKzbAV │ 12847309 │ 2024-04-01 13:14:37 │
 ╰──#───┴─────────────────────neuron─────────────────────┴─────────────────particle_from──────────────────┴──────────────────particle_to───────────────────┴──height──┴──────timestamp──────╯
 
-> graph-links-df test-graph.csv
+> cy graph-links-df test-graph.csv
 ╭──#───┬─────────────────────neuron─────────────────────┬─────────────────particle_from──────────────────┬──────────────────particle_to───────────────────┬──height──┬──────timestamp──────╮
 │ 0    │ bostrom1ay267fakkrgfy9lf2m7wsj8uez2dgylhtkdf9k │ QmPcfxEfW317u3bbz8MbEhjoMZ5HMFsx5TbsEHWPd1kLLw │ QmXQ4k4ciK5ieaSwtccmH9mm4QdPS6Spd21DTqLFrEwDWR │     9029 │ 2021-11-06 03:52:13 │
 │ 1    │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t │ QmYrXCXqunhqqirz3LBmvbnQb2pFFCk7douQkHDPDvQ3iE │ QmY4X4SkVBkoUGZdTzdcW7SKY8t4ULj5GJBRcRr4UMyahp │    12863 │ 2021-11-06 09:59:22 │
