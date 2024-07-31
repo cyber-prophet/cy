@@ -692,7 +692,9 @@ export def 'links-remove-existed-1by1' [
     if $existed_links_count > 0 {
         cprint --before 1 $'*($existed_links_count) cyberlinks* was/were already created by *($env.cy.address)*'
 
-        ($existed_links | select -i from_text from to_text to | each {|i| print $i})
+        $existed_links
+        | select -i from_text from to_text to
+        | each {|i| print $i}
 
         cprint -c red -a 2 'So they were removed from the temp table!'
 
