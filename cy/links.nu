@@ -341,19 +341,19 @@ def 'link-quote' []: [nothing -> record] {
 # > cy link-random | to yaml
 # - from_text: quote
 #   to_text: |
-#     text: Every problem has a gift for you in its hands.
-#     author: Richard Bach
+#     text: Those who are blessed with the most talent don't necessarily outperform everyone else. It's the people with follow-through who excel.
+#     author: Mary Kay Ash
 #     source: https://forismatic.com
 #   from: QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna
-#   to: QmT4Q4q9ge2avcbvQ5VF72W6xpgUrZkNUKgruLrZoRw7cD
+#   to: QmXfF8iWJUA37T7fDWbSLM6ASHBtXMTfnJx9jhg6g5A9eE
 #
 # > cy link-random --source chucknorris.io | to yaml
 # - from_text: chuck norris
 #   to_text: |
-#     text: Chuck Norris wasn't born in a hospital. He made himself.
+#     text: Chuck Norris is like God, sex and kung-fu put in a blender to create undiluted manliness.
 #     source: https://chucknorris.io
 #   from: QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1
-#   to: QmW8HSQQ8iAPk2VAPdoKabQf1A8aswepvKBRL8tZhSXegk
+#   to: Qmd3y4evbAZYwKPojDsvZiwSnWdnrPugY7CF95E4Jxp4Me
 export def 'link-random' [
     n: int = 1 # Number of links to append
     --source: string@'nu-complete-random-sources' = 'forismatic.com' # choose the source to take random links from
