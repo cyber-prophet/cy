@@ -436,7 +436,7 @@ export def 'links-append' [
 export def 'links-replace' [
     --quiet (-q) # suppress output the resulted temp links table
 ]: [table -> table, table -> nothing] {
-    save (current-links-csv-path) --force
+    save (current-links-csv-path | backup-and-echo --mv) --force
 
     if not $quiet { links-view -q }
 }
