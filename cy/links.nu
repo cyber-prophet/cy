@@ -372,23 +372,23 @@ export def 'link-random' [
 # View the temp cyberlinks table
 #
 # > cy links-view | to yaml
-# There are 2 cyberlinks in the temp table:
-# - from_text: chuck norris
-#   to_text: |-
-#     Chuck Norris IS Lukes father.
-#
-#     via [Chucknorris.io](https://chucknorris.io)
-#   from: QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1
-#   to: QmSLPzbM5NVmXuYCPiLZiePAhUcDCQncYUWDLs7GkLqC7J
-#   timestamp: 20230701-134134
+# There are 2 cyberlinks in the temp
+# table:
 # - from_text: quote
-#   to_text: |-
-#     He who knows himself is enlightened. (Lao Tzu )
-#
-#     via [forismatic.com](https://forismatic.com)
+#   to_text: |
+#     text: Those who are blessed with the most talent don't necessarily outperform everyone else. It's the people with follow-through who excel.
+#     author: Mary Kay Ash
+#     source: https://forismatic.com
 #   from: QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna
-#   to: QmWoxYsWYuTP4E2xaQHr3gUZZTBC7HdNDVhis1BK9X3qjX
-#   timestamp: 20230702-113842
+#   to: QmXfF8iWJUA37T7fDWbSLM6ASHBtXMTfnJx9jhg6g5A9eE
+#   timestamp: 20240801-072212
+# - from_text: chuck norris
+#   to_text: |
+#     text: Chuck Norris is like God, sex and kung-fu put in a blender to create undiluted manliness.
+#     source: https://chucknorris.io
+#   from: QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1
+#   to: Qmd3y4evbAZYwKPojDsvZiwSnWdnrPugY7CF95E4Jxp4Me
+#   timestamp: 20240801-072216
 export def 'links-view' [
     --quiet (-q) # Disable informational messages
     --no_timestamp # Don't output a timestamps column
