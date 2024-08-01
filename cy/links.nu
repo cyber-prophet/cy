@@ -765,6 +765,7 @@ def 'links-send-tx' [ ] {
         $links
         | upsert neuron $env.cy.address
         | upsert txhash $response.txhash
+        | default timestamp 0
         | select from to neuron timestamp txhash
         | to csv --noheaders
         | $in + (char nl)
