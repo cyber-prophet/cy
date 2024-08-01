@@ -316,7 +316,11 @@ def 'link-chuck' []: [nothing -> record] {
 # Add a random quote cyberlink to the temp table
 def 'link-quote' []: [nothing -> record] {
     let $quote = http get -e -r https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=text
-        | $in + "\n\n" + 'via [forismatic.com](https://forismatic.com)'
+        | str replace --regex --all '\s*\)' ')'
+        | str replace --regex --all '\s+' ' '
+        | { quote: $in
+            source: 'https://forismatic.com' }
+        | to yaml
 
     # link-texts 'quote' $quote
     link-texts 'quote' $quote
