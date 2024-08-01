@@ -340,19 +340,20 @@ def 'link-quote' []: [nothing -> record] {
 #
 # > cy link-random | to yaml
 # - from_text: quote
-#   to_text: |-
-#     If you want your life to be more rewarding, you have to change the way you think.   (Oprah Winfrey )
-#     via [forismatic.com](https://forismatic.com)
+#   to_text: |
+#     text: Every problem has a gift for you in its hands.
+#     author: Richard Bach
+#     source: https://forismatic.com
 #   from: QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna
-#   to: QmacQobc75xeG9vnogZxd1SC4GLLBriA6Z5cBJWwjgpsm1
+#   to: QmT4Q4q9ge2avcbvQ5VF72W6xpgUrZkNUKgruLrZoRw7cD
 #
 # > cy link-random --source chucknorris.io | to yaml
 # - from_text: chuck norris
-#   to_text: |-
-#     The F1 button on Chuck Norris' computer works.
-#     via [Chucknorris.io](https://chucknorris.io)
+#   to_text: |
+#     text: Chuck Norris wasn't born in a hospital. He made himself.
+#     source: https://chucknorris.io
 #   from: QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1
-#   to: QmUodhv94Y4m8EmFDrM23RxtU9EqTpniXUKwxRqLWCgUKm
+#   to: QmW8HSQQ8iAPk2VAPdoKabQf1A8aswepvKBRL8tZhSXegk
 export def 'link-random' [
     n: int = 1 # Number of links to append
     --source: string@'nu-complete-random-sources' = 'forismatic.com' # choose the source to take random links from
