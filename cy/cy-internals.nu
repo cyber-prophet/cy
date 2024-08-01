@@ -27,7 +27,7 @@ export def 'cy-path' [
     } else {}
 }
 
-export def open-cy-config-toml []: nothing -> record {
+export def open-global-config-toml []: nothing -> record {
     $nu.home-path
     | path join .cy_config.toml
     | if ($in | path exists) { open } else { touch $in; {} }
@@ -59,10 +59,10 @@ export def match-type [
 
 
 export def load-default-env --env [] {
-    let $config = open-cy-config-toml
+    let $global_config = open-global-config-toml
 
-    let $user_config = $config.path
-        | path join config $'($config.config-name).toml'
+    let $user_config = $global_config.path
+        | path join config $'($global_config.config-name).toml'
         | if ($in | path exists) { open } else {
             cprint $'A config file was not found. Run *cy config-new*'
             {}
@@ -70,7 +70,7 @@ export def load-default-env --env [] {
 
     make-default-folders-fn
 
-    $env.cy = (default-settings | merge $config | merge $user_config)
+    $env.cy = (default-settings | merge $global_config | merge $user_config)
 }
 
 export def 'backup-and-echo' [
