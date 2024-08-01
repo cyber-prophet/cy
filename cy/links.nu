@@ -358,13 +358,14 @@ export def 'link-random' [
     --source: string@'nu-complete-random-sources' = 'forismatic.com' # choose the source to take random links from
 ]: [nothing -> record, nothing -> table] {
     1..$n
-    | each {
+    | par-each -t 3 {
         match $source {
             'forismatic.com' => { link-quote }
             'chucknorris.io' => { link-chuck }
             _ => {error make {msg: $'unknown source ($source)'}}
         }
     }
+    | uniq-by to_text
 }
 
 # View the temp cyberlinks table
