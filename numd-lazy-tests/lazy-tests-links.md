@@ -77,7 +77,7 @@ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 
 > cy link-chain bostrom cyber superintelligence
 temp files saved to a local directory
-/Users/user/cy/temp/ipfs_upload/20240731-142132
+/Users/user/cy/temp/ipfs_upload/20240801-022000
 ╭─from_text─┬──────to_text──────┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────╮
 │ bostrom   │ cyber             │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │
 │ cyber     │ superintelligence │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │ QmRMMbTqFQ3o2NmHNYzLoS5fjT5WE3h9Sn21MvmEcsvJ8M │
@@ -151,117 +151,45 @@ There are 1 cyberlinks in the temp table:
 
 > cy config-activate 42gboot+cyber
 
-> cy link-random 3
-╭from_text┬──────────────────────────────────────────────────────────────────to_text───────────────────────────────────────────────────────────────────┬──────────────────from──────────────────┬─to─╮
-│ quote   │ Just as much as we see in others we have in ourselves. (William Hazlitt)                                                                   │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2... │ .. │
-│         │                                                                                                                                            │                                        │    │
-│         │ via [forismatic.com](https://forismatic.com)                                                                                               │                                        │    │
-│ quote   │ If you come to a fork in the road, take it.                                                                                                │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2... │ .. │
-│         │                                                                                                                                            │                                        │    │
-│         │ via [forismatic.com](https://forismatic.com)                                                                                               │                                        │    │
-│ quote   │ The greatest danger for most of us is not that our aim is too high and we miss it, but that it is too low and we reach it.  (Michelangelo) │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2... │ .. │
-│         │                                                                                                                                            │                                        │    │
-│         │ via [forismatic.com](https://forismatic.com)                                                                                               │                                        │    │
-╰─from_te─┴──────────────────────────────────────────────────────────────────to_text───────────────────────────────────────────────────────────────────┴──────────────────from──────────────────┴─to─╯
+> cy link-random 3 | to yaml
+- from_text: quote
+  to_text: |
+    text: Our distrust is very expensive.
+    author: Ralph Emerson
+    source: https://forismatic.com
+  from: QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna
+  to: QmPSvawXPVBdUG1QNGt2hrbGmvWRpoYy45Kz1ww9fYyAjd
 
-> cy link-random 3 --source forismatic.com
-╭from_text┬───────────────────────────────────────────────────────────────────────────────────to_text────────────────────────────────────────────────────────────────────────────────────┬─from─┬─to─╮
-│ quote   │ Love the moment. Flowers grow out of dark moments. Therefore, each moment is vital. It affects the whole. Life is a succession of such moments and to live each, is to su... │ Q... │ .. │
-│ quote   │ If you are going to achieve excellence in big things, you develop the habit in little matters. Excellence is not an exception, it is a prevailing attitude.  (Colin Powell)  │ Q... │ .. │
-│         │                                                                                                                                                                              │      │    │
-│         │ via [forismatic.com](https://forismatic.com)                                                                                                                                 │      │    │
-│ quote   │ Great talent finds happiness in execution.  (Johann Wolfgang von Goethe)                                                                                                     │ Q... │ .. │
-│         │                                                                                                                                                                              │      │    │
-│         │ via [forismatic.com](https://forismatic.com)                                                                                                                                 │      │    │
-╰─from_te─┴───────────────────────────────────────────────────────────────────────────────────to_text────────────────────────────────────────────────────────────────────────────────────┴─from─┴─to─╯
+> cy link-random 3 --source forismatic.com | to yaml
+- from_text: quote
+  to_text: |
+    text: Silence is deep as Eternity, Speech is shallow as Time.
+    author: Carlyle
+    source: https://forismatic.com
+  from: QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna
+  to: Qmb4FJSBBoXeiDhX3pDVrb8Etg4QQ6RUrK2X7rjKsuzu6w
+
+> cy link-random 3 --source chucknorris.io | to yaml
+- from_text: chuck norris
+  to_text: |
+    text: Those movies when monsters attack tokyo are fake. Its just a documentery about when Chuck Norris lets his pets play outside
+    source: https://chucknorris.io
+  from: QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1
+  to: QmZvD8yr7MHUk6kmcjA5wRtLnrwjqq1c9SBZzapwAraydh
+- from_text: chuck norris
+  to_text: |
+    text: Once Chuck Norris died just to see how it feels like to be dead. The next day he resurrected himself and roundhouse kicked everyone who celebrated his temporary death.
+    source: https://chucknorris.io
+  from: QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1
+  to: QmSM722aRsQvBirKA77BKto89esQ7HqDYzTXqXTUFwaAUo
+- from_text: chuck norris
+  to_text: |
+    text: Every night before bed Chuck Norris round house kicks 10 childern.
+    source: https://chucknorris.io
+  from: QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1
+  to: QmcsrdFWBD4YoT3CGpH58vAPHed6pCvqGfAkQ6xLp5TNGW
 
 > cy links-remove-existed-1by1
-0 2 1 3 4 5 6 7
-1 cyberlinks was/were already created by
-bostrom166tas63rcdezv35jycr8mlfr0qgjdm7rgpzly5
-╭───────────┬──────────────────────────────────────────────────────────────────────────╮
-│ from_text │ quote                                                                    │
-│ from      │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna                           │
-│ to_text   │ Just as much as we see in others we have in ourselves. (William Hazlitt) │
-│           │                                                                          │
-│           │ via [forismatic.com](https://forismatic.com)                             │
-│ to        │ QmPbAfbEzfLLKF1rNi2Vw9t6eCoCLfyEQVozJdDKNkYR4H                           │
-╰───────────┴──────────────────────────────────────────────────────────────────────────╯
-So they were removed from the temp table!
-
-╭─#─┬──────────────────────────────────────────────────────────────────────────────────────────────────────item───────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ 0 │ ╭────────────┬────────────────────────────────────────────────╮                                                                                                                                                 │
-│   │ │ from_text  │ bostrom                                        │                                                                                                                                                 │
-│   │ │ to_text    │ cyber                                          │                                                                                                                                                 │
-│   │ │ from       │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │                                                                                                                                                 │
-│   │ │ to         │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │                                                                                                                                                 │
-│   │ │ timestamp  │                                                │                                                                                                                                                 │
-│   │ │ index      │ 0                                              │                                                                                                                                                 │
-│   │ │ link_exist │ false                                          │                                                                                                                                                 │
-│   │ ╰────────────┴────────────────────────────────────────────────╯                                                                                                                                                 │
-│ 1 │ ╭────────────┬────────────────────────────────────────────────╮                                                                                                                                                 │
-│   │ │ from_text  │ cyber                                          │                                                                                                                                                 │
-│   │ │ to_text    │ superintelligence                              │                                                                                                                                                 │
-│   │ │ from       │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │                                                                                                                                                 │
-│   │ │ to         │ QmRMMbTqFQ3o2NmHNYzLoS5fjT5WE3h9Sn21MvmEcsvJ8M │                                                                                                                                                 │
-│   │ │ timestamp  │                                                │                                                                                                                                                 │
-│   │ │ index      │ 1                                              │                                                                                                                                                 │
-│   │ │ link_exist │ false                                          │                                                                                                                                                 │
-│   │ ╰────────────┴────────────────────────────────────────────────╯                                                                                                                                                 │
-│ 2 │ ╭────────────┬────────────────────────────────────────────────╮                                                                                                                                                 │
-│   │ │ from_text  │ quote                                          │                                                                                                                                                 │
-│   │ │ to_text    │ If you come to a fork in the road, take it.    │                                                                                                                                                 │
-│   │ │            │                                                │                                                                                                                                                 │
-│   │ │            │ via [forismatic.com](https://forismatic.com)   │                                                                                                                                                 │
-│   │ │ from       │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │                                                                                                                                                 │
-│   │ │ to         │ QmTSjU6z6zb3EhvzcgxVWXuYmG4r1GRCNW7BEa7Fiok4zV │                                                                                                                                                 │
-│   │ │ timestamp  │ 20240731-142153                                │                                                                                                                                                 │
-│   │ │ index      │ 3                                              │                                                                                                                                                 │
-│   │ │ link_exist │ false                                          │                                                                                                                                                 │
-│   │ ╰────────────┴────────────────────────────────────────────────╯                                                                                                                                                 │
-│ 3 │ ╭────────────┬────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮                                                     │
-│   │ │ from_text  │ quote                                                                                                                                      │                                                     │
-│   │ │ to_text    │ The greatest danger for most of us is not that our aim is too high and we miss it, but that it is too low and we reach it.  (Michelangelo) │                                                     │
-│   │ │            │                                                                                                                                            │                                                     │
-│   │ │            │ via [forismatic.com](https://forismatic.com)                                                                                               │                                                     │
-│   │ │ from       │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna                                                                                             │                                                     │
-│   │ │ to         │ QmfVWVqs2JGsfdSBKGtKS7NzMzV98MRF56uP3jHqTdqJZS                                                                                             │                                                     │
-│   │ │ timestamp  │ 20240731-142157                                                                                                                            │                                                     │
-│   │ │ index      │ 4                                                                                                                                          │                                                     │
-│   │ │ link_exist │ false                                                                                                                                      │                                                     │
-│   │ ╰────────────┴────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯                                                     │
-│ 4 │ ╭────────────┬────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮ │
-│   │ │ from_text  │ quote                                                                                                                                                                                          │ │
-│   │ │ to_text    │ Love the moment. Flowers grow out of dark moments. Therefore, each moment is vital. It affects the whole. Life is a succession of such moments and to live each, is to succeed.  (Corita Kent) │ │
-│   │ │            │                                                                                                                                                                                                │ │
-│   │ │            │ via [forismatic.com](https://forismatic.com)                                                                                                                                                   │ │
-│   │ │ from       │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna                                                                                                                                                 │ │
-│   │ │ to         │ QmWhRys2ct9evb8tvenn6szSp3j6ungKiJPWpWVuchUSZd                                                                                                                                                 │ │
-│   │ │ timestamp  │ 20240731-142201                                                                                                                                                                                │ │
-│   │ │ index      │ 5                                                                                                                                                                                              │ │
-│   │ │ link_exist │ false                                                                                                                                                                                          │ │
-│   │ ╰────────────┴────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯ │
-│ 5 │ ╭────────────┬─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮                    │
-│   │ │ from_text  │ quote                                                                                                                                                                       │                    │
-│   │ │ to_text    │ If you are going to achieve excellence in big things, you develop the habit in little matters. Excellence is not an exception, it is a prevailing attitude.  (Colin Powell) │                    │
-│   │ │            │                                                                                                                                                                             │                    │
-│   │ │            │ via [forismatic.com](https://forismatic.com)                                                                                                                                │                    │
-│   │ │ from       │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna                                                                                                                              │                    │
-│   │ │ to         │ QmWRggHtgwJ4VqUmb3GjvWHvy5yDtseQgEEJbj9agCwMCA                                                                                                                              │                    │
-│   │ │ timestamp  │ 20240731-142205                                                                                                                                                             │                    │
-│   │ │ index      │ 6                                                                                                                                                                           │                    │
-│   │ │ link_exist │ false                                                                                                                                                                       │                    │
-│   │ ╰────────────┴─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯                    │
-│ 6 │ ╭────────────┬──────────────────────────────────────────────────────────────────────────╮                                                                                                                       │
-│   │ │ from_text  │ quote                                                                    │                                                                                                                       │
-│   │ │ to_text    │ Great talent finds happiness in execution.  (Johann Wolfgang von Goethe) │                                                                                                                       │
-│   │ │            │                                                                          │                                                                                                                       │
-│   │ │            │ via [forismatic.com](https://forismatic.com)                             │                                                                                                                       │
-│   │ │ from       │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna                           │                                                                                                                       │
-│   │ │ to         │ QmXS8UtWoR2hP7SFmtWFkfgPQBeNWMDX3T4P1PHBHdDp9K                           │                                                                                                                       │
-│   │ │ timestamp  │ 20240731-142208                                                          │                                                                                                                       │
-│   │ │ index      │ 7                                                                        │                                                                                                                       │
-│   │ │ link_exist │ false                                                                    │                                                                                                                       │
-│   │ ╰────────────┴──────────────────────────────────────────────────────────────────────────╯                                                                                                                       │
-╰─#─┴──────────────────────────────────────────────────────────────────────────────────────────────────────item───────────────────────────────────────────────────────────────────────────────────────────────────────╯
+1 2 0 5 3 6 4 7 8 9 10 There are no cyberlinks in the temp table for the current address exist the
+cybergraph
 ```

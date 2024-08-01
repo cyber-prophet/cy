@@ -126,16 +126,20 @@ cy links-view | reject timestamp -i | table --width 200 | print; print ''
 
 cy config-activate 42gboot+cyber | table --width 200 | print; print ''
 
-"> cy link-random 3" | nu-highlight | print
+"> cy link-random 3 | to yaml" | nu-highlight | print
 
-cy link-random 3 | table --width 200 | print; print ''
+cy link-random 3 | to yaml | table --width 200 | print; print ''
 
-"> cy link-random 3 --source forismatic.com" | nu-highlight | print
+"> cy link-random 3 --source forismatic.com | to yaml" | nu-highlight | print
 
-cy link-random 3 --source forismatic.com | table --width 200 | print; print ''
+cy link-random 3 --source forismatic.com | to yaml | table --width 200 | print; print ''
 
-"> cy links-remove-existed-1by1 | enumerate | table -e" | nu-highlight | print
+"> cy link-random 3 --source chucknorris.io | to yaml" | nu-highlight | print
 
-cy links-remove-existed-1by1 | enumerate | table -e | table --width 200 | print; print ''
+cy link-random 3 --source chucknorris.io | to yaml | table --width 200 | print; print ''
+
+"> cy links-remove-existed-1by1" | nu-highlight | print
+
+cy links-remove-existed-1by1 | table --width 200 | print; print ''
 
 "```" | print
