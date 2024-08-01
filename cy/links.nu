@@ -318,13 +318,16 @@ def 'link-chuck' []: [nothing -> record] {
 
 # Add a random quote cyberlink to the temp table
 def 'link-quote' []: [nothing -> record] {
-    let $quote = http get -e -r https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=text
+    let $quote = ( http get --allow-errors -r
+        https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=text )
         | str replace -ar '(\.|\,)(\S)' '$1 $2'
         | str replace -ar '\s+' ' '
-        | parse -r '^(?<quote>.*?)\((?<author>.*)?\)'
-        | get 0?
-        | if ($in | is-empty) {return} else {}
-        | str trim quote? author?
+        | parse -r '^(?<text>.*?)\((?<author>.*)?\)'
+        | if ($in.0? | is-empty) {
+            print $"empty answer:\n($in)";
+            return
+        } else {get 0}
+        | str trim text? author?
         | if $in.author? in [null, ''] {select quote} else {}
         | insert source 'https://forismatic.com'
         | to yaml
