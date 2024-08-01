@@ -1,3 +1,4 @@
+use cy-internals.nu *
 
 export def 'nu-complete-random-sources' [] {
     ['chucknorris.io' 'forismatic.com']
