@@ -306,9 +306,12 @@ export def 'tweet' [
 
 # Add a random chuck norris cyberlink to the temp table
 def 'link-chuck' []: [nothing -> record] {
-    let $quote = http get -e https://api.chucknorris.io/jokes/random
+    let $quote = http get --allow-errors https://api.chucknorris.io/jokes/random
         | get value
-        | $in + "\n\n" + 'via [Chucknorris.io](https://chucknorris.io)'
+        | str trim
+        | { text: $in
+            source: 'https://chucknorris.io' }
+        | to yaml
 
     link-texts 'chuck norris' $quote
 }
@@ -316,10 +319,14 @@ def 'link-chuck' []: [nothing -> record] {
 # Add a random quote cyberlink to the temp table
 def 'link-quote' []: [nothing -> record] {
     let $quote = http get -e -r https://api.forismatic.com/api/1.0/?method=getQuote&lang=en&format=text
-        | str replace --regex --all '\s*\)' ')'
-        | str replace --regex --all '\s+' ' '
-        | { quote: $in
-            source: 'https://forismatic.com' }
+        | str replace -ar '(\.|\,)(\S)' '$1 $2'
+        | str replace -ar '\s+' ' '
+        | parse -r '^(?<quote>.*?)\((?<author>.*)?\)'
+        | get 0?
+        | if ($in | is-empty) {return} else {}
+        | str trim quote? author?
+        | if $in.author? in [null, ''] {select quote} else {}
+        | insert source 'https://forismatic.com'
         | to yaml
 
     # link-texts 'quote' $quote
