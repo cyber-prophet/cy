@@ -17,7 +17,7 @@ scope modules
 
 # This script updates the README with the latest version of command annotations in cy.nu
 
-let readme = (open ~/cy/README.md | lines)
+let $readme = open ~/cy/README.md | lines
 
 $readme
 | take until {|i| $i == "## Commands"}
