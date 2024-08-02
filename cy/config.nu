@@ -32,7 +32,7 @@ export def --env 'config-new' [
         let $error_text = cprint --echo $'
             There are no addresses in the keyring of *($exec)*. To use Cy, you need to add one.
             You can find out how to add the key by running the command "*($exec) keys add -h*".
-            After adding the key, come back and launch this wizard again.'
+            After adding the key, come back and launch this wizard again with *cy config-new*.'
 
         error make -u {msg: $error_text}
     }
