@@ -793,7 +793,6 @@ def 'links-send-tx' [ ] {
         | default timestamp 0
         | select from to neuron timestamp txhash
         | to csv --noheaders
-        | $in + (char nl)
         | save --append --raw (cy-path mylinks _cyberlinks_archive.csv)
 
         links-view -q
