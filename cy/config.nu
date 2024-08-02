@@ -104,10 +104,14 @@ export def 'config-view' [
 
 # Save the piped-in JSON into a config file inside of `cy/config` folder
 export def --env 'config-save' [
-    config_name: string@'nu-complete-config-names'
+    config_name?: string@'nu-complete-config-names'
     --inactive # Don't activate current config
 ] {
-    default ($env.cy)
+    let $input = $in
+    let $config_name = $config_name | default $env.cy.config-name
+
+    $input
+    | default ($env.cy)
     | upsert config-name $config_name
     | print-and-pass
     | save -f ( cy-path config $'($config_name).toml' )
