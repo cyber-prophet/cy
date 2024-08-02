@@ -54,6 +54,10 @@ cy link-texts "cyber" "bostrom" | table --width 200 | print; print ''
 
 cy link-texts "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV" "bostrom" | table --width 200 | print; print ''
 
+"> cy link-texts \"QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV\" \"bostrom\" --only_hash" | nu-highlight | print
+
+cy link-texts "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV" "bostrom" --only_hash | table --width 200 | print; print ''
+
 "> cy link-texts \"QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV\" \"bostrom\" --ignore_cid" | nu-highlight | print
 
 cy link-texts "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV" "bostrom" --ignore_cid | table --width 200 | print; print ''
@@ -81,6 +85,26 @@ cy link-files --link_filenames --yes --include_extension | table --width 200 | p
 "> cy link-files --link_filenames --yes --include_extension bostrom.txt" | nu-highlight | print
 
 cy link-files --link_filenames --yes --include_extension bostrom.txt | table --width 200 | print; print ''
+
+"> cy link-files --link_filenames --yes --include_extension --disable_append bostrom.txt" | nu-highlight | print
+
+cy link-files --link_filenames --yes --include_extension --disable_append bostrom.txt | table --width 200 | print; print ''
+
+"> cy links-clear" | nu-highlight | print
+
+cy links-clear | table --width 200 | print; print ''
+
+"> cy link-folder" | nu-highlight | print
+
+cy link-folder | table --width 200 | print; print ''
+
+"> cy link-folder --no_content" | nu-highlight | print
+
+cy link-folder --no_content | table --width 200 | print; print ''
+
+"> cy link-folder --no_folders" | nu-highlight | print
+
+cy link-folder --no_folders | table --width 200 | print; print ''
 
 "> cd .." | nu-highlight | print
 

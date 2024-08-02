@@ -1,6 +1,5 @@
 ```nushell
 > if (ps | where name =~ ipfs | is-empty) {wezterm cli spawn -- /Users/user/.cargo/bin/nu -c "$env.IPFS_PATH = /Users/user/.ipfs_blank; ipfs daemon"}
-23
 
 > overlay use ~/cy/cy -pr
 > $env.config.table.abbreviated_row_count = 10000
@@ -68,6 +67,14 @@ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 │ to        │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │
 ╰───────────┴────────────────────────────────────────────────╯
 
+> cy link-texts "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV" "bostrom" --only_hash
+╭───────────┬────────────────────────────────────────────────╮
+│ from_text │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │
+│ to_text   │ bostrom                                        │
+│ from      │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │
+│ to        │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │
+╰───────────┴────────────────────────────────────────────────╯
+
 > cy link-texts "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV" "bostrom" --ignore_cid
 ╭───────────┬────────────────────────────────────────────────╮
 │ from_text │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │
@@ -80,7 +87,7 @@ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 
 > cy link-chain bostrom cyber superintelligence
 temp files saved to a local directory
-/Users/user/cy/temp/ipfs_upload/20240802-141809
+/Users/user/cy/temp/ipfs_upload/20240802-144007-290424000
 ╭─from_text─┬──────to_text──────┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────╮
 │ bostrom   │ cyber             │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │
 │ cyber     │ superintelligence │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │ QmRMMbTqFQ3o2NmHNYzLoS5fjT5WE3h9Sn21MvmEcsvJ8M │
@@ -100,6 +107,33 @@ temp files saved to a local directory
 ╭──from_text──┬─────────to_text─────────┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────╮
 │ bostrom.txt │ pinned_file:bostrom.txt │ QmPtV5CU9v3u7MY7hMgG3z9kTno8o7JHJD1e6f3NLfZ86k │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │
 ╰──from_text──┴─────────to_text─────────┴──────────────────────from──────────────────────┴───────────────────────to───────────────────────╯
+
+> cy link-files --link_filenames --yes --include_extension --disable_append bostrom.txt
+╭──from_text──┬─────────to_text─────────┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────╮
+│ bostrom.txt │ pinned_file:bostrom.txt │ QmPtV5CU9v3u7MY7hMgG3z9kTno8o7JHJD1e6f3NLfZ86k │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │
+╰──from_text──┴─────────to_text─────────┴──────────────────────from──────────────────────┴───────────────────────to───────────────────────╯
+
+> cy links-clear
+
+> cy link-folder
+╭───from_text───┬─────────to_text─────────┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────╮
+│ linkfilestest │ bostrom                 │ QmRetYSHe7E9eNuduiu9pebrMyPC7HYKfYqu9wQqAEuqKR │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │
+│ bostrom       │ pinned_file:bostrom.txt │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │
+│ linkfilestest │ cyber                   │ QmRetYSHe7E9eNuduiu9pebrMyPC7HYKfYqu9wQqAEuqKR │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │
+│ cyber         │ pinned_file:cyber.txt   │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │
+╰───from_text───┴─────────to_text─────────┴──────────────────────from──────────────────────┴───────────────────────to───────────────────────╯
+
+> cy link-folder --no_content
+╭───from_text───┬─to_text─┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────╮
+│ linkfilestest │ bostrom │ QmRetYSHe7E9eNuduiu9pebrMyPC7HYKfYqu9wQqAEuqKR │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │
+│ linkfilestest │ cyber   │ QmRetYSHe7E9eNuduiu9pebrMyPC7HYKfYqu9wQqAEuqKR │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │
+╰───from_text───┴─to_text─┴──────────────────────from──────────────────────┴───────────────────────to───────────────────────╯
+
+> cy link-folder --no_folders
+╭─from_text─┬─────────to_text─────────┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────╮
+│ bostrom   │ pinned_file:bostrom.txt │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │
+│ cyber     │ pinned_file:cyber.txt   │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │
+╰─from_text─┴─────────to_text─────────┴──────────────────────from──────────────────────┴───────────────────────to───────────────────────╯
 
 > cd ..
 
@@ -157,51 +191,44 @@ There are 1 cyberlinks in the temp table:
 > cy link-random 3 | to yaml
 - from_text: quote
   to_text: |
-    text: What separates the winners from the losers is how a person reacts to each new twist of fate.
-    author: Donald Trump
+    text: 'When you come to the edge of all the light you know, and are about to step off into the darkness of the unknown, faith is knowing one of two things will happen: There will be something solid to stand on, or you will be taught how to fly.'
+    author: Barbara Winter
     source: https://forismatic.com
   from: QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna
-  to: QmRkvVM8vTfE6kESU4pxoMA3DSVWmnBUhGzDbSLTe9ob4N
-- from_text: quote
-  to_text: |
-    text: Our greatness lies not so much in being able to remake the world as being able to remake ourselves.
-    author: Mahatma Gandhi
-    source: https://forismatic.com
-  from: QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna
-  to: QmYrQ1gSueMSMGZFDBeYfgzaa7ZxRSP7HBQxr8CNTzaaYu
+  to: QmPJXuiCWnUG9Wtogp9riJfxg8LfuvTwpphMEStKti7T7b
 
 > cy link-random 3 --source forismatic.com | to yaml
 - from_text: quote
   to_text: |
-    text: I believe that a simple and unassuming manner of life is best for everyone, best both for the body and the mind.
-    author: Albert Einstein
+    text: Prosperity depends more on wanting what you have than having what you want.
+    author: Geoffrey F. Abert
     source: https://forismatic.com
   from: QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna
-  to: QmcLQ1fdyfvMeKGHGyEdkpNx7oE67didQ8Jb8qkT1ws4AJ
+  to: QmSU95Z3FnJwPoNM5ar3GULHFwzMDZPk1V3TD7ejwK6u6p
 
 > cy link-random 3 --source chucknorris.io | to yaml
 - from_text: chuck norris
   to_text: |
-    text: Chuck Norris uses the dimensional tear in his kitchen as a garbage disposal.
+    text: There is endless debate about the existence of the human soul. Well it does exist and Chuck Norris finds it delicious.
     source: https://chucknorris.io
   from: QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1
-  to: QmeHFSg2qZWJaAh1aB4dUv7b9YoDDC5Zg1BPpdxNaEcmSb
+  to: QmcE38LW8ShFbyvJXpx3HAQyh6Fwz695QgwbCZcxgF71ms
 - from_text: chuck norris
   to_text: |
-    text: The show Survivor had the original premise of putting people on an island with Chuck Norris. There were no survivors, and nobody is brave enough to go to the island to retrieve the footage.
+    text: Chuck Norris once broke the law. They are still trying to put it back together.
     source: https://chucknorris.io
   from: QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1
-  to: QmR3Fa3U34cJkLWRpvQrKGig7ZWE33YrSna19BzLzmfn1F
+  to: QmXmHF6CT6NMpLKkNirUNmPAjZospACo6NiZk1nda3LVD5
 - from_text: chuck norris
   to_text: |
-    text: The eye of Chuck Norris' penis is all seeing, all knowing.
+    text: Chuck Norris can play Sonic R on a Playstation and Crash Bandicoot on a Sega Saturn.
     source: https://chucknorris.io
   from: QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1
-  to: QmNmVqnx64Z8fkCB695WWsVLTsvq976n8C12c87cdCS5sx
+  to: QmTqpRP1mc9BF232FfuyTKNk9f6ZrDXhNhCJfHRJ8aSATb
 
 > cy links-remove-existed-1by1
-1 0 2 4 3 7 5 6 8 9 10
-4 cyberlinks was/were already created by
+0 2 3 1 4 5 6 7 8 9 10
+2 cyberlinks was/were already created by
 bostrom166tas63rcdezv35jycr8mlfr0qgjdm7rgpzly5
 ╭───────────┬────────────────────────────────────────────────╮
 │ from_text │ bostrom                                        │
@@ -215,55 +242,38 @@ bostrom166tas63rcdezv35jycr8mlfr0qgjdm7rgpzly5
 │ to_text   │ superintelligence                              │
 │ to        │ QmRMMbTqFQ3o2NmHNYzLoS5fjT5WE3h9Sn21MvmEcsvJ8M │
 ╰───────────┴────────────────────────────────────────────────╯
-╭───────────┬────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ from_text │ quote                                                                                              │
-│ from      │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna                                                     │
-│ to_text   │ text: What separates the winners from the losers is how a person reacts to each new twist of fate. │
-│           │ author: Donald Trump                                                                               │
-│           │ source: https://forismatic.com                                                                     │
-│           │                                                                                                    │
-│ to        │ QmRkvVM8vTfE6kESU4pxoMA3DSVWmnBUhGzDbSLTe9ob4N                                                     │
-╰───────────┴────────────────────────────────────────────────────────────────────────────────────────────────────╯
-╭───────────┬────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ from_text │ quote                                                                                              │
-│ from      │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna                                                     │
-│ to_text   │ text: What separates the winners from the losers is how a person reacts to each new twist of fate. │
-│           │ author: Donald Trump                                                                               │
-│           │ source: https://forismatic.com                                                                     │
-│           │                                                                                                    │
-│ to        │ QmRkvVM8vTfE6kESU4pxoMA3DSVWmnBUhGzDbSLTe9ob4N                                                     │
-╰───────────┴────────────────────────────────────────────────────────────────────────────────────────────────────╯
 So they were removed from the temp table!
 
 ╭─#──┬──from_text───┬───────────────────────────────────────────────────────────────────to_text───────────────────────────────────────────────────────────────────┬─from─┬─to─┬─timestamp─┬link_exist╮
-│ 2  │ quote        │ text: Our greatness lies not so much in being able to remake the world as being able to remake ourselves.                                   │ Q... │ .. │ 202408... │ false    │
-│    │              │ author: Mahatma Gandhi                                                                                                                      │      │    │           │          │
+│ 2  │ quote        │ text: 'When you come to the edge of all the light you know, and are about to step off into the darkness of the unknown, faith is knowing... │ Q... │ .. │ 202408... │ false    │
+│ 3  │ quote        │ text: 'When you come to the edge of all the light you know, and are about to step off into the darkness of the unknown, faith is knowing... │ Q... │ .. │ 202408... │ false    │
+│ 4  │ quote        │ text: 'When you come to the edge of all the light you know, and are about to step off into the darkness of the unknown, faith is knowing... │ Q... │ .. │ 202408... │ false    │
+│ 5  │ quote        │ text: Prosperity depends more on wanting what you have than having what you want.                                                           │ Q... │ .. │ 202408... │ false    │
+│    │              │ author: Geoffrey F. Abert                                                                                                                   │      │    │           │          │
 │    │              │ source: https://forismatic.com                                                                                                              │      │    │           │          │
 │    │              │                                                                                                                                             │      │    │           │          │
-│ 5  │ quote        │ text: I believe that a simple and unassuming manner of life is best for everyone, best both for the body and the mind.                      │ Q... │ .. │ 202408... │ false    │
-│    │              │ author: Albert Einstein                                                                                                                     │      │    │           │          │
+│ 6  │ quote        │ text: Prosperity depends more on wanting what you have than having what you want.                                                           │ Q... │ .. │ 202408... │ false    │
+│    │              │ author: Geoffrey F. Abert                                                                                                                   │      │    │           │          │
 │    │              │ source: https://forismatic.com                                                                                                              │      │    │           │          │
 │    │              │                                                                                                                                             │      │    │           │          │
-│ 6  │ quote        │ text: I believe that a simple and unassuming manner of life is best for everyone, best both for the body and the mind.                      │ Q... │ .. │ 202408... │ false    │
-│    │              │ author: Albert Einstein                                                                                                                     │      │    │           │          │
+│ 7  │ quote        │ text: Prosperity depends more on wanting what you have than having what you want.                                                           │ Q... │ .. │ 202408... │ false    │
+│    │              │ author: Geoffrey F. Abert                                                                                                                   │      │    │           │          │
 │    │              │ source: https://forismatic.com                                                                                                              │      │    │           │          │
 │    │              │                                                                                                                                             │      │    │           │          │
-│ 7  │ quote        │ text: I believe that a simple and unassuming manner of life is best for everyone, best both for the body and the mind.                      │ Q... │ .. │ 202408... │ false    │
-│    │              │ author: Albert Einstein                                                                                                                     │      │    │           │          │
-│    │              │ source: https://forismatic.com                                                                                                              │      │    │           │          │
-│    │              │                                                                                                                                             │      │    │           │          │
-│ 8  │ chuck norris │ text: The show Survivor had the original premise of putting people on an island with Chuck Norris. There were no survivors, and nobody i... │ Q... │ .. │ 202408... │ false    │
-│ 9  │ chuck norris │ text: Chuck Norris uses the dimensional tear in his kitchen as a garbage disposal.                                                          │ Q... │ .. │ 202408... │ false    │
+│ 8  │ chuck norris │ text: There is endless debate about the existence of the human soul. Well it does exist and Chuck Norris finds it delicious.                │ Q... │ .. │ 202408... │ false    │
 │    │              │ source: https://chucknorris.io                                                                                                              │      │    │           │          │
 │    │              │                                                                                                                                             │      │    │           │          │
-│ 10 │ chuck norris │ text: The eye of Chuck Norris' penis is all seeing, all knowing.                                                                            │ Q... │ .. │ 202408... │ false    │
+│ 9  │ chuck norris │ text: Chuck Norris can play Sonic R on a Playstation and Crash Bandicoot on a Sega Saturn.                                                  │ Q... │ .. │ 202408... │ false    │
+│    │              │ source: https://chucknorris.io                                                                                                              │      │    │           │          │
+│    │              │                                                                                                                                             │      │    │           │          │
+│ 10 │ chuck norris │ text: Chuck Norris once broke the law. They are still trying to put it back together.                                                       │ Q... │ .. │ 202408... │ false    │
 │    │              │ source: https://chucknorris.io                                                                                                              │      │    │           │          │
 │    │              │                                                                                                                                             │      │    │           │          │
 ╰─#──┴──from_text───┴───────────────────────────────────────────────────────────────────to_text───────────────────────────────────────────────────────────────────┴─from─┴─to─┴─timestamp─┴─link_exi─╯
 
 > cy links-publish
-2 links from initial data were removed, because they were obsolete
+4 links from initial data were removed, because they were obsolete
 ╭────────────────────cy────────────────────┬──────────────────────────────txhash──────────────────────────────╮
-│ 5 cyberlinks should be successfully sent │ 882E44E14441E7F6B97C81DCDBD2504F274096DE9572DF635AF5ABEDE44AC31A │
+│ 5 cyberlinks should be successfully sent │ 344121947149ECFE8DA25D56D9DEE4878715523D1283EC5D8BA616B865D4AA07 │
 ╰────────────────────cy────────────────────┴──────────────────────────────txhash──────────────────────────────╯
 ```
