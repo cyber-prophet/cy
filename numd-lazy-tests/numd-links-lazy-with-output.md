@@ -1,4 +1,7 @@
 ```nushell
+> if (ps | where name =~ ipfs | is-empty) {wezterm cli spawn -- /Users/user/.cargo/bin/nu -c "$env.IPFS_PATH = /Users/user/.ipfs_blank; ipfs daemon"}
+23
+
 > overlay use ~/cy/cy -pr
 > $env.config.table.abbreviated_row_count = 10000
 
@@ -77,7 +80,7 @@ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 
 > cy link-chain bostrom cyber superintelligence
 temp files saved to a local directory
-/Users/user/cy/temp/ipfs_upload/20240801-063357
+/Users/user/cy/temp/ipfs_upload/20240802-141809
 ╭─from_text─┬──────to_text──────┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────╮
 │ bostrom   │ cyber             │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │
 │ cyber     │ superintelligence │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │ QmRMMbTqFQ3o2NmHNYzLoS5fjT5WE3h9Sn21MvmEcsvJ8M │
@@ -154,49 +157,113 @@ There are 1 cyberlinks in the temp table:
 > cy link-random 3 | to yaml
 - from_text: quote
   to_text: |
-    text: If you break your neck, if you have nothing to eat, if your house is on fire, then you got a problem. Everything else is inconvenience.
-    author: Robert Fulghum
+    text: What separates the winners from the losers is how a person reacts to each new twist of fate.
+    author: Donald Trump
     source: https://forismatic.com
   from: QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna
-  to: QmbQJR5ffwgwQGiz2F6Gq8E86uDPDyuFoythR5zzf55CuA
+  to: QmRkvVM8vTfE6kESU4pxoMA3DSVWmnBUhGzDbSLTe9ob4N
 - from_text: quote
   to_text: |
-    text: Consider how hard it is to change yourself and you'll understand what little chance you have in trying to change others.
-    author: Jacob Braude
+    text: Our greatness lies not so much in being able to remake the world as being able to remake ourselves.
+    author: Mahatma Gandhi
     source: https://forismatic.com
   from: QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna
-  to: QmarLLuFMboDZCbGwZ3CCfvKaepFKMzBL6baPs8gHgrHME
+  to: QmYrQ1gSueMSMGZFDBeYfgzaa7ZxRSP7HBQxr8CNTzaaYu
 
 > cy link-random 3 --source forismatic.com | to yaml
-empty answer:
-[]
-empty answer:
-[]
-empty answer:
-[]
-[]
+- from_text: quote
+  to_text: |
+    text: I believe that a simple and unassuming manner of life is best for everyone, best both for the body and the mind.
+    author: Albert Einstein
+    source: https://forismatic.com
+  from: QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna
+  to: QmcLQ1fdyfvMeKGHGyEdkpNx7oE67didQ8Jb8qkT1ws4AJ
 
 > cy link-random 3 --source chucknorris.io | to yaml
 - from_text: chuck norris
   to_text: |
-    text: Chuck Norris was banned from the Winter Olympics because the judges didnt know how to score a double-lutz flip-axle roundhouse kick to the face!!
+    text: Chuck Norris uses the dimensional tear in his kitchen as a garbage disposal.
     source: https://chucknorris.io
   from: QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1
-  to: QmYU8tXgZH93mBmqevH65iHKq87WaXHnxU9zmsJMiVQ5YA
+  to: QmeHFSg2qZWJaAh1aB4dUv7b9YoDDC5Zg1BPpdxNaEcmSb
 - from_text: chuck norris
   to_text: |
-    text: the only reason Mexican cartel doesn't come to united states is bacause they're afraid of Chuck Norris.
+    text: The show Survivor had the original premise of putting people on an island with Chuck Norris. There were no survivors, and nobody is brave enough to go to the island to retrieve the footage.
     source: https://chucknorris.io
   from: QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1
-  to: QmPGwbAC39bcAMhbEZKta3mPgNHLfRCHFsbkUWMS8Kgr9Z
+  to: QmR3Fa3U34cJkLWRpvQrKGig7ZWE33YrSna19BzLzmfn1F
 - from_text: chuck norris
   to_text: |
-    text: Chuck Norris can chew with his mouth open
+    text: The eye of Chuck Norris' penis is all seeing, all knowing.
     source: https://chucknorris.io
   from: QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1
-  to: QmXok1jAUuEtYF3DxnnpZfUHNzvRJSN7eFddBaLmrqRdAg
+  to: QmNmVqnx64Z8fkCB695WWsVLTsvq976n8C12c87cdCS5sx
 
 > cy links-remove-existed-1by1
-0 2 3 1 4 5 6 7 There are no cyberlinks in the temp table for the current address exist the
-cybergraph
+1 0 2 4 3 7 5 6 8 9 10
+4 cyberlinks was/were already created by
+bostrom166tas63rcdezv35jycr8mlfr0qgjdm7rgpzly5
+╭───────────┬────────────────────────────────────────────────╮
+│ from_text │ bostrom                                        │
+│ from      │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │
+│ to_text   │ cyber                                          │
+│ to        │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │
+╰───────────┴────────────────────────────────────────────────╯
+╭───────────┬────────────────────────────────────────────────╮
+│ from_text │ cyber                                          │
+│ from      │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │
+│ to_text   │ superintelligence                              │
+│ to        │ QmRMMbTqFQ3o2NmHNYzLoS5fjT5WE3h9Sn21MvmEcsvJ8M │
+╰───────────┴────────────────────────────────────────────────╯
+╭───────────┬────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ from_text │ quote                                                                                              │
+│ from      │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna                                                     │
+│ to_text   │ text: What separates the winners from the losers is how a person reacts to each new twist of fate. │
+│           │ author: Donald Trump                                                                               │
+│           │ source: https://forismatic.com                                                                     │
+│           │                                                                                                    │
+│ to        │ QmRkvVM8vTfE6kESU4pxoMA3DSVWmnBUhGzDbSLTe9ob4N                                                     │
+╰───────────┴────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭───────────┬────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ from_text │ quote                                                                                              │
+│ from      │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna                                                     │
+│ to_text   │ text: What separates the winners from the losers is how a person reacts to each new twist of fate. │
+│           │ author: Donald Trump                                                                               │
+│           │ source: https://forismatic.com                                                                     │
+│           │                                                                                                    │
+│ to        │ QmRkvVM8vTfE6kESU4pxoMA3DSVWmnBUhGzDbSLTe9ob4N                                                     │
+╰───────────┴────────────────────────────────────────────────────────────────────────────────────────────────────╯
+So they were removed from the temp table!
+
+╭─#──┬──from_text───┬───────────────────────────────────────────────────────────────────to_text───────────────────────────────────────────────────────────────────┬─from─┬─to─┬─timestamp─┬link_exist╮
+│ 2  │ quote        │ text: Our greatness lies not so much in being able to remake the world as being able to remake ourselves.                                   │ Q... │ .. │ 202408... │ false    │
+│    │              │ author: Mahatma Gandhi                                                                                                                      │      │    │           │          │
+│    │              │ source: https://forismatic.com                                                                                                              │      │    │           │          │
+│    │              │                                                                                                                                             │      │    │           │          │
+│ 5  │ quote        │ text: I believe that a simple and unassuming manner of life is best for everyone, best both for the body and the mind.                      │ Q... │ .. │ 202408... │ false    │
+│    │              │ author: Albert Einstein                                                                                                                     │      │    │           │          │
+│    │              │ source: https://forismatic.com                                                                                                              │      │    │           │          │
+│    │              │                                                                                                                                             │      │    │           │          │
+│ 6  │ quote        │ text: I believe that a simple and unassuming manner of life is best for everyone, best both for the body and the mind.                      │ Q... │ .. │ 202408... │ false    │
+│    │              │ author: Albert Einstein                                                                                                                     │      │    │           │          │
+│    │              │ source: https://forismatic.com                                                                                                              │      │    │           │          │
+│    │              │                                                                                                                                             │      │    │           │          │
+│ 7  │ quote        │ text: I believe that a simple and unassuming manner of life is best for everyone, best both for the body and the mind.                      │ Q... │ .. │ 202408... │ false    │
+│    │              │ author: Albert Einstein                                                                                                                     │      │    │           │          │
+│    │              │ source: https://forismatic.com                                                                                                              │      │    │           │          │
+│    │              │                                                                                                                                             │      │    │           │          │
+│ 8  │ chuck norris │ text: The show Survivor had the original premise of putting people on an island with Chuck Norris. There were no survivors, and nobody i... │ Q... │ .. │ 202408... │ false    │
+│ 9  │ chuck norris │ text: Chuck Norris uses the dimensional tear in his kitchen as a garbage disposal.                                                          │ Q... │ .. │ 202408... │ false    │
+│    │              │ source: https://chucknorris.io                                                                                                              │      │    │           │          │
+│    │              │                                                                                                                                             │      │    │           │          │
+│ 10 │ chuck norris │ text: The eye of Chuck Norris' penis is all seeing, all knowing.                                                                            │ Q... │ .. │ 202408... │ false    │
+│    │              │ source: https://chucknorris.io                                                                                                              │      │    │           │          │
+│    │              │                                                                                                                                             │      │    │           │          │
+╰─#──┴──from_text───┴───────────────────────────────────────────────────────────────────to_text───────────────────────────────────────────────────────────────────┴─from─┴─to─┴─timestamp─┴─link_exi─╯
+
+> cy links-publish
+2 links from initial data were removed, because they were obsolete
+╭────────────────────cy────────────────────┬──────────────────────────────txhash──────────────────────────────╮
+│ 5 cyberlinks should be successfully sent │ 882E44E14441E7F6B97C81DCDBD2504F274096DE9572DF635AF5ABEDE44AC31A │
+╰────────────────────cy────────────────────┴──────────────────────────────txhash──────────────────────────────╯
 ```
