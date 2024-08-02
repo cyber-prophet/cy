@@ -254,7 +254,7 @@ export def 'link-folder' [
     | uniq
     | links-pin-columns-using-kubo --dont_replace --quiet
     | update to_text {|i| $to_text_subst | get -i $i.to_text | default $i.to_text}
-    | if $disable_append {} else {links-append}
+    | if $disable_append {} else {links-append -q; $in}
 }
 
 # Create a cyberlink according to `following a neuron` semantic convention
