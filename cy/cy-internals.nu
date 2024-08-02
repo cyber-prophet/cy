@@ -392,10 +392,17 @@ export def 'col-name-reverse' [
 
 export def 'now-fn' [
     --pretty (-P)
+    --precise (-p)
 ] {
     date now
     | format date (
-        if $pretty {'%Y-%m-%d-%H:%M:%S'} else {'%Y%m%d-%H%M%S'}
+        if $pretty {
+            '%Y-%m-%d-%H:%M:%S'
+        } else if $precise {
+            '%Y%m%d-%H%M%S-%f'
+        } else {
+            '%Y%m%d-%H%M%S'
+        }
     )
 }
 
