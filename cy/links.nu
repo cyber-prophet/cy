@@ -788,13 +788,7 @@ def 'links-send-tx' [ ] {
         | tx-broadcast
 
     if $response.code == 0 {
-        $links
-        | upsert neuron $env.cy.address
-        | upsert txhash $response.txhash
-        | default timestamp 0
-        | select from to neuron timestamp txhash
-        | to csv --noheaders
-        | save --append --raw (cy-path mylinks _cyberlinks_archive.csv)
+        save-links-to-archive $links $response.txhash
 
         links-view -q
         | skip $env.cy.links-per-transaction
@@ -815,8 +809,23 @@ def 'links-send-tx' [ ] {
             error make --unspanned {msg: (cprint --echo 'Use *cy links-remove-existed-using-snapshot*')}
         }
 
+        save-links-to-archive $links 'link-might-not-be-sent-hash-unknown'
+
         cprint 'The transaction might be not sent.'
     }
+}
+
+def save-links-to-archive [
+    $links
+    $hash
+] {
+    $links
+    | upsert neuron $env.cy.address
+    | upsert txhash $hash
+    | default timestamp 0
+    | select from to neuron timestamp txhash
+    | to csv --noheaders
+    | save --append --raw (cy-path mylinks _cyberlinks_archive.csv)
 }
 
 # remove duplicated or non-valid cyberlinks from the temp table
