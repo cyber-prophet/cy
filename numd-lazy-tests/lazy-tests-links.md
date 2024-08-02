@@ -1,4 +1,5 @@
 ```nushell
+> if (ps | where name =~ ipfs | is-empty) {wezterm cli spawn -- /Users/user/.cargo/bin/nu -c "$env.IPFS_PATH = /Users/user/.ipfs_blank; ipfs daemon"}
 > overlay use ~/cy/cy -pr
 > $env.config.table.abbreviated_row_count = 10000
 > cy help-cy
@@ -34,4 +35,5 @@
 > cy link-random 3 --source forismatic.com | to yaml
 > cy link-random 3 --source chucknorris.io | to yaml
 > cy links-remove-existed-1by1
+> cy links-publish
 ```

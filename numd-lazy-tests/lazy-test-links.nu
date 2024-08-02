@@ -2,6 +2,10 @@
 # https://github.com/nushell-prophet/numd
 const init_numd_pwd_const = '/Users/user/cy/numd-lazy-tests'
 "```nushell" | print
+"> if (ps | where name =~ ipfs | is-empty) {wezterm cli spawn -- /Users/user/.cargo/bin/nu -c \"$env.IPFS_PATH = /Users/user/.ipfs_blank; ipfs daemon\"}" | nu-highlight | print
+
+if (ps | where name =~ ipfs | is-empty) {wezterm cli spawn -- /Users/user/.cargo/bin/nu -c "$env.IPFS_PATH = /Users/user/.ipfs_blank; ipfs daemon"} | table --width 200 | print; print ''
+
 "> overlay use ~/cy/cy -pr" | nu-highlight | print
 
 overlay use ~/cy/cy -pr
@@ -141,5 +145,9 @@ cy link-random 3 --source chucknorris.io | to yaml | table --width 200 | print; 
 "> cy links-remove-existed-1by1" | nu-highlight | print
 
 cy links-remove-existed-1by1 | table --width 200 | print; print ''
+
+"> cy links-publish" | nu-highlight | print
+
+cy links-publish | table --width 200 | print; print ''
 
 "```" | print
