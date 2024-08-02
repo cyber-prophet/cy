@@ -702,6 +702,7 @@ def 'link-exist' [
 # Remove existing in cybergraph cyberlinks from the temp table
 export def 'links-remove-existed-1by1' [
     --all_links # check all links in the temp table
+    --threads: int = 10 # number threads to request cyberlinks
 ]: [nothing -> table, nothing -> nothing] {
     let $links_view = links-view -q
     let $links_per_trans = set-get-env links-per-transaction
@@ -716,7 +717,7 @@ export def 'links-remove-existed-1by1' [
             }
             | first $links_per_trans }
         | merge ($in | length | seq 0 $in | wrap index)
-        | par-each {|i| $i
+        | par-each --threads $threads {|i| $i
             | upsert link_exist {|row|
                 print -n $'($row.index) '
 
