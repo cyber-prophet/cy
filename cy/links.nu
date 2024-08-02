@@ -747,7 +747,7 @@ export def 'links-remove-existed-1by1' [
         }
         | links-replace
     } else {
-        cprint 'There are no cyberlinks in the temp table for the current address exist the cybergraph'
+        cprint --before 1 'There are no cyberlinks in the temp table for the current address exist the cybergraph'
     }
 }
 
