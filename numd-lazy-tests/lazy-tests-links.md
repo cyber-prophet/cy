@@ -12,6 +12,7 @@
 > cy pin-text ([linkfilestest cyber.txt] | path join) --follow_file_path
 > cy link-texts "cyber" "bostrom"
 > cy link-texts "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV" "bostrom"
+> cy link-texts "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV" "bostrom" --only_hash
 > cy link-texts "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV" "bostrom" --ignore_cid
 > cy set-cy-setting ipfs-upload-with-no-confirm 'true'
 > cy link-chain bostrom cyber superintelligence
@@ -19,6 +20,11 @@
 > cd linkfilestest
 > cy link-files --link_filenames --yes --include_extension
 > cy link-files --link_filenames --yes --include_extension bostrom.txt
+> cy link-files --link_filenames --yes --include_extension --disable_append bostrom.txt
+> cy links-clear
+> cy link-folder
+> cy link-folder --no_content
+> cy link-folder --no_folders
 > cd ..
 > cy follow bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8
 > cy follow bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8 --use_local_list_only
