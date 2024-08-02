@@ -106,6 +106,7 @@ export def 'config-view' [
 export def --env 'config-save' [
     config_name?: string@'nu-complete-config-names'
     --inactive # Don't activate current config
+    --quiet # Don't pring config
 ] {
     let $input = $in
     let $config_name = $config_name | default $env.cy.config-name
@@ -113,7 +114,9 @@ export def --env 'config-save' [
     $input
     | default ($env.cy)
     | upsert config-name $config_name
-    | print-and-pass
+    | if $quiet {} else {
+        print-and-pass
+    }
     | save -f ( cy-path config $'($config_name).toml' )
 
     if not $inactive {
