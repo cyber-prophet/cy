@@ -1,6 +1,7 @@
 # Cy submodule for creating and publishing cyberlinks
 
 use nu-utils [cprint, print-and-pass, confirm, path-modify]
+use config.nu [config-view config-save]
 use cy-complete.nu *
 use cy-internals.nu *
 use dict.nu [dict-neurons-add]
@@ -367,6 +368,30 @@ export def 'link-random' [
         }
     }
     | uniq-by to_text
+}
+
+# Command to link numbers. Useful for testing and using bandwidth.
+export def --env link-number [
+    count: int = 10 # the count of numbers to cyberlink
+    --from: int # number including which to create a range
+] {
+    let $config = (config-view)
+    let $prev_number = $from
+        | default (
+            $config
+            | get -i last-number-cyberlinked
+            | default (-1)
+            | $in + 1
+        )
+
+    let $new_last_number = $prev_number + $count - 1
+
+    $config
+    | upsert last-number-cyberlinked $new_last_number
+    | config-save --quiet
+
+    | $prev_number..$new_last_number
+    | each {link-texts --only_hash 'QmUFuDurUa9bQqfWoTmW1N9e94VfUfFxbJHwgjGDe5roz8' $'($in)'}
 }
 
 # View the temp cyberlinks table
