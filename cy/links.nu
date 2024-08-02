@@ -585,7 +585,7 @@ export def 'links-pin-columns-using-kubo' [
 ]: [nothing -> table, table -> table] {
     let $links = inlinks-or-links
 
-    let $temp_ipfs_folder = cy-path temp ipfs_upload (now-fn) --create_missing
+    let $temp_ipfs_folder = cy-path temp ipfs_upload (now-fn --precise) --create_missing
 
     let $groups = $links.from_text?
         | append $links.to_text?
