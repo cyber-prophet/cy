@@ -84,7 +84,7 @@ export def 'backup-and-echo' [
     --mv # move the file to backup directory instead of copy
 ] {
     let $path = if $filename == null {} else {$filename}
-    let $backups_path = cy-path backups $'(now-fn)($path | path basename)'
+    let $backups_path = cy-path backups $'(now-fn --precise)($path | path basename)'
 
     if not ( $path | path exists ) {
         cprint $'*($path)* does not exist'
