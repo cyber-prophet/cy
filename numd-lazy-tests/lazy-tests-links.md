@@ -5,6 +5,7 @@
 > cy help-cy
 > cy help-cy | length
 > $env.IPFS_PATH = /Users/user/.ipfs_blank
+> cy set-cy-setting ipfs-download-from kubo
 > cy pin-text 'cyber'
 > cy pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV'
 > cy pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV' --ignore_cid
@@ -16,6 +17,7 @@
 > cy link-texts "QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV" "bostrom" --ignore_cid
 > cy set-cy-setting ipfs-upload-with-no-confirm 'true'
 > cy link-chain bostrom cyber superintelligence
+> cy link-chain '1481' '982' '1471' '195' '1427' '2054' '1642' '358' '1712' '1419' '219' '767' '1419' '1126' '577' '756' '141' '622' '1169' '1932' '407' '1880' '659' '871' '1161' '1651' '1845' '1506' '1446' '751' '1064' '704' '1255' '199' '309' '982' '290' '2011' '211'
 > cy set-links-table-name lazy-tests-links-1
 > cd linkfilestest
 > cy link-files --link_filenames --yes --include_extension
