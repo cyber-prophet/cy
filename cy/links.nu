@@ -145,10 +145,8 @@ export def 'link-chain' [
 
 # Pin files from the current folder to the local node and append their cyberlinks to the temp table
 #
-# Create temporary directory, cd there, save `cyber.txt` `bostrom.txt` files there with according content.
+# Create cyberlinks for saved in the example file.
 # > cd (mktemp -d); 'cyber' | save cyber.txt; 'bostrom' | save bostrom.txt;
-#
-# Create cyberlinks from filenames to their content for previously saved files.
 # > cy link-files --link_filenames --yes | to yaml
 # - from_text: bostrom.txt
 #   to_text: pinned_file:bostrom.txt
