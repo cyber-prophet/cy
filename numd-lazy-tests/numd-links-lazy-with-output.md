@@ -1,5 +1,6 @@
 ```nushell
 > if (ps | where name =~ ipfs | is-empty) {wezterm cli spawn -- /Users/user/.cargo/bin/nu -c "$env.IPFS_PATH = /Users/user/.ipfs_blank; ipfs daemon"}
+27
 
 > overlay use ~/cy/cy -pr
 > $env.config.table.abbreviated_row_count = 10000
@@ -87,7 +88,7 @@ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 
 > cy link-chain bostrom cyber superintelligence
 temp files saved to a local directory
-/Users/user/cy/temp/ipfs_upload/20240802-144007-290424000
+/Users/user/cy/temp/ipfs_upload/20240803-054229-447124000
 ╭─from_text─┬──────to_text──────┬──────────────────────from──────────────────────┬───────────────────────to───────────────────────╮
 │ bostrom   │ cyber             │ QmU1Nf2opJGZGNWmqxAa9bb8X6wVSHRBDCY6nbm3RmVXGb │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │
 │ cyber     │ superintelligence │ QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV │ QmRMMbTqFQ3o2NmHNYzLoS5fjT5WE3h9Sn21MvmEcsvJ8M │
@@ -191,43 +192,50 @@ There are 1 cyberlinks in the temp table:
 > cy link-random 3 | to yaml
 - from_text: quote
   to_text: |
-    text: 'When you come to the edge of all the light you know, and are about to step off into the darkness of the unknown, faith is knowing one of two things will happen: There will be something solid to stand on, or you will be taught how to fly.'
-    author: Barbara Winter
+    text: I destroy my enemies when I make them my friends.
+    author: Abraham Lincoln
     source: https://forismatic.com
   from: QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna
-  to: QmPJXuiCWnUG9Wtogp9riJfxg8LfuvTwpphMEStKti7T7b
+  to: QmSinwbBfDzXSNwwYtwJ2q2XhGekJSKzw1JQ6FC3VW1Q3t
 
 > cy link-random 3 --source forismatic.com | to yaml
 - from_text: quote
   to_text: |
-    text: Prosperity depends more on wanting what you have than having what you want.
-    author: Geoffrey F. Abert
+    text: The man who trusts men will make fewer mistakes than he who distrusts them.
+    author: Cavour
     source: https://forismatic.com
   from: QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna
-  to: QmSU95Z3FnJwPoNM5ar3GULHFwzMDZPk1V3TD7ejwK6u6p
+  to: Qme62gVQBqoyVeHX3q8A8iwm4h1yXEWRmuJ8SzrAZ5xtXq
+- from_text: quote
+  to_text: |
+    text: I destroy my enemies when I make them my friends.
+    author: Abraham Lincoln
+    source: https://forismatic.com
+  from: QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna
+  to: QmSinwbBfDzXSNwwYtwJ2q2XhGekJSKzw1JQ6FC3VW1Q3t
 
 > cy link-random 3 --source chucknorris.io | to yaml
 - from_text: chuck norris
   to_text: |
-    text: There is endless debate about the existence of the human soul. Well it does exist and Chuck Norris finds it delicious.
+    text: Chuck Norris don't do facebook. No one can ever poke him.
     source: https://chucknorris.io
   from: QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1
-  to: QmcE38LW8ShFbyvJXpx3HAQyh6Fwz695QgwbCZcxgF71ms
+  to: QmbCNjrThuRY9e4qkeLRZzkeQ1tgFTmes4G3YojHQbMvKw
 - from_text: chuck norris
   to_text: |
-    text: Chuck Norris once broke the law. They are still trying to put it back together.
+    text: The world was a cube. Until Chuck Norris got there!
     source: https://chucknorris.io
   from: QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1
-  to: QmXmHF6CT6NMpLKkNirUNmPAjZospACo6NiZk1nda3LVD5
+  to: QmaUzNMqrnfz3vPgcu3xC78CHqKXoqbdegDSTo8LDHCHMW
 - from_text: chuck norris
   to_text: |
-    text: Chuck Norris can play Sonic R on a Playstation and Crash Bandicoot on a Sega Saturn.
+    text: Chuck Norris opens his Dos Equis beer bottles with The Most Interesting Man in the World's asshole.
     source: https://chucknorris.io
   from: QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1
-  to: QmTqpRP1mc9BF232FfuyTKNk9f6ZrDXhNhCJfHRJ8aSATb
+  to: QmXnYeY5QUxN9Fo6RTKM9sZQF2DF6WX93d8Cu5PZcY8TzS
 
 > cy links-remove-existed-1by1
-0 2 3 1 4 5 6 7 8 9 10
+0 1 2 3 4 5 6 7 8 9 10
 2 cyberlinks was/were already created by
 bostrom166tas63rcdezv35jycr8mlfr0qgjdm7rgpzly5
 ╭───────────┬────────────────────────────────────────────────╮
@@ -244,36 +252,45 @@ bostrom166tas63rcdezv35jycr8mlfr0qgjdm7rgpzly5
 ╰───────────┴────────────────────────────────────────────────╯
 So they were removed from the temp table!
 
-╭─#──┬──from_text───┬───────────────────────────────────────────────────────────────────to_text───────────────────────────────────────────────────────────────────┬─from─┬─to─┬─timestamp─┬link_exist╮
-│ 2  │ quote        │ text: 'When you come to the edge of all the light you know, and are about to step off into the darkness of the unknown, faith is knowing... │ Q... │ .. │ 202408... │ false    │
-│ 3  │ quote        │ text: 'When you come to the edge of all the light you know, and are about to step off into the darkness of the unknown, faith is knowing... │ Q... │ .. │ 202408... │ false    │
-│ 4  │ quote        │ text: 'When you come to the edge of all the light you know, and are about to step off into the darkness of the unknown, faith is knowing... │ Q... │ .. │ 202408... │ false    │
-│ 5  │ quote        │ text: Prosperity depends more on wanting what you have than having what you want.                                                           │ Q... │ .. │ 202408... │ false    │
-│    │              │ author: Geoffrey F. Abert                                                                                                                   │      │    │           │          │
-│    │              │ source: https://forismatic.com                                                                                                              │      │    │           │          │
-│    │              │                                                                                                                                             │      │    │           │          │
-│ 6  │ quote        │ text: Prosperity depends more on wanting what you have than having what you want.                                                           │ Q... │ .. │ 202408... │ false    │
-│    │              │ author: Geoffrey F. Abert                                                                                                                   │      │    │           │          │
-│    │              │ source: https://forismatic.com                                                                                                              │      │    │           │          │
-│    │              │                                                                                                                                             │      │    │           │          │
-│ 7  │ quote        │ text: Prosperity depends more on wanting what you have than having what you want.                                                           │ Q... │ .. │ 202408... │ false    │
-│    │              │ author: Geoffrey F. Abert                                                                                                                   │      │    │           │          │
-│    │              │ source: https://forismatic.com                                                                                                              │      │    │           │          │
-│    │              │                                                                                                                                             │      │    │           │          │
-│ 8  │ chuck norris │ text: There is endless debate about the existence of the human soul. Well it does exist and Chuck Norris finds it delicious.                │ Q... │ .. │ 202408... │ false    │
-│    │              │ source: https://chucknorris.io                                                                                                              │      │    │           │          │
-│    │              │                                                                                                                                             │      │    │           │          │
-│ 9  │ chuck norris │ text: Chuck Norris can play Sonic R on a Playstation and Crash Bandicoot on a Sega Saturn.                                                  │ Q... │ .. │ 202408... │ false    │
-│    │              │ source: https://chucknorris.io                                                                                                              │      │    │           │          │
-│    │              │                                                                                                                                             │      │    │           │          │
-│ 10 │ chuck norris │ text: Chuck Norris once broke the law. They are still trying to put it back together.                                                       │ Q... │ .. │ 202408... │ false    │
-│    │              │ source: https://chucknorris.io                                                                                                              │      │    │           │          │
-│    │              │                                                                                                                                             │      │    │           │          │
-╰─#──┴──from_text───┴───────────────────────────────────────────────────────────────────to_text───────────────────────────────────────────────────────────────────┴─from─┴─to─┴─timestamp─┴─link_exi─╯
+╭─#──┬──from_text───┬──────────────────────────────────────────────────to_text──────────────────────────────────────────────────┬──────────────────from──────────────────┬─to─┬─timestamp─┬link_exist╮
+│ 2  │ quote        │ text: I destroy my enemies when I make them my friends.                                                   │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2... │ .. │ 202408... │ false    │
+│    │              │ author: Abraham Lincoln                                                                                   │                                        │    │           │          │
+│    │              │ source: https://forismatic.com                                                                            │                                        │    │           │          │
+│    │              │                                                                                                           │                                        │    │           │          │
+│ 3  │ quote        │ text: I destroy my enemies when I make them my friends.                                                   │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2... │ .. │ 202408... │ false    │
+│    │              │ author: Abraham Lincoln                                                                                   │                                        │    │           │          │
+│    │              │ source: https://forismatic.com                                                                            │                                        │    │           │          │
+│    │              │                                                                                                           │                                        │    │           │          │
+│ 4  │ quote        │ text: I destroy my enemies when I make them my friends.                                                   │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2... │ .. │ 202408... │ false    │
+│    │              │ author: Abraham Lincoln                                                                                   │                                        │    │           │          │
+│    │              │ source: https://forismatic.com                                                                            │                                        │    │           │          │
+│    │              │                                                                                                           │                                        │    │           │          │
+│ 5  │ quote        │ text: The man who trusts men will make fewer mistakes than he who distrusts them.                         │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2... │ .. │ 202408... │ false    │
+│    │              │ author: Cavour                                                                                            │                                        │    │           │          │
+│    │              │ source: https://forismatic.com                                                                            │                                        │    │           │          │
+│    │              │                                                                                                           │                                        │    │           │          │
+│ 6  │ quote        │ text: The man who trusts men will make fewer mistakes than he who distrusts them.                         │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2... │ .. │ 202408... │ false    │
+│    │              │ author: Cavour                                                                                            │                                        │    │           │          │
+│    │              │ source: https://forismatic.com                                                                            │                                        │    │           │          │
+│    │              │                                                                                                           │                                        │    │           │          │
+│ 7  │ quote        │ text: I destroy my enemies when I make them my friends.                                                   │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2... │ .. │ 202408... │ false    │
+│    │              │ author: Abraham Lincoln                                                                                   │                                        │    │           │          │
+│    │              │ source: https://forismatic.com                                                                            │                                        │    │           │          │
+│    │              │                                                                                                           │                                        │    │           │          │
+│ 8  │ chuck norris │ text: The world was a cube. Until Chuck Norris got there!                                                 │ QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnV... │ .. │ 202408... │ false    │
+│    │              │ source: https://chucknorris.io                                                                            │                                        │    │           │          │
+│    │              │                                                                                                           │                                        │    │           │          │
+│ 9  │ chuck norris │ text: Chuck Norris opens his Dos Equis beer bottles with The Most Interesting Man in the World's asshole. │ QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnV... │ .. │ 202408... │ false    │
+│    │              │ source: https://chucknorris.io                                                                            │                                        │    │           │          │
+│    │              │                                                                                                           │                                        │    │           │          │
+│ 10 │ chuck norris │ text: Chuck Norris don't do facebook. No one can ever poke him.                                           │ QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnV... │ .. │ 202408... │ false    │
+│    │              │ source: https://chucknorris.io                                                                            │                                        │    │           │          │
+│    │              │                                                                                                           │                                        │    │           │          │
+╰─#──┴──from_text───┴──────────────────────────────────────────────────to_text──────────────────────────────────────────────────┴──────────────────from──────────────────┴─to─┴─timestamp─┴─link_exi─╯
 
 > cy links-publish
 4 links from initial data were removed, because they were obsolete
 ╭────────────────────cy────────────────────┬──────────────────────────────txhash──────────────────────────────╮
-│ 5 cyberlinks should be successfully sent │ 344121947149ECFE8DA25D56D9DEE4878715523D1283EC5D8BA616B865D4AA07 │
+│ 5 cyberlinks should be successfully sent │ 3A8993AA9C2669B154B8B87BCC4E525E6993B8F83B44FA0BEAE253049A7BC0B2 │
 ╰────────────────────cy────────────────────┴──────────────────────────────txhash──────────────────────────────╯
 ```

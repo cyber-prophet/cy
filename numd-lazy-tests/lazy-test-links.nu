@@ -1,6 +1,8 @@
 # this script was generated automatically using numd
 # https://github.com/nushell-prophet/numd
+
 const init_numd_pwd_const = '/Users/user/cy/numd-lazy-tests'
+
 "```nushell" | print
 "> if (ps | where name =~ ipfs | is-empty) {wezterm cli spawn -- /Users/user/.cargo/bin/nu -c \"$env.IPFS_PATH = /Users/user/.ipfs_blank; ipfs daemon\"}" | nu-highlight | print
 
@@ -25,6 +27,10 @@ cy help-cy | length | table --width 200 | print; print ''
 "> $env.IPFS_PATH = /Users/user/.ipfs_blank" | nu-highlight | print
 
 $env.IPFS_PATH = /Users/user/.ipfs_blank | table --width 200 | print; print ''
+
+"> cy set-cy-setting ipfs-download-from kubo" | nu-highlight | print
+
+cy set-cy-setting ipfs-download-from kubo | table --width 200 | print; print ''
 
 "> cy pin-text 'cyber'" | nu-highlight | print
 
@@ -69,6 +75,10 @@ cy set-cy-setting ipfs-upload-with-no-confirm 'true' | table --width 200 | print
 "> cy link-chain bostrom cyber superintelligence" | nu-highlight | print
 
 cy link-chain bostrom cyber superintelligence | table --width 200 | print; print ''
+
+"> cy link-chain '1483' '982' '1471' '195' '1427' '2054' '1642' '358' '1712' '1419' '219' '767' '1419' '1126' '577' '756' '141' '622' '1169' '1932' '407' '1880' '659' '871' '1161' '1651' '1845' '1506' '1446' '751' '1064' '704' '1255' '199' '309' '982' '290' '2011' '211'" | nu-highlight | print
+
+cy link-chain '1483' '982' '1471' '195' '1427' '2054' '1642' '358' '1712' '1419' '219' '767' '1419' '1126' '577' '756' '141' '622' '1169' '1932' '407' '1880' '659' '871' '1161' '1651' '1845' '1506' '1446' '751' '1064' '704' '1255' '199' '309' '982' '290' '2011' '211' | table --width 200 | print; print ''
 
 "> cy set-links-table-name lazy-tests-links-1" | nu-highlight | print
 
