@@ -91,18 +91,23 @@ The main feedback resource is GitHub [issues](https://github.com/cyber-prophet/c
 Usage:
   > pin-text {flags} (text_param)
 
+  pin text 'cyber', get it's cid
   > cy pin-text 'cyber'
   QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 
-  > "cyber" | save -f cyber.txt; cy pin-text 'cyber.txt'
+  pin text 'cyber.txt', get it's cid
+  > cy pin-text 'cyber.txt'
   QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6
 
+  save text 'cyber' to the file. Use flag `--follow_file_path` to pin the content of file, but not it's name
   > "cyber" | save -f cyber.txt; cy pin-text 'cyber.txt' --follow_file_path
   QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 
+  use `cy pin-text` with some cid, to see that it will return the cid by default unchanged
   > cy pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV'
   QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
 
+  use `--ignore_cid` flag to calculate hash from the initial cid as if it is a regular text
   > cy pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV' --ignore_cid
   QmcDUZon6VQLR3gjAvSKnudSVQ2RbGXUtFFV8mR6zHZK8F
 
@@ -187,8 +192,8 @@ Input/output types:
 Usage:
   > link-files {flags} ...(files)
 
-  > mkdir linkfilestest; cd linkfilestest
-  > 'cyber' | save cyber.txt; 'bostrom' | save bostrom.txt
+  Create cyberlinks for saved in the example file.
+  > cd (mktemp -d); 'cyber' | save cyber.txt; 'bostrom' | save bostrom.txt;
   > cy link-files --link_filenames --yes | to yaml
   - from_text: bostrom.txt
     to_text: pinned_file:bostrom.txt
@@ -198,7 +203,6 @@ Usage:
     to_text: pinned_file:cyber.txt
     from: QmXLmkZxEyRk5XELoGpxhQJDBj798CkHeMdkoCKYptSCA6
     to: QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV
-  > cd ..; rm -r linkfilestest
 
 Flags:
   -n, --link_filenames - Add filenames as a `from` link
@@ -221,7 +225,7 @@ Input/output types:
 ### cy link-folder
 
 ```
-  Link folders to filenames and filenames to files hierarchy in a specified or current folder
+  Create cyberlinks to hierarchies (if any) `parent_folder - child_folder`, `folder - filename`, `filename - content`
 
 Usage:
   > link-folder {flags} (folder_path)
@@ -246,7 +250,7 @@ Input/output types:
 ### cy follow
 
 ```
-  Create a cyberlink according to semantic convention of following a neuron
+  Create a cyberlink according to `following a neuron` semantic convention
 
 Usage:
   > follow {flags} <neuron>
@@ -306,19 +310,22 @@ Input/output types:
 Usage:
   > link-random {flags} (n)
 
-  > cy link-random
-  ==========================================================
-  Chuck Norris IS Lukes father.
+  > cy link-random | to yaml
+  - from_text: quote
+    to_text: |
+      text: Those who are blessed with the most talent don't necessarily outperform everyone else. It's the people with follow-through who excel.
+      author: Mary Kay Ash
+      source: https://forismatic.com
+    from: QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna
+    to: QmXfF8iWJUA37T7fDWbSLM6ASHBtXMTfnJx9jhg6g5A9eE
 
-  via [Chucknorris.io](https://chucknorris.io)
-  ==========================================================
-
-  ==========================================================
-  He who knows himself is enlightened.   (Lao Tzu )
-  > cy link-random --source forismatic.com
-
-  via [forismatic.com](https://forismatic.com)
-  ==========================================================
+  > cy link-random --source chucknorris.io | to yaml
+  - from_text: chuck norris
+    to_text: |
+      text: Chuck Norris is like God, sex and kung-fu put in a blender to create undiluted manliness.
+      source: https://chucknorris.io
+    from: QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1
+    to: Qmd3y4evbAZYwKPojDsvZiwSnWdnrPugY7CF95E4Jxp4Me
 
 Flags:
   --source choose the source to take random links from (default: 'forismatic.com')
@@ -327,9 +334,26 @@ Parameters:
   n <int>: Number of links to append (optional, default: 1)
 
 Input/output types:
-  ╭──input──┬─output──╮
-  │ nothing │ nothing │
-  ╰─────────┴─────────╯
+  ╭──input──┬─output─╮
+  │ nothing │ record │
+  │ nothing │ table  │
+  ╰─────────┴────────╯
+
+```
+
+### cy link-number
+
+```
+  Command to link numbers. Useful for testing and using bandwidth.
+
+Usage:
+  > link-number {flags} (count)
+
+Flags:
+  --from <Int> - number including which to create a range
+
+Parameters:
+  count <int>: the count of numbers to cyberlink (optional, default: 10)
 
 ```
 
@@ -342,23 +366,23 @@ Usage:
   > links-view {flags}
 
   > cy links-view | to yaml
-  There are 2 cyberlinks in the temp table:
-  - from_text: chuck norris
-    to_text: |-
-      Chuck Norris IS Lukes father.
-
-      via [Chucknorris.io](https://chucknorris.io)
-    from: QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1
-    to: QmSLPzbM5NVmXuYCPiLZiePAhUcDCQncYUWDLs7GkLqC7J
-    timestamp: 20230701-134134
+  There are 2 cyberlinks in the temp
+  table:
   - from_text: quote
-    to_text: |-
-      He who knows himself is enlightened. (Lao Tzu )
-
-      via [forismatic.com](https://forismatic.com)
+    to_text: |
+      text: Those who are blessed with the most talent don't necessarily outperform everyone else. It's the people with follow-through who excel.
+      author: Mary Kay Ash
+      source: https://forismatic.com
     from: QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna
-    to: QmWoxYsWYuTP4E2xaQHr3gUZZTBC7HdNDVhis1BK9X3qjX
-    timestamp: 20230702-113842
+    to: QmXfF8iWJUA37T7fDWbSLM6ASHBtXMTfnJx9jhg6g5A9eE
+    timestamp: 20240801-072212
+  - from_text: chuck norris
+    to_text: |
+      text: Chuck Norris is like God, sex and kung-fu put in a blender to create undiluted manliness.
+      source: https://chucknorris.io
+    from: QmXL2fdBAWHgpot8BKrtThUFvgJyRmCWbnVbbYiNreQAU1
+    to: Qmd3y4evbAZYwKPojDsvZiwSnWdnrPugY7CF95E4Jxp4Me
+    timestamp: 20240801-072216
 
 Flags:
   -q, --quiet - Disable informational messages
@@ -555,6 +579,7 @@ Usage:
 
 Flags:
   --all_links - check all links in the temp table
+  --threads <Int> - number threads to request cyberlinks (default: 10)
 
 Input/output types:
   ╭──input──┬─output──╮
@@ -605,11 +630,89 @@ Input/output types:
 
 ```
 
+### cy config-new
+
+```
+  Create a config JSON to set env variables, to use them as parameters in cyber cli
+
+Usage:
+  > config-new
+
+```
+
+### cy config-view
+
+```
+  View a saved JSON config file
+
+Usage:
+  > config-view (config_name)
+
+Parameters:
+  config_name <string>:  (optional)
+
+```
+
+### cy config-save
+
+```
+  Save the piped-in JSON into a config file inside of `cy/config` folder
+
+Usage:
+  > config-save {flags} (config_name)
+
+Flags:
+  --inactive - Don't activate current config
+  --quiet - Don't pring config
+
+Parameters:
+  config_name <string>:  (optional)
+
+```
+
+### cy config-activate
+
+```
+  Activate the config JSON
+
+Usage:
+  > config-activate <config_name>
+
+Parameters:
+  config_name <string>:
+
+```
+
+### cy set-cy-setting
+
+```
+Usage:
+  > set-cy-setting {flags} (key) (value)
+
+Flags:
+  --output_value_only
+
+Parameters:
+  key <string>:  (optional)
+  value <any>:  (optional)
+
+```
+
 ### cy load-default-env
 
 ```
 Usage:
   > load-default-env
+
+```
+
+### cy help-cy
+
+```
+  An ordered list of cy commands
+
+Usage:
+  > help-cy
 
 ```
 
@@ -647,82 +750,5 @@ Input/output types:
   ╭──input──┬─output─╮
   │ nothing │ table  │
   ╰─────────┴────────╯
-
-```
-
-### cy config-new
-
-```
-  Create a config JSON to set env variables, to use them as parameters in cyber cli
-
-Usage:
-  > config-new
-
-```
-
-### cy config-view
-
-```
-  View a saved JSON config file
-
-Usage:
-  > config-view (config_name)
-
-Parameters:
-  config_name <string>:  (optional)
-
-```
-
-### cy config-save
-
-```
-  Save the piped-in JSON into a config file inside of `cy/config` folder
-
-Usage:
-  > config-save {flags} <config_name>
-
-Flags:
-  --inactive - Don't activate current config
-
-Parameters:
-  config_name <string>:
-
-```
-
-### cy config-activate
-
-```
-  Activate the config JSON
-
-Usage:
-  > config-activate <config_name>
-
-Parameters:
-  config_name <string>:
-
-```
-
-### cy set-cy-setting
-
-```
-Usage:
-  > set-cy-setting {flags} (key) (value)
-
-Flags:
-  --output_value_only
-
-Parameters:
-  key <string>:  (optional)
-  value <any>:  (optional)
-
-```
-
-### cy help-cy
-
-```
-  An ordered list of cy commands
-
-Usage:
-  > help-cy
 
 ```
