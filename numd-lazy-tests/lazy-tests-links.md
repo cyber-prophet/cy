@@ -1,10 +1,10 @@
 ```nushell
-> if (ps | where name =~ ipfs | is-empty) {wezterm cli spawn -- /Users/user/.cargo/bin/nu -c "$env.IPFS_PATH = /Users/user/.ipfs_blank; ipfs daemon"}
+> if (ps | where name =~ ipfs | is-empty) {wezterm cli spawn -- /Users/user/.cargo/bin/nu -c "$env.IPFS_PATH = '/Users/user/.ipfs_blank'; ipfs daemon"}
 > overlay use ~/cy/cy -pr
 > $env.config.table.abbreviated_row_count = 10000
 > cy help-cy
 > cy help-cy | length
-> $env.IPFS_PATH = /Users/user/.ipfs_blank
+> $env.IPFS_PATH = '/Users/user/.ipfs_blank'
 > cy set-cy-setting ipfs-download-from kubo
 > cy pin-text 'cyber'
 > cy pin-text 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV'
