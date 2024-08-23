@@ -75,7 +75,20 @@ export def load-default-env --env [] {
 
     make-default-folders-fn
 
-    $env.cy = (default-settings | merge $global_config | merge $user_config)
+    let $types_dict = cy-path kickstart settings-variants.yaml | open
+
+    $env.cy = (
+        default-settings
+        | merge $global_config
+        | merge $user_config
+        | items {|k v|
+            {
+                key: $k
+                value: ($v | match-type ($types_dict | get -i $k | get -i type))
+            }
+        }
+        | transpose -idr
+    )
 }
 
 export def 'backup-and-echo' [
