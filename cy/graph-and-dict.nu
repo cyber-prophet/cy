@@ -475,6 +475,7 @@ export def 'graph-filter-contracts' [
     --exclude
 ] {
     graph-links-df
+    | polars collect
     | polars filter-with (
         $in.neuron =~ '.{64}'
         | if $exclude {polars not} else {}
@@ -832,14 +833,16 @@ export def 'graph-add-metadata' [
     let $p = graph-particles-df
         | polars select particle content_s
         | if $escape_quotes {
-            polars with-column (
+            polars collect
+            | polars with-column (
                 $in.content_s
                 | polars replace-all --pattern '"' --replace '\"'
                 | polars replace-all --pattern '^(.*)$' --replace '"$1"'
             )
         } else {}
         | if $new_lines {
-            polars with-column (
+            polars collect
+            | polars with-column (
                 $in.content_s
                 | polars replace-all --pattern '⏎' --replace (char nl)
             )
