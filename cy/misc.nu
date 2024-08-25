@@ -1,4 +1,5 @@
 use cy-complete.nu *
+use cy-internals.nu *
 
 # query neuron addrsss by his nick
 export def 'qnbn' [
