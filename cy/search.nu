@@ -1,5 +1,6 @@
 use cy-internals.nu *
 use cy-complete.nu *
+use cid.nu cid-read-or-download
 
 def 'search-sync' [
     query
@@ -102,7 +103,7 @@ def 'search-auto-refresh' [
     }
 }
 
-export def search-walk [
+export def 'search-walk' [
     query: string
     --results_per_page: int = 100
     --duration: duration = 2min
@@ -129,7 +130,7 @@ export def search-walk [
 }
 
 # Use the built-in node search function in cyber or pussy
-export def 'search' [
+export def main [
     query
     --page (-p): int = 0
     --results_per_page (-r): int = 10
