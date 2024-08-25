@@ -4,9 +4,9 @@
 const init_numd_pwd_const = '/Users/user/cy/numd-lazy-tests'
 
 "```nushell" | print
-"> if (ps | where name =~ ipfs | is-empty) {wezterm cli spawn -- /Users/user/.cargo/bin/nu -c \"$env.IPFS_PATH = /Users/user/.ipfs_blank; ipfs daemon\"}" | nu-highlight | print
+"> if (ps | where name =~ ipfs | is-empty) {wezterm cli spawn -- /Users/user/.cargo/bin/nu -c \"$env.IPFS_PATH = '/Users/user/.ipfs_blank'; ipfs daemon\"}" | nu-highlight | print
 
-if (ps | where name =~ ipfs | is-empty) {wezterm cli spawn -- /Users/user/.cargo/bin/nu -c "$env.IPFS_PATH = /Users/user/.ipfs_blank; ipfs daemon"} | table --width 200 | print; print ''
+if (ps | where name =~ ipfs | is-empty) {wezterm cli spawn -- /Users/user/.cargo/bin/nu -c "$env.IPFS_PATH = '/Users/user/.ipfs_blank'; ipfs daemon"}
 
 "> overlay use ~/cy/cy -pr" | nu-highlight | print
 
@@ -14,7 +14,7 @@ overlay use ~/cy/cy -pr
 
 "> $env.config.table.abbreviated_row_count = 10000" | nu-highlight | print
 
-$env.config.table.abbreviated_row_count = 10000 | table --width 200 | print; print ''
+$env.config.table.abbreviated_row_count = 10000
 
 "> cy help-cy" | nu-highlight | print
 
@@ -24,9 +24,9 @@ cy help-cy | table --width 200 | print; print ''
 
 cy help-cy | length | table --width 200 | print; print ''
 
-"> $env.IPFS_PATH = /Users/user/.ipfs_blank" | nu-highlight | print
+"> $env.IPFS_PATH = '/Users/user/.ipfs_blank'" | nu-highlight | print
 
-$env.IPFS_PATH = /Users/user/.ipfs_blank | table --width 200 | print; print ''
+$env.IPFS_PATH = '/Users/user/.ipfs_blank'
 
 "> cy set-cy-setting ipfs-download-from kubo" | nu-highlight | print
 
