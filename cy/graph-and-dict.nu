@@ -453,7 +453,7 @@ export def 'graph-update-particles-parquet' [
         )
     }
     | polars sort-by height particle
-    | polars to-parquet ($parquet_path | backup-and-echo --mv)
+    | polars save ($parquet_path | backup-and-echo --mv)
     | print $in.0?
 }
 
@@ -700,7 +700,7 @@ export def 'graph-to-gephi' [] {
         | polars as Timeset
     )
     | polars rename [particle_from particle_to] [source target]
-    | polars to-csv (cy-path export !gephi_cyberlinks.csv)
+    | polars save (cy-path export !gephi_cyberlinks.csv)
 
     $particles
     | polars join --left $t1_height_index height height
