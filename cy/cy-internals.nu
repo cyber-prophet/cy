@@ -437,3 +437,16 @@ def --env is-connected-interval [
         return false
     }
 }
+
+export def dict-neurons-bare [
+    --path
+] {
+    cy-path graph neurons_dict.yaml
+    | if $path {
+        return $in
+    } else {}
+    | if ($in | path exists) {
+        open
+    } else { [[neuron nickname];
+        ['bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8' 'maxim']] }
+}
