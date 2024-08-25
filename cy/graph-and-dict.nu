@@ -1013,14 +1013,7 @@ export def 'dict-neurons-view' [
 ] {
     let $neurons_tags = dict-neurons-tags --wide
 
-    cy-path graph neurons_dict.yaml
-    | if $path {
-        return $in
-    } else {}
-    | if ($in | path exists) {
-        open
-    } else { [[neuron nickname];
-        ['bostrom1h29u0h2y98rkhdrwsx0ejk5eq8wvslygexr7p8' 'maxim']] }
+    dict-neurons-bare --path=$path
     | reject -i ...($neurons_tags | columns | where $it != 'neuron')
     | join --outer $neurons_tags neuron
     | if $karma_bar {

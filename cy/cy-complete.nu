@@ -9,7 +9,7 @@ export def 'nu-complete-search-functions' [] {
 }
 
 export def 'nu-complete-neurons-nicks' [] {
-    dict-neurons-view | get nick
+    dict-neurons-bare | get nick
 }
 
 export def 'nu-complete-config-names' [] {
@@ -32,7 +32,7 @@ export def 'nu-complete-executables' [] {
 }
 
 export def 'nu-complete dict-nicks' [] {
-    dict-neurons-view
+    dict-neurons-bare
     | select -i nickname neuron
     | uniq-by nickname
     | where nickname not-in [null '' '?']
