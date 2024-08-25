@@ -25,7 +25,7 @@
 │ 1020 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8 │ QmR7zZv2PNo477ixpKBVYVUoquxLVabsde2zTfgqgwNzna │ QmZdKqcYqYGy88QpUGZpqjmDUkwm6gZBhygxtSHbCKzbAV │ 12847309 │ 2024-04-01 13:14:37 │
 ╰──#───┴─────────────────────neuron─────────────────────┴─────────────────particle_from──────────────────┴──────────────────particle_to───────────────────┴──height──┴──────timestamp──────╯
 
-> graph-links-df test-graph.csv | graph-filter-contracts
+> graph-links-df test-graph.csv | graph-filter-contracts | polars collect
 ╭─#──┬───────────────────────────────neuron───────────────────────────────┬─────────────────particle_from──────────────────┬──────────────────particle_to───────────────────┬──height──┬──────timestamp──────╮
 │ 0  │ bostrom1jkte0pytr85qg0whmgux3vmz9ehmh82w40h8gaqeg435fnkyfxqq9qaku3 │ QmVww6z5eshB4puR74xCwmNPrsbcou1dfF8Q2zmW4sJiUP │ QmPhByrCLn4E8buNkYjPag9PuxXHPJgo7mAumxVAbm5U1N │  3627537 │ 2022-07-08 16:17:49 │
 │ 1  │ bostrom16y344e8ryydmeu2g8yyfznq79j7jfnar4p59ngpvaazcj83jzsmsts7qxt │ QmZbcRTU4fdrMy2YzDKEUAXezF3pRDmFSMXbXYABVe3UhW │ QmbNve1YGn7vtSRm3XWvjG2AzFrB1zz78VJbAtpA2zEuhJ │  3627649 │ 2022-07-08 16:28:33 │
@@ -46,7 +46,7 @@
 │ 16 │ bostrom16y344e8ryydmeu2g8yyfznq79j7jfnar4p59ngpvaazcj83jzsmsts7qxt │ QmaMhB3x2dM6pp3dWo4oHWvLjtqXUkA5SMXuMuvFPcw8pT │ QmPoomrqMFTTBhsgDWH2pmTArgfvb5XqogXz3qZoGDjbmp │ 12234459 │ 2024-02-19 12:02:32 │
 ╰─#──┴───────────────────────────────neuron───────────────────────────────┴─────────────────particle_from──────────────────┴──────────────────particle_to───────────────────┴──height──┴──────timestamp──────╯
 
-> graph-links-df test-graph.csv | graph-filter-contracts --exclude
+> graph-links-df test-graph.csv | graph-filter-contracts --exclude | polars collect
 ╭──#───┬─────────────────────neuron─────────────────────┬─────────────────particle_from──────────────────┬──────────────────particle_to───────────────────┬──height──┬──────timestamp──────╮
 │ 0    │ bostrom1ay267fakkrgfy9lf2m7wsj8uez2dgylhtkdf9k │ QmPcfxEfW317u3bbz8MbEhjoMZ5HMFsx5TbsEHWPd1kLLw │ QmXQ4k4ciK5ieaSwtccmH9mm4QdPS6Spd21DTqLFrEwDWR │     9029 │ 2021-11-06 03:52:13 │
 │ 1    │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t │ QmYrXCXqunhqqirz3LBmvbnQb2pFFCk7douQkHDPDvQ3iE │ QmY4X4SkVBkoUGZdTzdcW7SKY8t4ULj5GJBRcRr4UMyahp │    12863 │ 2021-11-06 09:59:22 │
@@ -84,16 +84,16 @@
 │ 8   │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t                     │ QmVww6z5eshB4puR74xCwmNPrsbcou1dfF8Q2zmW4sJiUP │ QmSVa1XLM3XcY9Rm9XzXg9NnT6RutPPnXpL1kZB5McPCiR │  395739 │ 2021-12-02 06:45:01 │
 │ 9   │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t                     │ QmVww6z5eshB4puR74xCwmNPrsbcou1dfF8Q2zmW4sJiUP │ QmTN9CZ2n5c1un3mNSNymSyK9ww3vyt3cKQwm8A3t6e2rf │  395743 │ 2021-12-02 06:45:24 │
 │ ... │ ...                                                                │ ...                                            │ ...                                            │ ...     │ ...                 │
-│ 106 │ bostrom1823qj9q6eruxv8mfwfay87zd9pp66ayq0ckp9xttk0e758a6kl9qtglw7z │ QmNprvRpqVsQEqEoTRJfZUB57RHEVSK2KLPsaHSULWb28j │ QmW5GREog52duzpQbHQ2da8NCQSkL218TWW9hQzsR11bGM │ 7825065 │ 2023-04-20 05:31:02 │
-│ 107 │ bostrom10fqy0npt7djm8lg847v9rqlng88kqfdvl8tyt4ge204wf52sy68qlq7nz2 │ QmTR3QWRK6k4uZspKSPnJqVAE8qZ9NHaJ5Xf3YQTasZWrh │ QmNprvRpqVsQEqEoTRJfZUB57RHEVSK2KLPsaHSULWb28j │ 3628878 │ 2022-07-08 18:26:41 │
-│ 108 │ bostrom1pc4ep362vkyrquq7r27wvm08u2yjxwnuylc509s2dfumw4qwt7hsdavx33 │ QmW5GREog52duzpQbHQ2da8NCQSkL218TWW9hQzsR11bGM │ QmNprvRpqVsQEqEoTRJfZUB57RHEVSK2KLPsaHSULWb28j │ 7912873 │ 2023-04-26 07:32:57 │
-│ 109 │ bostrom10fqy0npt7djm8lg847v9rqlng88kqfdvl8tyt4ge204wf52sy68qlq7nz2 │ QmZid7P7oYhV43dpv7WkVyrf7oHRvqMkBh8JBWtyEJ27m6 │ QmNprvRpqVsQEqEoTRJfZUB57RHEVSK2KLPsaHSULWb28j │ 6406162 │ 2023-01-12 12:53:56 │
-│ 110 │ bostrom1qnlxnneluedfg3lusv8r36t5c0s4r2p0xhhszj                     │ QmTHDFzGs6ph7HMCVovRn746Bf94sP4XMs42kBJ5iW1FAc │ QmVYMVibAfUtHdneRnwaBRWH7poxT6BfYEwBWegk6uwUXK │ 4546075 │ 2022-09-08 04:03:17 │
-│ 111 │ bostrom1taq9pscnws852tfvd4vrtckztu0kttkkqzx8dv                     │ QmTHDFzGs6ph7HMCVovRn746Bf94sP4XMs42kBJ5iW1FAc │ QmVas7T5i9rRcqFDndhynhYXcqdoMYMR5QkZZRi39HUxya │  150903 │ 2021-11-15 16:23:22 │
-│ 112 │ bostrom1zy8knphzhf9u8xeyjc6k3eps96q48hlmj03zsk                     │ QmTHDFzGs6ph7HMCVovRn746Bf94sP4XMs42kBJ5iW1FAc │ Qmc3Xpzc4B3KMaqRFACg4FpbXUXmb56DBEXSTDzSShQhmm │  552203 │ 2021-12-12 20:31:59 │
-│ 113 │ bostrom1jkte0pytr85qg0whmgux3vmz9ehmh82w40h8gaqeg435fnkyfxqq9qaku3 │ QmZid7P7oYhV43dpv7WkVyrf7oHRvqMkBh8JBWtyEJ27m6 │ QmTHDFzGs6ph7HMCVovRn746Bf94sP4XMs42kBJ5iW1FAc │ 6406162 │ 2023-01-12 12:53:56 │
-│ 114 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8                     │ QmfQdNw9ajQwNW6eA35DRS7tTb1gnFCULRCKQat4zABRC6 │ QmTHDFzGs6ph7HMCVovRn746Bf94sP4XMs42kBJ5iW1FAc │ 6700597 │ 2023-02-01 16:36:31 │
-│ 115 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8                     │ QmfQdNw9ajQwNW6eA35DRS7tTb1gnFCULRCKQat4zABRC6 │ QmaNY1eb7GNiUm6wCoKKGp3Sfg8W5VuZwhKeWnDerHfruG │ 6700597 │ 2023-02-01 16:36:31 │
+│ 108 │ bostrom1823qj9q6eruxv8mfwfay87zd9pp66ayq0ckp9xttk0e758a6kl9qtglw7z │ QmNprvRpqVsQEqEoTRJfZUB57RHEVSK2KLPsaHSULWb28j │ QmW5GREog52duzpQbHQ2da8NCQSkL218TWW9hQzsR11bGM │ 7825065 │ 2023-04-20 05:31:02 │
+│ 109 │ bostrom10fqy0npt7djm8lg847v9rqlng88kqfdvl8tyt4ge204wf52sy68qlq7nz2 │ QmTR3QWRK6k4uZspKSPnJqVAE8qZ9NHaJ5Xf3YQTasZWrh │ QmNprvRpqVsQEqEoTRJfZUB57RHEVSK2KLPsaHSULWb28j │ 3628878 │ 2022-07-08 18:26:41 │
+│ 110 │ bostrom1pc4ep362vkyrquq7r27wvm08u2yjxwnuylc509s2dfumw4qwt7hsdavx33 │ QmW5GREog52duzpQbHQ2da8NCQSkL218TWW9hQzsR11bGM │ QmNprvRpqVsQEqEoTRJfZUB57RHEVSK2KLPsaHSULWb28j │ 7912873 │ 2023-04-26 07:32:57 │
+│ 111 │ bostrom10fqy0npt7djm8lg847v9rqlng88kqfdvl8tyt4ge204wf52sy68qlq7nz2 │ QmZid7P7oYhV43dpv7WkVyrf7oHRvqMkBh8JBWtyEJ27m6 │ QmNprvRpqVsQEqEoTRJfZUB57RHEVSK2KLPsaHSULWb28j │ 6406162 │ 2023-01-12 12:53:56 │
+│ 112 │ bostrom1qnlxnneluedfg3lusv8r36t5c0s4r2p0xhhszj                     │ QmTHDFzGs6ph7HMCVovRn746Bf94sP4XMs42kBJ5iW1FAc │ QmVYMVibAfUtHdneRnwaBRWH7poxT6BfYEwBWegk6uwUXK │ 4546075 │ 2022-09-08 04:03:17 │
+│ 113 │ bostrom1taq9pscnws852tfvd4vrtckztu0kttkkqzx8dv                     │ QmTHDFzGs6ph7HMCVovRn746Bf94sP4XMs42kBJ5iW1FAc │ QmVas7T5i9rRcqFDndhynhYXcqdoMYMR5QkZZRi39HUxya │  150903 │ 2021-11-15 16:23:22 │
+│ 114 │ bostrom1zy8knphzhf9u8xeyjc6k3eps96q48hlmj03zsk                     │ QmTHDFzGs6ph7HMCVovRn746Bf94sP4XMs42kBJ5iW1FAc │ Qmc3Xpzc4B3KMaqRFACg4FpbXUXmb56DBEXSTDzSShQhmm │  552203 │ 2021-12-12 20:31:59 │
+│ 115 │ bostrom1jkte0pytr85qg0whmgux3vmz9ehmh82w40h8gaqeg435fnkyfxqq9qaku3 │ QmZid7P7oYhV43dpv7WkVyrf7oHRvqMkBh8JBWtyEJ27m6 │ QmTHDFzGs6ph7HMCVovRn746Bf94sP4XMs42kBJ5iW1FAc │ 6406162 │ 2023-01-12 12:53:56 │
+│ 116 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8                     │ QmfQdNw9ajQwNW6eA35DRS7tTb1gnFCULRCKQat4zABRC6 │ QmTHDFzGs6ph7HMCVovRn746Bf94sP4XMs42kBJ5iW1FAc │ 6700597 │ 2023-02-01 16:36:31 │
+│ 117 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8                     │ QmfQdNw9ajQwNW6eA35DRS7tTb1gnFCULRCKQat4zABRC6 │ QmaNY1eb7GNiUm6wCoKKGp3Sfg8W5VuZwhKeWnDerHfruG │ 6700597 │ 2023-02-01 16:36:31 │
 ╰──#──┴───────────────────────────────neuron───────────────────────────────┴─────────────────particle_from──────────────────┴──────────────────particle_to───────────────────┴─height──┴──────timestamp──────╯
 
 > graph-links-df test-graph.csv | graph-filter-contracts | graph-append-related --only_first_neuron  | graph-keep-standard-columns-only
@@ -125,56 +125,59 @@
 ╭──#──┬──────nickname──────┬─links_count─┬───────────────────────────────neuron───────────────────────────────╮
 │ 0   │ mastercyb          │          24 │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t                     │
 │ 1   │ ?                  │          16 │ bostrom16y344e8ryydmeu2g8yyfznq79j7jfnar4p59ngpvaazcj83jzsmsts7qxt │
-│ 2   │ cyberacademy       │          14 │ bostrom1679yrs8dmska7wcsawgy2m25kwucm3z0hwr74y                     │
+│ 2   │ cyberacademy       │          15 │ bostrom1679yrs8dmska7wcsawgy2m25kwucm3z0hwr74y                     │
 │ 3   │ ?                  │          12 │ bostrom1jkte0pytr85qg0whmgux3vmz9ehmh82w40h8gaqeg435fnkyfxqq9qaku3 │
 │ 4   │ cicada             │           8 │ bostrom1qjf43tsdhzfk5apchznuheqf6sux0wwmt4q4qq                     │
-│ 5   │ jooy               │           6 │ bostrom1k7nssnnvxezpp4una7lvk6j53895vadpqe6jh6                     │
-│ 6   │ ?                  │           6 │ bostrom10fqy0npt7djm8lg847v9rqlng88kqfdvl8tyt4ge204wf52sy68qlq7nz2 │
-│ 7   │ maxim              │           4 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8                     │
-│ 8   │ el-nivvo           │           4 │ bostrom1ay267fakkrgfy9lf2m7wsj8uez2dgylhtkdf9k                     │
+│ 5   │ ?                  │           6 │ bostrom10fqy0npt7djm8lg847v9rqlng88kqfdvl8tyt4ge204wf52sy68qlq7nz2 │
+│ 6   │ jooy               │           6 │ bostrom1k7nssnnvxezpp4una7lvk6j53895vadpqe6jh6                     │
+│ 7   │ el-nivvo           │           4 │ bostrom1ay267fakkrgfy9lf2m7wsj8uez2dgylhtkdf9k                     │
+│ 8   │ maxim              │           4 │ bostrom1nngr5aj3gcvphlhnvtqth8k3sl4asq3n6r76m8                     │
 │ 9   │ cyberdbot          │           3 │ bostrom135ca8hdpy9sk0ntwqzpzsvatyl48ptx5j359lz                     │
 │ ... │ ...                │ ...         │ ...                                                                │
-│ 15  │ laurentiu          │           1 │ bostrom1zy8knphzhf9u8xeyjc6k3eps96q48hlmj03zsk                     │
-│ 16  │ mazw1010           │           1 │ bostrom13eehekx464l2qtl4xfyzggvd77nef22x82asv8                     │
-│ 17  │ cybergudwin        │           1 │ bostrom1v5x5vl4c0zjua37ymqjy4267fy9m6x8yvzvkfp                     │
-│ 18  │ superhuman         │           1 │ bostrom1pntx8ql2v7cqxu05etg8c4v0r2vz7qnq9uqmpy                     │
-│ 19  │ kalpemo            │           1 │ bostrom1rj7zt2pzuzwhjlr24u0prnqqxm3xexavtpqtzx                     │
-│ 20  │ belzebuth          │           1 │ bostrom1qnlxnneluedfg3lusv8r36t5c0s4r2p0xhhszj                     │
-│ 21  │ digital-oppression │           1 │ bostrom1g70uv8y47s5pn07n4gtgakz278vps228r9emvt                     │
-│ 22  │ ?                  │           1 │ bostrom15xx4xh3p7f773ssyz25ydrk27g09cl7qfh75mh                     │
-│ 23  │ castigaojetes      │           1 │ bostrom1kwwp7f5pszyxr39whf2rwm7gly596mdw5gmmf4                     │
-│ 24  │ elonamusk          │           1 │ bostrom19wtkh935tx2ut2n4m6tjvkfvew4shaeezfl7em                     │
+│ 16  │ castigaojetes      │           1 │ bostrom1kwwp7f5pszyxr39whf2rwm7gly596mdw5gmmf4                     │
+│ 17  │ ?                  │           1 │ bostrom15xx4xh3p7f773ssyz25ydrk27g09cl7qfh75mh                     │
+│ 18  │ laurentiu          │           1 │ bostrom1zy8knphzhf9u8xeyjc6k3eps96q48hlmj03zsk                     │
+│ 19  │ therealcalmate     │           1 │ bostrom1ltpef4eyh72ly3x8cx6ath6sfg94ag42aga5n5                     │
+│ 20  │ digital-oppression │           1 │ bostrom1g70uv8y47s5pn07n4gtgakz278vps228r9emvt                     │
+│ 21  │ cybergudwin        │           1 │ bostrom1v5x5vl4c0zjua37ymqjy4267fy9m6x8yvzvkfp                     │
+│ 22  │ superhuman         │           1 │ bostrom1pntx8ql2v7cqxu05etg8c4v0r2vz7qnq9uqmpy                     │
+│ 23  │ belzebuth          │           1 │ bostrom1qnlxnneluedfg3lusv8r36t5c0s4r2p0xhhszj                     │
+│ 24  │ synthetic          │           1 │ bostrom12tdulmvjmsmpaqrpshz0emu0h9sqz5x58hv36e                     │
+│ 25  │ mazw1010           │           1 │ bostrom13eehekx464l2qtl4xfyzggvd77nef22x82asv8                     │
 ╰──#──┴──────nickname──────┴─links_count─┴───────────────────────────────neuron───────────────────────────────╯
 
 > graph-links-df test-graph.csv | graph-filter-contracts | graph-append-related | graph-stats
 ╭───────────┬───────────────────╮
-│ neurons   │ 25                │
+│ neurons   │ 26                │
 │ links     │ {record 6 fields} │
 │ particles │ {record 4 fields} │
 ╰───────────┴───────────────────╯
+
 > graph-links-df test-graph.csv | graph-filter-contracts | graph-append-related | graph-stats | table -e
 ╭───────────┬───────────────────────────────────╮
-│ neurons   │ 25                                │
+│ neurons   │ 26                                │
 │           │ ╭─────────┬─────────────────────╮ │
-│ links     │ │ links   │ 116                 │ │
+│ links     │ │ links   │ 118                 │ │
 │           │ │ first   │ 2021-11-06 09:12:42 │ │
-│           │ │ last    │ 2024-04-02 19:27:46 │ │
-│           │ │ unique  │ 116                 │ │
+│           │ │ last    │ 2024-07-07 12:12:16 │ │
+│           │ │ unique  │ 118                 │ │
 │           │ │ follows │ 0                   │ │
 │           │ │ tweets  │ 0                   │ │
 │           │ ╰─────────┴─────────────────────╯ │
 │           │ ╭────────────────┬─────╮          │
-│ particles │ │ unique         │ 103 │          │
+│ particles │ │ unique         │ 105 │          │
 │           │ │ text           │ 81  │          │
 │           │ │ nontext        │ 10  │          │
-│           │ │ not_downloaded │ 12  │          │
+│           │ │ not_downloaded │ 14  │          │
 │           │ ╰────────────────┴─────╯          │
 ╰───────────┴───────────────────────────────────╯
-> graph-links-df test-graph.csv | graph-filter-contracts | graph-to-gephi 
-> graph-links-df test-graph.csv | graph-filter-contracts | graph-to-cosmograph 
+
+> graph-links-df test-graph.csv | graph-filter-contracts | graph-to-gephi
+
+> graph-links-df test-graph.csv | graph-filter-contracts | graph-to-cosmograph
 You can upload the file to https://cosmograph.app/run
-/Users/user/cy/export/cybergraph-in-cosmograph20240415-134607.csv
-> graph-links-df test-graph.csv | graph-filter-contracts | graph-to-graphviz 
+
+> graph-links-df test-graph.csv | graph-filter-contracts | graph-to-graphviz
 digraph G {
 
 "mastercyb|W4sJiUP" -> "bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t|Abm5U1N";
@@ -199,7 +202,8 @@ Size = 218789
 "maxim|FPcw8pT" -> "osmo1nngr5aj3gcvphlhnvtqth8k3sl4asq3n3teenj|dXphKiW";
 "maxim|FPcw8pT" -> "terra1h9epjq7wp08ypj7g99k0vs4xtvk9acmq3saxrl|oGDjbmp";
 }
-> graph-links-df test-graph.csv | graph-filter-contracts | graph-add-metadata | graph-keep-standard-columns-only --out
+
+> graph-links-df test-graph.csv | graph-filter-contracts | graph-add-metadata | graph-keep-standard-columns-only --out | polars collect
 ╭─#──┬────────────nick────────────┬──content_s_from───┬──────────────────────content_s_to──────────────────────╮
 │ 0  │ passport-address_?@q9qaku3 │ mastercyb|W4sJiUP │ bostrom1d8754xqa9245pctlfcyv8eah468neqzn3a0y0t|Abm5U1N │
 │ 1  │ passport-proofs_?@sts7qxt  │ master|BVe3UhW    │ 0xb2e19dd996848818d972dd3a60a1b7faffb82330|A2zEuhJ     │
