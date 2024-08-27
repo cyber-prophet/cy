@@ -5,7 +5,6 @@ export use links.nu *
 export use maintenance.nu *
 export use message.nu *
 export use misc.nu *
-export use nu-utils *
 export use passport.nu *
 export use query.nu *
 export use queue.nu *
