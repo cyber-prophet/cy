@@ -1,7 +1,7 @@
 # Cy submodule for creating and publishing cyberlinks
 
 use nu-utils [cprint, print-and-pass, confirm, path-modify]
-use config.nu [config-view config-save]
+use config.nu [config-view config-save config-activate]
 use cy-complete.nu *
 use cy-internals.nu *
 use graph-and-dict.nu [graph-links-df graph-receive-new-links dict-neurons-add]
@@ -849,10 +849,15 @@ def 'links-prepare-for-publishing' [] {
 }
 
 # Publish all links from the temp table to cybergraph
-export def 'links-publish' [
     --links_per_trans: int
+export def --env 'links-publish' [
+    --neuron: string@'nu-complete-config-names' = '' # name of cy config to activate
 ] {
     let $links_per_trans = set-get-env links-per-transaction $links_per_trans
+
+    if $neuron != '' {
+        config-activate $neuron
+    }
 
     links-view --quiet
     | links-prepare-for-publishing
