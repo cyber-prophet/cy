@@ -311,7 +311,7 @@ def 'link-chuck' []: [nothing -> record] {
             source: 'https://chucknorris.io' }
         | to yaml
 
-    link-texts 'chuck norris' $quote
+    link-texts 'chuck norris' $quote --disable_append
 }
 
 # Add a random quote cyberlink to the temp table
@@ -331,7 +331,7 @@ def 'link-quote' []: [nothing -> record] {
         | to yaml
 
     # link-texts 'quote' $quote
-    link-texts 'quote' $quote
+    link-texts 'quote' $quote --disable_append
 }
 
 # Make a random cyberlink from different APIs (chucknorris.io, forismatic.com)
@@ -365,6 +365,7 @@ export def 'link-random' [
         }
     }
     | uniq-by to_text
+    | links-append
 }
 
 # Command to link numbers. Useful for testing and using bandwidth.
