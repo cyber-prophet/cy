@@ -1,3 +1,4 @@
+use queue.nu [queue-task-add]
 
 # Obtain cid info
 #
