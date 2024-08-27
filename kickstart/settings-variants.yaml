@@ -101,3 +101,9 @@ ipfs-upload-with-no-confirm:
   variants:
   - true
   - false
+last-number-cyberlinked:
+  description: the last number for a neuron cyberlinked using `link-number`
+  type: int
+  variants:
+  - -1
+  - other
