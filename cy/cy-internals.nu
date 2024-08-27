@@ -90,10 +90,10 @@ export def load-default-env --env [] {
         | merge $global_config
         | merge $user_config
         | items {|k v|
-            {
-                key: $k
-                value: ($v | match-type ($types_dict | get -i $k | get -i type))
-            }
+            $v
+            | match-type ($types_dict | get -i $k | get -i type)
+            | wrap value
+            | insert key $k
         }
         | transpose -idr
     )
