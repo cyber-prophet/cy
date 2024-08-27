@@ -56,7 +56,14 @@ export def match-type [
     match $type {
         'int' => {$def_value | into int}
         'datetime' => {$def_value | into datetime}
-        'duration' => {$def_value | into duration}
+        'duration' => {
+            $def_value
+            | if ($in =~ '\D') { # if it contains `wk` or similar
+                into duration
+            } else {
+                into int | into duration # i don't know where it saves durations as int here
+            }
+        }
         'bool' => {$def_value | into bool}
         _ => {$def_value | into string}
     }
