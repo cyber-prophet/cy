@@ -849,8 +849,8 @@ def 'links-prepare-for-publishing' [] {
 }
 
 # Publish all links from the temp table to cybergraph
-    --links_per_trans: int
 export def --env 'links-publish' [
+    --links_per_trans: int # number of transactions to send per batch. From 1 to 100. Default is 80.
     --neuron: string@'nu-complete-config-names' = '' # name of cy config to activate
 ] {
     let $links_per_trans = set-get-env links-per-transaction $links_per_trans
