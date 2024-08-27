@@ -61,7 +61,8 @@ export def match-type [
             | if ($in =~ '\D') { # if it contains `wk` or similar
                 into duration
             } else {
-                into int | into duration # i don't know where it saves durations as int here
+                # i don't know where it saves durations as int here, so i handle it this way
+                into int | into duration
             }
         }
         'bool' => {$def_value | into bool}
