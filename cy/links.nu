@@ -804,7 +804,7 @@ def 'links-send-tx' [ ] {
             error make --unspanned {msg: (cprint --echo 'Increase your *Volts* balance or wait time.')}
         }
         if $response.raw_log =~ 'your cyberlink already exists' {
-            error make --unspanned {msg: (cprint --echo 'Use *cy links-remove-existed-using-snapshot*')}
+            links-remove-existed-1by1
         }
 
         save-links-to-archive $links 'link-might-not-be-sent-hash-unknown'
