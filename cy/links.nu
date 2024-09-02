@@ -799,11 +799,11 @@ def 'links-send-tx' [ ] {
     } else {
         print $response
 
-        if $response.raw_log == 'not enough personal bandwidth' {
+        if $response.raw_log? == 'not enough personal bandwidth' {
             print (query-links-bandwidth-neuron $env.cy.address)
             error make --unspanned {msg: (cprint --echo 'Increase your *Volts* balance or wait time.')}
         }
-        if $response.raw_log =~ 'your cyberlink already exists' {
+        if $response.raw_log? =~ 'your cyberlink already exists' {
             links-remove-existed-1by1
         }
 
