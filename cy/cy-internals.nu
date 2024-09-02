@@ -164,16 +164,16 @@ export def make-default-folders-fn []: nothing -> nothing {
     cy-path --create_missing backups
     cy-path --create_missing cache cli_out
     cy-path --create_missing cache jsonl
-    cy-path --create_missing cache queue_cids_dead
-    cy-path --create_missing cache queue_cids_to_download
-    cy-path --create_missing cache queue_tasks_failed
-    cy-path --create_missing cache queue_tasks_to_run
     cy-path --create_missing cache search
     cy-path --create_missing config
     cy-path --create_missing export
     cy-path --create_missing graph particles safe
     cy-path --create_missing mylinks
     cy-path --create_missing temp ipfs_upload
+    cy-path --create_missing temp queue_cids_dead
+    cy-path --create_missing temp queue_cids_to_download
+    cy-path --create_missing temp queue_tasks_failed
+    cy-path --create_missing temp queue_tasks_to_run
     cy-path --create_missing temp transactions
 
     touch (cy-path graph update.toml)

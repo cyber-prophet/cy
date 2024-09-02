@@ -88,7 +88,7 @@ export def 'cid-download' [
     }
 
     if ($status) in ['text' 'non_text'] {
-        rm --force (cy-path cache queue_cids_to_download $cid)
+        rm --force (cy-path temp queue_cids_to_download $cid)
         'downloaded'
     } else if $status == 'not found' {
         queue-cid-add $cid '-'
@@ -188,8 +188,8 @@ def 'cid-download-gateway' [
 export def 'cache-clean-cids-queue' [
     attempts: int = 15 # limit a number of previous download attempts for cids in queue
 ] {
-    let $files = ls (cy-path cache queue_cids_to_download)
-    let $files_dead = cy-path cache queue_cids_dead
+    let $files = ls (cy-path temp queue_cids_to_download)
+    let $files_dead = cy-path temp queue_cids_dead
 
     $files
     | where size > ($attempts | into filesize)
@@ -198,7 +198,7 @@ export def 'cache-clean-cids-queue' [
         try {
             mv $i $files_dead
         } catch {
-            open $i | save -a (cy-path cache queue_cids_dead ($i | path basename))
+            open $i | save -a (cy-path temp queue_cids_dead ($i | path basename))
             rm $i
         }
     }

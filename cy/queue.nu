@@ -5,7 +5,7 @@ export def 'queue-task-add' [
 ] {
     let $filename = $command
         | to-safe-filename --prefix $'($priority)-' --suffix '.nu.txt'
-        | cy-path cache queue_tasks_to_run $in
+        | cy-path temp queue_tasks_to_run $in
 
     $'use (cy-path cy.nu) *; ($command)'
     | save -f $filename
@@ -16,7 +16,7 @@ export def --env 'queue-tasks-monitor' [
     --cids_in_run: int = 10 # a number of files to download in one command run. 0 - means all (default)
 ] {
     loop {
-        glob (cy-path cache queue_tasks_to_run *.nu.txt)
+        glob (cy-path temp queue_tasks_to_run *.nu.txt)
         | sort
         | if (is-connected-interval 10min) {
             if ($in | length) == 0 { } else {
@@ -44,7 +44,7 @@ export def 'queue-execute-task' [
         print -n $'(char nl)($results.stdout)'
     } else {
         print -n $'(char nl)🛑 ($command)'
-        $command + ';' | save -a (cy-path cache queue_tasks_failed ($task_path | path basename))
+        $command + ';' | save -a (cy-path temp queue_tasks_failed ($task_path | path basename))
     }
     ^rm -f $task_path
     log debug $'run ($command)'
@@ -59,7 +59,7 @@ export def 'queue-cids-download' [
     --threads: int = 15 # a number of threads to use for downloading
     --cids_in_run: int = 0 # a number of files to download in one command run. 0 - means all (default)
 ] {
-    let $files = ls -s (cy-path cache queue_cids_to_download)
+    let $files = ls -s (cy-path temp queue_cids_to_download)
 
     if ($files | length) == 0 {
         return 'there are no files in queue'
@@ -118,7 +118,7 @@ export def 'queue-cid-add' [
     cid: string
     symbol: string = ''
 ] {
-    let $path = cy-path cache queue_cids_to_download $cid
+    let $path = cy-path temp queue_cids_to_download $cid
 
     if not ($path | path exists) {
         touch $path

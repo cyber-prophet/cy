@@ -96,7 +96,7 @@ def 'search-auto-refresh' [
 
     serp1 $results
 
-    watch (cy-path cache queue_cids_to_download) {||
+    watch (cy-path temp queue_cids_to_download) {||
         clear
         print $'Searching ($env.cy.exec) for ($cid)'
         serp1 $results
