@@ -1,3 +1,4 @@
+use cy-internals.nu [cy-path]
 
 # Create a custom unsigned cyberlinks transaction
 export def 'tx-json-create-from-cyberlinks' [
