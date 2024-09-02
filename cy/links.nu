@@ -843,6 +843,11 @@ def 'links-prepare-for-publishing' [] {
         | where {|i| $i.from_valid and $i.to_valid and $i.not_cycle}
         | reject count
 
+    let $invalid = $checked
+        | where {|i| not ($i.from_valid and $i.to_valid and $i.not_cycle) or $i.count > 1}
+
+    $invalid | save (cy-path mylinks invalid --ts_extension csv)
+
     let $valid_length = $valid | length
     let $diff_length = ($links | length) - $valid_length
 
