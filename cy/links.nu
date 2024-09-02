@@ -799,6 +799,8 @@ def 'links-send-tx' [ ] {
     } else {
         print $response
 
+        $response | save (cy-path temp transaction_errors --tsjson)
+
         if $response.raw_log? == 'not enough personal bandwidth' {
             print (query-links-bandwidth-neuron $env.cy.address)
             error make --unspanned {msg: (cprint --echo 'Increase your *Volts* balance or wait time.')}
