@@ -118,7 +118,7 @@ open $nu.config-path
 | save -f $nu.config-path
 
 if (open $nu.env-path | lines | where $it starts-with '$env.EDITOR' | is-empty) {
-    (char nl) + '$env.EDITOR = nano' + (char nl) | save -a $nu.env-path
+    (char nl) + '$env.EDITOR = ^nano' + (char nl) | save -a $nu.env-path
 }
 
 print "Cy has been downloaded and installed. Now it will be launched automatically with Nu."
