@@ -111,6 +111,7 @@ export def 'tx-broadcast' []: path -> record {
         --broadcast-mode block
         --output json
         --node $env.cy.rpc-address
+        --yes
     ]
     | complete
     | if ($in.exit_code != 0 ) {
