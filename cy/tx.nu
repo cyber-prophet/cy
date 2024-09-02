@@ -114,7 +114,9 @@ export def 'tx-broadcast' []: path -> record {
     ]
     | complete
     | if ($in.exit_code != 0 ) {
-        {code: $in.exit_code}
+        let $input = $in
+        $input | save -f (cy-path --create_missing temp transaction_errors --tsjson)
+        {code: $input.exit_code}
     } else {
         get stdout | from json | select raw_log code txhash
     }
