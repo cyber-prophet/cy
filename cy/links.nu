@@ -832,11 +832,16 @@ def save-links-to-archive [
 def 'links-prepare-for-publishing' [] {
     let $links = inlinks-or-links
 
-    let $filtered = $links
-        | where (is-cid ($it.from? | default ''))
-        | where (is-cid ($it.to? | default ''))
-        | where $it.from != $it.to
-        | uniq-by from to
+    let $checked = $links
+        | insert from_valid {|i| is-cid ($i.from? | default '')}
+        | insert to_valid {|i| is-cid ($i.to? | default '')}
+        | insert not_cycle {|i| $i.from != $i.to}
+        | uniq-by from to --count
+        | flatten
+
+    let $filtered = $checked
+        | where {|i| $i.from_valid and $i.to_valid and $i.not_cycle}
+        | reject count
 
     let $filtered_length = $filtered | length
     let $diff_length = ($links | length) - $filtered_length
