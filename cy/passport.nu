@@ -1,4 +1,4 @@
-
+use cy-internals.nu [caching-function]
 
 # Get a passport by providing a neuron's address or nick
 #
