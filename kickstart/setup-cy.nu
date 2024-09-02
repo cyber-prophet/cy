@@ -115,6 +115,8 @@ open $nu.config-path
 | str replace 'file_format: "plaintext"' 'file_format: "sqlite"'
 | str replace 'quick: true' 'quick: false'
 | str replace 'algorithm: "prefix"' 'algorithm: "fuzzy"'
+| str replace --regex '\n*$' "\n"
+| collect
 | save -f $nu.config-path
 
 if (open $nu.env-path | lines | where $it starts-with '$env.EDITOR' | is-empty) {
