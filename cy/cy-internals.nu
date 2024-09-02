@@ -8,6 +8,7 @@ use queue.nu *
 export def 'cy-path' [
     ...folders: string # folders to add to cy path
     --create_missing # if the resulted path doesn't exist - create it
+    --tsjson # name a json file with timestamp, precides file
     --file: string # a filename to use as a last segment of the path
 ]: nothing -> path {
     $env | get -i cy.path
@@ -22,7 +23,9 @@ export def 'cy-path' [
             $input
         } else {}
     } else {}
-    | if $file != null {
+    | if $tsjson {
+        path join (date now | into int | into string | $in + '.json')
+    } else if $file != null {
         path join $file
     } else {}
 }
@@ -175,6 +178,7 @@ export def make-default-folders-fn []: nothing -> nothing {
     cy-path --create_missing temp queue_tasks_failed
     cy-path --create_missing temp queue_tasks_to_run
     cy-path --create_missing temp transactions
+    cy-path --create_missing temp transaction_errors
 
     touch (cy-path graph update.toml)
 
