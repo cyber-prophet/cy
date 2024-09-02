@@ -821,7 +821,7 @@ def save-links-to-archive [
     | upsert neuron $env.cy.address
     | upsert txhash $hash
     | default timestamp 0
-    | select from to neuron timestamp txhash
+    | select from to neuron timestamp txhash -i
     | to csv --noheaders
     | save --append --raw (cy-path mylinks _cyberlinks_archive.csv)
 }
