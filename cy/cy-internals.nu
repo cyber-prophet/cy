@@ -58,7 +58,9 @@ export def match-type [
         'datetime' => {$def_value | into datetime}
         'duration' => {
             $def_value
-            | if ($in =~ '\D') { # if it contains `wk` or similar
+            | if ($in | describe) == 'duration' {
+
+            } else if ($in =~ '\D') { # if it contains `wk` or similar
                 into duration
             } else {
                 # i don't know where it saves durations as int here, so i handle it this way
