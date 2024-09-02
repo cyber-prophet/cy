@@ -117,7 +117,7 @@ export def 'tx-broadcast' []: path -> record {
     | if ($in.exit_code != 0 ) {
         {code: $in.exit_code}
     } else {
-        get stdout | from json | select raw_log code txhash
+        get stdout | from json
     }
 }
 
