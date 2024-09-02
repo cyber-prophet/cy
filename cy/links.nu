@@ -799,7 +799,7 @@ def 'links-send-tx' [ ] {
     } else {
         print $response
 
-        $response | save (cy-path temp transaction_errors --tsjson)
+        $response | save (cy-path temp transaction_errors --ts_extension json)
 
         if $response.raw_log? == 'not enough personal bandwidth' {
             print (query-links-bandwidth-neuron $env.cy.address)
