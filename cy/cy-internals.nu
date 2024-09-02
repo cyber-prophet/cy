@@ -176,7 +176,7 @@ export def make-default-folders-fn []: nothing -> nothing {
     cy-path --create_missing config
     cy-path --create_missing export
     cy-path --create_missing graph particles safe
-    cy-path --create_missing mylinks
+    cy-path --create_missing mylinks invalid
     cy-path --create_missing temp ipfs_upload
     cy-path --create_missing temp queue_cids_dead
     cy-path --create_missing temp queue_cids_to_download
