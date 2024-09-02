@@ -803,7 +803,7 @@ def 'links-send-tx' [ ] {
             print (query-links-bandwidth-neuron $env.cy.address)
             error make --unspanned {msg: (cprint --echo 'Increase your *Volts* balance or wait time.')}
         }
-        if $response.raw_log? =~ 'your cyberlink already exists' {
+        if ($response.raw_log? | default '') =~ 'your cyberlink already exists' {
             links-remove-existed-1by1
         }
 
