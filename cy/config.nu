@@ -5,7 +5,7 @@ use cy-internals.nu *
 export use cy-internals.nu load-default-env
 use passport.nu *
 
-# Create a config JSON to set env variables, to use them as parameters in cyber cli
+# Create a config file to set env variables, to use them as parameters in cyber cli
 export def --env 'config-new' [
     # config_name?: string@'nu-complete-config-names'
 ] {
@@ -91,7 +91,7 @@ export def --env 'config-new' [
     } | config-save $config_name
 }
 
-# View a saved JSON config file
+# View a saved config file
 export def 'config-view' [
     config_name?: string@'nu-complete-config-names'
 ] {
@@ -102,7 +102,7 @@ export def 'config-view' [
     }
 }
 
-# Save the piped-in JSON into a config file inside of `cy/config` folder
+# Save the piped-in config into a config file inside of `cy/config` folder
 export def --env 'config-save' [
     config_name?: string@'nu-complete-config-names'
     --inactive # Don't activate current config
@@ -124,7 +124,7 @@ export def --env 'config-save' [
     }
 }
 
-# Activate the config JSON
+# Activate the config
 export def --env 'config-activate' [
     config_name: string@'nu-complete-config-names'
 ] {
