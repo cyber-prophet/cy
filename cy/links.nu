@@ -830,7 +830,7 @@ def save-links-to-archive [
 
 # remove duplicated or non-valid cyberlinks from the temp table
 def 'links-prepare-for-publishing' [] {
-    let $links = inlinks-or-links
+    let $links = inlinks-or-links --necessary_columns
 
     let $checked = $links
         | insert from_valid {|i| is-cid ($i.from? | default '')}
