@@ -894,8 +894,13 @@ export def --env 'links-publish' [
     }
 }
 
-def 'inlinks-or-links' []: [nothing -> table, table -> table] {
+def 'inlinks-or-links' [
+    --necessary_columns
+]: [nothing -> table, table -> table] {
     if $in == null {links-view -q} else {}
+    | if $necessary_columns {
+        select -i from to from_text to_text
+    } else {}
     | fill non-exist -v null
 }
 
