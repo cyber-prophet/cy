@@ -886,8 +886,8 @@ export def --env 'links-publish' [
         | each {links-send-tx}
     } else { # in linux request for pin won't show up inside `each` cycle
         if $in > 1 {
-            cprint $'Publising first ($links_per_trans) cyberlinks.
-                You will need to exectue *links-publish* ($in - 1) more
+            cprint $'Publishing first ($links_per_trans) cyberlinks.
+                You will need to execute *links-publish* ($in - 1) more
                 times.'
         }
         links-send-tx

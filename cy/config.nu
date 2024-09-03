@@ -106,7 +106,7 @@ export def 'config-view' [
 export def --env 'config-save' [
     config_name?: string@'nu-complete-config-names'
     --inactive # Don't activate current config
-    --quiet # Don't pring config
+    --quiet # Don't print config
 ] {
     let $input = $in
     let $config_name = $config_name | default $env.cy.config-name
