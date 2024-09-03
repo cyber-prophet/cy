@@ -856,7 +856,7 @@ def 'links-prepare-for-publishing' [] {
 
     if $diff_length > 0 {
         cprint $'*($diff_length)* links from initial data were removed, because they were obsolete'
-        $invalid | enumerate | print
+        $invalid | enumerate | table -e | print
     }
     if $valid_length == 0 {
         error make --unspanned ( cprint --err_msg $'there are no cyberlinks to publish' )
