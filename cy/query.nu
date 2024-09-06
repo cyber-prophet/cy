@@ -51,10 +51,13 @@ export def 'query-tx' [
         reject -i events
     }
     | print-and-pass {|i| trans_status $i}
+    | if ($in | get -i tx.body.memo) != '' {
+        insert memo {|i| $i.tx.body.memo}
+    } else {}
     | if $full_info {
-        select -i ...($in | columns | prepend [height code logs tx txhash])
+        select -i ...($in | columns | prepend [height code memo logs tx txhash])
     } else {
-        select height code logs
+        select -i height code memo logs
     }
     | upsert trans_status {|i| trans_status $i}
 }
