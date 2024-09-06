@@ -591,7 +591,7 @@ export def 'graph-neurons-stats' [] {
     | polars join --left $follows neuron neuron
     | polars join --left $tweets neuron neuron
     | polars fill-null 0
-    | polars join --left ( dict-neurons-view --df --karma_bar) neuron neuron
+    | polars join --left ( dict-neurons-view --df ) neuron neuron
     | polars select ($in | polars columns | prepend [nickname links_count last_link] | uniq)
     | polars collect
 }
@@ -1012,20 +1012,12 @@ def 'first_cyberlink' [] {
 export def 'dict-neurons-view' [
     --df # output as a dataframe
     --path # output path of the dict
-    --karma_bar # output karma bar
 ] {
     let $neurons_tags = dict-neurons-tags --wide
 
     dict-neurons-bare --path=$path
     | reject -i ...($neurons_tags | columns | where $it != 'neuron')
     | join --outer $neurons_tags neuron
-    | if $karma_bar {
-        default 0 karma
-        | into float karma
-        | normalize karma
-        | upsert karma_norm_bar {|i| bar $i.karma_norm --width ('karma_norm_bar' | str length)}
-        | move karma_norm karma_norm_bar --after karma
-    } else {}
     | if $df {
         fill non-exist
         | reject -i addresses # quick fix for failing df conversion
