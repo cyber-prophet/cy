@@ -37,7 +37,7 @@ export def 'query-rank-karma' [
 # Query tx by hash
 export def 'query-tx' [
     hash: string
-    --full_info # display all columns of a transaction
+    --all (-a) # display all columns of a transaction
 ]: nothing -> record {
     def trans_status [i] {
         if $i.code == 0 {'Transaction has been processed! ✅'} else {
@@ -54,7 +54,7 @@ export def 'query-tx' [
     | if ($in | get -i tx.body.memo) != '' {
         insert memo {|i| $i.tx.body.memo}
     } else {}
-    | if $full_info {
+    | if $all {
         select -i ...($in | columns | prepend [height code memo logs tx txhash])
     } else {
         select -i height code memo logs
