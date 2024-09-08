@@ -18,11 +18,9 @@ export def --env 'queue-tasks-monitor' [
     loop {
         glob (cy-path temp queue_tasks_to_run *.nu.txt)
         | sort
-        | if (is-connected-interval 10min) {
-            if ($in | length) == 0 { } else {
-                par-each -t $threads {
-                    |i| queue-execute-task $i
-                }
+        | if ($in | length) == 0 { } else {
+            par-each -t $threads {
+                |i| queue-execute-task $i
             }
         }
         sleep 1sec
