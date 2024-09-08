@@ -397,7 +397,7 @@ def add-background-task [
     sub_commands_and_args
 ] {
     $sub_commands_and_args
-    | each { str replace -a '"' '\"' | $'"($in)"' }
+    | each { to json } # escape quotes
     | str join ' '
     | ($'caching-function --exec ($executable) --force_update [' +
         $in + '] | to yaml | lines | first 5 | str join "\n"')
