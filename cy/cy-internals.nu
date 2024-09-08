@@ -399,8 +399,9 @@ def add-background-task [
     $sub_commands_and_args
     | each { to json } # escape quotes
     | str join ' '
-    | ($'caching-function --exec ($executable) --force_update [' +
-        $in + '] | to yaml | lines | first 5 | str join "\n"')
+    | prepend $'caching-function --exec ($executable) --force_update ['
+    | append '] | to yaml | lines | first 5 | str join "\n"'
+    | str join
     | queue-task-add -o 2 $in
 }
 
