@@ -400,7 +400,7 @@ def add-background-task [
     | each { to json } # escape quotes
     | str join ' '
     | prepend $'caching-function --exec ($executable) --force_update ['
-    | append '] | to yaml | lines | first 5 | str join "\n"'
+    | append '] | to yaml | lines | first 5 | to text'
     | str join
     | queue-task-add -o 2 $in
 }
