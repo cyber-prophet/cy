@@ -12,7 +12,7 @@ scope modules
 | each {|i| $"parse_help 'cy ($i)' \(help '($i)'\);"}
 | prepend "use ~/cy/cy/"
 | prepend (view source 'parse_help')
-| str join "\n"
+| to text
 | nu --env-config env-table-settings.nu -c $in
 
 # This script updates the README with the latest version of command annotations in cy.nu
@@ -59,7 +59,7 @@ def parse_help [
     | prepend ( $first_part | take 2 )
     | prepend $"### ($command)\n\n```"
     | append "```\n\n"
-    | str join "\n"
+    | to text
     | ansi strip
     | str replace "Flags:\n\n" ""
     | save -a 'help_output.md'
