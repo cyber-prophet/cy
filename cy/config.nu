@@ -8,6 +8,7 @@ use passport.nu *
 # Create a config file to set env variables, to use them as parameters in cyber cli
 export def --env 'config-new' [
     # config_name?: string@'nu-complete-config-names'
+    --keyring-test
 ] {
     print (check-requirements)
     make-default-folders-fn
@@ -15,11 +16,13 @@ export def --env 'config-new' [
     cprint -c green 'Choose the name of executable:'
     let $exec = nu-complete-executables | input list -f | print-and-pass
 
-    let $addr_table = ^($exec) keys list --output json
-        | from json
-        | flatten
-        | select name address
-        | upsert keyring main
+    let $addr_table = if $keyring_test {} else {
+            ^($exec) keys list --output json
+            | from json
+            | flatten
+            | select name address
+            | upsert keyring main
+        }
         | append (
             ^($exec) keys list --output json --keyring-backend test
             | from json
