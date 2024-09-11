@@ -82,7 +82,7 @@ export def 'tx-authz' [ ]: path -> path {
 
 export def 'tx-sign' [ ]: path -> path {
     let $unsigned_tx_path = $in
-    let $out_path = $unsigned_tx_path | path-modify --suffix 'signed'
+    let $out_path = $unsigned_tx_path | str replace 'unsigned' 'signed'
     let $params = [
             --from $env.cy.address
             --chain-id $env.cy.chain-id
