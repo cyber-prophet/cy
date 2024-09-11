@@ -666,6 +666,7 @@ export def 'pin-file-or-folder-to-cybernode' [
     let $paths_length = $paths | length
 
     $paths
+    | where $it !~ '.DS_Store'
     | enumerate
     | par-each {|i|
         open -r $i.item | pin-text
