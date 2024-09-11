@@ -201,7 +201,7 @@ export def --wrapped 'caching-function' [
             --error=$error --quiet=$quiet --last_data $last_data)
     } else {
         if $freshness > $cache_validity_duration {
-            add-background-task $executable sub_commands_and_args
+            add-background-task $executable $sub_commands_and_args
         }
 
         $last_data
