@@ -1,5 +1,6 @@
 use cy-internals.nu [cy-path]
 use std log
+use nu-utils/ [to-safe-filename]
 
 export def 'queue-task-add' [
     command: string
