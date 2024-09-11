@@ -1,6 +1,7 @@
 use cy-internals.nu *
 use nu-utils ['cprint']
 use cy-complete.nu *
+use queue.nu ['caching-function']
 
 # Get a current height for the active network in config
 #
