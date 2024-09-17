@@ -84,3 +84,15 @@ export def 'doctor' [] {
         }
     }
 }
+
+# move cids to to a folder
+export def 'migration-0.1-move-cids' [] {
+    cd $env.cy.ipfs-files-folder
+
+    glob *.md
+    | each {|i|
+        let dir = $i | path basename | str substring ..3 | str downcase;
+        mkdir $dir;
+        mv $i $dir
+    }
+}
