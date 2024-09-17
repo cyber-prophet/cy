@@ -143,7 +143,7 @@ def 'cid-download-kubo' [
     }
 }
 
-def 'cid-path' [
+export def 'cid-path' [
     cid: string
     --no_mkdir
 ] {
