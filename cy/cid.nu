@@ -102,6 +102,7 @@ def 'cid-download-kubo' [
     --info_only # # Generates a card with the specified filetype and size instead of downloading the file
 ] {
     log debug $'cid to download ($cid)'
+    let $file_path = cid-path $cid
     let $type = ^ipfs cat --timeout $timeout -l 400 $cid
         | complete
         | if $in == null or $in.exit_code == 1 {
@@ -136,7 +137,7 @@ def 'cid-download-kubo' [
         | merge {'MIME type': ($type | split row ';' | get -i 0)}
         | sort -r
         | to toml
-        | save -f (cid-path $cid)
+        | save -f $file_path
 
         return 'non_text'
     }
