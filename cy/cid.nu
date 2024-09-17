@@ -78,13 +78,11 @@ export def 'cid-download' [
     cid: string
     --source: string # kubo or gateway
     --info_only # Generates a card with the specified filetype and size instead of downloading the file
-    --folder: path # Folder path to save the file
 ] {
-    let $folder = $folder | default $env.cy.ipfs-files-folder
     let $source = $source | default $env.cy.ipfs-download-from
     let $status = match $source {
-        'gateway' => {cid-download-gateway $cid --info_only=$info_only --folder $folder}
-        'kubo' => {cid-download-kubo $cid --info_only=$info_only --folder $folder}
+        'gateway' => {cid-download-gateway $cid --info_only=$info_only}
+        'kubo' => {cid-download-kubo $cid --info_only=$info_only}
     }
 
     if ($status) in ['text' 'non_text'] {
@@ -101,11 +99,9 @@ export def 'cid-download' [
 def 'cid-download-kubo' [
     cid: string
     --timeout = '300s'
-    --folder: path # Folder path to save the file
     --info_only # # Generates a card with the specified filetype and size instead of downloading the file
 ] {
     log debug $'cid to download ($cid)'
-    let $file_path = cid-path $cid
     let $type = ^ipfs cat --timeout $timeout -l 400 $cid
         | complete
         | if $in == null or $in.exit_code == 1 {
@@ -140,7 +136,7 @@ def 'cid-download-kubo' [
         | merge {'MIME type': ($type | split row ';' | get -i 0)}
         | sort -r
         | to toml
-        | save -f $file_path
+        | save -f (cid-path $cid)
 
         return 'non_text'
     }
@@ -166,7 +162,6 @@ def 'cid-path' [
 def 'cid-download-gateway' [
     cid: string
     --gate_url: string = 'https://gateway.ipfs.cybernode.ai/ipfs/'
-    --folder: string
     --info_only # Don't download the file by write a card with filetype and size
 ] {
     let $meta = cid-get-type-gateway $cid
