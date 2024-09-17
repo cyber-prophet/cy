@@ -148,6 +148,7 @@ def 'cid-download-kubo' [
 
 def 'cid-store' [
     cid: string
+    --path # return path only
 ] {
     let $input = $in
     let $folder_path = $env.cy.ipfs-files-folder
@@ -158,6 +159,10 @@ def 'cid-store' [
 
     let $file_path = $folder_path
         | path join $'($cid).md'
+
+    if $path {
+        return $file_path
+    }
 
     $input | save -f $file_path
 }
