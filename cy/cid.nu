@@ -105,7 +105,7 @@ def 'cid-download-kubo' [
     --info_only # # Generates a card with the specified filetype and size instead of downloading the file
 ] {
     log debug $'cid to download ($cid)'
-    let $file_path = $folder | default $env.cy.ipfs-files-folder | path join $'($cid).md'
+    let $file_path = cid-store --path $cid
     let $type = ^ipfs cat --timeout $timeout -l 400 $cid
         | complete
         | if $in == null or $in.exit_code == 1 {
