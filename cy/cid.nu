@@ -105,7 +105,7 @@ def 'cid-download-kubo' [
     --info_only # # Generates a card with the specified filetype and size instead of downloading the file
 ] {
     log debug $'cid to download ($cid)'
-    let $file_path = cid-store --path $cid
+    let $file_path = cid-path $cid
     let $type = ^ipfs cat --timeout $timeout -l 400 $cid
         | complete
         | if $in == null or $in.exit_code == 1 {
@@ -146,25 +146,20 @@ def 'cid-download-kubo' [
     }
 }
 
-def 'cid-store' [
+def 'cid-path' [
     cid: string
-    --path # return path only
+    --no_mkdir
 ] {
-    let $input = $in
     let $folder_path = $env.cy.ipfs-files-folder
         | path join ($cid | str substring ..3)
         | str downcase
 
-    mkdir $folder_path
-
-    let $file_path = $folder_path
-        | path join $'($cid).md'
-
-    if $path {
-        return $file_path
+    if not $no_mkdir {
+        mkdir $folder_path
     }
 
-    $input | save -f $file_path
+    $folder_path
+    | path join $'($cid).md'
 }
 
 # Download a cid from gateway immediately
@@ -189,7 +184,7 @@ def 'cid-download-gateway' [
                 return 'not found'
             } else {}
 
-            $content | cid-store $cid
+            $content | save -f (cid-path $cid)
         } catch {
             return 'not found'
         }
@@ -198,7 +193,7 @@ def 'cid-download-gateway' [
         {'MIME type': $meta.type, 'Size': $meta.size?}
         | sort -r
         | to toml
-        | cid-store $cid
+        | save -f (cid-path $cid)
 
         return 'non_text'
     } else {
