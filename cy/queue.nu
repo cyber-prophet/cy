@@ -287,9 +287,13 @@ def generate-cache-path [
 
 
 export def 'create-tasks-db' [] {
-    cy-path cache tasks.db
-    | if not ($in | path exists) {
-        sqlite3 $in "
+    let $db_path = cy-path cache tasks.db
+
+    if not ($db_path | path exists) {
+        [['db_version']; ['20240918']] | into sqlite $db_path --table-name version
+
+        open $db_path
+        | query db "
             CREATE TABLE tasks (
                 task_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 task_name TEXT NOT NULL UNIQUE,
@@ -302,7 +306,7 @@ export def 'create-tasks-db' [] {
 
             CREATE TABLE cids_queue (
                 task_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                cid var NOT NULL UNIQUE,
+                cid VARCHAR NOT NULL UNIQUE,
                 first_added DATETIME NOT NULL,
                 times_requested INTEGER NOT NULL DEFAULT 1,
                 times_executed INTEGER NOT NULL DEFAULT 0,
@@ -311,7 +315,10 @@ export def 'create-tasks-db' [] {
             );
 
             PRAGMA journal_mode = WAL;
-
         "
     }
+}
+
+export def 'add-task' [] {
+
 }
