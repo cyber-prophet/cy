@@ -33,6 +33,14 @@ export def 'cid-get-type-gateway' [
     {type: $type size: $size}
 }
 
+export def 'cid-read' [
+    cid
+] {
+    cy-path graph particles.db
+    | open
+    | query db $"SELECT content FROM particles WHERE cid = '($cid)'"
+    | get -i content.0
+}
 
 # Read a CID from the cache, and if the CID is absent - add it into the queue
 export def 'cid-read-or-download' [
