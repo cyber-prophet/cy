@@ -284,3 +284,34 @@ def generate-cache-path [
     | to-safe-filename --suffix '.json'
     | cy-path cache jsonl --file $in
 }
+
+
+export def 'create-tasks-db' [] {
+    cy-path cache tasks.db
+    | if not ($in | path exists) {
+        sqlite3 $in "
+            CREATE TABLE tasks (
+                task_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                task_name TEXT NOT NULL UNIQUE,
+                first_added DATETIME NOT NULL,
+                times_requested INTEGER NOT NULL DEFAULT 1,
+                times_executed INTEGER NOT NULL DEFAULT 0,
+                last_execution_time DATETIME,
+                status TEXT NOT NULL DEFAULT 'pending'
+            );
+
+            CREATE TABLE cids_queue (
+                task_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                cid var NOT NULL UNIQUE,
+                first_added DATETIME NOT NULL,
+                times_requested INTEGER NOT NULL DEFAULT 1,
+                times_executed INTEGER NOT NULL DEFAULT 0,
+                last_execution_time DATETIME,
+                status TEXT NOT NULL DEFAULT 'pending'
+            );
+
+            PRAGMA journal_mode = WAL;
+
+        "
+    }
+}
