@@ -56,13 +56,14 @@ export def 'cid-read-or-download' [
     cid: string
     --full # output full text of a particle
 ] {
-    $env.cy.ipfs-files-folder | path join $'($cid).md'
-    | if ($in | path exists) {
-        open
-    } else {
+    let $content = cid-read $cid
+
+    if $content == null {
         queue-task-add $'cid-download ($cid)'
-        'downloading'
+        return 'added into queue'
     }
+
+    $content
     | if $full {} else {
         str substring 0..400
         | str replace (char nl) '↩' --all
