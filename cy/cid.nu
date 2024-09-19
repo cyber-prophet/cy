@@ -200,10 +200,10 @@ def 'cid-download-gateway' [
             } else {}
 
             $content | save -f $file_path
+            return 'text'
         } catch {
             return 'not found'
         }
-        return 'text'
     } else if ($meta.type? != null) {
         {'MIME type': $meta.type, 'Size': $meta.size?}
         | sort -r
