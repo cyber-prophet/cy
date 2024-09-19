@@ -322,6 +322,15 @@ export def 'create-tasks-db' [] {
     }
 }
 
-export def 'add-task' [] {
-
+export def 'add-cid-into-queue' [
+    cid
+] {
+    cy-path cache tasks.db
+    | open
+    | query db "
+        INSERT INTO cids_queue (cid, first_added, times_requested)
+        VALUES (?, CURRENT_TIMESTAMP, 1)
+        ON CONFLICT(cid) DO UPDATE SET
+            times_requested = cids_queue.times_requested + 1;
+    " -p [$cid]
 }
