@@ -221,10 +221,11 @@ def 'cid-download-gateway' [
             return 'not found'
         }
     } else if ($meta.type? != null) {
-        {'MIME type': $meta.type, 'Size': $meta.size?}
-        | sort -r
-        | to toml
-        | save -f $file_path
+        let content = {'MIME type': $meta.type, 'Size': $meta.size?}
+            | sort -r
+            | to toml
+
+        particle-store $cid $content
 
         return 'non_text'
     } else {
