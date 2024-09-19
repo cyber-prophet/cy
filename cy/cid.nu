@@ -8,7 +8,6 @@ use queue.nu [queue-task-add]
 export def 'cid-get-type-gateway' [
     cid: string
     --gate_url: string = 'https://gateway.ipfs.cybernode.ai/ipfs/'
-    --to_csv
 ] {
     let $headers = ^curl -s -I -m 120 $'($gate_url)($cid)'
         | lines
@@ -27,8 +26,6 @@ export def 'cid-get-type-gateway' [
     ) {
         return null
     }
-
-    log_row_csv --cid $cid --source $gate_url --type $type --size $size --status '3.downloaded headers'
 
     {type: $type size: $size}
 }
