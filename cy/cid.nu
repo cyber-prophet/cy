@@ -71,7 +71,7 @@ export def 'cid-read-or-download' [
     let $content = cid-read $cid
 
     if $content == null {
-        queue-task-add $'cid-download ($cid)'
+        queue-add-cid-db $cid
         return 'added into queue'
     }
 
