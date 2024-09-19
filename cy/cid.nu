@@ -184,6 +184,7 @@ def 'cid-download-gateway' [
     --info_only # Don't download the file by write a card with filetype and size
 ] {
     let $meta = cid-get-type-gateway $cid
+    let $file_path = cid-path $cid
 
     if (
         ($meta.type? | default '') == 'text/plain; charset=utf-8' and not $info_only
@@ -198,7 +199,7 @@ def 'cid-download-gateway' [
                 return 'not found'
             } else {}
 
-            $content | save -f (cid-path $cid)
+            $content | save -f $file_path
         } catch {
             return 'not found'
         }
@@ -207,7 +208,7 @@ def 'cid-download-gateway' [
         {'MIME type': $meta.type, 'Size': $meta.size?}
         | sort -r
         | to toml
-        | save -f (cid-path $cid)
+        | save -f $file_path
 
         return 'non_text'
     } else {
