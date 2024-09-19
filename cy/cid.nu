@@ -199,7 +199,6 @@ def 'cid-download-gateway' [
     --info_only # Don't download the file by write a card with filetype and size
 ] {
     let $meta = cid-get-type-gateway $cid
-    let $file_path = cid-path $cid
 
     if (
         $'($meta.type?)' == 'text/plain; charset=utf-8' and not $info_only
@@ -221,9 +220,7 @@ def 'cid-download-gateway' [
             return 'not found'
         }
     } else if ($meta.type? != null) {
-        let content = {'MIME type': $meta.type, 'Size': $meta.size?}
-            | sort -r
-            | to toml
+        let $content = {'MIME type': $meta.type, 'Size': $meta.size?} | to toml
 
         particle-store $cid $content
 
