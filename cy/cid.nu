@@ -199,6 +199,7 @@ def 'cid-download-gateway' [
                 return 'not found'
             } else {}
 
+            particle-store $cid $content
             $content | save -f $file_path
             return 'text'
         } catch {
