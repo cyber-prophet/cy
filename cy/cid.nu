@@ -42,13 +42,28 @@ export def 'cid-read' [
     | get -i content.0
 }
 
-export def 'particle-store' [
+export def 'particle-store-db' [
     cid: string
     content: string
 ] {
     cy-path graph particles.db
     | open
     | query db "insert into particles VALUES (?, ?)" -p [$cid $content]
+}
+
+export def 'particle-store-file' [
+    cid: string
+    content: string
+] {
+    $content | save (cid-path $cid)
+}
+
+export def 'particle-store' [
+    cid: string
+    content: string
+] {
+    particle-store-file $cid $content
+    particle-store-db $cid $content
 }
 
 # Read a CID from the cache, and if the CID is absent - add it into the queue
@@ -200,7 +215,7 @@ def 'cid-download-gateway' [
             } else {}
 
             particle-store $cid $content
-            $content | save -f $file_path
+
             return 'text'
         } catch {
             return 'not found'
