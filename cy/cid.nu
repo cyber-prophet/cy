@@ -187,7 +187,7 @@ def 'cid-download-gateway' [
     let $file_path = cid-path $cid
 
     if (
-        ($meta.type? | default '') == 'text/plain; charset=utf-8' and not $info_only
+        $'($meta.type?)' == 'text/plain; charset=utf-8' and not $info_only
     ) {
         # to catch response body closed before all bytes were read
         # {http get -e https://gateway.ipfs.cybernode.ai/ipfs/QmdnSiS36vggN6gHbeeoJUBSUEa7B1xTJTcVR8F92vjTHK
