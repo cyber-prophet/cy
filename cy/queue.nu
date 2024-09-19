@@ -290,7 +290,8 @@ export def 'create-tasks-db' [] {
     let $db_path = cy-path cache tasks.db
 
     if not ($db_path | path exists) {
-        [['db_version']; ['20240918']] | into sqlite $db_path --table-name version
+        [['db_version']; ['20240918']]
+        | into sqlite $db_path --table-name version
 
         open $db_path
         | query db "
@@ -303,7 +304,11 @@ export def 'create-tasks-db' [] {
                 last_execution_time DATETIME,
                 status TEXT NOT NULL DEFAULT 'pending'
             );
+            PRAGMA journal_mode = WAL;
+        "
 
+        open $db_path
+        | query db "
             CREATE TABLE cids_queue (
                 task_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 cid VARCHAR NOT NULL UNIQUE,
@@ -313,8 +318,6 @@ export def 'create-tasks-db' [] {
                 last_execution_time DATETIME,
                 status TEXT NOT NULL DEFAULT 'pending'
             );
-
-            PRAGMA journal_mode = WAL;
         "
     }
 }
