@@ -83,26 +83,6 @@ export def 'cid-read-or-download' [
     }
 }
 
-# Add a cid into queue to download asynchronously
-export def 'cid-download-async' [
-    cid: string
-    --force (-f)
-    --source: string # kubo or gateway
-    --info_only # Don't download the file by write a card with filetype and size
-    --folder: string
-] {
-    let $folder = $folder | default $'($env.cy.ipfs-files-folder)'
-    let $content = do -i {open ($env.cy.ipfs-files-folder | path join $'($cid).md')}
-    let $source = $source | default $env.cy.ipfs-download-from
-
-    let $task = $'cid-download ($cid) --source ($source) --info_only=($info_only) --folder "($folder)"'
-
-    if $content == null or $content == 'timeout' or $force {
-        queue-task-add $task
-        print 'downloading'
-    }
-}
-
 # Download cid immediately and mark it in the queue
 export def 'cid-download' [
     cid: string
