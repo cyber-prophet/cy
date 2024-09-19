@@ -72,13 +72,7 @@ export def 'pin-text' [
         } else { }
 
     if not $skip_save_particle_in_cache {
-        let $path = cid-path $cid
-
         particle-store $cid $text
-
-        if not ($path | path exists) {
-            $text | save -r $path
-        }
     }
 
     $cid
