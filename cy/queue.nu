@@ -343,6 +343,7 @@ export def 'queue-db-cid-in-progress' [
     | query db "
         UPDATE cids_queue
         SET
+            times_executed = times_executed + 1
             last_execution_time = CURRENT_TIMESTAMP,
             status = 'processing'
         WHERE cid = ?;
@@ -370,7 +371,6 @@ export def 'queue-db-cid-request-failed' [
     | query db "
         UPDATE cids_queue
         SET
-            times_executed = times_executed + 1
             status = 'pending'
         WHERE cid = ?;
     " -p [$cid]
