@@ -7,7 +7,7 @@ use cy-internals.nu *
 use graph-and-dict.nu [graph-links-df graph-receive-new-links dict-neurons-add]
 use query.nu [query-links-bandwidth-neuron]
 use tx.nu [tx-json-create-from-cyberlinks tx-sign tx-authz tx-broadcast]
-use cid.nu [particle-path]
+use particle.nu [particle-path]
 
 # Pin a text particle
 #

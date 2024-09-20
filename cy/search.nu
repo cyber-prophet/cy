@@ -1,6 +1,6 @@
 use cy-internals.nu *
 use cy-complete.nu *
-use cid.nu particle-read-or-download
+use particle.nu particle-read-or-download
 
 def 'search-sync' [
     query

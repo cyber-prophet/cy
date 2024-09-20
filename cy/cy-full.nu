@@ -1,4 +1,4 @@
-export use cid.nu *
+export use particle.nu *
 export use config.nu *
 export use graph-and-dict.nu *
 export use links.nu *
