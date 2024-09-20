@@ -36,7 +36,7 @@ export def 'cid-get-type-gateway' [
     {type: $type size: $size}
 }
 
-export def 'cid-read' [
+export def 'particle-read' [
     cid
 ] {
     cy-path graph particles.db
@@ -70,11 +70,11 @@ export def 'particle-store' [
 }
 
 # Read a CID from the cache, and if the CID is absent - add it into the queue
-export def 'cid-read-or-download' [
+export def 'particle-read-or-download' [
     cid: string
     --full # output full text of a particle
 ] {
-    let $content = cid-read $cid
+    let $content = particle-read $cid
 
     if $content == null {
         queue-db-cid-add $cid

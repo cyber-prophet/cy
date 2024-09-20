@@ -1,6 +1,6 @@
 use cy-internals.nu *
 use cy-complete.nu *
-use cid.nu cid-read-or-download
+use cid.nu particle-read-or-download
 
 def 'search-sync' [
     query
@@ -51,7 +51,7 @@ def 'search-with-backlinks' [
             select particle rank
             | par-each {
                 |$r| $r
-                | upsert particle (cid-read-or-download $r.particle)
+                | upsert particle (particle-read-or-download $r.particle)
             }
             | upsert source $type
             | sort-by rank -r -n
@@ -156,7 +156,7 @@ def serp1 [
     $results
     | get result
     | upsert particle {
-        |i| cid-read-or-download $i.particle
+        |i| particle-read-or-download $i.particle
     }
     | select particle rank
 }
