@@ -349,6 +349,18 @@ export def 'queue-db-cid-in-progress' [
     " -p [$cid]
 }
 
+export def 'queue-db-cid-request-completed' [
+    cid: string
+] {
+    cy-path cache tasks.db
+    | open
+    | query db "
+        UPDATE cids_queue
+        SET
+            status = 'downloaded'
+        WHERE cid = ?;
+    " -p [$cid]
+}
 
 export def 'queue-db-cid-request-failed' [
     cid: string
