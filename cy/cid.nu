@@ -105,10 +105,8 @@ export def 'cid-download' [
         queue-db-cid-request-completed $cid
         'downloaded'
     } else if $status == 'not found' {
-        # use db
         queue-db-cid-request-failed $cid
         'not found'
-        # error make {msg: $'($cid) is not found'}
     }
 }
 
