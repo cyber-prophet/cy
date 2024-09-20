@@ -102,11 +102,11 @@ export def 'cid-download' [
     }
 
     if ($status) in ['text' 'non_text'] {
-        rm --force (cy-path temp queue_cids_to_download $cid)
+        queue-db-cid-request-completed $cid
         'downloaded'
     } else if $status == 'not found' {
         # use db
-        queue-cid-add $cid '-'
+        queue-db-cid-request-failed $cid
         'not found'
         # error make {msg: $'($cid) is not found'}
     }
