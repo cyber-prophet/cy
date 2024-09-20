@@ -232,13 +232,13 @@ export def search-test-dummy [] {
 }
 
 #[test]
-export def cid-download-kubo-test-dummy [] {
-    equal (cid-download --source 'kubo' 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV') 'downloaded'
+export def particle-download-kubo-test-dummy [] {
+    equal (particle-download --source 'kubo' 'QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV') 'downloaded'
 }
 
 #[test]
-export def cid-download-gateway-test-dummy [] {
-    equal (cid-download --source 'gateway' QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV) 'downloaded'
+export def particle-download-gateway-test-dummy [] {
+    equal (particle-download --source 'gateway' QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV) 'downloaded'
 }
 
 

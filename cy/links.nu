@@ -7,7 +7,7 @@ use cy-internals.nu *
 use graph-and-dict.nu [graph-links-df graph-receive-new-links dict-neurons-add]
 use query.nu [query-links-bandwidth-neuron]
 use tx.nu [tx-json-create-from-cyberlinks tx-sign tx-authz tx-broadcast]
-use cid.nu [cid-path]
+use cid.nu [particle-path]
 
 # Pin a text particle
 #
@@ -627,7 +627,7 @@ export def 'links-pin-columns-using-kubo' [
     if not $skip_save_particle_in_cache {
         $hash_associations
         | each {|i|
-            let $path = cid-path $i.cid
+            let $path = particle-path $i.cid
             if not ($path | path exists) {
                 $i.item | save $path
             }

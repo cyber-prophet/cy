@@ -105,7 +105,7 @@ export def 'queue-cids-download' [
     } else {}
     | enumerate
     | par-each -t $threads {
-        |i| cid-download $i.item
+        |i| particle-download $i.item
         | if $nu.is-interactive {
             print -n $'(if ($in == "not found") {'-'} else {'+'})'
             # print -n $"( ansi -e '1000D' )( bar --width 60 --background yellow ($i.index / $filtered_count)) ($i.index):($in)"

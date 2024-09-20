@@ -8,10 +8,10 @@ use queue.nu [
 
 # Obtain cid info
 #
-# > cy cid-get-type-gateway QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV | to yaml
+# > cy particle-get-type-gateway QmRX8qYgeZoYM3M5zzQaWEpVFdpin6FvVXvp6RPQK3oufV | to yaml
 # type: text/plain; charset=utf-8
 # size: '5'
-export def 'cid-get-type-gateway' [
+export def 'particle-get-type-gateway' [
     cid: string
     --gate_url: string = 'https://gateway.ipfs.cybernode.ai/ipfs/'
 ] {
@@ -58,7 +58,7 @@ export def 'particle-store-file' [
     cid: string
     content: string
 ] {
-    $content | save (cid-path $cid)
+    $content | save (particle-path $cid)
 }
 
 export def 'particle-store' [
@@ -90,15 +90,15 @@ export def 'particle-read-or-download' [
 }
 
 # Download cid immediately and mark it in the queue
-export def 'cid-download' [
+export def 'particle-download' [
     cid: string
     --source: string # kubo or gateway
     --info_only # Generates a card with the specified filetype and size instead of downloading the file
 ] {
     let $source = $source | default $env.cy.ipfs-download-from
     let $status = match $source {
-        'gateway' => {cid-download-gateway $cid --info_only=$info_only}
-        'kubo' => {cid-download-kubo $cid --info_only=$info_only}
+        'gateway' => {particle-download-gateway $cid --info_only=$info_only}
+        'kubo' => {particle-download-kubo $cid --info_only=$info_only}
     }
 
     if ($status) in ['text' 'non_text'] {
@@ -111,13 +111,13 @@ export def 'cid-download' [
 }
 
 # Download a cid from kubo (go-ipfs cli) immediately
-def 'cid-download-kubo' [
+def 'particle-download-kubo' [
     cid: string
     --timeout = '300s'
     --info_only # # Generates a card with the specified filetype and size instead of downloading the file
 ] {
     log debug $'cid to download ($cid)'
-    let $file_path = cid-path $cid
+    let $file_path = particle-path $cid
     let $type = ^ipfs cat --timeout $timeout -l 400 $cid
         | complete
         | if $in == null or $in.exit_code == 1 {
@@ -159,7 +159,7 @@ def 'cid-download-kubo' [
     }
 }
 
-export def 'cid-path' [
+export def 'particle-path' [
     cid: string
     --no_mkdir
 ] {
@@ -176,12 +176,12 @@ export def 'cid-path' [
 }
 
 # Download a cid from gateway immediately
-def 'cid-download-gateway' [
+def 'particle-download-gateway' [
     cid: string
     --gate_url: string = 'https://gateway.ipfs.cybernode.ai/ipfs/'
     --info_only # Don't download the file by write a card with filetype and size
 ] {
-    let $meta = cid-get-type-gateway $cid
+    let $meta = particle-get-type-gateway $cid
 
     if (
         $'($meta.type?)' == 'text/plain; charset=utf-8' and not $info_only
