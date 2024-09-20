@@ -41,7 +41,7 @@ export def 'cid-read' [
 ] {
     cy-path graph particles.db
     | open
-    | query db $"SELECT content FROM particles WHERE cid = '($cid)'"
+    | query db $"SELECT content FROM particles WHERE cid = ?" -p [$cid]
     | get -i content.0
 }
 
