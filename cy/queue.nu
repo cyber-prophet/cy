@@ -335,6 +335,21 @@ export def 'queue-db-cid-add' [
     " -p [$cid]
 }
 
+export def 'queue-db-cid-in-progress' [
+    cid: string
+] {
+    cy-path cache tasks.db
+    | open
+    | query db "
+        UPDATE cids_queue
+        SET
+            last_execution_time = CURRENT_TIMESTAMP,
+            status = 'processing'
+        WHERE cid = ?;
+    " -p [$cid]
+}
+
+
 export def 'queue-db-cid-request-failed' [
     cid: string
 ] {
@@ -344,7 +359,6 @@ export def 'queue-db-cid-request-failed' [
         UPDATE cids_queue
         SET
             times_executed = times_executed + 1
-            last_execution_time = CURRENT_TIMESTAMP,
             status = 'pending'
         WHERE cid = ?;
     " -p [$cid]
