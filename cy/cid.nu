@@ -1,4 +1,10 @@
-use queue.nu [queue-task-add]
+use queue.nu [
+    queue-task-add
+    queue-db-cid-add
+    queue-db-cid-in-progress
+    queue-db-cid-request-completed
+    queue-db-cid-request-failed
+]
 
 # Obtain cid info
 #
