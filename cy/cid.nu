@@ -140,6 +140,7 @@ def 'cid-download-kubo' [
             | complete # complete here is to hide ipfs get err output, as it sends there information
             | $in.exit_code == 0
         ) {
+            particle-store-db $cid (open $file_path) # file was saved earlier
             return 'text'
         } else {
             return 'not found'
@@ -152,7 +153,7 @@ def 'cid-download-kubo' [
         | merge {'MIME type': ($type | split row ';' | get -i 0)}
         | sort -r
         | to toml
-        | save -f $file_path
+        | particle-store $cid $in
 
         return 'non_text'
     }
