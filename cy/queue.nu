@@ -322,7 +322,7 @@ export def 'create-tasks-db' [] {
     }
 }
 
-export def 'queue-add-cid-db' [
+export def 'queue-db-cid-add' [
     cid: string
 ] {
     cy-path cache tasks.db
