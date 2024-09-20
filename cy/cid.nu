@@ -202,9 +202,10 @@ def 'cid-download-gateway' [
             return 'not found'
         }
     } else if ($meta.type? != null) {
-        let $content = {'MIME type': $meta.type, 'Size': $meta.size?} | to toml
 
-        particle-store $cid $content
+        {'MIME type': $meta.type, 'Size': $meta.size?}
+        | to toml
+        | particle-store $cid $in
 
         return 'non_text'
     } else {
