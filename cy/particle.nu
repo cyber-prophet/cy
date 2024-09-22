@@ -1,3 +1,4 @@
+use cy-internals.nu [cy-path]
 use queue.nu [
     queue-task-add
     queue-db-cid-add
