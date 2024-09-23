@@ -64,8 +64,6 @@ export def --env 'config-new' [
         | get $address
         | $'($in)($passport_nick | if $in == null {} else {'-' + $in})-($exec)'
 
-    let $chain_id = if ($exec == 'cyber') { 'bostrom' } else { 'space-pussy' }
-
     let $rpc_def = if ($exec == 'cyber') {
         'https://rpc.bostrom.cybernode.ai:443'
     } else {
@@ -77,6 +75,16 @@ export def --env 'config-new' [
         | input list -f
         | if $in == 'other' {
             input 'enter the RPC address:'
+        } else {}
+        | print-and-pass
+
+    let $chain_id_def = if ($exec == 'cyber') { 'bostrom' } else { 'space-pussy' }
+
+    cprint -c green --before 1 'Select the chain-id:'
+    let $chain_id = [$chain_id_def 'localbostrom' 'other']
+        | input list -f
+        | if $in == 'other' {
+            input 'enter the `chain-id`: '
         } else {}
         | print-and-pass
 
