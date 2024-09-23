@@ -3,8 +3,7 @@ use queue.nu [
     queue-task-add
     queue-db-cid-add
     queue-db-cid-in-progress
-    queue-db-cid-request-completed
-    queue-db-cid-request-failed
+    queue-db-set-cid-status
 ]
 
 # Obtain cid info
@@ -102,11 +101,11 @@ export def 'particle-download' [
         'kubo' => {particle-download-kubo $cid --info_only=$info_only}
     }
 
-    if ($status) in ['text' 'non_text'] {
-        queue-db-cid-request-completed $cid
+    if $status in ['text' 'non_text'] {
+        queue-db-set-cid-status $cid 'downloaded'
         'downloaded'
     } else if $status == 'not found' {
-        queue-db-cid-request-failed $cid
+        queue-db-set-cid-status $cid 'pending'
         'not found'
     }
 }
