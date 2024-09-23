@@ -1,4 +1,4 @@
-use cy-internals.nu [cy-path]
+use cy-internals.nu [cy-path set-get-env]
 use std log
 use nu-utils/ [to-safe-filename]
 
