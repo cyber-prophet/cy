@@ -87,7 +87,7 @@ try {ipfs routing findpeer 12D3KooWNMcnoQynAY9hyi4JxzSu64BsRGcJ9z7vKghqk8sTrpqY}
 | $'(ansi yellow)($in)(ansi reset)'
 | print
 
-cargo install nu_plugin_polars
+cargo install nu_plugin_polars --locked
 plugin add ('~/.cargo/bin/nu_plugin_polars' | path expand)
 
 let $cy_folder = '~/cy'
