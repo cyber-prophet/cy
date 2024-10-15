@@ -108,7 +108,6 @@ export def 'tx-sign' [ ]: path -> path {
 
 export def 'tx-broadcast' []: path -> record {
     ^($env.cy.exec) tx broadcast $in ...[
-        --broadcast-mode block
         --output json
         --node $env.cy.rpc-address
         --yes
