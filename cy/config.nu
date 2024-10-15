@@ -26,9 +26,11 @@ export def --env 'config-new' [
         | append (
             ^($exec) keys list --output json --keyring-backend test
             | from json
-            | flatten
-            | select name address
-            | upsert keyring test
+            | if $in =~ 'No records were found' {[]} else {
+                flatten
+                | select name address
+                | upsert keyring test
+            }
         )
 
     if ($addr_table | length) == 0 {
