@@ -14,7 +14,7 @@ def --env 'install_if_missing' [
                 print $'($brew_cli_name) failed to install.'
             }
         }
-    } else { brew upgrade $brew_cli_name }
+    }
 }
 
 def --env 'confirm' [
