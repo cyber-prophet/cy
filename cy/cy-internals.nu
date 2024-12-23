@@ -10,7 +10,7 @@ export def 'cy-path' [
     --file: string # a filename to use as a last segment of the path
 ]: nothing -> path {
     $env | get -i cy.path
-    | default ($nu.home-path | path join 'cy')
+    | default ($nu.home-path | path join 'git' 'cy')
     | append $folders
     | path join
     | path expand
