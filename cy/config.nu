@@ -20,8 +20,18 @@ export def --env 'config-new' [
             ^($exec) keys list --output json
             | from json
             | flatten
-            | select name address
-            | upsert keyring main
+            | if $in.0 =~ 'No records were found' {[{}]} else {
+                inspect
+                | flatten
+                | select name address
+                | upsert keyring test
+            }
+            | if ($in | is-empty) {
+                [{}]
+            } else {
+                select name address
+                | upsert keyring main
+            }
         }
         | append (
             ^($exec) keys list --output json --keyring-backend test
