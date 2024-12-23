@@ -190,7 +190,7 @@ def 'particle-download-gateway' [
         # {http get -e https://gateway.ipfs.cybernode.ai/ipfs/QmdnSiS36vggN6gHbeeoJUBSUEa7B1xTJTcVR8F92vjTHK
         # | save -f temp/test.md}
         try {
-            let $content = http get --allow-errors $'($gate_url)($cid)' --max-time 120
+            let $content = http get --allow-errors $'($gate_url)($cid)' --max-time 120sec
 
             if '<head><title>502 Bad Gateway</title></head>' in $content {
                 return 'not found'
