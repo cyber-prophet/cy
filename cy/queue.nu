@@ -215,7 +215,7 @@ def 'request-save-output-exec-response' [
     json_path: string
     --error
     --quiet
-    --last_data: = {'update_time': 0}
+    --last_data = {'update_time': 0}
 ] {
     log debug $'($executable) ($sub_commands_and_args | str join " ")'
 
