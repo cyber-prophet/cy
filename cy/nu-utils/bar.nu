@@ -1,5 +1,3 @@
-use std repeat
-
 # construct bars based of a given percentage from a given width (5 is default)
 # https://github.com/nushell/nu_scripts/blob/main/sourced/progress_bar/bar.nu
 # > bar 0.2
@@ -14,7 +12,10 @@ export def main [
     --width (-w): int = 5
 ] {
     let blocks = [null "▏" "▎" "▍" "▌" "▋" "▊" "▉" "█"]
-    let $whole_part = (($blocks | last) | repeat ($percentage * $width // 1) | into int) | str join
+    let $whole_part = (($blocks | last) | seq 0 $in | each {
+            ($percentage * $width // 1)
+            | into int
+        }) | str join
     let $fraction = (
         $blocks
         | get (
